@@ -1,0 +1,77 @@
+# Primal Frontier development instructions
+
+## Environment
+
+* Engine: Unreal Engine 5.8.2
+* Engine root: C:\\Program Files\\Epic Games\\UE\_5.8
+* Platform: Windows 11
+* Editor target: PrimalFrontierEditor
+* Game target: PrimalFrontier
+* Server target: PrimalFrontierServer
+* Default build configuration: Development Editor Win64
+* Project file: PrimalFrontier.uproject
+
+## Project objective
+
+Build a server-authoritative open-world survival game inspired by the
+structure of ARK-style survival games, without copying protected names,
+characters, maps, assets, sounds, story, or other expressive content.
+
+## Architecture
+
+* Implement authoritative gameplay, networking, persistence, inventory,
+combat, crafting, construction, and creature logic in C++.
+* Use Blueprints for presentation, asset composition, effects, UI, and tuning.
+* Use data assets or data tables for item, recipe, creature, and structure data.
+* Use Gameplay Tags rather than arbitrary state strings.
+* Multiplayer gameplay must be server-authoritative.
+* Important systems must support dedicated servers.
+* Avoid hard references when soft references or asset manager references are appropriate.
+* Keep classes focused and avoid oversized god objects.
+* Expose tuning values to designers without putting core authority in Blueprints.
+
+## Content
+
+* Store project-owned assets under Content/PrimalFrontier.
+* Use the project's established asset naming prefixes.
+* Use placeholder assets until gameplay is validated.
+* Never modify .uasset or .umap files as raw binary data.
+* Change binary assets through Unreal Editor, Python, commandlets, or supported import tools.
+* Do not rename or move assets without checking redirectors and references.
+
+## Generated files
+
+* Never edit files under Binaries, Intermediate, Saved, or DerivedDataCache.
+* Do not commit generated build directories.
+* Do not commit machine-specific editor settings.
+
+## Verification
+
+* Compile PrimalFrontierEditor after C++ changes.
+* Run the narrowest relevant automated test.
+* Check Saved/Logs/PrimalFrontier.log after launches and tests.
+* Treat compiler warnings and ensure failures as problems to investigate.
+* Do not claim an editor-facing feature works without testing it in Unreal.
+* For multiplayer features, test a server and at least two clients when practical.
+* Record evidence for important visual or gameplay changes.
+
+## Change management
+
+* Make small, reviewable commits.
+* Preserve unrelated user changes.
+* Explain new dependencies and plugins before adding them.
+* Prefer reversible migrations.
+* Update architecture and decision documents when changing a major system.
+
+
+## Camera and player presentation
+
+
+
+* First person is the primary camera and gameplay experience.
+* Design interaction, weapons, building placement, UI, and creature encounters for first person.
+* Maintain a full-body replicated character mesh for remote players.
+* Use separate first-person arms, camera, and item meshes for the locally controlled player.
+* Keep camera switching architecture extensible so optional third person can be added later.
+* Do not implement third-person gameplay or UI unless explicitly requested.
+

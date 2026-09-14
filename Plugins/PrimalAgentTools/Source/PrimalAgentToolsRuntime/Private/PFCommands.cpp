@@ -1,0 +1,202 @@
+#include "PFCommands.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/World.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/WorldSettings.h"
+#include "HAL/IConsoleManager.h"
+#include "String/LexFromString.h"
+#include "Modules/ModuleManager.h"
+
+namespace PF::AgentTools
+{
+static FEditorCommand EditorCommand;
+static TArray<FResult> History;
+void SetEditorCommand(FEditorCommand Handler) { EditorCommand = MoveTemp(Handler); }
+const TArray<FResult>& CommandHistory() { return History; }
+
+const TArray<FCommandSpec>& CommandSpecs()
+{
+    static const TArray<FCommandSpec> Specs = {
+        {TEXT("PF.Help"), TEXT("List all PF commands, usage and implementation status.")},
+        {TEXT("PF.ValidateAssets"), TEXT("[/Game[/Subfolder]] Validate saved project assets without fixing or saving."), TEXT(""), 0, 1, true},
+        {TEXT("PF.CheckNaming"), TEXT("Check naming under /Game/PrimalFrontier."), TEXT(""), 0, 0, true},
+        {TEXT("PF.CheckReferences"), TEXT("[/Game[/Subfolder]] Report missing package references and redirectors."), TEXT(""), 0, 1, true},
+        {TEXT("PF.ResetTestWorld"), TEXT("Reset only owned unsaved editor fixtures in approved L_Automation; runtime reset unavailable."), TEXT(""), 0, 0, true, true},
+        {TEXT("PF.PlaceTestActor"), TEXT("Upsert owned PF_TestCube in approved editor L_Automation; no save."), TEXT(""), 0, 0, true, true},
+        {TEXT("PF.RunSmokeTest"), TEXT("Run asset, naming and package-reference checks; no gameplay coverage."), TEXT(""), 0, 0, true},
+        {TEXT("PF.ExportTestReport"), TEXT("[label] Export this process's execution history to Saved/AutomationReports."), TEXT(""), 0, 1},
+        {TEXT("PF.CaptureTestScreenshot"), TEXT("[label] Capture rendered editor level viewport PNG."), TEXT(""), 0, 1, true},
+        {TEXT("PF.GiveItem"), TEXT("ItemId Quantity: grant via inventory adapter (unavailable)."), TEXT("No item-definition registry or authoritative inventory API exists."), 2, 2, false, true},
+        {TEXT("PF.SpawnCreature"), TEXT("CreatureId: spawn via creature registry (unavailable)."), TEXT("No creature registry or authoritative creature spawn API exists."), 1, 1, false, true},
+        {TEXT("PF.SetHealth"), TEXT("Value: clamp via survival health adapter (unavailable)."), TEXT("No survival health attribute API exists; shooter template HP is unrelated."), 1, 1, false, true},
+        {TEXT("PF.SetHunger"), TEXT("Value: clamp via survival hunger adapter (unavailable)."), TEXT("No hunger attribute API or limits exist."), 1, 1, false, true},
+        {TEXT("PF.SetThirst"), TEXT("Value: clamp via survival thirst adapter (unavailable)."), TEXT("No thirst attribute API or limits exist."), 1, 1, false, true},
+        {TEXT("PF.SetTimeOfDay"), TEXT("Hour: 0 through 23, via world-time adapter (unavailable)."), TEXT("No world-time subsystem exists."), 1, 1, false, true},
+        {TEXT("PF.Teleport"), TEXT("X Y Z [PlayerId]: authority-only character teleport; collision, floor, 1km bounds; one player unless ID given."), TEXT(""), 3, 4, false, true},
+        {TEXT("PF.SaveWorld"), TEXT("Request gameplay save (unavailable); never saves editor maps."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
+        {TEXT("PF.LoadWorld"), TEXT("Request gameplay load (unavailable)."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
+        {TEXT("PF.TestGathering"), TEXT("Validate gathering integration (unavailable)."), TEXT("No gathering system exists.")},
+        {TEXT("PF.TestCrafting"), TEXT("Validate crafting integration (unavailable)."), TEXT("No crafting system exists.")},
+        {TEXT("PF.TestBuildingPlacement"), TEXT("Validate construction integration (unavailable)."), TEXT("No building placement system exists.")},
+        {TEXT("PF.TestCreatureAI"), TEXT("Validate creature AI integration (unavailable)."), TEXT("No survival creature AI exists.")},
+        {TEXT("PF.TestMultiplayerReplication"), TEXT("Validate survival replication (unavailable)."), TEXT("No survival replication acceptance scenario exists; transport alone is not a pass.")},
+        {TEXT("PF.TestPersistence"), TEXT("Validate persistence round trip (unavailable)."), TEXT("No gameplay persistence API exists.")},
+        {TEXT("PF.ResetAutomation"), TEXT("Alias of PF.ResetTestWorld."), TEXT(""), 0, 0, true, true},
+        {TEXT("PF.CaptureScreenshot"), TEXT("[label] Alias of PF.CaptureTestScreenshot."), TEXT(""), 0, 1, true},
+        {TEXT("PF.ExportResults"), TEXT("[label] Alias of PF.ExportTestReport."), TEXT(""), 0, 1}
+    };
+    return Specs;
+}
+
+static bool Number(const FString& Text, double& Out)
+{
+    // LexTryParseString alone accepts numeric prefixes on some platforms.
+    if (Text.IsEmpty() || !Text.IsNumeric()) { return false; }
+    return LexTryParseString(Out, *Text) && FMath::IsFinite(Out);
+}
+FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
+{
+    if (A.Num() < S.MinArgs || A.Num() > S.MaxArgs) { return TEXT("Wrong argument count. Usage: ") + S.Name + TEXT(" ") + S.Help; }
+    if (S.Name == TEXT("PF.GiveItem"))
+    {
+        int64 Quantity = 0;
+        if (!IsSafeLabel(A[0]) || !A[0].StartsWith(TEXT("Item_"))) { return TEXT("Item ID must be an Item_ identifier, not an object path."); }
+        for (TCHAR C : A[1]) { if (C < '0' || C > '9') { return TEXT("Quantity must be a positive int32."); } }
+        if (A[1].Len() > 10 || !LexTryParseString(Quantity, *A[1]) || Quantity <= 0 || Quantity > MAX_int32) { return TEXT("Quantity must be a positive int32."); }
+    }
+    if (S.Name == TEXT("PF.SpawnCreature") && !IsSafeLabel(A[0])) { return TEXT("Creature registry ID must be a simple identifier; arbitrary class paths are forbidden."); }
+    if (S.Name.StartsWith(TEXT("PF.Set")) || S.Name == TEXT("PF.Teleport"))
+    {
+        const int32 Count = S.Name == TEXT("PF.Teleport") ? 3 : 1;
+        for (int32 I = 0; I < Count; ++I)
+        {
+            double Value;
+            if (!Number(A[I], Value)) { return TEXT("Expected a finite decimal number."); }
+            if (S.Name == TEXT("PF.SetTimeOfDay") && (Value < 0 || Value > 23)) { return TEXT("Hour must be between 0 and 23 inclusive."); }
+            if (S.Name == TEXT("PF.Teleport") && FMath::Abs(Value) > 100000) { return TEXT("Teleport coordinates must be within +/-100000 cm."); }
+        }
+        if (A.Num() == 4)
+        {
+            int64 Id;
+            for (TCHAR C : A[3]) { if (C < '0' || C > '9') { return TEXT("PlayerId must be a nonnegative integer."); } }
+            if (A[3].IsEmpty() || A[3].Len() > 10 || !LexTryParseString(Id, *A[3]) || Id < 0 || Id > MAX_int32) { return TEXT("Invalid PlayerId."); }
+        }
+    }
+    if ((S.Name.Contains(TEXT("Export")) || S.Name.Contains(TEXT("Screenshot"))) && !A.IsEmpty() && !IsSafeLabel(A[0])) { return TEXT("Label must be 1-64 ASCII letters, digits, underscore or hyphen."); }
+    return FString();
+}
+
+static void Fail(FResult& R, const TCHAR* Code, const FString& Message) { R.Add(TEXT("Error"), Code, FString(), Message); }
+static FResult Teleport(const TArray<FString>& Args, UWorld* World)
+{
+    FResult R(TEXT("PF.Teleport"));
+    APlayerController* Target = nullptr;
+    int32 PlayerId = INDEX_NONE;
+    if (Args.Num() == 4) { LexTryParseString(PlayerId, *Args[3]); }
+    for (auto It = World->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (!PC || (PlayerId != INDEX_NONE && (!PC->PlayerState || PC->PlayerState->GetPlayerId() != PlayerId))) { continue; }
+        if (Target) { Fail(R, TEXT("AmbiguousPlayer"), TEXT("Multiple players: supply the authoritative PlayerState PlayerId as fourth argument.")); return R; }
+        Target = PC;
+    }
+    ACharacter* Character = Target ? Cast<ACharacter>(Target->GetPawn()) : nullptr;
+    if (!Character || !Character->HasAuthority()) { Fail(R, TEXT("PlayerUnavailable"), TEXT("An authoritative possessed ACharacter is required.")); return R; }
+    double X, Y, Z; Number(Args[0], X); Number(Args[1], Y); Number(Args[2], Z);
+    const FVector Destination(X, Y, Z);
+    UCapsuleComponent* Capsule = Character->GetCapsuleComponent();
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(PFDevTeleport), false, Character);
+    const FCollisionShape Shape = FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight());
+    FHitResult Floor;
+    if (Z <= World->GetWorldSettings()->KillZ + Capsule->GetScaledCapsuleHalfHeight() ||
+        World->OverlapBlockingTestByProfile(Destination, FQuat::Identity, Capsule->GetCollisionProfileName(), Shape, Query) ||
+        !World->LineTraceSingleByChannel(Floor, Destination, Destination - FVector(0, 0, 10000), ECC_Visibility, Query) ||
+        Floor.ImpactNormal.Z < 0.5f)
+    {
+        Fail(R, TEXT("UnsafeDestination"), TEXT("Destination overlaps blocking collision, is below KillZ, or lacks walkable ground within 100m.")); return R;
+    }
+    if (!Character->TeleportTo(Destination, Character->GetActorRotation(), false, false)) { Fail(R, TEXT("TeleportRejected"), TEXT("Unreal collision-aware TeleportTo rejected the destination.")); return R; }
+    Character->GetCharacterMovement()->StopMovementImmediately();
+    Character->ForceNetUpdate();
+    R.Add(TEXT("Info"), TEXT("Teleported"), Character->GetPathName(), Character->GetActorLocation().ToString());
+    return R;
+}
+
+FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld* World, bool bLog)
+{
+    FResult R(Name);
+#if !UE_BUILD_SHIPPING
+    const FCommandSpec* S = CommandSpecs().FindByPredicate([&](const FCommandSpec& Entry) { return Entry.Name == Name; });
+    const FString Map = World ? World->GetOutermost()->GetName() : TEXT("Unavailable");
+    const FString Timestamp = R.StartedUtc;
+    const FString Error = S ? ValidateArguments(*S, Args) : TEXT("Unknown PF command.");
+    if (!IsInGameThread()) { Fail(R, TEXT("WrongThread"), TEXT("Commands require the game thread.")); return R; }
+    if (!Error.IsEmpty()) { Fail(R, TEXT("InvalidArguments"), Error); }
+    else if (World && World->GetNetMode() == NM_Client && S->bMutation) { Fail(R, TEXT("NotAuthority"), TEXT("Run this command on the server console. Clients cannot forward or execute mutations.")); }
+    else if (!S->Blocker.IsEmpty()) { R.bNotImplemented = true; R.Add(TEXT("Info"), TEXT("NOT IMPLEMENTED"), FString(), S->Blocker); }
+    else if (Name == TEXT("PF.Help"))
+    {
+        for (const FCommandSpec& Entry : CommandSpecs())
+        {
+            const FString Status = !Entry.Blocker.IsEmpty() ? TEXT("NOT IMPLEMENTED") : Entry.bEditor ? (EditorCommand ? TEXT("IMPLEMENTED (editor only)") : TEXT("UNAVAILABLE (editor only)")) : TEXT("IMPLEMENTED");
+            R.Add(TEXT("Info"), *Status, Entry.Name, Entry.Help + (Entry.Blocker.IsEmpty() ? TEXT("") : TEXT(" ") + Entry.Blocker));
+        }
+    }
+    else if (Name == TEXT("PF.ExportTestReport") || Name == TEXT("PF.ExportResults"))
+    {
+        R.Map = Map;
+        R.Add(TEXT("Info"), TEXT("ExportRequested"), FString(), TEXT("Snapshot includes this export request; artifact success is recorded in subsequent history."));
+        TArray<FResult> Snapshot = History;
+        Snapshot.Add(R);
+        R = ExportResults(Snapshot, Args.IsEmpty() ? TEXT("Results") : Args[0]);
+    }
+    else if (S->bEditor)
+    {
+        if (EditorCommand && (!World || World->WorldType == EWorldType::Editor)) { R = EditorCommand(Name, Args, World); }
+        else { R.bNotImplemented = true; R.Add(TEXT("Info"), TEXT("NOT IMPLEMENTED"), FString(), TEXT("Requires editor backend outside PIE. Runtime gameplay reset/screenshot adapter is unavailable.")); }
+    }
+    else if (Name == TEXT("PF.Teleport"))
+    {
+        if (!World || !World->IsGameWorld() || !World->GetAuthGameMode()) { Fail(R, TEXT("AuthorityWorldUnavailable"), TEXT("Requires a running authoritative gameplay world and GameMode.")); }
+        else { R = Teleport(Args, World); }
+    }
+    R.Command = Name; R.Map = Map; R.StartedUtc = Timestamp;
+    R.Add(TEXT("Info"), TEXT("Arguments"), FString(), FString::Join(Args, TEXT(" ")));
+    History.Add(R);
+    if (bLog) { LogResult(R); }
+#else
+    Fail(R, TEXT("ShippingDisabled"), TEXT("Developer commands are excluded from Shipping."));
+#endif
+    return R;
+}
+}
+
+class FPrimalAgentToolsRuntimeModule final : public IModuleInterface
+{
+    TArray<IConsoleObject*> Commands;
+public:
+    void StartupModule() override
+    {
+#if !UE_BUILD_SHIPPING
+        for (const PF::AgentTools::FCommandSpec& S : PF::AgentTools::CommandSpecs())
+        {
+            const FString Name = S.Name;
+            Commands.Add(IConsoleManager::Get().RegisterConsoleCommand(*Name, *S.Help,
+                FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([Name](const TArray<FString>& Args, UWorld* World)
+                { PF::AgentTools::ExecuteCommand(Name, Args, World); }), ECVF_Default));
+        }
+        UE_LOG(LogPrimalAgentTools, Display, TEXT("[PrimalAgentTools] Registered %d non-Shipping commands. PF.Help lists status. No network service or client RPC."), Commands.Num());
+#endif
+    }
+    void ShutdownModule() override
+    {
+        for (IConsoleObject* Command : Commands) { IConsoleManager::Get().UnregisterConsoleObject(Command, false); }
+        Commands.Empty();
+        PF::AgentTools::SetEditorCommand({});
+    }
+};
+IMPLEMENT_MODULE(FPrimalAgentToolsRuntimeModule, PrimalAgentToolsRuntime)
+

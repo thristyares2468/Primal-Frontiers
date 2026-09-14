@@ -1,0 +1,42 @@
+{
+  "FileVersion": 3,
+  "Version": 2,
+  "VersionName": "0.2.0",
+  "FriendlyName": "Primal Agent Tools",
+  "Description": "Non-Shipping developer commands and editor-only asset tools.",
+  "Category": "Editor",
+  "CreatedBy": "Primal Frontier",
+  "EnabledByDefault": false,
+  "CanContainContent": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "PrimalAgentToolsRuntime",
+      "Type": "Runtime",
+      "LoadingPhase": "PostEngineInit",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ]
+    },
+    {
+      "Name": "PrimalAgentTools",
+      "Type": "Editor",
+      "LoadingPhase": "PostEngineInit",
+      "TargetAllowList": [
+        "Editor"
+      ],
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ]
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "DataValidation",
+      "Enabled": true,
+      "TargetAllowList": [
+        "Editor"
+      ]
+    }
+  ]
+}

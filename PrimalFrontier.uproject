@@ -17,6 +17,12 @@
 	],
 	"Plugins": [
 		{
+			"Name": "PrimalAgentTools",
+			"Enabled": true,
+			"TargetAllowList": ["Editor", "Game", "Client", "Server"],
+			"TargetConfigurationDenyList": ["Shipping"]
+		},
+		{
 			"Name": "ModelingToolsEditorMode",
 			"Enabled": true,
 			"TargetAllowList": [
@@ -29,6 +35,90 @@
 		},
 		{
 			"Name": "GameplayStateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayTagsToolset",
+			"Enabled": true
+		},
+		{
+			"Name": "CQTestEnhancedInput",
+			"Enabled": true
+		},
+		{
+			"Name": "StateTreeToolset",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGBiomeCore",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGToolset",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGPrimitives_MeshPartitionInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGPrimitives",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGBiomeSample",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGExternalDataInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGFastGeoInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGWaterInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGPythonInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGNiagaraInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGNaniteAssembliesInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGMeshPartitionInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGInstancedActorsInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGGeometryScriptInterop",
+			"Enabled": true
+		},
+		{
+			"Name": "MeshPartitionWater",
+			"Enabled": true
+		},
+		{
+			"Name": "WaterAdvanced",
+			"Enabled": true
+		},
+		{
+			"Name": "WaterExtras",
 			"Enabled": true
 		}
 	]
