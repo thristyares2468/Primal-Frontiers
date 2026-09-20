@@ -1,3 +1,27 @@
+# Current implementation checkpoint — 2026-09-21
+
+## First-person survival foundation: in progress, blocked at first build
+
+Scope for this milestone is Health, Stamina, server-authoritative changes, death/respawn, a minimal first-person HUD and focused tests. Hunger and Thirst remain planned interfaces. Inventory, crafting, creatures, building, persistence and world expansion are not authorized by this milestone.
+
+The initial source slice adds `UPFPlayerSurvivalComponent` with replicated Health/Stamina, server-only mutation guards, clamping, stamina recovery, death-state Gameplay Tags and notifications. `PF.Survival.Component` contains assertions for initial values, damage, stamina, authority rejection and death. Hunger/Thirst tags reserve names only; `SupportsStat` explicitly returns false for them. GameplayTags and SlateCore were added to the game module dependencies (SlateCore is for the planned placeholder HUD).
+
+This component is **not yet attached to a player**. Character integration, respawn, HUD, PrimalAgentTools integration, project-owned Blueprint copies and live replication tests remain unimplemented. Existing first-person/template assets have not been changed by this work.
+
+Verification attempted:
+
+- `Build.bat PrimalFrontierEditor Win64 Development -Project=C:/UnrealProjects/PrimalFrontier/PrimalFrontier.uproject -WaitMutex -NoHotReloadFromIDE -MaxParallelActions=2`
+- UHT, `PFPlayerSurvivalComponent.cpp` and `PFSurvivalComponentTests.cpp` compiled; no compiler warnings appeared in this attempt.
+- Target build **FAILED** with `LNK1104` because running UnrealEditor PID 35724 held `UnrealEditor-PrimalFrontier.dll`, `UnrealEditor-PrimalAgentToolsRuntime.dll` and `UnrealEditor-PrimalAgentTools.dll` open. UBA first reported the file-in-use errors and then retried linking without UBA; the same lock remained.
+- Build evidence: `C:/Users/jackh/AppData/Local/UnrealBuildTool/Log.txt`, result `Failed (OtherCompilationError)`, elapsed 78.57 seconds. This generated log may be replaced by the next build.
+- New tests run: **none**. The failed link prevents testing current source; previous Phase 10 passes do not verify this new component.
+- Existing `Saved/Logs/PrimalFrontier.log` contains the `r.MotionVectorSimulation` render-thread warning. No new editor or multiplayer process was launched.
+- Resource observation: UBT reported 15.93 GB physical RAM and 32.01 GB committed at build start. Compilation was limited to two workers. No gameplay performance or stutter assessment was made.
+
+Stopped after the build failure without expanding implementation. Next step: close the existing editor after handling any unsaved work, retry the same incremental build, and run only `PF.Survival.Component` with NullRHI before continuing this milestone. No Git staging or commits were performed.
+
+---
+
 \# Milestones
 
 
