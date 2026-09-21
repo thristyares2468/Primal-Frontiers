@@ -1,6 +1,7 @@
 #include "PFAssetChecks.h"
 #include "PFAutomationScenario.h"
 #include "PFResults.h"
+#include "PFCommands.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Dom/JsonObject.h"
@@ -112,7 +113,7 @@ bool FPFScenarioTest::RunTest(const FString& Parameters)
     TestFalse(TEXT("Scenario created"), First.HasErrors());
     if (First.HasErrors()) { LogResult(First); return false; }
     TestTrue(TEXT("Reset console command dispatches after editor startup"),
-        IConsoleManager::Get().ProcessUserConsoleInput(TEXT("PF.ResetAutomation"), *GLog, World));
+        IConsoleManager::Get().ProcessUserConsoleInput(TEXT("PF.ResetTestWorld"), *GLog, World));
     TestTrue(TEXT("Placement console command dispatches"),
         IConsoleManager::Get().ProcessUserConsoleInput(TEXT("PF.PlaceTestActor"), *GLog, World));
     AActor* Cube = nullptr;
@@ -159,7 +160,7 @@ bool FPFScenarioTest::RunTest(const FString& Parameters)
 DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FPFCaptureViewport, FAutomationTestBase*, Test);
 bool FPFCaptureViewport::Update()
 {
-    const FResult Capture = CaptureScreenshot(TEXT("ViewportVerification"));
+    const FResult Capture = ExecuteCommand(TEXT("PF.CaptureTestScreenshot"), {TEXT("ViewportVerification")}, GEditor->GetEditorWorldContext().World());
     Test->TestFalse(TEXT("Rendered viewport capture succeeds"), Capture.HasErrors());
     LogResult(Capture);
     if (!Capture.Artifacts.IsEmpty())

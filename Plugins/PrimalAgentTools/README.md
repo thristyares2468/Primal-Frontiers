@@ -1,10 +1,12 @@
 # PrimalAgentTools
 
-UE 5.8.2 C++ editor plugin for local project validation and repeatable development fixtures. No MCP server, listener, remote execution interface, Python scripts, or runtime gameplay module.
+UE 5.8.2 C++ developer plugin. A non-Shipping runtime module owns command registration, argument validation, history and server-side character teleporting. The editor module provides asset checks and unsaved fixtures. No MCP server, listener, remote execution interface or Python scripts.
+
+See [DEVELOPER_COMMANDS.md](DEVELOPER_COMMANDS.md) for all 27 commands, integration blockers and multiplayer verification.
 
 ## Enable and use
 
-The project enables this plugin for Editor targets only. Build `PrimalFrontierEditor Win64 Development`, then restart the editor to load the newly built module. Open **Output Log** and enter commands in its console field. All plugin messages contain `[PrimalAgentTools]`. These are synchronous commands: validation can take time while assets load.
+The project enables this plugin for Editor, Game, Client and Server targets except Shipping. Build `PrimalFrontierEditor Win64 Development`, then restart the editor to load the newly built module. Open **Output Log** and enter commands in its console field. All plugin messages contain `[PrimalAgentTools]`. These are synchronous commands: validation can take time while assets load.
 
 | Command | Behavior |
 | --- | --- |
@@ -16,7 +18,7 @@ The project enables this plugin for Editor targets only. Build `PrimalFrontierEd
 | `PF.CaptureScreenshot [label]` | Read a rendered level-editor viewport and synchronously write a PNG. Default label `Viewport`. Fails explicitly in PIE, commandlets, NullRHI, or without a viewport. |
 | `PF.ExportResults [label]` | Write a JSON snapshot of this editor session's command history, with per-command status, issue codes, asset paths, counts, and artifact paths. Default label `Results`. |
 
-Output is restricted to **`Saved/AutomationReports`**. Labels allow 1-64 ASCII letters, digits, `_`, and `-`; they cannot be paths. Each output has a UTC timestamp and GUID, so repeated calls preserve earlier reports. `schemaVersion` is 1. Status is `Failed` if any error exists, `NeedsAttention` for warnings/incomplete coverage, otherwise `Passed`. An empty export is `NoResults`. Export success means the file was written; the report's aggregate status still reflects failed checks.
+Output is restricted to **`Saved/AutomationReports`**. Labels allow 1-64 ASCII letters, digits, `_`, and `-`; they cannot be paths. Each output has a UTC timestamp and GUID, so repeated calls preserve earlier reports. `schemaVersion` is 2. Every execution includes `testName`, UTC `timestamp`, `map`, `result`, and structured `details`. Unavailable gameplay systems return `NOT IMPLEMENTED`, never `Passed`. Status is `Failed` if any error exists, `NeedsAttention` for warnings/incomplete coverage, otherwise `Passed`. An empty export is `NoResults`. Export success means the file was written; the report's aggregate status still reflects failed checks.
 
 ## Scenario contract
 
@@ -51,7 +53,8 @@ Prefixes are case sensitive and require a nonempty suffix. Names use the same 64
 
 ## Shipping exclusion
 
-The `.uproject` plugin reference allows only `Editor` targets and denies `Shipping`/`Test` configurations. The `.uplugin` contains a single `Editor` module with the same restrictions and `CanContainContent=false`. The module rules reject noneditor/Shipping/Test builds; command registration is also compile-guarded and uses `ECVF_Cheat`. No runtime module depends on this plugin. Fixture actors additionally use Unreal's editor-only actor flag.
+The `.uproject` reference and both module descriptors deny Shipping. The runtime module build rules also reject Shipping and command registration is compile-guarded with `!UE_BUILD_SHIPPING`. The editor module remains Type=Editor and cannot enter a game package. The runtime module has no UnrealEd or DataValidation dependency. Development, DebugGame and Test are allowed; `ECVF_Default` keeps commands available in Test, with explicit world authority checks rather than relying on cheat flags. Fixture actors remain editor-only.
+
 
 ## Verification
 
