@@ -1,0 +1,49 @@
+#include "Survival/PFSurvivalHUD.h"
+#include "Survival/PFPlayerSurvivalComponent.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/VerticalBox.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
+#include "GameFramework/Pawn.h"
+
+void UPFSurvivalHUD::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+    // A Blueprint child can replace this placeholder layout and use PresentVitals.
+    if (WidgetTree->RootWidget) { return; }
+    UCanvasPanel* Canvas = WidgetTree->ConstructWidget<UCanvasPanel>();
+    WidgetTree->RootWidget = Canvas;
+    UVerticalBox* Panel = WidgetTree->ConstructWidget<UVerticalBox>();
+    UCanvasPanelSlot* PanelSlot = Canvas->AddChildToCanvas(Panel);
+    PanelSlot->SetAnchors(FAnchors(0.f, 1.f));
+    PanelSlot->SetAlignment(FVector2D(0.f, 1.f));
+    PanelSlot->SetPosition(FVector2D(32.f, -32.f));
+    PanelSlot->SetSize(FVector2D(340.f, 150.f));
+    HealthLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(HealthLabel);
+    HealthBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(HealthBar);
+    HealthBar->SetFillColorAndOpacity(FLinearColor(0.8f, 0.15f, 0.1f));
+    StaminaLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(StaminaLabel);
+    StaminaBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(StaminaBar);
+    StaminaBar->SetFillColorAndOpacity(FLinearColor(0.2f, 0.8f, 0.35f));
+    StateLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(StateLabel);
+    SetVisibility(ESlateVisibility::HitTestInvisible);
+}
+void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
+{
+    Super::NativeTick(Geometry, DeltaTime);
+    const APawn* Pawn = GetOwningPlayerPawn();
+    const UPFPlayerSurvivalComponent* Survival = Pawn ? Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>() : nullptr;
+    if (!Survival) { if (StateLabel) { StateLabel->SetText(FText::FromString(TEXT("Waiting for survivor..."))); } return; }
+    const FPFPlayerVitals V = Survival->GetVitals();
+    if (HealthLabel)
+    {
+        HealthLabel->SetText(FText::FromString(FString::Printf(TEXT("HEALTH   %.0f / %.0f"), V.Health, V.MaxHealth)));
+        StaminaLabel->SetText(FText::FromString(FString::Printf(TEXT("STAMINA   %.0f / %.0f"), V.Stamina, V.MaxStamina)));
+        HealthBar->SetPercent(V.Health / FMath::Max(1.f, V.MaxHealth));
+        StaminaBar->SetPercent(V.Stamina / FMath::Max(1.f, V.MaxStamina));
+        StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") : TEXT("WASD Move | Mouse Look | Space Jump")));
+    }
+    PresentVitals(V.Health, V.MaxHealth, V.Stamina, V.MaxStamina, Survival->IsDead());
+}

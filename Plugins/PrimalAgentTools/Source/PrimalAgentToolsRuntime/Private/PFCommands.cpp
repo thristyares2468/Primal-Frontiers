@@ -9,6 +9,9 @@
 #include "HAL/IConsoleManager.h"
 #include "String/LexFromString.h"
 #include "Modules/ModuleManager.h"
+#include "Survival/PFPlayerSurvivalComponent.h"
+#include "Survival/PFSurvivalGameMode.h"
+#include "Engine/DamageEvents.h"
 
 namespace PF::AgentTools
 {
@@ -31,7 +34,11 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.CaptureTestScreenshot"), TEXT("[label] Capture rendered editor level viewport PNG."), TEXT(""), 0, 1, true},
         {TEXT("PF.GiveItem"), TEXT("ItemId Quantity: grant via inventory adapter (unavailable)."), TEXT("No item-definition registry or authoritative inventory API exists."), 2, 2, false, true},
         {TEXT("PF.SpawnCreature"), TEXT("CreatureId: spawn via creature registry (unavailable)."), TEXT("No creature registry or authoritative creature spawn API exists."), 1, 1, false, true},
-        {TEXT("PF.SetHealth"), TEXT("Value: clamp via survival health adapter (unavailable)."), TEXT("No survival health attribute API exists; shooter template HP is unrelated."), 1, 1, false, true},
+        {TEXT("PF.SetHealth"), TEXT("Value: server-only survivor health, clamped to limits; cannot revive a dead pawn."), TEXT(""), 1, 1, false, true},
+        {TEXT("PF.SetStamina"), TEXT("Value: server-only survivor stamina, clamped to limits."), TEXT(""), 1, 1, false, true},
+        {TEXT("PF.Damage"), TEXT("Amount: apply positive damage through the server character damage API."), TEXT(""), 1, 1, false, true},
+        {TEXT("PF.Kill"), TEXT("Apply lethal server damage to the sole controlled survivor."), TEXT(""), 0, 0, false, true},
+        {TEXT("PF.Respawn"), TEXT("Respawn the sole dead survivor at a PlayerStart; living players are refused."), TEXT(""), 0, 0, false, true},
         {TEXT("PF.SetHunger"), TEXT("Value: clamp via survival hunger adapter (unavailable)."), TEXT("No hunger attribute API or limits exist."), 1, 1, false, true},
         {TEXT("PF.SetThirst"), TEXT("Value: clamp via survival thirst adapter (unavailable)."), TEXT("No thirst attribute API or limits exist."), 1, 1, false, true},
         {TEXT("PF.SetTimeOfDay"), TEXT("Hour: 0 through 23, via world-time adapter (unavailable)."), TEXT("No world-time subsystem exists."), 1, 1, false, true},
@@ -68,13 +75,14 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
         if (A[1].Len() > 10 || !LexTryParseString(Quantity, *A[1]) || Quantity <= 0 || Quantity > MAX_int32) { return TEXT("Quantity must be a positive int32."); }
     }
     if (S.Name == TEXT("PF.SpawnCreature") && !IsSafeLabel(A[0])) { return TEXT("Creature registry ID must be a simple identifier; arbitrary class paths are forbidden."); }
-    if (S.Name.StartsWith(TEXT("PF.Set")) || S.Name == TEXT("PF.Teleport"))
+    if (S.Name.StartsWith(TEXT("PF.Set")) || S.Name == TEXT("PF.Teleport") || S.Name == TEXT("PF.Damage"))
     {
         const int32 Count = S.Name == TEXT("PF.Teleport") ? 3 : 1;
         for (int32 I = 0; I < Count; ++I)
         {
             double Value;
             if (!Number(A[I], Value)) { return TEXT("Expected a finite decimal number."); }
+            if (S.Name == TEXT("PF.Damage") && (Value <= 0 || Value > MAX_flt)) { return TEXT("Damage must be positive and representable as a float."); }
             if (S.Name == TEXT("PF.SetTimeOfDay") && (Value < 0 || Value > 23)) { return TEXT("Hour must be between 0 and 23 inclusive."); }
             if (S.Name == TEXT("PF.Teleport") && FMath::Abs(Value) > 100000) { return TEXT("Teleport coordinates must be within +/-100000 cm."); }
         }
@@ -90,6 +98,35 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 }
 
 static void Fail(FResult& R, const TCHAR* Code, const FString& Message) { R.Add(TEXT("Error"), Code, FString(), Message); }
+static FResult SurvivalCommand(const FString& Name, const TArray<FString>& Args, UWorld* World)
+{
+    FResult R(Name);
+    if (!World || !World->IsGameWorld() || World->GetNetMode() == NM_Client || !World->GetAuthGameMode())
+    { Fail(R, TEXT("NotAuthority"), TEXT("Requires a server gameplay world.")); return R; }
+    if (World->GetNumPlayerControllers() != 1)
+    { Fail(R, TEXT("AmbiguousPlayer"), TEXT("This milestone's survival hooks require exactly one player controller.")); return R; }
+    APlayerController* PC = World->GetFirstPlayerController();
+    APawn* Pawn = PC ? PC->GetPawn() : nullptr;
+    UPFPlayerSurvivalComponent* Survival = Pawn ? Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>() : nullptr;
+    if (!Survival || !Pawn->HasAuthority())
+    { Fail(R, TEXT("SurvivorUnavailable"), TEXT("Possessed survivor with an authoritative survival component is required.")); return R; }
+    double NumberValue = 0;
+    if (!Args.IsEmpty()) { Number(Args[0], NumberValue); }
+    const float Value = static_cast<float>(FMath::Clamp(NumberValue, -static_cast<double>(MAX_flt), static_cast<double>(MAX_flt)));
+    bool Accepted = false;
+    if (Name == TEXT("PF.SetHealth")) { Accepted = Survival->SetHealth(Value); }
+    else if (Name == TEXT("PF.SetStamina")) { Accepted = Survival->ChangeStamina(FMath::Clamp(Value, 0.f, Survival->GetVitals().MaxStamina) - Survival->GetVitals().Stamina); }
+    else if (Name == TEXT("PF.Damage") || Name == TEXT("PF.Kill"))
+    { Accepted = Pawn->TakeDamage(Name == TEXT("PF.Kill") ? Survival->GetVitals().MaxHealth : Value, FDamageEvent(), PC, Pawn) > 0.f; }
+    else if (APFSurvivalGameMode* Mode = World->GetAuthGameMode<APFSurvivalGameMode>()) { Accepted = Mode->RespawnPlayer(PC); }
+    if (!Accepted) { Fail(R, TEXT("SurvivalRequestRejected"), TEXT("Invalid life state or unavailable survival GameMode; no successful mutation reported.")); }
+    else
+    {
+        const UPFPlayerSurvivalComponent* Current = PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();
+        R.Add(TEXT("Info"), TEXT("AuthoritativeVitals"), PC->GetPawn()->GetName(), FString::Printf(TEXT("Health=%.1f Stamina=%.1f Dead=%d"), Current->GetVitals().Health, Current->GetVitals().Stamina, Current->IsDead()));
+    }
+    return R;
+}
 static FResult Teleport(const TArray<FString>& Args, UWorld* World)
 {
     FResult R(TEXT("PF.Teleport"));
@@ -158,6 +195,8 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
         if (EditorCommand && (!World || World->WorldType == EWorldType::Editor)) { R = EditorCommand(Name, Args, World); }
         else { R.bNotImplemented = true; R.Add(TEXT("Info"), TEXT("NOT IMPLEMENTED"), FString(), TEXT("Requires editor backend outside PIE. Runtime gameplay reset/screenshot adapter is unavailable.")); }
     }
+    else if (Name == TEXT("PF.SetHealth") || Name == TEXT("PF.SetStamina") || Name == TEXT("PF.Damage") || Name == TEXT("PF.Kill") || Name == TEXT("PF.Respawn"))
+    { R = SurvivalCommand(Name, Args, World); }
     else if (Name == TEXT("PF.Teleport"))
     {
         if (!World || !World->IsGameWorld() || !World->GetAuthGameMode()) { Fail(R, TEXT("AuthorityWorldUnavailable"), TEXT("Requires a running authoritative gameplay world and GameMode.")); }
