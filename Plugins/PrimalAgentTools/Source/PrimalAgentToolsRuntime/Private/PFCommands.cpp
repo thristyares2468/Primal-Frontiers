@@ -12,6 +12,7 @@
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Survival/PFSurvivalGameMode.h"
 #include "Engine/DamageEvents.h"
+#include "Inventory/PFInventoryComponent.h"
 
 namespace PF::AgentTools
 {
@@ -32,7 +33,8 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.RunSmokeTest"), TEXT("Run asset, naming and package-reference checks; no gameplay coverage."), TEXT(""), 0, 0, true},
         {TEXT("PF.ExportTestReport"), TEXT("[label] Export this process's execution history to Saved/AutomationReports."), TEXT(""), 0, 1},
         {TEXT("PF.CaptureTestScreenshot"), TEXT("[label] Capture rendered editor level viewport PNG."), TEXT(""), 0, 1, true},
-        {TEXT("PF.GiveItem"), TEXT("ItemId Quantity: grant via inventory adapter (unavailable)."), TEXT("No item-definition registry or authoritative inventory API exists."), 2, 2, false, true},
+        {TEXT("PF.GiveItem"), TEXT("ItemId Quantity: server-only grant to sole player's inventory, respecting capacity."), TEXT(""), 2, 2, false, true},
+        {TEXT("PF.RemoveItem"), TEXT("ItemId Quantity: server-only removal from sole player's inventory."), TEXT(""), 2, 2, false, true},
         {TEXT("PF.SpawnCreature"), TEXT("CreatureId: spawn via creature registry (unavailable)."), TEXT("No creature registry or authoritative creature spawn API exists."), 1, 1, false, true},
         {TEXT("PF.SetHealth"), TEXT("Value: server-only survivor health, clamped to limits; cannot revive a dead pawn."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.SetStamina"), TEXT("Value: server-only survivor stamina, clamped to limits."), TEXT(""), 1, 1, false, true},
@@ -69,7 +71,7 @@ static bool Number(const FString& Text, double& Out)
 FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 {
     if (A.Num() < S.MinArgs || A.Num() > S.MaxArgs) { return TEXT("Wrong argument count. Usage: ") + S.Name + TEXT(" ") + S.Help; }
-    if (S.Name == TEXT("PF.GiveItem"))
+    if (S.Name == TEXT("PF.GiveItem") || S.Name == TEXT("PF.RemoveItem"))
     {
         int64 Quantity = 0;
         if (!IsSafeLabel(A[0]) || !A[0].StartsWith(TEXT("Item_"))) { return TEXT("Item ID must be an Item_ identifier, not an object path."); }
@@ -101,6 +103,20 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 }
 
 static void Fail(FResult& R, const TCHAR* Code, const FString& Message) { R.Add(TEXT("Error"), Code, FString(), Message); }
+static FResult InventoryCommand(const FString& Name,const TArray<FString>& Args,UWorld* World)
+{
+    FResult R(Name);
+    if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode())
+    {Fail(R,TEXT("NotAuthority"),TEXT("Requires server gameplay world."));return R;}
+    if(World->GetNumPlayerControllers()!=1){Fail(R,TEXT("AmbiguousPlayer"),TEXT("Inventory developer commands require exactly one player."));return R;}
+    const auto* PC=World->GetFirstPlayerController();
+    auto* I=PC && PC->PlayerState ? PC->PlayerState->FindComponentByClass<UPFInventoryComponent>() : nullptr;
+    int32 Count=0; LexTryParseString(Count,*Args[1]); const FName Id(*Args[0]);
+    const bool Accepted=I && (Name==TEXT("PF.GiveItem") ? I->Grant(Id,Count) : I->RemoveItem(Id,Count));
+    if(!Accepted){Fail(R,TEXT("InventoryRejected"),TEXT("Unknown item, capacity/quantity limit, insufficient items or unavailable inventory."));}
+    else{R.Add(TEXT("Info"),TEXT("InventoryChanged"),Args[0],FString::Printf(TEXT("Quantity=%d total=%d weight=%.2f"),Count,I->Count(Id),I->GetWeight()));}
+    return R;
+}
 static FResult SurvivalCommand(const FString& Name, const TArray<FString>& Args, UWorld* World)
 {
     FResult R(Name);
@@ -206,6 +222,8 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
     else if (Name == TEXT("PF.SetHealth") || Name == TEXT("PF.SetStamina") || Name == TEXT("PF.Damage") || Name == TEXT("PF.Kill") || Name == TEXT("PF.Respawn") ||
         Name == TEXT("PF.SetHunger") || Name == TEXT("PF.SetThirst") || Name == TEXT("PF.SetExposure") || Name == TEXT("PF.RecoverNeeds"))
     { R = SurvivalCommand(Name, Args, World); }
+    else if (Name == TEXT("PF.GiveItem") || Name == TEXT("PF.RemoveItem"))
+    { R=InventoryCommand(Name,Args,World); }
     else if (Name == TEXT("PF.Teleport"))
     {
         if (!World || !World->IsGameWorld() || !World->GetAuthGameMode()) { Fail(R, TEXT("AuthorityWorldUnavailable"), TEXT("Requires a running authoritative gameplay world and GameMode.")); }

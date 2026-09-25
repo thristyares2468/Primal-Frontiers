@@ -6,7 +6,7 @@
 
 Milestone 1 adds an isolated survival character with authoritative Health/Stamina and PlayerStart respawn. The runtime module depends on `PrimalFrontier` to call those validated APIs; gameplay has no dependency on tooling. Project-owned Blueprint copies and a primitive map are separate from the templates. The earlier paragraph describes the Phase 10 teleport integration.
 
-The checkout contains FirstPerson, Shooter and Horror templates. Shooter HP/weapon arrays are not a survival inventory. Item registry, inventory, creature registry/spawner, time, gameplay save/load, gathering, crafting and construction remain explicit stubs. M1 implements Health/Stamina and M2 adds Hunger/Thirst/Exposure; see `Docs/SURVIVAL_M1.md` and `Docs/SURVIVAL_M2.md` for the composition and tests.
+The checkout contains FirstPerson, Shooter and Horror templates. Shooter HP/weapon arrays are not a survival inventory. Creature registry/spawner, time, gameplay save/load, gathering, crafting and construction remain explicit stubs. M1 implements Health/Stamina and M2 adds Hunger/Thirst/Exposure; see `Docs/SURVIVAL_M1.md` and `Docs/SURVIVAL_M2.md` for the composition and tests.
 
 The runtime module is available in Development, DebugGame and Test. Shipping excludes the plugin through the project reference and both module descriptors; runtime build rules additionally reject Shipping. Registration and execution are compile guarded. The editor module alone depends on UnrealEd, AssetRegistry and DataValidation. No MCP server, remote command endpoint, RPC or additional external plugin is introduced.
 
@@ -26,7 +26,8 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.CaptureTestScreenshot [label]` | Editor: synchronous rendered viewport PNG. Runtime/PIE unavailable. |
 | `PF.ExportTestReport [label]` | JSON command history to project-local `Saved/AutomationReports`. |
 | `PF.Teleport X Y Z [PlayerId]` | Real server-side possessed-character teleport. See safety contract below. |
-| `PF.GiveItem ItemId Quantity` | NOT IMPLEMENTED: item registry/inventory absent. Syntax requires `Item_` identifier and positive int32 quantity. |
+| `PF.GiveItem ItemId Quantity` | M3 server-only grant to the sole player, respecting catalog and capacity. Syntax requires an `Item_` identifier and positive int32 quantity. |
+| `PF.RemoveItem ItemId Quantity` | M3 server-only removal from the sole player's inventory; insufficient quantity is rejected atomically. |
 | `PF.SpawnCreature CreatureId` | NOT IMPLEMENTED: creature registry/spawner absent. Simple registry ID only. |
 | `PF.SetHealth Value` | Server-only: set living survivor Health, clamped to its configured maximum. |
 | `PF.SetStamina Value` | Server-only: set clamped Stamina; depletion delays recovery. |
@@ -74,4 +75,4 @@ For multiplayer, use the same executable/project with `/Game/FirstPerson/Lvl_Fir
 
 Compare each process's `[PrimalAgentTools] ReplicationSnapshot PlayerId=... Role=... Location=...` lines by PlayerId. Both clients must see both server positions after settling. Record server/client test results separately from the cross-process position comparison. A real dedicated-server executable additionally requires a Server target and an engine distribution supporting server builds; this checkout currently has only Game and Editor targets. Editor `-server` exercises an uncooked dedicated-server world.
 
-Item grant, registry resolution, creature spawning, gameplay persistence and runtime reset integration tests remain blocked until their actual systems exist. Health/Stamina and M2 needs use real survival APIs. The `PF.Survival` automation and opt-in `PF.Survival.NeedsLive` test cover those implemented systems; unrelated stubs continue to return NOT IMPLEMENTED.
+Creature spawning, gameplay persistence and runtime reset integration tests remain blocked until their actual systems exist. Health/Stamina and M2 needs use real survival APIs. The `PF.Survival` automation and opt-in `PF.Survival.NeedsLive` test cover those implemented systems; unrelated stubs continue to return NOT IMPLEMENTED.

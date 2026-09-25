@@ -18,6 +18,8 @@
 
 ## Gameplay Systems
 
+Milestone 3 adds a small item-catalog data asset and an owner-only replicated inventory component on `APFInventoryPlayerState`. Stable stack GUIDs and per-batch server deadlines survive pawn replacement. The player controller validates split/drop/eat RPCs against its own inventory; pickup traces and world-actor transfers run on the server. A separate native placeholder inventory widget handles keyboard presentation. See `INVENTORY_M3.md` for transaction, privacy and save-preparation limits.
+
 Milestone 2 extends the same survival snapshot with food, water and exposure. A primitive hazard region is sampled by the authoritative survival tick, and a single-use ration is consumed through a validated server view trace on the survival controller. The client supplies no recovery quantities. See `SURVIVAL_M2.md` for threshold timing, UI and test contracts.
 
 - Player character

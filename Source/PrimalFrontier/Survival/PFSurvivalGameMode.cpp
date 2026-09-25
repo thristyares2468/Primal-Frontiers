@@ -2,6 +2,7 @@
 #include "Survival/PFSurvivorCharacter.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
 #include "GameFramework/PlayerStart.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
@@ -10,6 +11,7 @@ APFSurvivalGameMode::APFSurvivalGameMode()
 {
     DefaultPawnClass = APFSurvivorCharacter::StaticClass();
     PlayerControllerClass = APFSurvivalPlayerController::StaticClass();
+    PlayerStateClass = APFInventoryPlayerState::StaticClass();
 }
 void APFSurvivalGameMode::RestartPlayer(AController* Controller)
 {

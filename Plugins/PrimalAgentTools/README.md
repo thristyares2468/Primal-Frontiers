@@ -6,6 +6,8 @@ See [DEVELOPER_COMMANDS.md](DEVELOPER_COMMANDS.md) for the current commands, int
 
 ## Enable and use
 
+Milestone 3 implements `PF.GiveItem ItemId Quantity` and `PF.RemoveItem ItemId Quantity` for the sole authoritative player. See [INVENTORY_M3.md](../../Docs/INVENTORY_M3.md) for capacity, food freshness, gameplay controls and live replication tests. There is no client grant RPC.
+
 The project enables this plugin for Editor, Game, Client and Server targets except Shipping. Build `PrimalFrontierEditor Win64 Development`, then restart the editor to load the newly built module. Open **Output Log** and enter commands in its console field. All plugin messages contain `[PrimalAgentTools]`. These are synchronous commands: validation can take time while assets load.
 
 | Command | Behavior |

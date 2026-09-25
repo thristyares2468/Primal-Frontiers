@@ -1,6 +1,6 @@
 # Food freshness and preservation
 
-Design direction recorded 2026-09-23 at the user's request. Only the M2 world-ration expiration is implemented. Inventory, cooking and storage follow their milestone gates.
+Design direction recorded 2026-09-23 at the user's request. M2 world-ration expiration and M3 inventory batch freshness are implemented; see `INVENTORY_M3.md` and the milestone evidence for their verification status. Cooking and storage follow their later milestone gates.
 
 ## Research
 
@@ -36,7 +36,7 @@ These are simulation-time targets to playtest against acquisition frequency, hun
 
 M2 assigns each single-use world pickup an immutable server deadline and replicates it. The server rejects expired consumption immediately, including before its cleanup tick. Clients display synchronized remaining time.
 
-For M3 inventory, keep freshness provenance per acquisition batch and quantity. Splitting inherits it; merging must not refresh older batches. Unlike the researched sequential stack approach, our proposed batch policy expires each batch at its own deadline, regardless of stack rearrangement. The UI must show quantity and the next expiry so a large loss is not hidden. Validate this policy during inventory playtesting before treating it as final balance.
+M3 inventory keeps freshness provenance per acquisition batch and quantity. Splitting inherits it; merging never refreshes older batches. Unlike the researched sequential stack approach, this batch policy expires each batch at its own deadline, regardless of stack rearrangement. Different deadlines occupy separate slots, and the UI shows each batch's quantity and remaining seconds. The policy remains subject to later balance playtesting.
 
 For preservation, evolve the representation to remaining freshness plus last server evaluation time and decay rate. At a container, fuel or power transition, first account for elapsed decay at the previous rate, then apply the new rate. A 5x preservation effect consumes freshness at one fifth the ordinary rate; it never adds freshness. Do not blindly restart a full deadline when food changes containers.
 
