@@ -1,5 +1,9 @@
 \# Architecture and Design Decisions
 
+## 2026-09-26 — Keep supplied visual references outside runtime content
+
+Preserve the user's eight Palworld/ARK screenshots unchanged under [References/SurvivalGames](References/SurvivalGames/README.md), with an index of relevant readability, first-person framing and progression principles. These are documentation references, not imported assets or a copied art/UI specification. M3 keeps its lightweight readable inventory overlay. Technology progression, creature/world visuals and final presentation remain behind their respective plans and gates.
+
 ## 2026-09-25 — Milestone 3 inventory ownership and food batches
 
 Keep inventory on PlayerState, independent of the pawn, so death/respawn does not destroy item state. Replicate bounded stack contents owner-only; replicate world pickups to relevant clients. Use a small editable data-asset catalog and stable item/stack identifiers. Preflight insertion capacity, preserve the world actor when pickup fails, and spawn a drop before removing its quantity. Food from different deadlines occupies separate slots; split/drop/pickup never refreshes it. Consume the selected usable stack through validated server requests. No inventory grant RPC exists. Save/reconnect restoration remains M8; M3 reconnect deliberately starts empty. See `INVENTORY_M3.md`.

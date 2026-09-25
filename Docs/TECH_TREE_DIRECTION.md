@@ -1,5 +1,7 @@
 # Technology progression reference and direction
 
+The user's eight visual references are indexed in [References/SurvivalGames](References/SurvivalGames/README.md). Images 05 and 08 illustrate tier grouping, point costs, search/filtering and distinct progression paths. Use these readability principles with original Primal Frontier presentation; the images are documentation only.
+
 Recorded 2026-09-25 from the user's pasted Palworld technology/ancient-technology lists and ARK: Survival Evolved engram/boss-unlock lists. This is a future design reference, not implemented gameplay. The pasted entries include version-specific, DLC, mod and internal-looking names; they are not a verified catalog or a requirement to recreate every entry.
 
 ## Principles to carry forward
