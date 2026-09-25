@@ -18,6 +18,8 @@
 
 ## Gameplay Systems
 
+Milestone 2 extends the same survival snapshot with food, water and exposure. A primitive hazard region is sampled by the authoritative survival tick, and a single-use ration is consumed through a validated server view trace on the survival controller. The client supplies no recovery quantities. See `SURVIVAL_M2.md` for threshold timing, UI and test contracts.
+
 - Player character
 - Camera and interaction
 - Attributes and survival needs

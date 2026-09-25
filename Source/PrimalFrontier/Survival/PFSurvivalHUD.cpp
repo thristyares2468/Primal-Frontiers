@@ -20,13 +20,18 @@ void UPFSurvivalHUD::NativeOnInitialized()
     PanelSlot->SetAnchors(FAnchors(0.f, 1.f));
     PanelSlot->SetAlignment(FVector2D(0.f, 1.f));
     PanelSlot->SetPosition(FVector2D(32.f, -32.f));
-    PanelSlot->SetSize(FVector2D(340.f, 150.f));
+    PanelSlot->SetSize(FVector2D(440.f, 215.f));
     HealthLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(HealthLabel);
     HealthBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(HealthBar);
     HealthBar->SetFillColorAndOpacity(FLinearColor(0.8f, 0.15f, 0.1f));
     StaminaLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(StaminaLabel);
     StaminaBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(StaminaBar);
     StaminaBar->SetFillColorAndOpacity(FLinearColor(0.2f, 0.8f, 0.35f));
+    NeedsLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(NeedsLabel);
+    HungerBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(HungerBar);
+    HungerBar->SetFillColorAndOpacity(FLinearColor(0.8f,0.65f,0.25f));
+    ThirstBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(ThirstBar);
+    ThirstBar->SetFillColorAndOpacity(FLinearColor(0.2f,0.55f,0.9f));
     StateLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(StateLabel);
     SetVisibility(ESlateVisibility::HitTestInvisible);
 }
@@ -43,7 +48,12 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
         StaminaLabel->SetText(FText::FromString(FString::Printf(TEXT("STAMINA   %.0f / %.0f"), V.Stamina, V.MaxStamina)));
         HealthBar->SetPercent(V.Health / FMath::Max(1.f, V.MaxHealth));
         StaminaBar->SetPercent(V.Stamina / FMath::Max(1.f, V.MaxStamina));
-        StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") : TEXT("WASD Move | Mouse Look | Space Jump")));
+        NeedsLabel->SetText(FText::FromString(FString::Printf(TEXT("FOOD %.0f | WATER %.0f | EXPOSURE %.0f%%"),V.Hunger,V.Thirst,V.Exposure*100)));
+        HungerBar->SetPercent(V.Hunger/100.f); ThirstBar->SetPercent(V.Thirst/100.f);
+        StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") :
+            (V.Hunger <= 0 || V.Thirst <= 0 ? TEXT("STARVING / DEHYDRATED - find a ration!") :
+            (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : TEXT("WASD | Space Jump | E Consume ration")))));
     }
     PresentVitals(V.Health, V.MaxHealth, V.Stamina, V.MaxStamina, Survival->IsDead());
+    PresentNeeds(V.Hunger,V.Thirst,V.Exposure);
 }

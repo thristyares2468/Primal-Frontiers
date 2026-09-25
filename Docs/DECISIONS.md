@@ -1,5 +1,21 @@
 \# Architecture and Design Decisions
 
+## 2026-09-25 — Retain technology-tree references for later planning
+
+The user's Palworld and ARK progression lists inform accessible ordinary unlock points and a separate challenge-earned path, with early essentials, prerequisite/station requirements and later preservation upgrades. [TECH_TREE_DIRECTION.md](TECH_TREE_DIRECTION.md) records the original-game design direction and scope boundary. Do not implement a tech tree while finishing M2 or assume the pasted item roster is an approved feature list.
+
+## 2026-09-23 — Food research and preservation direction
+
+Use Palworld and ARK: Survival Evolved's cooking and preservation progression as mechanical research, documented with sources in [FOOD_AND_PRESERVATION.md](FOOD_AND_PRESERVATION.md). Primal Frontier uses original tuning: per-food lifetimes, found/gathered inputs, later cooking/drying and maintained storage. Five-minute M2 rations are test tuning. Moving food cannot reset freshness, spoiled ingredients cannot create edible meals, and preservation slows remaining decay rather than rejuvenating food. Future inventory tracks freshness by acquisition batch; its expiry UX must be playtested because it differs from sequential stack spoilage in the researched games. These later systems remain planned, not implemented or verified.
+
+## 2026-09-22 — Milestone 2 survival needs and placeholder interaction
+
+2026-09-23 refinement requested by the user: world rations are finite and perishable, never a permanent player ability. Use a replicated server-time expiration deadline and server-side consumption rejection/cleanup. Default shelf life is 300 simulation seconds. Carry expiration into future inventory and cooking; do not add those systems ahead of their milestones. Developer recovery remains a non-Shipping testing hook.
+
+Extend the existing replicated vitals snapshot with food/water reserves and exposure. Integrate threshold damage using time spent below the threshold; keep server authority in C++ and use existing death/respawn handling. Pause stamina recovery while starving, dehydrated or exposed. Health regeneration is optional and off by default to preserve the M1 damage contract.
+
+Use a no-tick primitive hazard actor and the survival component's existing 10 Hz server tick to resolve the strongest overlapping exposure. Add a single-use ration with a validated server view trace and bounded fixed recovery, rather than introducing inventory early. Replicated actor destruction prevents duplicate consumption. A small separate M2 map preserves the M1/template assets. No new engine plugin, external art, third-person mode or world expansion is required.
+
 
 
 \## 2026-09-12 — First-person primary experience

@@ -13,6 +13,10 @@ struct FPFPlayerVitals
     UPROPERTY(BlueprintReadOnly) float Stamina = 100.f;
     UPROPERTY(BlueprintReadOnly) float MaxHealth = 100.f;
     UPROPERTY(BlueprintReadOnly) float MaxStamina = 100.f;
+    // Higher values mean better fed/hydrated; zero causes damage.
+    UPROPERTY(BlueprintReadOnly) float Hunger = 100.f;
+    UPROPERTY(BlueprintReadOnly) float Thirst = 100.f;
+    UPROPERTY(BlueprintReadOnly) float Exposure = 0.f;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPFSurvivalEvent);
@@ -27,8 +31,13 @@ public:
     UFUNCTION(BlueprintPure, Category="Survival") FPFPlayerVitals GetVitals() const { return Vitals; }
     UFUNCTION(BlueprintPure, Category="Survival") bool IsDead() const { return Vitals.Health <= 0.f; }
     UFUNCTION(BlueprintPure, Category="Survival") FGameplayTag GetLifeState() const;
-    // Hunger and thirst tags reserve interfaces only; no values or simulation exist yet.
     UFUNCTION(BlueprintPure, Category="Survival") bool SupportsStat(FGameplayTag Stat) const;
+    UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Survival") bool SetHunger(float Value);
+    UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Survival") bool SetThirst(float Value);
+    UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Survival") bool SetExposure(float Value);
+    UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Survival") bool RecoverNeeds(float Food, float Water);
+    // Authoritative simulation entry point shared by tick and deterministic tests.
+    bool AdvanceNeeds(float Seconds);
     UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Survival") bool ApplyDamage(float Amount);
     UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Survival") bool SetHealth(float Value);
     UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Survival") bool ChangeStamina(float Delta);
@@ -42,6 +51,13 @@ public:
     UPROPERTY(EditDefaultsOnly, Category="Survival", meta=(ClampMin="1")) float InitialMaxStamina = 100.f;
     UPROPERTY(EditDefaultsOnly, Category="Survival", meta=(ClampMin="0")) float StaminaRecoveryPerSecond = 10.f;
     UPROPERTY(EditDefaultsOnly, Category="Survival", meta=(ClampMin="0")) float StaminaRecoveryDelay = 1.5f;
+    UPROPERTY(EditDefaultsOnly, Category="Survival|Needs", meta=(ClampMin="0", ClampMax="1000")) float HungerDrainPerSecond = 0.2f;
+    UPROPERTY(EditDefaultsOnly, Category="Survival|Needs", meta=(ClampMin="0", ClampMax="1000")) float ThirstDrainPerSecond = 0.3f;
+    UPROPERTY(EditDefaultsOnly, Category="Survival|Needs", meta=(ClampMin="0", ClampMax="1000")) float StarvationDamagePerSecond = 2.f;
+    UPROPERTY(EditDefaultsOnly, Category="Survival|Needs", meta=(ClampMin="0", ClampMax="1000")) float DehydrationDamagePerSecond = 3.f;
+    UPROPERTY(EditDefaultsOnly, Category="Survival|Needs", meta=(ClampMin="0", ClampMax="1000")) float ExposureDamagePerSecond = 5.f;
+    // Opt-in health regeneration; default off preserves the M1 damage contract.
+    UPROPERTY(EditDefaultsOnly, Category="Survival|Needs", meta=(ClampMin="0", ClampMax="1000")) float FedHealthRecoveryPerSecond = 0.f;
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
@@ -53,4 +69,5 @@ private:
     void Publish(const FPFPlayerVitals& Previous);
     bool CanMutate() const;
     double RecoveryStartsAt = 0;
+    float TestExposure = 0.f;
 };

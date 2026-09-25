@@ -48,8 +48,8 @@ bool FPFSurvivalComponentTest::RunTest(const FString&)
     TestEqual(TEXT("Death gameplay tag"), Survival->GetLifeState().ToString(), FString(TEXT("State.Survival.Dead")));
     TestFalse(TEXT("Cannot revive by assigning health"), Survival->SetHealth(100.f));
     TestFalse(TEXT("Dead stamina change rejected"), Survival->ChangeStamina(10.f));
-    TestFalse(TEXT("Hunger remains planned"), Survival->SupportsStat(FGameplayTag::RequestGameplayTag(TEXT("Attribute.Survival.Hunger"))));
-    TestFalse(TEXT("Thirst remains planned"), Survival->SupportsStat(FGameplayTag::RequestGameplayTag(TEXT("Attribute.Survival.Thirst"))));
+    TestTrue(TEXT("Hunger supported"), Survival->SupportsStat(FGameplayTag::RequestGameplayTag(TEXT("Attribute.Survival.Hunger"))));
+    TestTrue(TEXT("Thirst supported"), Survival->SupportsStat(FGameplayTag::RequestGameplayTag(TEXT("Attribute.Survival.Thirst"))));
     AddInfo(TEXT("[PrimalSurvival] Component assertions cover authority guards; socket replication is a separate live test."));
     Fixture.ForwardErrorMessages(this);
     return true;

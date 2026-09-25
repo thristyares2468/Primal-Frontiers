@@ -11,6 +11,11 @@ public:
     APFSurvivalPlayerController();
     UPROPERTY(EditDefaultsOnly, Category="Survival|UI") TSubclassOf<UPFSurvivalHUD> SurvivalHUDClass;
     UPROPERTY(Transient, BlueprintReadOnly, Category="Survival|UI") TObjectPtr<UPFSurvivalHUD> SurvivalHUD;
+    UFUNCTION(BlueprintCallable, Category="Survival") void Interact();
 protected:
     virtual void BeginPlay() override;
+    virtual void SetupInputComponent() override;
+    UFUNCTION(Server, Reliable) void ServerInteract();
+private:
+    double NextInteractionTime = 0;
 };

@@ -2,7 +2,7 @@
 
 UE 5.8.2 C++ developer plugin. A non-Shipping runtime module owns command registration, argument validation, history and server-side character teleporting. The editor module provides asset checks and unsaved fixtures. No MCP server, listener, remote execution interface or Python scripts.
 
-See [DEVELOPER_COMMANDS.md](DEVELOPER_COMMANDS.md) for all 27 commands, integration blockers and multiplayer verification.
+See [DEVELOPER_COMMANDS.md](DEVELOPER_COMMANDS.md) for the current commands, integration blockers and multiplayer verification. Milestone 2 adds real hunger/thirst/exposure and recovery adapters; [SURVIVAL_M2.md](../../Docs/SURVIVAL_M2.md) describes their gameplay and test contracts. All tooling commands remain excluded from Shipping.
 
 ## Enable and use
 

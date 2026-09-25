@@ -1,0 +1,19 @@
+# Technology progression reference and direction
+
+Recorded 2026-09-25 from the user's pasted Palworld technology/ancient-technology lists and ARK: Survival Evolved engram/boss-unlock lists. This is a future design reference, not implemented gameplay. The pasted entries include version-specific, DLC, mod and internal-looking names; they are not a verified catalog or a requirement to recreate every entry.
+
+## Principles to carry forward
+
+- Ordinary progression should award points readily through leveling and useful survival activity. Basic necessities should be available early, without grind that prevents eating, drinking or obtaining shelter.
+- Use a separate challenge-earned path for exceptional discoveries, inspired by the distinction between ordinary points and boss-earned unlocks. Specific challenges and rewards require an original design; bosses are not part of the current milestone implementation.
+- Organize unlocks by readable tiers, prerequisites, point costs and required crafting stations. Make blocked requirements clear in the UI.
+- Start with primitive tools, fire, basic cooking and simple shelter/storage. Follow with better processing, durable construction, food preservation and later powered equipment where explicitly planned.
+- Bundle related building pieces to avoid spending a point on every cosmetic variation. Keep meaningful equipment choices distinct.
+- Unlocking a recipe grants knowledge, not free items. Crafting still requires acquired ingredients, the correct station and server validation. Food still expires; preservation and cooking provide earned ways to manage it.
+- Keep Primal Frontier's names, creatures, recipes, fiction, progression layout and balance original. The references inform structure and pacing, not a copied roster or numerical level/cost table.
+
+## Fit with the existing milestones
+
+M2 remains focused on survival needs and perishable world food. M3 item definitions and M4 recipe definitions should leave room for stable unlock identifiers and Gameplay Tags without implementing a full tech tree early. M5 building definitions can use the same recipe/unlock contract. A dedicated progression plan and test gate must define XP sources, level curve, point economy, prerequisites, respec policy, co-op sharing and challenge rewards before implementation. The current eight-milestone plan does not silently expand to an 80-level tree or an endgame boss system.
+
+When the tech tree is scheduled, use this reference alongside [FOOD_AND_PRESERVATION.md](FOOD_AND_PRESERVATION.md), and revisit the user's supplied lists rather than assuming all listed features are approved scope. Validate unlock spending, duplicate requests, prerequisite bypass, multiplayer authority and eventual save/reconnect behavior. Do not progress beyond the user's Milestone 8 boundary without a new plan.
