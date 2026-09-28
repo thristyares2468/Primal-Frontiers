@@ -15,6 +15,11 @@ void UPFSurvivalHUD::NativeOnInitialized()
     if (WidgetTree->RootWidget) { return; }
     UCanvasPanel* Canvas = WidgetTree->ConstructWidget<UCanvasPanel>();
     WidgetTree->RootWidget = Canvas;
+    UTextBlock* AimMarker=WidgetTree->ConstructWidget<UTextBlock>();
+    AimMarker->SetText(FText::FromString(TEXT("+")));AimMarker->SetShadowColorAndOpacity(FLinearColor::Black);AimMarker->SetShadowOffset(FVector2D(1,1));
+    UCanvasPanelSlot* AimPlacement=Canvas->AddChildToCanvas(AimMarker);
+    AimPlacement->SetAnchors(FAnchors(0.5f,0.5f));AimPlacement->SetAlignment(FVector2D(0.5f,0.5f));AimPlacement->SetAutoSize(true);
+    AimPlacement->SetPosition(FVector2D::ZeroVector);
     UVerticalBox* Panel = WidgetTree->ConstructWidget<UVerticalBox>();
     UCanvasPanelSlot* PanelSlot = Canvas->AddChildToCanvas(Panel);
     PanelSlot->SetAnchors(FAnchors(0.f, 1.f));
@@ -52,7 +57,7 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
         HungerBar->SetPercent(V.Hunger/100.f); ThirstBar->SetPercent(V.Thirst/100.f);
         StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") :
             (V.Hunger <= 0 || V.Thirst <= 0 ? TEXT("STARVING / DEHYDRATED - find a ration!") :
-            (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : TEXT("WASD | Space | E Interact | Tab Inventory")))));
+            (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : TEXT("WASD | Space | E Gather | Tab Bag | C Craft")))));
     }
     PresentVitals(V.Health, V.MaxHealth, V.Stamina, V.MaxStamina, Survival->IsDead());
     PresentNeeds(V.Hunger,V.Thirst,V.Exposure);

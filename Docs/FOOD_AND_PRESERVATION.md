@@ -1,6 +1,6 @@
 # Food freshness and preservation
 
-Design direction recorded 2026-09-23 at the user's request. M2 world-ration expiration and M3 inventory batch freshness are implemented; see `INVENTORY_M3.md` and the milestone evidence for their verification status. Cooking and storage follow their later milestone gates.
+Design direction recorded 2026-09-23 at the user's request. M2 world-ration expiration, M3 inventory batch freshness and M4 finite gathering/cooking/drying are implemented; see `INVENTORY_M3.md`, `GATHERING_CRAFTING_M4.md` and the milestone evidence. Storage preservation remains deferred. Current M4 recipes consume fresh gathered food and wood fuel after a server-validated duration; cooked food lasts 900 seconds and dried food 1800 seconds. These are greybox test values, not final balance.
 
 ## Research
 

@@ -1,5 +1,9 @@
 \# Architecture and Design Decisions
 
+## 2026-09-27 — Milestone 4 atomic completion and finite resource nodes
+
+Crafting keeps ingredients in inventory and snapshots exact stack IDs, quantities and deadlines at start. Completion revalidates and performs one atomic conversion. Moving/consuming/spoiling an input can invalidate the job, clearly reported; cancellation requires no refund space and cannot reset food freshness. Death or pawn replacement cancels work. One active job bounds replication and UI cost. Resource nodes validate first-person aim, reach, cooldown and capacity before spending finite hit counts. The carried primitive tool reduces actions required without increasing total node yield. Recipes and resources are editable catalog entries; portable cooking/drying consumes wood fuel and time, while placeable stations wait for M5. No new plugin or external dependency is added.
+
 ## 2026-09-26 — Keep supplied visual references outside runtime content
 
 Preserve the user's eight Palworld/ARK screenshots unchanged under [References/SurvivalGames](References/SurvivalGames/README.md), with an index of relevant readability, first-person framing and progression principles. These are documentation references, not imported assets or a copied art/UI specification. M3 keeps its lightweight readable inventory overlay. Technology progression, creature/world visuals and final presentation remain behind their respective plans and gates.
@@ -129,3 +133,6 @@ Health and Stamina mutate only on authority; damage uses Unreal's damage pipelin
 PrimalAgentToolsRuntime now depends on the project game module to call the same validated survival APIs. The game module does not depend on tooling, and command registration remains excluded from Shipping. No MCP server, gameplay RPC for arbitrary developer mutations, external assets or new plugin dependency is introduced. One-player command targeting deliberately rejects ambiguity.
 
 Use component/lifecycle automation, an opt-in live replication test, and a manual first-person test as distinct gates. Use one rendered client and a NullRHI server on the 16 GB machine. Do not infer multiplayer success from role simulation or a previous tooling test.
+# 2026-09-28 — Native first-person aim marker
+
+The M4 rendered playtest exposed an offset external crosshair overlay. Add a small centered native HUD marker so the player can aim the server-derived gathering trace reliably. This is presentation only; trace reach and server validation remain unchanged. The repeated forage/cooking/drying playtest passed with this marker. Portable cooking/drying remains the M4 scope; placeable stations, equipment durability and technology unlocks are future work.

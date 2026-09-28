@@ -13,6 +13,9 @@
 #include "Survival/PFSurvivalGameMode.h"
 #include "Engine/DamageEvents.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Crafting/PFCraftingComponent.h"
+#include "Crafting/PFResourceNode.h"
+#include "EngineUtils.h"
 
 namespace PF::AgentTools
 {
@@ -49,8 +52,10 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.Teleport"), TEXT("X Y Z [PlayerId]: authority-only character teleport; collision, floor, 1km bounds; one player unless ID given."), TEXT(""), 3, 4, false, true},
         {TEXT("PF.SaveWorld"), TEXT("Request gameplay save (unavailable); never saves editor maps."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
         {TEXT("PF.LoadWorld"), TEXT("Request gameplay load (unavailable)."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
-        {TEXT("PF.TestGathering"), TEXT("Validate gathering integration (unavailable)."), TEXT("No gathering system exists.")},
-        {TEXT("PF.TestCrafting"), TEXT("Validate crafting integration (unavailable)."), TEXT("No crafting system exists.")},
+        {TEXT("PF.TestGathering"), TEXT("Server: validate loaded resource definitions and node state; no harvesting."), TEXT(""), 0, 0},
+        {TEXT("PF.TestCrafting"), TEXT("Server: validate player recipe catalogs and queue state; no item grants."), TEXT(""), 0, 0},
+        {TEXT("PF.Craft"), TEXT("RecipeId: start the sole player's server-validated timed craft."), TEXT(""), 1, 1, false, true},
+        {TEXT("PF.CancelCraft"), TEXT("Cancel the sole player's craft without consuming inputs."), TEXT(""), 0, 0, false, true},
         {TEXT("PF.TestBuildingPlacement"), TEXT("Validate construction integration (unavailable)."), TEXT("No building placement system exists.")},
         {TEXT("PF.TestCreatureAI"), TEXT("Validate creature AI integration (unavailable)."), TEXT("No survival creature AI exists.")},
         {TEXT("PF.TestMultiplayerReplication"), TEXT("Validate survival replication (unavailable)."), TEXT("No survival replication acceptance scenario exists; transport alone is not a pass.")},
@@ -79,6 +84,7 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
         if (A[1].Len() > 10 || !LexTryParseString(Quantity, *A[1]) || Quantity <= 0 || Quantity > MAX_int32) { return TEXT("Quantity must be a positive int32."); }
     }
     if (S.Name == TEXT("PF.SpawnCreature") && !IsSafeLabel(A[0])) { return TEXT("Creature registry ID must be a simple identifier; arbitrary class paths are forbidden."); }
+    if (S.Name == TEXT("PF.Craft") && (!IsSafeLabel(A[0]) || !A[0].StartsWith(TEXT("Recipe_")))) { return TEXT("Expected Recipe_ identifier, not an object path."); }
     if (S.Name.StartsWith(TEXT("PF.Set")) || S.Name == TEXT("PF.Teleport") || S.Name == TEXT("PF.Damage"))
     {
         const int32 Count = S.Name == TEXT("PF.Teleport") ? 3 : 1;
@@ -103,6 +109,46 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 }
 
 static void Fail(FResult& R, const TCHAR* Code, const FString& Message) { R.Add(TEXT("Error"), Code, FString(), Message); }
+static FResult CraftingCommand(const FString& Name,const TArray<FString>& Args,UWorld* World)
+{
+    FResult R(Name);
+    if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode())
+    {Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));return R;}
+    if(Name==TEXT("PF.TestGathering"))
+    {
+        int32 Count=0;
+        for(TActorIterator<APFResourceNode> It(World);It;++It)
+        {
+            ++Count;const auto* D=It->Catalog?It->Catalog->Resource(It->ResourceId,It->Items):nullptr;
+            if(!D || It->HitsRemaining<0 || (D && It->HitsRemaining>D->Hits) || !FMath::IsFinite(It->RespawnAt) ||
+                (It->HitsRemaining==0 && It->RespawnAt<=0) || (It->HitsRemaining>0 && It->RespawnAt!=0))
+            {Fail(R,TEXT("InvalidResource"),It->GetPathName());}
+        }
+        if(Count==0){Fail(R,TEXT("NoResources"),TEXT("No runtime resource nodes to validate."));}
+        R.Add(TEXT("Info"),TEXT("ResourceIntegrity"),FString(),FString::Printf(TEXT("Checked %d nodes. Functional gathering is covered by PF.Crafting.Gathering/Live."),Count));return R;
+    }
+    if(Name==TEXT("PF.TestCrafting"))
+    {
+        int32 Count=0;
+        for(auto It=World->GetPlayerControllerIterator();It;++It)
+        {
+            auto* PS=It->Get()?It->Get()->PlayerState.Get():nullptr;
+            auto* C=PS?PS->FindComponentByClass<UPFCraftingComponent>():nullptr;auto* I=C?C->Inventory():nullptr;
+            if(!C || !C->Catalog || !I || C->Catalog->Recipes.IsEmpty()){Fail(R,TEXT("CraftingUnavailable"),TEXT("Missing player catalog/component."));continue;}
+            ++Count;
+            for(const auto& D:C->Catalog->Recipes){if(!C->Catalog->Recipe(D.Id,I->Catalog)){Fail(R,TEXT("InvalidRecipe"),D.Id.ToString());}}
+            if(!FMath::IsFinite(C->FinishAt) || (C->ActiveRecipe.IsNone()?C->FinishAt!=0:C->FinishAt<=0)){Fail(R,TEXT("InvalidQueue"),PS->GetName());}
+        }
+        if(Count==0){Fail(R,TEXT("NoPlayers"),TEXT("No player crafting components to validate."));}
+        R.Add(TEXT("Info"),TEXT("RecipeIntegrity"),FString(),FString::Printf(TEXT("Checked %d players. Functional transactions are covered by PF.Crafting.Transactions/Live."),Count));return R;
+    }
+    if(World->GetNumPlayerControllers()!=1){Fail(R,TEXT("AmbiguousPlayer"),TEXT("Craft developer commands require exactly one player."));return R;}
+    auto* PC=World->GetFirstPlayerController();auto* C=PC && PC->PlayerState?PC->PlayerState->FindComponentByClass<UPFCraftingComponent>():nullptr;
+    if(!C || !(Name==TEXT("PF.CancelCraft")?C->Cancel():C->Start(FName(*Args[0]),PC->GetPawn())))
+    {Fail(R,TEXT("CraftRejected"),TEXT("Busy, missing ingredients, invalid recipe/life state or no active job."));}
+    else{R.Add(TEXT("Info"),TEXT("CraftRequestAccepted"),FString(),C->Feedback);}
+    return R;
+}
 static FResult InventoryCommand(const FString& Name,const TArray<FString>& Args,UWorld* World)
 {
     FResult R(Name);
@@ -224,6 +270,8 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
     { R = SurvivalCommand(Name, Args, World); }
     else if (Name == TEXT("PF.GiveItem") || Name == TEXT("PF.RemoveItem"))
     { R=InventoryCommand(Name,Args,World); }
+    else if(Name==TEXT("PF.TestGathering") || Name==TEXT("PF.TestCrafting") || Name==TEXT("PF.Craft") || Name==TEXT("PF.CancelCraft"))
+    {R=CraftingCommand(Name,Args,World);}
     else if (Name == TEXT("PF.Teleport"))
     {
         if (!World || !World->IsGameWorld() || !World->GetAuthGameMode()) { Fail(R, TEXT("AuthorityWorldUnavailable"), TEXT("Requires a running authoritative gameplay world and GameMode.")); }

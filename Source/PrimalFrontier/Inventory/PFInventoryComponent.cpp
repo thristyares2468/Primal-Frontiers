@@ -90,6 +90,30 @@ bool UPFInventoryComponent::OwnsLivingPawn(APawn* Pawn) const
     const auto* S=Pawn ? Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>() : nullptr;
     return Authority() && IsValid(Pawn) && Pawn->HasAuthority() && Pawn->GetPlayerState()==GetOwner() && Pawn->GetController() && S && !S->IsDead();
 }
+bool UPFInventoryComponent::Transform(const TArray<FPFItemStack>& Inputs,FName Output,int32 Quantity)
+{
+    if(!Authority() || Inputs.IsEmpty() || Inputs.Num()>64 || Quantity<1 || Quantity>10000){return false;}
+    const auto* D=Definition(Output); if(!D){return false;}
+    PruneExpired(); auto Proposed=Stacks; TSet<FGuid> Seen;
+    for(const auto& Input:Inputs)
+    {
+        const int32 Index=Proposed.IndexOfByPredicate([&](const auto& S){return S.StackId==Input.StackId;});
+        if(Seen.Contains(Input.StackId) || Index==INDEX_NONE || Input.Quantity<=0 || Proposed[Index].Quantity<Input.Quantity ||
+            Proposed[Index].ItemId!=Input.ItemId || Proposed[Index].ExpiresAt!=Input.ExpiresAt){return false;}
+        Seen.Add(Input.StackId); Proposed[Index].Quantity-=Input.Quantity;
+        if(Proposed[Index].Quantity==0){Proposed.RemoveAt(Index);}
+    }
+    double Weight=double(D->Weight)*Quantity;
+    for(const auto& S:Proposed){const auto* Item=Definition(S.ItemId);if(!Item){return false;}Weight+=double(Item->Weight)*S.Quantity;}
+    if(SlotLimit<1 || SlotLimit>64 || !FMath::IsFinite(WeightLimit) || WeightLimit<=0 || Weight>WeightLimit+0.0001){return false;}
+    const double Deadline=D->ShelfLifeSeconds>0 ? ServerTime(GetWorld())+D->ShelfLifeSeconds : 0;
+    int32 Left=Quantity;
+    for(auto& S:Proposed){if(S.ItemId==Output && S.ExpiresAt==Deadline){const int32 N=FMath::Min(Left,D->StackLimit-S.Quantity);S.Quantity+=N;Left-=N;}}
+    while(Left>0 && Proposed.Num()<SlotLimit)
+    { FPFItemStack S;S.StackId=FGuid::NewGuid();S.ItemId=Output;S.Quantity=FMath::Min(Left,D->StackLimit);S.ExpiresAt=Deadline;Proposed.Add(S);Left-=S.Quantity; }
+    if(Left>0){return false;}
+    Stacks=MoveTemp(Proposed);Changed(TEXT("crafted"));return true;
+}
 bool UPFInventoryComponent::Consume(FGuid Id,APawn* Pawn)
 {
     if(!OwnsLivingPawn(Pawn)){return false;} PruneExpired();

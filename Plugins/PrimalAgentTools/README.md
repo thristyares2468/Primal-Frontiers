@@ -58,6 +58,10 @@ Prefixes are case sensitive and require a nonempty suffix. Names use the same 64
 The `.uproject` reference and both module descriptors deny Shipping. The runtime module build rules also reject Shipping and command registration is compile-guarded with `!UE_BUILD_SHIPPING`. The editor module remains Type=Editor and cannot enter a game package. The runtime module has no UnrealEd or DataValidation dependency. Development, DebugGame and Test are allowed; `ECVF_Default` keeps commands available in Test, with explicit world authority checks rather than relying on cheat flags. Fixture actors remain editor-only.
 
 
+## Milestone 4 integration
+
+`PF.TestGathering` and `PF.TestCrafting` now perform read-only runtime integrity checks on real resource nodes and player recipe catalogs/queues. `PF.Craft RecipeId` and `PF.CancelCraft` use the sole player's authoritative timed craft API. These commands are non-Shipping, logged and exported like the existing interface. `PF.Crafting.Transactions`, `PF.Crafting.Gathering` and the opt-in `PF.Crafting.Live` test verify gameplay separately; command integrity alone does not certify the complete loop. No MCP server is added.
+
 ## Verification
 
 See [VERIFICATION.md](VERIFICATION.md) for the completed acceptance run, exact findings, evidence, and remaining manual setup.

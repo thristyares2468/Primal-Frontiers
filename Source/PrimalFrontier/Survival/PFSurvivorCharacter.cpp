@@ -3,11 +3,44 @@
 #include "Survival/PFSurvivalGameMode.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
+#include "Inventory/PFInventoryComponent.h"
+#include "GameFramework/PlayerState.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "UObject/ConstructorHelpers.h"
 
 APFSurvivorCharacter::APFSurvivorCharacter()
 {
     bReplicates = true;
     Survival = CreateDefaultSubobject<UPFPlayerSurvivalComponent>(TEXT("Survival"));
+    PrimaryActorTick.bCanEverTick=true;
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    ToolHandle=CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GatheringToolHandle"));
+    ToolHead=CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GatheringToolHead"));
+    RemoteTool=CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RemoteGatheringTool"));
+    for(auto* Part:{ToolHandle.Get(),ToolHead.Get(),RemoteTool.Get()})
+    {Part->SetStaticMesh(Cube.Object);Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);Part->SetCastShadow(false);Part->SetVisibility(false);}
+    ToolHandle->SetupAttachment(GetFirstPersonCameraComponent());ToolHandle->SetOnlyOwnerSee(true);
+    ToolHandle->SetRelativeLocation(FVector(45,25,-24));ToolHandle->SetRelativeRotation(FRotator(0,0,-20));ToolHandle->SetRelativeScale3D(FVector(0.04,0.04,0.4));
+    ToolHead->SetupAttachment(GetFirstPersonCameraComponent());ToolHead->SetOnlyOwnerSee(true);
+    ToolHead->SetRelativeLocation(FVector(45,30,-5));ToolHead->SetRelativeScale3D(FVector(0.09,0.22,0.08));
+    RemoteTool->SetupAttachment(GetMesh(),TEXT("hand_r"));RemoteTool->SetOwnerNoSee(true);RemoteTool->SetRelativeScale3D(FVector(0.06,0.06,0.4));
+}
+void APFSurvivorCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{Super::GetLifetimeReplicatedProps(OutLifetimeProps);DOREPLIFETIME(APFSurvivorCharacter,bHasGatheringTool);}
+void APFSurvivorCharacter::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    if(HasAuthority())
+    {
+        const auto* I=GetPlayerState()?GetPlayerState()->FindComponentByClass<UPFInventoryComponent>():nullptr;
+        const bool Equipped=I && I->Count(TEXT("Item_Tool"))>0 && !Survival->IsDead();
+        if(bHasGatheringTool!=Equipped){bHasGatheringTool=Equipped;ForceNetUpdate();}
+    }
+    if(GetNetMode()!=NM_DedicatedServer)
+    {ToolHandle->SetVisibility(bHasGatheringTool && IsLocallyControlled());ToolHead->SetVisibility(bHasGatheringTool && IsLocallyControlled());RemoteTool->SetVisibility(bHasGatheringTool && !IsLocallyControlled());}
 }
 void APFSurvivorCharacter::BeginPlay()
 {

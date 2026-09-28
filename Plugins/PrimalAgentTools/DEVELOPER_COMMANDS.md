@@ -6,7 +6,7 @@
 
 Milestone 1 adds an isolated survival character with authoritative Health/Stamina and PlayerStart respawn. The runtime module depends on `PrimalFrontier` to call those validated APIs; gameplay has no dependency on tooling. Project-owned Blueprint copies and a primitive map are separate from the templates. The earlier paragraph describes the Phase 10 teleport integration.
 
-The checkout contains FirstPerson, Shooter and Horror templates. Shooter HP/weapon arrays are not a survival inventory. Creature registry/spawner, time, gameplay save/load, gathering, crafting and construction remain explicit stubs. M1 implements Health/Stamina and M2 adds Hunger/Thirst/Exposure; see `Docs/SURVIVAL_M1.md` and `Docs/SURVIVAL_M2.md` for the composition and tests.
+The checkout contains FirstPerson, Shooter and Horror templates. Shooter HP/weapon arrays are not a survival inventory. Creature registry/spawner, time, gameplay save/load and construction remain explicit stubs. M1 implements Health/Stamina, M2 adds Hunger/Thirst/Exposure, M3 adds inventory and M4 adds gathering/crafting; see the corresponding documents in `Docs/` for their contracts and tests.
 
 The runtime module is available in Development, DebugGame and Test. Shipping excludes the plugin through the project reference and both module descriptors; runtime build rules additionally reject Shipping. Registration and execution are compile guarded. The editor module alone depends on UnrealEd, AssetRegistry and DataValidation. No MCP server, remote command endpoint, RPC or additional external plugin is introduced.
 
@@ -41,8 +41,10 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.SetTimeOfDay Hour` | NOT IMPLEMENTED: time API absent. Finite hour from 0 through 23. |
 | `PF.SaveWorld` | NOT IMPLEMENTED: gameplay save API absent. Never saves an editor map. |
 | `PF.LoadWorld` | NOT IMPLEMENTED: gameplay load API absent. |
-| `PF.TestGathering` | NOT IMPLEMENTED: gathering system absent. |
-| `PF.TestCrafting` | NOT IMPLEMENTED: crafting system absent. |
+| `PF.TestGathering` | M4 server-only read-only integrity check of loaded resource definitions, hit counts and respawn state; fails if no nodes exist. Functional gathering is tested separately. |
+| `PF.TestCrafting` | M4 server-only read-only validation of player recipe catalogs and queue state; fails if players/components are missing. Functional conversions are tested separately. |
+| `PF.Craft RecipeId` | M4 server-only start for the sole player's timed recipe. Rejects busy/invalid/insufficient requests; acceptance does not mean completion. |
+| `PF.CancelCraft` | M4 server-only cancellation for the sole player. Ingredients stay in inventory until completion. |
 | `PF.TestBuildingPlacement` | NOT IMPLEMENTED: construction system absent. |
 | `PF.TestCreatureAI` | NOT IMPLEMENTED: survival creature AI absent. |
 | `PF.TestMultiplayerReplication` | NOT IMPLEMENTED: no survival acceptance scenario. Transport/teleport verification below is narrower. |
@@ -51,7 +53,7 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.CaptureScreenshot [label]` | Compatibility alias of `PF.CaptureTestScreenshot`. |
 | `PF.ExportResults [label]` | Compatibility alias of `PF.ExportTestReport`. |
 
-Unknown item/creature IDs cannot be resolved without registries. Well-formed unknown IDs return NOT IMPLEMENTED, not a fabricated “unknown registry entry” validation or successful mutation. Malformed identifiers fail argument validation.
+Unknown item or recipe IDs fail against the implemented catalogs. Creature IDs still return NOT IMPLEMENTED until a creature registry exists. Malformed identifiers fail argument validation. M4 controls, recipes and food policies are documented in `Docs/GATHERING_CRAFTING_M4.md`.
 
 ## Authority and teleport safety
 

@@ -10,6 +10,9 @@
 #include "Inventory/PFItemPickup.h"
 #include "Inventory/PFInventoryHUD.h"
 #include "GameFramework/PlayerState.h"
+#include "Crafting/PFCraftingComponent.h"
+#include "Crafting/PFCraftingHUD.h"
+#include "Crafting/PFResourceNode.h"
 
 APFSurvivalPlayerController::APFSurvivalPlayerController() { SurvivalHUDClass = UPFSurvivalHUD::StaticClass(); }
 void APFSurvivalPlayerController::BeginPlay()
@@ -21,6 +24,8 @@ void APFSurvivalPlayerController::BeginPlay()
         if (SurvivalHUD) { SurvivalHUD->AddToPlayerScreen(); }
         InventoryHUD=CreateWidget<UPFInventoryHUD>(this,UPFInventoryHUD::StaticClass());
         if(InventoryHUD){InventoryHUD->AddToPlayerScreen();}
+        CraftingHUD=CreateWidget<UPFCraftingHUD>(this,UPFCraftingHUD::StaticClass());
+        if(CraftingHUD){CraftingHUD->AddToPlayerScreen();}
     }
 }
 void APFSurvivalPlayerController::SetupInputComponent()
@@ -33,6 +38,11 @@ void APFSurvivalPlayerController::SetupInputComponent()
     InputComponent->BindKey(EKeys::X,IE_Pressed,this,&APFSurvivalPlayerController::InventorySplit);
     InputComponent->BindKey(EKeys::G,IE_Pressed,this,&APFSurvivalPlayerController::InventoryDrop);
     InputComponent->BindKey(EKeys::Q,IE_Pressed,this,&APFSurvivalPlayerController::InventoryConsume);
+    InputComponent->BindKey(EKeys::C,IE_Pressed,this,&APFSurvivalPlayerController::ToggleCrafting);
+    InputComponent->BindKey(EKeys::One,IE_Pressed,this,&APFSurvivalPlayerController::CraftTool);
+    InputComponent->BindKey(EKeys::Two,IE_Pressed,this,&APFSurvivalPlayerController::CookFood);
+    InputComponent->BindKey(EKeys::Three,IE_Pressed,this,&APFSurvivalPlayerController::DryFood);
+    InputComponent->BindKey(EKeys::R,IE_Pressed,this,&APFSurvivalPlayerController::CancelCraft);
 }
 void APFSurvivalPlayerController::Interact() { if (IsLocalController()) { ServerInteract(); } }
 void APFSurvivalPlayerController::ServerInteract_Implementation()
@@ -50,6 +60,8 @@ void APFSurvivalPlayerController::ServerInteract_Implementation()
         if(auto* Item=Cast<APFItemPickup>(Hit.GetActor()))
         {ClientInventoryFeedback(Item->TryPickup(GetPawn()) ? TEXT("Picked up") : TEXT("Pickup refused: full, expired or invalid"));}
         else if (auto* Pickup = Cast<APFRecoveryPickup>(Hit.GetActor())) { Pickup->TryConsume(GetPawn()); }
+        else if(auto* Node=Cast<APFResourceNode>(Hit.GetActor()))
+        {ClientInventoryFeedback(Node->Gather(GetPawn())?TEXT("Gathered"):TEXT("Gather refused: depleted, cooldown or full inventory"));}
     }
 }
 UPFInventoryComponent* APFSurvivalPlayerController::GetInventory() const
@@ -83,3 +95,17 @@ void APFSurvivalPlayerController::ServerInventoryAction_Implementation(FGuid Sta
     ClientInventoryFeedback(Accepted ? TEXT("Done") : TEXT("Refused: invalid stack, quantity, space or life state"));
 }
 void APFSurvivalPlayerController::ClientInventoryFeedback_Implementation(const FString& Message){InventoryMessage=Message;}
+UPFCraftingComponent* APFSurvivalPlayerController::GetCrafting() const
+{return PlayerState?PlayerState->FindComponentByClass<UPFCraftingComponent>():nullptr;}
+void APFSurvivalPlayerController::ToggleCrafting(){bCraftingOpen=!bCraftingOpen;}
+void APFSurvivalPlayerController::CraftTool(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Tool"),false);}}
+void APFSurvivalPlayerController::CookFood(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Cook"),false);}}
+void APFSurvivalPlayerController::DryFood(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Dry"),false);}}
+void APFSurvivalPlayerController::CancelCraft(){if(bCraftingOpen){ServerCraftAction(NAME_None,true);}}
+void APFSurvivalPlayerController::ServerCraftAction_Implementation(FName Id,bool bCancel)
+{
+    if(!HasAuthority()){return;}const double Now=GetWorld()->GetTimeSeconds();if(Now<NextCraftTime){return;}NextCraftTime=Now+0.25;
+    auto* C=GetCrafting();const bool Accepted=C && (bCancel?C->Cancel():C->Start(Id,GetPawn()));
+    UE_LOG(LogPFSurvival,Display,TEXT("[PrimalCrafting] Request recipe=%s cancel=%d accepted=%d owner=%s"),*Id.ToString(),bCancel,Accepted,*GetName());
+    ClientInventoryFeedback(Accepted?TEXT("Craft request accepted"):TEXT("Craft refused: busy, invalid recipe, ingredients or life state"));
+}

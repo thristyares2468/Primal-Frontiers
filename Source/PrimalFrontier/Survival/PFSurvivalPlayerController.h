@@ -4,6 +4,8 @@
 class UPFSurvivalHUD;
 class UPFInventoryHUD;
 class UPFInventoryComponent;
+class UPFCraftingComponent;
+class UPFCraftingHUD;
 
 UCLASS()
 class PRIMALFRONTIER_API APFSurvivalPlayerController : public APrimalFrontierPlayerController
@@ -15,6 +17,9 @@ public:
     UPROPERTY(Transient, BlueprintReadOnly, Category="Survival|UI") TObjectPtr<UPFSurvivalHUD> SurvivalHUD;
     UFUNCTION(BlueprintCallable, Category="Survival") void Interact();
     UPFInventoryComponent* GetInventory() const;
+    UPFCraftingComponent* GetCrafting() const;
+    bool IsCraftingOpen() const {return bCraftingOpen;}
+    UFUNCTION(Server,Reliable) void ServerCraftAction(FName RecipeId,bool bCancel);
     bool IsInventoryOpen() const {return bInventoryOpen;}
     int32 GetSelectedInventoryIndex() const {return SelectedInventoryIndex;}
     const FString& GetInventoryMessage() const {return InventoryMessage;}
@@ -27,6 +32,14 @@ protected:
 private:
     double NextInteractionTime = 0;
     double NextInventoryTime = 0;
+    double NextCraftTime = 0;
+    bool bCraftingOpen=false;
+    UPROPERTY() TObjectPtr<UPFCraftingHUD> CraftingHUD;
+    void ToggleCrafting();
+    void CraftTool();
+    void CookFood();
+    void DryFood();
+    void CancelCraft();
     bool bInventoryOpen=false;
     int32 SelectedInventoryIndex=0;
     FString InventoryMessage;
