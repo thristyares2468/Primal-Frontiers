@@ -6,7 +6,7 @@
 
 Milestone 1 adds an isolated survival character with authoritative Health/Stamina and PlayerStart respawn. The runtime module depends on `PrimalFrontier` to call those validated APIs; gameplay has no dependency on tooling. Project-owned Blueprint copies and a primitive map are separate from the templates. The earlier paragraph describes the Phase 10 teleport integration.
 
-The checkout contains FirstPerson, Shooter and Horror templates. Shooter HP/weapon arrays are not a survival inventory. Creature registry/spawner, time and gameplay save/load remain explicit stubs. M1 implements Health/Stamina, M2 adds Hunger/Thirst/Exposure, M3 adds inventory, M4 adds gathering/crafting and M5 adds greybox building/storage; see the corresponding documents in `Docs/` for their contracts and tests.
+The checkout contains FirstPerson, Shooter and Horror templates. Shooter HP/weapon arrays are not a survival inventory. Time and gameplay save/load remain explicit stubs. M1 implements Health/Stamina, M2 adds Hunger/Thirst/Exposure, M3 adds inventory, M4 adds gathering/crafting, M5 adds greybox building/storage and M6 adds greybox creatures; see the corresponding documents in `Docs/` for their contracts and tests.
 
 The runtime module is available in Development, DebugGame and Test. Shipping excludes the plugin through the project reference and both module descriptors; runtime build rules additionally reject Shipping. Registration and execution are compile guarded. The editor module alone depends on UnrealEd, AssetRegistry and DataValidation. No MCP server, remote command endpoint, RPC or additional external plugin is introduced.
 
@@ -28,7 +28,8 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.Teleport X Y Z [PlayerId]` | Real server-side possessed-character teleport. See safety contract below. |
 | `PF.GiveItem ItemId Quantity` | M3 server-only grant to the sole player, respecting catalog and capacity. Syntax requires an `Item_` identifier and positive int32 quantity. |
 | `PF.RemoveItem ItemId Quantity` | M3 server-only removal from the sole player's inventory; insufficient quantity is rejected atomically. |
-| `PF.SpawnCreature CreatureId` | NOT IMPLEMENTED: creature registry/spawner absent. Simple registry ID only. |
+| `PF.SpawnCreature CreatureId` | M6 server-only catalog spawn near the sole player, with navigation, clearance and an eight-creature cap. IDs: Creature_Forager, Creature_Prowler. |
+| `PF.ResetCreatures` | M6 standalone L_M6Creatures only: pause spawn points and clear creature actors without loot or saved-map mutation. |
 | `PF.SetHealth Value` | Server-only: set living survivor Health, clamped to its configured maximum. |
 | `PF.SetStamina Value` | Server-only: set clamped Stamina; depletion delays recovery. |
 | `PF.Damage Amount` | Server-only: positive finite damage through the survivor damage pipeline. |
@@ -47,14 +48,14 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.CancelCraft` | M4 server-only cancellation for the sole player. Ingredients stay in inventory until completion. |
 | `PF.TestBuildingPlacement` | M5 server-only read-only structure health/ownership/support integrity check; fails if no structures exist. Functional placement tests run separately. |
 | `PF.ResetBuildings` | M5 server-only reset of the sole player's empty runtime structures in `L_M5Building`; no refund or map save. Occupied storage rejects reset. |
-| `PF.TestCreatureAI` | NOT IMPLEMENTED: survival creature AI absent. |
+| `PF.TestCreatureAI` | M6 server-only definition, health, state and controller integrity. Functional movement/combat uses PF.Creatures.Lifecycle/Live. |
 | `PF.TestMultiplayerReplication` | NOT IMPLEMENTED: no survival acceptance scenario. Transport/teleport verification below is narrower. |
 | `PF.TestPersistence` | NOT IMPLEMENTED: gameplay persistence absent. |
 | `PF.ResetAutomation` | Compatibility alias of `PF.ResetTestWorld`. |
 | `PF.CaptureScreenshot [label]` | Compatibility alias of `PF.CaptureTestScreenshot`. |
 | `PF.ExportResults [label]` | Compatibility alias of `PF.ExportTestReport`. |
 
-Unknown item or recipe IDs fail against the implemented catalogs. Creature IDs still return NOT IMPLEMENTED until a creature registry exists. Malformed identifiers fail argument validation. M4 controls, recipes and food policies are documented in `Docs/GATHERING_CRAFTING_M4.md`.
+Unknown item, recipe and creature IDs fail against the implemented catalogs. Malformed identifiers fail argument validation. M4 controls, recipes and food policies are documented in `Docs/GATHERING_CRAFTING_M4.md`; M6 behavior is in `Docs/CREATURES_M6.md`.
 
 ## Authority and teleport safety
 
@@ -78,4 +79,4 @@ For multiplayer, use the same executable/project with `/Game/FirstPerson/Lvl_Fir
 
 Compare each process's `[PrimalAgentTools] ReplicationSnapshot PlayerId=... Role=... Location=...` lines by PlayerId. Both clients must see both server positions after settling. Record server/client test results separately from the cross-process position comparison. A real dedicated-server executable additionally requires a Server target and an engine distribution supporting server builds; this checkout currently has only Game and Editor targets. Editor `-server` exercises an uncooked dedicated-server world.
 
-Creature spawning, gameplay persistence and runtime reset integration tests remain blocked until their actual systems exist. Health/Stamina and M2 needs use real survival APIs. The `PF.Survival` automation and opt-in `PF.Survival.NeedsLive` test cover those implemented systems; unrelated stubs continue to return NOT IMPLEMENTED.
+Gameplay persistence and general runtime automation reset remain blocked until their actual systems exist. M6 creature spawning uses a real catalog and bounded navigation-valid spawn API. Health/Stamina and M2 needs use real survival APIs. The `PF.Survival` automation and opt-in `PF.Survival.NeedsLive` test cover those implemented systems; unrelated stubs continue to return NOT IMPLEMENTED.

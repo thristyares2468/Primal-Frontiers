@@ -19,6 +19,8 @@
 #include "Building/PFBuildingComponent.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "EngineUtils.h"
+#include "Creatures/PFCreature.h"
+#include "Creatures/PFCreatureSpawner.h"
 
 namespace PF::AgentTools
 {
@@ -41,7 +43,8 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.CaptureTestScreenshot"), TEXT("[label] Capture rendered editor level viewport PNG."), TEXT(""), 0, 1, true},
         {TEXT("PF.GiveItem"), TEXT("ItemId Quantity: server-only grant to sole player's inventory, respecting capacity."), TEXT(""), 2, 2, false, true},
         {TEXT("PF.RemoveItem"), TEXT("ItemId Quantity: server-only removal from sole player's inventory."), TEXT(""), 2, 2, false, true},
-        {TEXT("PF.SpawnCreature"), TEXT("CreatureId: spawn via creature registry (unavailable)."), TEXT("No creature registry or authoritative creature spawn API exists."), 1, 1, false, true},
+        {TEXT("PF.SpawnCreature"), TEXT("CreatureId: server spawn near sole player, validated catalog/navigation/collision and world cap."), TEXT(""), 1, 1, false, true},
+        {TEXT("PF.ResetCreatures"), TEXT("Server: clear test creatures and pause spawn points only in standalone L_M6Creatures."), TEXT(""), 0, 0, false, true},
         {TEXT("PF.SetHealth"), TEXT("Value: server-only survivor health, clamped to limits; cannot revive a dead pawn."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.SetStamina"), TEXT("Value: server-only survivor stamina, clamped to limits."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.Damage"), TEXT("Amount: apply positive damage through the server character damage API."), TEXT(""), 1, 1, false, true},
@@ -61,7 +64,7 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.CancelCraft"), TEXT("Cancel the sole player's craft without consuming inputs."), TEXT(""), 0, 0, false, true},
         {TEXT("PF.TestBuildingPlacement"), TEXT("Server: validate existing structure health, ownership and support; functional tests run separately."), TEXT(""), 0, 0},
         {TEXT("PF.ResetBuildings"), TEXT("Server: remove sole player's empty runtime structures only in L_M5Building; no refund or map save."), TEXT(""), 0, 0, false, true},
-        {TEXT("PF.TestCreatureAI"), TEXT("Validate creature AI integration (unavailable)."), TEXT("No survival creature AI exists.")},
+        {TEXT("PF.TestCreatureAI"), TEXT("Server: inspect creature definitions, health, state and AI controllers; functional navigation tested separately.")},
         {TEXT("PF.TestMultiplayerReplication"), TEXT("Validate survival replication (unavailable)."), TEXT("No survival replication acceptance scenario exists; transport alone is not a pass.")},
         {TEXT("PF.TestPersistence"), TEXT("Validate persistence round trip (unavailable)."), TEXT("No gameplay persistence API exists.")},
         {TEXT("PF.ResetAutomation"), TEXT("Alias of PF.ResetTestWorld."), TEXT(""), 0, 0, true, true},
@@ -113,6 +116,32 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 }
 
 static void Fail(FResult& R, const TCHAR* Code, const FString& Message) { R.Add(TEXT("Error"), Code, FString(), Message); }
+static FResult CreatureCommand(const FString& Name,const TArray<FString>& Args,UWorld* World)
+{
+    FResult R(Name);
+    if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode())
+    {Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));return R;}
+    if(Name==TEXT("PF.ResetCreatures"))
+    {
+        if(World->GetNetMode()!=NM_Standalone || World->GetOutermost()->GetName()!=TEXT("/Game/PrimalFrontier/Maps/L_M6Creatures"))
+        {Fail(R,TEXT("ResetScope"),TEXT("Requires standalone L_M6Creatures test map."));return R;}
+        for(TActorIterator<APFCreatureSpawner> It(World);It;++It){It->bAutoSpawn=false;}
+        int32 Count=0;for(TActorIterator<APFCreature> It(World);It;++It){It->Destroy();++Count;}
+        R.Add(TEXT("Info"),TEXT("CreaturesReset"),FString(),FString::Printf(TEXT("Removed %d runtime test creatures, paused spawners, no loot or map save."),Count));return R;
+    }
+    if(Name==TEXT("PF.SpawnCreature"))
+    {
+        auto* PC=World->GetFirstPlayerController();APawn* P=PC?PC->GetPawn():nullptr;
+        if(World->GetNumPlayerControllers()!=1 || !P){Fail(R,TEXT("AmbiguousPlayer"),TEXT("Requires one possessed player."));return R;}
+        const FVector At=P->GetActorLocation()+PC->GetControlRotation().Vector().GetSafeNormal2D()*400;
+        if(auto* C=APFCreatureSpawner::Spawn(World,FName(*Args[0]),At)){R.Add(TEXT("Info"),TEXT("CreatureSpawned"),C->GetName(),Args[0]);}
+        else{Fail(R,TEXT("SpawnRejected"),TEXT("Unknown definition, missing navigation, blocked position or eight-creature limit."));}return R;
+    }
+    int32 Count=0;for(TActorIterator<APFCreature> It(World);It;++It)
+    {++Count;const auto* D=It->Definition();if(!D || !FMath::IsFinite(It->Health) || It->Health<0 || (D && It->Health>D->Health) || !It->State.IsValid() || (!It->IsDead() && !It->GetController())){Fail(R,TEXT("CreatureInvalid"),It->GetName());}}
+    if(Count==0){Fail(R,TEXT("NoCreatures"),TEXT("Spawn a creature before integrity validation."));}
+    R.Add(TEXT("Info"),TEXT("CreatureIntegrity"),FString(),FString::Printf(TEXT("Checked %d creatures; run PF.Creatures.Lifecycle/Live for functional behavior."),Count));return R;
+}
 static FResult BuildingCommand(const FString& Name,UWorld* World)
 {
     FResult R(Name);if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode()){Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));return R;}
@@ -290,6 +319,7 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
     else if (Name == TEXT("PF.GiveItem") || Name == TEXT("PF.RemoveItem"))
     { R=InventoryCommand(Name,Args,World); }
     else if(Name==TEXT("PF.TestBuildingPlacement") || Name==TEXT("PF.ResetBuildings")) { R=BuildingCommand(Name,World); }
+    else if(Name==TEXT("PF.SpawnCreature") || Name==TEXT("PF.ResetCreatures") || Name==TEXT("PF.TestCreatureAI")) { R=CreatureCommand(Name,Args,World); }
     else if(Name==TEXT("PF.TestGathering") || Name==TEXT("PF.TestCrafting") || Name==TEXT("PF.Craft") || Name==TEXT("PF.CancelCraft"))
     {R=CraftingCommand(Name,Args,World);}
     else if (Name == TEXT("PF.Teleport"))

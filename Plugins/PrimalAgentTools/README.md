@@ -62,6 +62,8 @@ The `.uproject` reference and both module descriptors deny Shipping. The runtime
 
 ## Milestone 4 integration
 
+M6 adds real `PF.SpawnCreature`, `PF.ResetCreatures` and `PF.TestCreatureAI` adapters. The runtime test module links Unreal's built-in NavigationSystem for its obstacle-path check. `PF.Creatures.Lifecycle` covers narrow state/authority/death/loot behavior; opt-in `PF.Creatures.Live` covers real server navigation, combat, loot interaction and client replication. See `Docs/CREATURES_M6.md` and milestone evidence for current gate status.
+
 `PF.TestGathering` and `PF.TestCrafting` now perform read-only runtime integrity checks on real resource nodes and player recipe catalogs/queues. `PF.Craft RecipeId` and `PF.CancelCraft` use the sole player's authoritative timed craft API. These commands are non-Shipping, logged and exported like the existing interface. `PF.Crafting.Transactions`, `PF.Crafting.Gathering` and the opt-in `PF.Crafting.Live` test verify gameplay separately; command integrity alone does not certify the complete loop. No MCP server is added.
 
 ## Verification

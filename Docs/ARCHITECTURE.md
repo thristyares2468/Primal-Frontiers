@@ -18,6 +18,8 @@
 
 ## Gameplay Systems
 
+Milestone 6 adds catalog-driven primitive creature characters, capped spawn points and bounded navigation. Server AI owns perception, path requests, attack windup/damage and one-time perishable loot. Clients receive movement, health, target and Gameplay Tag state; first-person attacks use an owning-controller RPC with server-derived aim/range, stamina cost and cooldown. See `CREATURES_M6.md` for scope and gate status.
+
 Milestone 5 adds a building component on the owning controller, a structure catalog, replicated primitive structure actors and a separate placeholder HUD. Placement requests contain only an ID and quarter turn; authority derives the view trace, grid and support and charges validated wood costs. Runtime structure ownership references PlayerState. Storage reuses owner-only inventory replication and preserves batch deadlines through atomic server transfers. See `BUILDING_M5.md` for support, demolition and current scope limits.
 
 Milestone 4 adds a data-asset resource/recipe catalog, replicated primitive resource nodes and an owner-only timed crafting component on PlayerState. Completion atomically converts exact input batches; cancellation consumes nothing, and stale inputs or insufficient output capacity fail without partial conversion. The controller derives gathering targets from server traces and accepts only recipe IDs/cancel requests for its own queue. Carrying the tool enables a replicated equipped indicator with local first-person and remote primitive presentation. See `GATHERING_CRAFTING_M4.md` for the contract and current test status.

@@ -1,5 +1,9 @@
 \# Architecture and Design Decisions
 
+## 2026-09-29 — Bounded server creature AI
+
+M6 uses two original data definitions, native Gameplay Tags for replicated states and 10 Hz server decisions. Built-in AIController/NavMesh handles movement, and server distance/line-of-sight queries provide simple perception. Attack windup rechecks target life, sight and range; finite loot uses existing food expiry and pickup transactions. Each spawn point has one resident and a shared eight-creature limit includes corpses. NavigationSystem is a built-in module dependency for gameplay and its live tests. No behavior-tree asset, external AI plugin or art acquisition is needed. The user has existing art assets: notify them before planning their integration, after the greybox milestone boundary.
+
 ## 2026-09-29 — Test hardware and performance reporting
 
 Use the user's 32 GB Ryzen 9 5900X machine as the current reference; record the full supplied configuration and observed GPU-name discrepancy in `TEST_MACHINE.md`. Keep historical 16 GB constraints as historical evidence, not a current measurement. M5 uses an uncapped 960x540 sample with all frames retained, including the capture-start hitch. Do not extrapolate this stationary small-arena sample to native 1440p, large worlds or a different GPU SKU. No persistent rendering settings change is needed.

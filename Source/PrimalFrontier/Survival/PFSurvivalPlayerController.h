@@ -23,6 +23,7 @@ public:
     UPFCraftingComponent* GetCrafting() const;
     bool IsCraftingOpen() const {return bCraftingOpen;}
     UFUNCTION(Server,Reliable) void ServerCraftAction(FName RecipeId,bool bCancel);
+    UFUNCTION(Server,Reliable) void ServerAttackCreature();
     bool IsInventoryOpen() const {return bInventoryOpen;}
     int32 GetSelectedInventoryIndex() const {return SelectedInventoryIndex;}
     const FString& GetInventoryMessage() const {return InventoryMessage;}
@@ -45,6 +46,7 @@ private:
     double NextInteractionTime = 0;
     double NextInventoryTime = 0;
     double NextCraftTime = 0;
+    double NextAttackTime = 0;
     bool bCraftingOpen=false;
     UPROPERTY() TObjectPtr<UPFCraftingHUD> CraftingHUD;
     void ToggleCrafting();

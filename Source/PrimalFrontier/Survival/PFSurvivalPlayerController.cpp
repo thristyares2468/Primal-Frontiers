@@ -16,6 +16,8 @@
 #include "Building/PFBuildingComponent.h"
 #include "Building/PFBuildingHUD.h"
 #include "Building/PFBuildPiece.h"
+#include "Creatures/PFCreature.h"
+#include "Engine/DamageEvents.h"
 
 APFSurvivalPlayerController::APFSurvivalPlayerController() { SurvivalHUDClass = UPFSurvivalHUD::StaticClass();Building=CreateDefaultSubobject<UPFBuildingComponent>(TEXT("Building")); }
 void APFSurvivalPlayerController::BeginPlay()
@@ -124,7 +126,19 @@ void APFSurvivalPlayerController::ServerCraftAction_Implementation(FName Id,bool
 void APFSurvivalPlayerController::ToggleBuilding(){Building->bBuildMode=!Building->bBuildMode;if(Building->bBuildMode){bCraftingOpen=false;bInventoryOpen=false;}}
 void APFSurvivalPlayerController::NextBuilding(){if(Building->bBuildMode && Building->Catalog && Building->Catalog->Pieces.Num()>0){Building->Selection=(Building->Selection+1)%Building->Catalog->Pieces.Num();}}
 void APFSurvivalPlayerController::RotateBuilding(){if(Building->bBuildMode){Building->Rotation=(Building->Rotation+1)%4;}}
-void APFSurvivalPlayerController::PlaceBuilding(){if(Building->bBuildMode){Building->ServerPlace(Building->SelectedId(),Building->Rotation);}}
+void APFSurvivalPlayerController::PlaceBuilding(){if(Building->bBuildMode){Building->ServerPlace(Building->SelectedId(),Building->Rotation);}else if(!bInventoryOpen && !bCraftingOpen){ServerAttackCreature();}}
+void APFSurvivalPlayerController::ServerAttackCreature_Implementation()
+{
+    if(!HasAuthority() || !GetPawn()){return;}
+    const double Now=GetWorld()->GetTimeSeconds();if(Now<NextAttackTime){return;}NextAttackTime=Now+0.5;
+    auto* V=GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();if(!V || V->IsDead()){return;}
+    FVector Eye;FRotator Look;GetPawn()->GetActorEyesViewPoint(Eye,Look);FHitResult Hit;
+    if(!GetWorld()->LineTraceSingleByChannel(Hit,Eye,Eye+Look.Vector()*250,ECC_Visibility,FCollisionQueryParams(SCENE_QUERY_STAT(PFCreatureAttack),false,GetPawn()))){return;}
+    auto* Creature=Cast<APFCreature>(Hit.GetActor());if(!Creature || Creature->IsDead() || !V->SpendStamina(5)){return;}
+    const auto* I=GetInventory();const float Amount=I && I->Count(TEXT("Item_Tool"))>0?35.f:20.f;
+    const bool HitCreature=Creature->TakeDamage(Amount,FDamageEvent(),this,GetPawn())>0;
+    ClientInventoryFeedback(HitCreature?TEXT("Creature hit"):TEXT("Attack refused"));
+}
 void APFSurvivalPlayerController::DemolishBuilding(){if(Building->bBuildMode){Building->ServerTargetAction(0);}}
 void APFSurvivalPlayerController::DamageBuilding(){if(Building->bBuildMode){Building->ServerTargetAction(2);}}
 void APFSurvivalPlayerController::StoreItem(){auto* I=GetInventory();if(Building->bBuildMode && I && I->GetStacks().IsValidIndex(SelectedInventoryIndex)){Building->ServerTransfer(true,I->GetStacks()[SelectedInventoryIndex].StackId,1);}}

@@ -65,7 +65,7 @@ bool FPFMissingSystemsTest::RunTest(const FString&)
         TestEqual(*S.Name, ExecuteCommand(S.Name, Args, nullptr, false).Status(), FString(TEXT("NOT IMPLEMENTED")));
     }
     TestTrue(TEXT("Item grant without authoritative world rejected"), ExecuteCommand(TEXT("PF.GiveItem"), {TEXT("Item_Unknown"), TEXT("1")}, nullptr, false).HasErrors());
-    TestEqual(TEXT("Unknown creature cannot spawn"), ExecuteCommand(TEXT("PF.SpawnCreature"), {TEXT("UnknownCreature")}, nullptr, false).Status(), FString(TEXT("NOT IMPLEMENTED")));
+    TestTrue(TEXT("Creature spawning requires authoritative world"), ExecuteCommand(TEXT("PF.SpawnCreature"), {TEXT("UnknownCreature")}, nullptr, false).HasErrors());
     TestTrue(TEXT("Null gameplay world cannot teleport"), ExecuteCommand(TEXT("PF.Teleport"), {TEXT("0"), TEXT("0"), TEXT("200")}, nullptr, false).HasErrors());
     AddInfo(TEXT("These assertions verify honest blockers, not item grants, spawning, clamping or persistence. Those integration tests require the missing gameplay APIs."));
     return true;
