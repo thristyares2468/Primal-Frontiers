@@ -21,7 +21,7 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Patrol,"Creature.State.Patrol");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Flee,"Creature.State.Flee");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Chase,"Creature.State.Chase");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Attack,"Creature.State.Attack");
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Dead,"Creature.State.Dead");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_CreatureDead,"Creature.State.Dead");
 
 APFCreature::APFCreature()
 {
@@ -104,7 +104,7 @@ void APFCreature::Think()
 void APFCreature::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);Think();
-    if(State==TAG_PF_Dead){GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);GetCharacterMovement()->DisableMovement();}
+    if(State==TAG_PF_CreatureDead){GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);GetCharacterMovement()->DisableMovement();}
     if(GetNetMode()!=NM_DedicatedServer)
     {
         Body->SetRelativeScale3D(IsDead()?FVector(1,0.7,0.15):(bHostile?FVector(1.1,0.7,0.85):FVector(0.9,0.65,0.7)));
@@ -131,7 +131,7 @@ float APFCreature::TakeDamage(float Amount,const FDamageEvent& Event,AController
 }
 void APFCreature::Die()
 {
-    Target=nullptr;SetState(TAG_PF_Dead);if(auto* AI=Cast<AAIController>(GetController())){AI->StopMovement();}
+    Target=nullptr;SetState(TAG_PF_CreatureDead);if(auto* AI=Cast<AAIController>(GetController())){AI->StopMovement();}
     GetCharacterMovement()->DisableMovement();GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     const auto* D=Definition();const auto* Items=LoadObject<UPFItemCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Items/DA_ItemCatalog.DA_ItemCatalog"));const auto* Food=Items?Items->Find(TEXT("Item_Food")):nullptr;
     if(D && Food)
