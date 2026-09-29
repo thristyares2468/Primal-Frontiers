@@ -6,6 +6,8 @@ class UPFInventoryHUD;
 class UPFInventoryComponent;
 class UPFCraftingComponent;
 class UPFCraftingHUD;
+class UPFBuildingComponent;
+class UPFBuildingHUD;
 
 UCLASS()
 class PRIMALFRONTIER_API APFSurvivalPlayerController : public APrimalFrontierPlayerController
@@ -13,6 +15,7 @@ class PRIMALFRONTIER_API APFSurvivalPlayerController : public APrimalFrontierPla
     GENERATED_BODY()
 public:
     APFSurvivalPlayerController();
+    UPROPERTY(VisibleAnywhere,BlueprintReadOnly) TObjectPtr<UPFBuildingComponent> Building;
     UPROPERTY(EditDefaultsOnly, Category="Survival|UI") TSubclassOf<UPFSurvivalHUD> SurvivalHUDClass;
     UPROPERTY(Transient, BlueprintReadOnly, Category="Survival|UI") TObjectPtr<UPFSurvivalHUD> SurvivalHUD;
     UFUNCTION(BlueprintCallable, Category="Survival") void Interact();
@@ -30,6 +33,15 @@ protected:
     virtual void SetupInputComponent() override;
     UFUNCTION(Server, Reliable) void ServerInteract();
 private:
+    UPROPERTY() TObjectPtr<UPFBuildingHUD> BuildingHUD;
+    void ToggleBuilding();
+    void NextBuilding();
+    void RotateBuilding();
+    void PlaceBuilding();
+    void DemolishBuilding();
+    void DamageBuilding();
+    void StoreItem();
+    void TakeStoredItem();
     double NextInteractionTime = 0;
     double NextInventoryTime = 0;
     double NextCraftTime = 0;

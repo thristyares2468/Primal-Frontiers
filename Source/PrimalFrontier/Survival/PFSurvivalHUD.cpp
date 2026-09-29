@@ -57,7 +57,7 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
         HungerBar->SetPercent(V.Hunger/100.f); ThirstBar->SetPercent(V.Thirst/100.f);
         StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") :
             (V.Hunger <= 0 || V.Thirst <= 0 ? TEXT("STARVING / DEHYDRATED - find a ration!") :
-            (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : TEXT("WASD | Space | E Gather | Tab Bag | C Craft")))));
+            (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : TEXT("WASD | Space | E Gather | Tab Bag | C Craft | B Build")))));
     }
     PresentVitals(V.Health, V.MaxHealth, V.Stamina, V.MaxStamina, Survival->IsDead());
     PresentNeeds(V.Hunger,V.Thirst,V.Exposure);

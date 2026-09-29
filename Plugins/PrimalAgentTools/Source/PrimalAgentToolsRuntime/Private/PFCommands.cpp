@@ -15,6 +15,9 @@
 #include "Inventory/PFInventoryComponent.h"
 #include "Crafting/PFCraftingComponent.h"
 #include "Crafting/PFResourceNode.h"
+#include "Building/PFBuildPiece.h"
+#include "Building/PFBuildingComponent.h"
+#include "Survival/PFSurvivalPlayerController.h"
 #include "EngineUtils.h"
 
 namespace PF::AgentTools
@@ -56,7 +59,8 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.TestCrafting"), TEXT("Server: validate player recipe catalogs and queue state; no item grants."), TEXT(""), 0, 0},
         {TEXT("PF.Craft"), TEXT("RecipeId: start the sole player's server-validated timed craft."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.CancelCraft"), TEXT("Cancel the sole player's craft without consuming inputs."), TEXT(""), 0, 0, false, true},
-        {TEXT("PF.TestBuildingPlacement"), TEXT("Validate construction integration (unavailable)."), TEXT("No building placement system exists.")},
+        {TEXT("PF.TestBuildingPlacement"), TEXT("Server: validate existing structure health, ownership and support; functional tests run separately."), TEXT(""), 0, 0},
+        {TEXT("PF.ResetBuildings"), TEXT("Server: remove sole player's empty runtime structures only in L_M5Building; no refund or map save."), TEXT(""), 0, 0, false, true},
         {TEXT("PF.TestCreatureAI"), TEXT("Validate creature AI integration (unavailable)."), TEXT("No survival creature AI exists.")},
         {TEXT("PF.TestMultiplayerReplication"), TEXT("Validate survival replication (unavailable)."), TEXT("No survival replication acceptance scenario exists; transport alone is not a pass.")},
         {TEXT("PF.TestPersistence"), TEXT("Validate persistence round trip (unavailable)."), TEXT("No gameplay persistence API exists.")},
@@ -109,6 +113,21 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 }
 
 static void Fail(FResult& R, const TCHAR* Code, const FString& Message) { R.Add(TEXT("Error"), Code, FString(), Message); }
+static FResult BuildingCommand(const FString& Name,UWorld* World)
+{
+    FResult R(Name);if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode()){Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));return R;}
+    if(Name==TEXT("PF.ResetBuildings"))
+    {
+        if(World->GetOutermost()->GetName()!=TEXT("/Game/PrimalFrontier/Maps/L_M5Building") || World->GetNumPlayerControllers()!=1){Fail(R,TEXT("ResetScope"),TEXT("Requires standalone M5 test world and exactly one player."));return R;}
+        auto* PC=World->GetFirstPlayerController();TArray<APFBuildPiece*> Owned;
+        for(TActorIterator<APFBuildPiece> It(World);It;++It){if(It->Builder==PC->PlayerState){if(!It->Storage->GetStacks().IsEmpty()){Fail(R,TEXT("OccupiedStorage"),TEXT("Empty storage before reset."));return R;}Owned.Add(*It);}}
+        for(auto* Piece:Owned){Piece->Destroy();}R.Add(TEXT("Info"),TEXT("BuildingsReset"),FString(),FString::Printf(TEXT("Removed %d owned runtime pieces; no saved map changes."),Owned.Num()));return R;
+    }
+    int32 Count=0;for(TActorIterator<APFBuildPiece> It(World);It;++It)
+    {++Count;if(!IsValid(It->Builder) || !FMath::IsFinite(It->Health) || It->Health<=0 || (It->Kind!=EPFBuildKind::Foundation && !IsValid(It->Support))){Fail(R,TEXT("InvalidStructure"),It->GetName());}}
+    if(Count==0){Fail(R,TEXT("NoStructures"),TEXT("Place a structure before validation."));}
+    R.Add(TEXT("Info"),TEXT("StructureIntegrity"),FString(),FString::Printf(TEXT("Checked %d structures. Functional tests: PF.Building.PlacementAndStorage and PF.Building.Live."),Count));return R;
+}
 static FResult CraftingCommand(const FString& Name,const TArray<FString>& Args,UWorld* World)
 {
     FResult R(Name);
@@ -270,6 +289,7 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
     { R = SurvivalCommand(Name, Args, World); }
     else if (Name == TEXT("PF.GiveItem") || Name == TEXT("PF.RemoveItem"))
     { R=InventoryCommand(Name,Args,World); }
+    else if(Name==TEXT("PF.TestBuildingPlacement") || Name==TEXT("PF.ResetBuildings")) { R=BuildingCommand(Name,World); }
     else if(Name==TEXT("PF.TestGathering") || Name==TEXT("PF.TestCrafting") || Name==TEXT("PF.Craft") || Name==TEXT("PF.CancelCraft"))
     {R=CraftingCommand(Name,Args,World);}
     else if (Name == TEXT("PF.Teleport"))

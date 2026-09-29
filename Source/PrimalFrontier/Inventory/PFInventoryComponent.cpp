@@ -90,6 +90,16 @@ bool UPFInventoryComponent::OwnsLivingPawn(APawn* Pawn) const
     const auto* S=Pawn ? Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>() : nullptr;
     return Authority() && IsValid(Pawn) && Pawn->HasAuthority() && Pawn->GetPlayerState()==GetOwner() && Pawn->GetController() && S && !S->IsDead();
 }
+bool UPFInventoryComponent::TransferTo(UPFInventoryComponent* Destination,FGuid Id,int32 Quantity)
+{
+    if(!Authority() || !IsValid(Destination) || Destination==this || !Destination->Authority() || Destination->GetWorld()!=GetWorld() || Quantity<1){return false;}
+    PruneExpired();const int32 Index=Stacks.IndexOfByPredicate([Id](const auto& S){return S.StackId==Id;});
+    if(Index==INDEX_NONE || Stacks[Index].Quantity<Quantity){return false;}
+    const FPFItemStack Source=Stacks[Index];
+    // No callbacks or world ticks between destination acceptance and the source commit.
+    if(!Destination->AddExisting(Source.ItemId,Quantity,Source.ExpiresAt)){return false;}
+    Stacks[Index].Quantity-=Quantity;if(Stacks[Index].Quantity==0){Stacks.RemoveAt(Index);}Changed(TEXT("transferred"));return true;
+}
 bool UPFInventoryComponent::Transform(const TArray<FPFItemStack>& Inputs,FName Output,int32 Quantity)
 {
     if(!Authority() || Inputs.IsEmpty() || Inputs.Num()>64 || Quantity<1 || Quantity>10000){return false;}

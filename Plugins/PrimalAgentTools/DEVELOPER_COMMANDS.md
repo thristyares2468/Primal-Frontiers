@@ -6,7 +6,7 @@
 
 Milestone 1 adds an isolated survival character with authoritative Health/Stamina and PlayerStart respawn. The runtime module depends on `PrimalFrontier` to call those validated APIs; gameplay has no dependency on tooling. Project-owned Blueprint copies and a primitive map are separate from the templates. The earlier paragraph describes the Phase 10 teleport integration.
 
-The checkout contains FirstPerson, Shooter and Horror templates. Shooter HP/weapon arrays are not a survival inventory. Creature registry/spawner, time, gameplay save/load and construction remain explicit stubs. M1 implements Health/Stamina, M2 adds Hunger/Thirst/Exposure, M3 adds inventory and M4 adds gathering/crafting; see the corresponding documents in `Docs/` for their contracts and tests.
+The checkout contains FirstPerson, Shooter and Horror templates. Shooter HP/weapon arrays are not a survival inventory. Creature registry/spawner, time and gameplay save/load remain explicit stubs. M1 implements Health/Stamina, M2 adds Hunger/Thirst/Exposure, M3 adds inventory, M4 adds gathering/crafting and M5 adds greybox building/storage; see the corresponding documents in `Docs/` for their contracts and tests.
 
 The runtime module is available in Development, DebugGame and Test. Shipping excludes the plugin through the project reference and both module descriptors; runtime build rules additionally reject Shipping. Registration and execution are compile guarded. The editor module alone depends on UnrealEd, AssetRegistry and DataValidation. No MCP server, remote command endpoint, RPC or additional external plugin is introduced.
 
@@ -45,7 +45,8 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.TestCrafting` | M4 server-only read-only validation of player recipe catalogs and queue state; fails if players/components are missing. Functional conversions are tested separately. |
 | `PF.Craft RecipeId` | M4 server-only start for the sole player's timed recipe. Rejects busy/invalid/insufficient requests; acceptance does not mean completion. |
 | `PF.CancelCraft` | M4 server-only cancellation for the sole player. Ingredients stay in inventory until completion. |
-| `PF.TestBuildingPlacement` | NOT IMPLEMENTED: construction system absent. |
+| `PF.TestBuildingPlacement` | M5 server-only read-only structure health/ownership/support integrity check; fails if no structures exist. Functional placement tests run separately. |
+| `PF.ResetBuildings` | M5 server-only reset of the sole player's empty runtime structures in `L_M5Building`; no refund or map save. Occupied storage rejects reset. |
 | `PF.TestCreatureAI` | NOT IMPLEMENTED: survival creature AI absent. |
 | `PF.TestMultiplayerReplication` | NOT IMPLEMENTED: no survival acceptance scenario. Transport/teleport verification below is narrower. |
 | `PF.TestPersistence` | NOT IMPLEMENTED: gameplay persistence absent. |

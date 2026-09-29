@@ -13,8 +13,11 @@
 #include "Crafting/PFCraftingComponent.h"
 #include "Crafting/PFCraftingHUD.h"
 #include "Crafting/PFResourceNode.h"
+#include "Building/PFBuildingComponent.h"
+#include "Building/PFBuildingHUD.h"
+#include "Building/PFBuildPiece.h"
 
-APFSurvivalPlayerController::APFSurvivalPlayerController() { SurvivalHUDClass = UPFSurvivalHUD::StaticClass(); }
+APFSurvivalPlayerController::APFSurvivalPlayerController() { SurvivalHUDClass = UPFSurvivalHUD::StaticClass();Building=CreateDefaultSubobject<UPFBuildingComponent>(TEXT("Building")); }
 void APFSurvivalPlayerController::BeginPlay()
 {
     Super::BeginPlay();
@@ -26,6 +29,7 @@ void APFSurvivalPlayerController::BeginPlay()
         if(InventoryHUD){InventoryHUD->AddToPlayerScreen();}
         CraftingHUD=CreateWidget<UPFCraftingHUD>(this,UPFCraftingHUD::StaticClass());
         if(CraftingHUD){CraftingHUD->AddToPlayerScreen();}
+        BuildingHUD=CreateWidget<UPFBuildingHUD>(this,UPFBuildingHUD::StaticClass());if(BuildingHUD){BuildingHUD->AddToPlayerScreen();}
     }
 }
 void APFSurvivalPlayerController::SetupInputComponent()
@@ -43,8 +47,16 @@ void APFSurvivalPlayerController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Two,IE_Pressed,this,&APFSurvivalPlayerController::CookFood);
     InputComponent->BindKey(EKeys::Three,IE_Pressed,this,&APFSurvivalPlayerController::DryFood);
     InputComponent->BindKey(EKeys::R,IE_Pressed,this,&APFSurvivalPlayerController::CancelCraft);
+    InputComponent->BindKey(EKeys::B,IE_Pressed,this,&APFSurvivalPlayerController::ToggleBuilding);
+    InputComponent->BindKey(EKeys::N,IE_Pressed,this,&APFSurvivalPlayerController::NextBuilding);
+    InputComponent->BindKey(EKeys::T,IE_Pressed,this,&APFSurvivalPlayerController::RotateBuilding);
+    InputComponent->BindKey(EKeys::LeftMouseButton,IE_Pressed,this,&APFSurvivalPlayerController::PlaceBuilding);
+    InputComponent->BindKey(EKeys::H,IE_Pressed,this,&APFSurvivalPlayerController::DemolishBuilding);
+    InputComponent->BindKey(EKeys::J,IE_Pressed,this,&APFSurvivalPlayerController::DamageBuilding);
+    InputComponent->BindKey(EKeys::U,IE_Pressed,this,&APFSurvivalPlayerController::StoreItem);
+    InputComponent->BindKey(EKeys::O,IE_Pressed,this,&APFSurvivalPlayerController::TakeStoredItem);
 }
-void APFSurvivalPlayerController::Interact() { if (IsLocalController()) { ServerInteract(); } }
+void APFSurvivalPlayerController::Interact() { if (IsLocalController()) { if(Building->bBuildMode){Building->ServerTargetAction(1);}else{ServerInteract();} } }
 void APFSurvivalPlayerController::ServerInteract_Implementation()
 {
     if (!HasAuthority() || !GetPawn()) { return; }
@@ -97,7 +109,7 @@ void APFSurvivalPlayerController::ServerInventoryAction_Implementation(FGuid Sta
 void APFSurvivalPlayerController::ClientInventoryFeedback_Implementation(const FString& Message){InventoryMessage=Message;}
 UPFCraftingComponent* APFSurvivalPlayerController::GetCrafting() const
 {return PlayerState?PlayerState->FindComponentByClass<UPFCraftingComponent>():nullptr;}
-void APFSurvivalPlayerController::ToggleCrafting(){bCraftingOpen=!bCraftingOpen;}
+void APFSurvivalPlayerController::ToggleCrafting(){bCraftingOpen=!bCraftingOpen;if(bCraftingOpen){Building->bBuildMode=false;}}
 void APFSurvivalPlayerController::CraftTool(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Tool"),false);}}
 void APFSurvivalPlayerController::CookFood(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Cook"),false);}}
 void APFSurvivalPlayerController::DryFood(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Dry"),false);}}
@@ -109,3 +121,11 @@ void APFSurvivalPlayerController::ServerCraftAction_Implementation(FName Id,bool
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalCrafting] Request recipe=%s cancel=%d accepted=%d owner=%s"),*Id.ToString(),bCancel,Accepted,*GetName());
     ClientInventoryFeedback(Accepted?TEXT("Craft request accepted"):TEXT("Craft refused: busy, invalid recipe, ingredients or life state"));
 }
+void APFSurvivalPlayerController::ToggleBuilding(){Building->bBuildMode=!Building->bBuildMode;if(Building->bBuildMode){bCraftingOpen=false;bInventoryOpen=false;}}
+void APFSurvivalPlayerController::NextBuilding(){if(Building->bBuildMode && Building->Catalog && Building->Catalog->Pieces.Num()>0){Building->Selection=(Building->Selection+1)%Building->Catalog->Pieces.Num();}}
+void APFSurvivalPlayerController::RotateBuilding(){if(Building->bBuildMode){Building->Rotation=(Building->Rotation+1)%4;}}
+void APFSurvivalPlayerController::PlaceBuilding(){if(Building->bBuildMode){Building->ServerPlace(Building->SelectedId(),Building->Rotation);}}
+void APFSurvivalPlayerController::DemolishBuilding(){if(Building->bBuildMode){Building->ServerTargetAction(0);}}
+void APFSurvivalPlayerController::DamageBuilding(){if(Building->bBuildMode){Building->ServerTargetAction(2);}}
+void APFSurvivalPlayerController::StoreItem(){auto* I=GetInventory();if(Building->bBuildMode && I && I->GetStacks().IsValidIndex(SelectedInventoryIndex)){Building->ServerTransfer(true,I->GetStacks()[SelectedInventoryIndex].StackId,1);}}
+void APFSurvivalPlayerController::TakeStoredItem(){auto* P=Building->OpenStorage.Get();if(Building->bBuildMode && IsValid(P) && !P->Storage->GetStacks().IsEmpty()){Building->ServerTransfer(false,P->Storage->GetStacks()[0].StackId,1);}}

@@ -36,6 +36,7 @@ public:
     bool Remove(FGuid Id,int32 Quantity);
     bool RemoveItem(FName Id,int32 Quantity);
     bool Split(FGuid Id,int32 Quantity);
+    bool TransferTo(UPFInventoryComponent* Destination,FGuid Id,int32 Quantity);
     // Server-only atomic conversion of exact still-fresh input batches into recipe output.
     bool Transform(const TArray<FPFItemStack>& Inputs,FName Output,int32 Quantity);
     bool Consume(FGuid Id,APawn* Pawn);

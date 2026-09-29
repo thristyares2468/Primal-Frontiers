@@ -1,5 +1,13 @@
 \# Architecture and Design Decisions
 
+## 2026-09-29 — Test hardware and performance reporting
+
+Use the user's 32 GB Ryzen 9 5900X machine as the current reference; record the full supplied configuration and observed GPU-name discrepancy in `TEST_MACHINE.md`. Keep historical 16 GB constraints as historical evidence, not a current measurement. M5 uses an uncapped 960x540 sample with all frames retained, including the capture-start hitch. Do not extrapolate this stationary small-arena sample to native 1440p, large worlds or a different GPU SKU. No persistent rendering settings change is needed.
+
+## 2026-09-28 — Milestone 5 building authority and safe removal
+
+Use a fixed 400 cm structural grid and data-defined piece IDs/costs/health, with view-derived server placement rather than trusting client transforms. Replicate structure ownership/support and reuse the existing inventory for private storage. Transfers retain exact freshness deadlines. Refuse removal or lethal owner damage while a piece supports children or contains items; no automatic cascading loss or refunds. M5 is a cooperative placeholder rule; group access, preservation equipment and persistence require later work. Test uncapped rendering with session overrides and report frame times alongside memory instead of treating a capped FPS value as optimization evidence.
+
 ## 2026-09-27 — Milestone 4 atomic completion and finite resource nodes
 
 Crafting keeps ingredients in inventory and snapshots exact stack IDs, quantities and deadlines at start. Completion revalidates and performs one atomic conversion. Moving/consuming/spoiling an input can invalidate the job, clearly reported; cancellation requires no refund space and cannot reset food freshness. Death or pawn replacement cancels work. One active job bounds replication and UI cost. Resource nodes validate first-person aim, reach, cooldown and capacity before spending finite hit counts. The carried primitive tool reduces actions required without increasing total node yield. Recipes and resources are editable catalog entries; portable cooking/drying consumes wood fuel and time, while placeable stations wait for M5. No new plugin or external dependency is added.
