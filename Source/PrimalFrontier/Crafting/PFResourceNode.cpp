@@ -3,6 +3,7 @@
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
+#include "Survival/PFInteraction.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/Pawn.h"
@@ -52,9 +53,7 @@ bool APFResourceNode::Gather(APawn* Pawn)
     const double Now=UPFInventoryComponent::ServerTime(GetWorld());
     if(!V || V->IsDead() || !I || !D || Now<NextHitAt){return false;}
     // Derive reach and aim from the possessed pawn. Clients never supply a target, yield or damage.
-    FVector Eye;FRotator Look;Pawn->GetActorEyesViewPoint(Eye,Look);FHitResult Hit;
-    FCollisionQueryParams Params(SCENE_QUERY_STAT(PFGather),false,Pawn);
-    if(!GetWorld()->LineTraceSingleByChannel(Hit,Eye,Eye+Look.Vector()*250,ECC_Visibility,Params) || Hit.GetActor()!=this){return false;}
+    if(PFInteraction::FindTarget(Pawn)!=this){return false;}
     I->PruneExpired();const int32 Damage=FMath::Min(HitsRemaining,I->Count(TEXT("Item_Tool"))>0?2:1);
     if(!I->Grant(D->YieldItem,D->YieldPerHit*Damage)){return false;}
     HitsRemaining-=Damage;NextHitAt=Now+0.5;

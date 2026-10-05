@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "InputCoreTypes.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFItemPickup.h"
 #include "Inventory/PFInventoryHUD.h"
 #include "GameFramework/PlayerState.h"
@@ -18,6 +19,9 @@
 #include "Building/PFBuildPiece.h"
 #include "Creatures/PFCreature.h"
 #include "Engine/DamageEvents.h"
+#include "Survival/PFPauseMenu.h"
+#include "Survival/PFInteraction.h"
+#include "GameFramework/PlayerInput.h"
 
 APFSurvivalPlayerController::APFSurvivalPlayerController() { SurvivalHUDClass = UPFSurvivalHUD::StaticClass();Building=CreateDefaultSubobject<UPFBuildingComponent>(TEXT("Building")); }
 void APFSurvivalPlayerController::BeginPlay()
@@ -37,6 +41,9 @@ void APFSurvivalPlayerController::BeginPlay()
 void APFSurvivalPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
+    BindGamepadControls();
+    InputComponent->BindKey(EKeys::P,IE_Pressed,this,&APFSurvivalPlayerController::TogglePauseMenu).bExecuteWhenPaused=true;
+    InputComponent->BindKey(EKeys::Escape,IE_Pressed,this,&APFSurvivalPlayerController::TogglePauseMenu).bExecuteWhenPaused=true;
     InputComponent->BindKey(EKeys::E,IE_Pressed,this,&APFSurvivalPlayerController::Interact);
     InputComponent->BindKey(EKeys::Tab,IE_Pressed,this,&APFSurvivalPlayerController::ToggleInventory);
     InputComponent->BindKey(EKeys::Down,IE_Pressed,this,&APFSurvivalPlayerController::InventoryNext);
@@ -58,7 +65,31 @@ void APFSurvivalPlayerController::SetupInputComponent()
     InputComponent->BindKey(EKeys::U,IE_Pressed,this,&APFSurvivalPlayerController::StoreItem);
     InputComponent->BindKey(EKeys::O,IE_Pressed,this,&APFSurvivalPlayerController::TakeStoredItem);
 }
-void APFSurvivalPlayerController::Interact() { if (IsLocalController()) { if(Building->bBuildMode){Building->ServerTargetAction(1);}else{ServerInteract();} } }
+void APFSurvivalPlayerController::TogglePauseMenu(){SetPauseMenuOpen(!bPauseMenuOpen);}
+void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
+{
+    if(!IsLocalController() || bOpen==bPauseMenuOpen){return;}
+    if(bOpen && !PauseMenu){PauseMenu=CreateWidget<UPFPauseMenu>(this,UPFPauseMenu::StaticClass());if(!PauseMenu){return;}}
+    bPauseMenuOpen=bOpen;SetIgnoreMoveInput(bOpen);SetIgnoreLookInput(bOpen);bShowMouseCursor=bOpen;
+    if(PlayerInput){PlayerInput->FlushPressedKeys();}
+    if(bOpen)
+    {
+        bInventoryOpen=false;bCraftingOpen=false;Building->bBuildMode=false;
+        bPausedWorld=GetNetMode()==NM_Standalone && SetPause(true);
+        PauseMenu->AddToPlayerScreen(100);PauseMenu->Refresh();FInputModeUIOnly Mode;Mode.SetWidgetToFocus(PauseMenu->TakeWidget());Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);SetInputMode(Mode);PauseMenu->SetKeyboardFocus();
+    }
+    else
+    {if(bPausedWorld){SetPause(false);bPausedWorld=false;}if(PauseMenu){PauseMenu->RemoveFromParent();}FInputModeGameOnly Mode;Mode.SetConsumeCaptureMouseDown(false);SetInputMode(Mode);}
+    UE_LOG(LogPFSurvival,Display,TEXT("[PrimalUI] Menu open=%d worldPaused=%d netMode=%d"),bPauseMenuOpen,bPausedWorld,int32(GetNetMode()));
+}
+void APFSurvivalPlayerController::Interact()
+{
+    if(!IsLocalController() || bPauseMenuOpen){return;}
+    // E prioritizes a nearby pickup/resource even while build preview is open.
+    if(PFInteraction::FindTarget(GetPawn())){ServerInteract();}
+    else if(Building->TracedPiece()){Building->ServerTargetAction(1);}
+    else{ServerInteract();}
+}
 void APFSurvivalPlayerController::ServerInteract_Implementation()
 {
     if (!HasAuthority() || !GetPawn()) { return; }
@@ -67,20 +98,33 @@ void APFSurvivalPlayerController::ServerInteract_Implementation()
     NextInteractionTime = Now + 0.25;
     const auto* S = GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();
     if (!S || S->IsDead()) { return; }
-    FVector Eye; FRotator Look; GetPawn()->GetActorEyesViewPoint(Eye,Look);
-    FHitResult Hit; FCollisionQueryParams Params(SCENE_QUERY_STAT(PFInteraction),false,GetPawn());
-    if (GetWorld()->LineTraceSingleByChannel(Hit,Eye,Eye + Look.Vector()*250.f,ECC_Visibility,Params))
+    if (AActor* Target=PFInteraction::FindTarget(GetPawn()))
     {
-        if(auto* Item=Cast<APFItemPickup>(Hit.GetActor()))
+        if(auto* Item=Cast<APFItemPickup>(Target))
         {ClientInventoryFeedback(Item->TryPickup(GetPawn()) ? TEXT("Picked up") : TEXT("Pickup refused: full, expired or invalid"));}
-        else if (auto* Pickup = Cast<APFRecoveryPickup>(Hit.GetActor())) { Pickup->TryConsume(GetPawn()); }
-        else if(auto* Node=Cast<APFResourceNode>(Hit.GetActor()))
+        else if (auto* Pickup = Cast<APFRecoveryPickup>(Target)) { Pickup->TryConsume(GetPawn()); }
+        else if(auto* Node=Cast<APFResourceNode>(Target))
         {ClientInventoryFeedback(Node->Gather(GetPawn())?TEXT("Gathered"):TEXT("Gather refused: depleted, cooldown or full inventory"));}
     }
+    else{ClientInventoryFeedback(TEXT("No item in reach - aim at a labelled pickup or resource within 2.5 m."));}
 }
+FString APFSurvivalPlayerController::InteractionPrompt() const
+{
+    if(bPauseMenuOpen || !GetPawn()){return FString();}
+    if(AActor* Target=PFInteraction::FindTarget(GetPawn()))
+    {
+        if(auto* Item=Cast<APFItemPickup>(Target)){const auto* I=GetInventory();const auto* D=I?I->Definition(Item->GetContents().ItemId):nullptr;return FString::Printf(TEXT("E / Pad X - Pick up %s x%d"),D?*D->DisplayName.ToString():*Item->GetContents().ItemId.ToString(),Item->GetContents().Quantity);}
+        if(auto* Node=Cast<APFResourceNode>(Target)){return Node->HitsRemaining>0?TEXT("E / Pad X - Gather resource"):TEXT("Resource depleted - wait for regrowth");}
+        return TEXT("E / Pad X - Recover");
+    }
+    if(PFInteraction::FindTarget(GetPawn(),500)){return TEXT("Move closer to interact (2.5 m)");}
+    if(Building->TracedPiece()){return TEXT("E - Open owned door / storage");}
+    return FString();
+}
+FString APFSurvivalPlayerController::RecentInteractionMessage() const{return GetWorld()->GetRealTimeSeconds()<MessageUntil?InventoryMessage:FString();}
 UPFInventoryComponent* APFSurvivalPlayerController::GetInventory() const
 {return PlayerState ? PlayerState->FindComponentByClass<UPFInventoryComponent>() : nullptr;}
-void APFSurvivalPlayerController::ToggleInventory(){bInventoryOpen=!bInventoryOpen;}
+void APFSurvivalPlayerController::ToggleInventory(){if(!bPauseMenuOpen){bInventoryOpen=!bInventoryOpen;if(bInventoryOpen){bCraftingOpen=false;Building->bBuildMode=false;}}}
 void APFSurvivalPlayerController::InventoryNext()
 {if(bInventoryOpen){if(const auto* I=GetInventory()){SelectedInventoryIndex=FMath::Min(SelectedInventoryIndex+1,I->GetStacks().Num()-1);}}}
 void APFSurvivalPlayerController::InventoryPrevious(){if(bInventoryOpen){SelectedInventoryIndex=FMath::Max(0,SelectedInventoryIndex-1);}}
@@ -89,7 +133,7 @@ void APFSurvivalPlayerController::InventoryDrop(){SendInventoryAction(1);}
 void APFSurvivalPlayerController::InventoryConsume(){SendInventoryAction(2);}
 void APFSurvivalPlayerController::SendInventoryAction(uint8 Action)
 {
-    const auto* I=GetInventory(); if(!bInventoryOpen || !I || I->GetStacks().IsEmpty()){return;}
+    const auto* I=GetInventory(); if(bPauseMenuOpen || !bInventoryOpen || !I || I->GetStacks().IsEmpty()){return;}
     SelectedInventoryIndex=FMath::Clamp(SelectedInventoryIndex,0,I->GetStacks().Num()-1);
     const auto S=I->GetStacks()[SelectedInventoryIndex];
     ServerInventoryAction(S.StackId,Action,Action==0 ? S.Quantity/2 : 1);
@@ -108,10 +152,10 @@ void APFSurvivalPlayerController::ServerInventoryAction_Implementation(FGuid Sta
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalInventory] Request action=%d quantity=%d accepted=%d owner=%s"),Action,Quantity,Accepted,*GetName());
     ClientInventoryFeedback(Accepted ? TEXT("Done") : TEXT("Refused: invalid stack, quantity, space or life state"));
 }
-void APFSurvivalPlayerController::ClientInventoryFeedback_Implementation(const FString& Message){InventoryMessage=Message;}
+void APFSurvivalPlayerController::ClientInventoryFeedback_Implementation(const FString& Message){InventoryMessage=Message;MessageUntil=GetWorld()->GetRealTimeSeconds()+4;UE_LOG(LogPFSurvival,Display,TEXT("[PrimalInteraction] %s"),*Message);}
 UPFCraftingComponent* APFSurvivalPlayerController::GetCrafting() const
 {return PlayerState?PlayerState->FindComponentByClass<UPFCraftingComponent>():nullptr;}
-void APFSurvivalPlayerController::ToggleCrafting(){bCraftingOpen=!bCraftingOpen;if(bCraftingOpen){Building->bBuildMode=false;}}
+void APFSurvivalPlayerController::ToggleCrafting(){if(bPauseMenuOpen){return;}bCraftingOpen=!bCraftingOpen;if(bCraftingOpen){Building->bBuildMode=false;bInventoryOpen=false;}}
 void APFSurvivalPlayerController::CraftTool(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Tool"),false);}}
 void APFSurvivalPlayerController::CookFood(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Cook"),false);}}
 void APFSurvivalPlayerController::DryFood(){if(bCraftingOpen){ServerCraftAction(TEXT("Recipe_Dry"),false);}}
@@ -123,7 +167,7 @@ void APFSurvivalPlayerController::ServerCraftAction_Implementation(FName Id,bool
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalCrafting] Request recipe=%s cancel=%d accepted=%d owner=%s"),*Id.ToString(),bCancel,Accepted,*GetName());
     ClientInventoryFeedback(Accepted?TEXT("Craft request accepted"):TEXT("Craft refused: busy, invalid recipe, ingredients or life state"));
 }
-void APFSurvivalPlayerController::ToggleBuilding(){Building->bBuildMode=!Building->bBuildMode;if(Building->bBuildMode){bCraftingOpen=false;bInventoryOpen=false;}}
+void APFSurvivalPlayerController::ToggleBuilding(){if(bPauseMenuOpen){return;}Building->bBuildMode=!Building->bBuildMode;if(Building->bBuildMode){bCraftingOpen=false;bInventoryOpen=false;}}
 void APFSurvivalPlayerController::NextBuilding(){if(Building->bBuildMode && Building->Catalog && Building->Catalog->Pieces.Num()>0){Building->Selection=(Building->Selection+1)%Building->Catalog->Pieces.Num();}}
 void APFSurvivalPlayerController::RotateBuilding(){if(Building->bBuildMode){Building->Rotation=(Building->Rotation+1)%4;}}
 void APFSurvivalPlayerController::PlaceBuilding(){if(Building->bBuildMode){Building->ServerPlace(Building->SelectedId(),Building->Rotation);}else if(!bInventoryOpen && !bCraftingOpen){ServerAttackCreature();}}

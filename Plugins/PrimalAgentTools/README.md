@@ -68,6 +68,8 @@ M6 adds real `PF.SpawnCreature`, `PF.ResetCreatures` and `PF.TestCreatureAI` ada
 
 ## Verification
 
+M7 adds server-authoritative `PF.SetTimeOfDay` for the unique replicated world clock. `PF.World.Clock` verifies its rules; opt-in `PF.World.Live` on `L_M7SurvivalArena` checks map navigation, gathering/crafting/building integration, clock replication and multiplayer menu behavior. `PF.Interaction.TargetAndPickup` and `PF.Input.Gamepad` verify interaction and contextual button routes. They do not certify a physical controller. See `Docs/PLAYTEST.md` for the playable level, controls and a self-test guide; full milestone gate status remains in `Docs/MILESTONES.md`.
+
 See [VERIFICATION.md](VERIFICATION.md) for the completed acceptance run, exact findings, evidence, and remaining manual setup.
 
 Run the narrow suite `PF.PrimalAgentTools` in an **isolated editor process**, not a working editor with unsaved user changes. Scenario and screenshot integration tests require explicit flags; absent flags produce a setup warning and do not exercise those features.

@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
@@ -45,6 +46,11 @@ void APFSurvivorCharacter::Tick(float DeltaSeconds)
 void APFSurvivorCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    // Keep the rendered first-person ray at the same stable eye used by server
+    // interaction. Animated head sockets are not updated identically on servers.
+    GetFirstPersonCameraComponent()->AttachToComponent(GetCapsuleComponent(),FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    GetFirstPersonCameraComponent()->SetRelativeLocation(FVector(0,0,BaseEyeHeight));
+    GetFirstPersonCameraComponent()->SetRelativeRotation(FRotator::ZeroRotator);
     Survival->OnDeath.AddDynamic(this, &APFSurvivorCharacter::HandleDeath);
     if (Survival->IsDead()) { HandleDeath(); }
 }

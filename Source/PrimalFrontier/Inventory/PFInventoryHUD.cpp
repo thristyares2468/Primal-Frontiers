@@ -23,7 +23,7 @@ void UPFInventoryHUD::NativeTick(const FGeometry& Geometry,float Delta)
     Super::NativeTick(Geometry,Delta); const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer()); if(!PC){return;}
     Panel->SetVisibility(PC->IsInventoryOpen() ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
     if(!PC->IsInventoryOpen()){return;} const auto* I=PC->GetInventory(); if(!I){Text->SetText(FText::FromString(TEXT("Waiting for inventory...")));return;}
-    FString Lines=FString::Printf(TEXT("INVENTORY   %d/%d slots   %.1f/%.1f kg\nTab close | Up/Down select\nX split half | G drop one | Q eat one\n\n"),I->GetStacks().Num(),I->SlotLimit,I->GetWeight(),I->WeightLimit);
+    FString Lines=FString::Printf(TEXT("INVENTORY   %d/%d slots   %.1f/%.1f kg\nTab / View close | Up/Down select\nKeys: X split | G drop | Q eat\nPad: D-left split | D-right drop | X eat\n\n"),I->GetStacks().Num(),I->SlotLimit,I->GetWeight(),I->WeightLimit);
     const int32 Selected=FMath::Clamp(PC->GetSelectedInventoryIndex(),0,I->GetStacks().Num()-1);
     int32 Index=0;
     for(const auto& S:I->GetStacks())

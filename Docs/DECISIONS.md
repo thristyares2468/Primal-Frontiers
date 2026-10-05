@@ -1,5 +1,19 @@
 \# Architecture and Design Decisions
 
+## 2026-10-06 — Preserve user asset imports while finishing the greybox gate
+
+The user has added Adventures_Pack, Bike, DynamicFalling, Modular_Rural_Cabin and Polyphoria and authorized sourcing other assets when needed. Keep these user changes outside the current M7 commit and preserve their paths/references. No imported pack is needed for the small arena verification. Before selecting an asset for a concrete feature, inspect suitability, dependency/memory cost and available usage rights; notify the user if a license, purchase or manual import is needed. This does not expand M1-M8 into final-art production or third-person gameplay.
+
+## 2026-10-04 — Interaction alignment, pause and gamepad input
+
+Keep first-person camera origin on the survivor capsule at the same eye height used by server traces; animated head sockets can differ between rendering and dedicated-server simulation. Use a shared bounded visibility query with 12 cm small-target tolerance and an independent obstruction check. E prioritizes nearby resources/items even when building preview is open. Inventory transactions, reach, life state, cooldowns and authority remain validated on the server. Give visible success/refusal and range prompts.
+
+Pause is local UI: freeze simulation only in Standalone. Network menus explicitly say the world continues. Resume restores game input; ending a session requires two activations and warns that persistence is not yet implemented. Use P in PIE because Editor Esc can end Play. Gamepad survival buttons reuse keyboard action methods/RPCs, while the existing Enhanced Input context supplies analog movement/look and jump. Keep overlays mutually exclusive to make contextual buttons unambiguous. No new plugin or template asset edits. Physical device/OS delivery, feel and hot-plugging are separate from automated binding verification.
+
+## 2026-09-30 — Small integrated greybox arena and server time
+
+M7 reuses existing catalogs and mechanics in a separate 60 x 70 m non-streamed arena. Keep safe, resource and danger zones connected by walkable primitive ground with optional stepped height variation. Baked navigation and two capped spawn points bound AI work. A replicated server clock owns day/night time; clients render two simple directional lights and cannot set server time. No World Partition, water simulation, new art or external dependency is justified at this scale. Engine inspection reports installed 5.8.3; record that version instead of claiming these runs used 5.8.2.
+
 ## 2026-09-29 — Bounded server creature AI
 
 M6 uses two original data definitions, native Gameplay Tags for replicated states and 10 Hz server decisions. Built-in AIController/NavMesh handles movement, and server distance/line-of-sight queries provide simple perception. Attack windup rechecks target life, sight and range; finite loot uses existing food expiry and pickup transactions. Each spawn point has one resident and a shared eight-creature limit includes corpses. NavigationSystem is a built-in module dependency for gameplay and its live tests. No behavior-tree asset, external AI plugin or art acquisition is needed. The user has existing art assets: notify them before planning their integration, after the greybox milestone boundary.

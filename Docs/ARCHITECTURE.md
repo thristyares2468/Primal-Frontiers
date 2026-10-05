@@ -1,4 +1,8 @@
 
+## Current input and interaction additions (2026-10-04)
+
+`PFInteraction` shares a server-compatible eye trace between prompts, pickup and resource gathering. The survivor camera is aligned to that stable eye. `PFPauseMenu` is a replaceable placeholder UMG presentation; `PFSurvivalPlayerController` owns local menu/input state and never pauses network simulation. `PFGamepadInput.cpp` maps contextual gamepad buttons to existing validated action paths. Existing Enhanced Input assets retain analog movement/look/jump. No template binary asset changes or new dependency are required. See `PLAYTEST.md` for keyboard/gamepad controls and verification limits.
+
 ---
 
 ## `ARCHITECTURE.md`
@@ -17,6 +21,8 @@
 - Dedicated-server-compatible architecture
 
 ## Gameplay Systems
+
+Milestone 7 adds a bounded separate survival arena and `APFWorldClock`. Authority advances and validates time; the replicated hour/Gameplay Tag phase drives lightweight client sun/night-fill presentation. Existing catalogs, interactions, hazards and capped AI are reused. No streaming or extra runtime dependency is introduced. See `WORLD_M7.md`.
 
 Milestone 6 adds catalog-driven primitive creature characters, capped spawn points and bounded navigation. Server AI owns perception, path requests, attack windup/damage and one-time perishable loot. Clients receive movement, health, target and Gameplay Tag state; first-person attacks use an owning-controller RPC with server-derived aim/range, stamina cost and cooldown. See `CREATURES_M6.md` for scope and gate status.
 

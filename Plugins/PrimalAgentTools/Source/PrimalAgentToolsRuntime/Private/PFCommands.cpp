@@ -21,6 +21,7 @@
 #include "EngineUtils.h"
 #include "Creatures/PFCreature.h"
 #include "Creatures/PFCreatureSpawner.h"
+#include "World/PFWorldClock.h"
 
 namespace PF::AgentTools
 {
@@ -54,7 +55,7 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.SetThirst"), TEXT("Value: server-only water reserve clamped 0..100; zero dehydrates."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.SetExposure"), TEXT("Value: server-only test exposure 0..1; zero restores volume-only exposure."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.RecoverNeeds"), TEXT("Server-only placeholder recovery of 35 food/water; no inventory grant."), TEXT(""), 0, 0, false, true},
-        {TEXT("PF.SetTimeOfDay"), TEXT("Hour: 0 through 23, via world-time adapter (unavailable)."), TEXT("No world-time subsystem exists."), 1, 1, false, true},
+        {TEXT("PF.SetTimeOfDay"), TEXT("Hour: 0 through 23; server-only set on the map's unique world clock."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.Teleport"), TEXT("X Y Z [PlayerId]: authority-only character teleport; collision, floor, 1km bounds; one player unless ID given."), TEXT(""), 3, 4, false, true},
         {TEXT("PF.SaveWorld"), TEXT("Request gameplay save (unavailable); never saves editor maps."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
         {TEXT("PF.LoadWorld"), TEXT("Request gameplay load (unavailable)."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
@@ -319,6 +320,16 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
     else if (Name == TEXT("PF.GiveItem") || Name == TEXT("PF.RemoveItem"))
     { R=InventoryCommand(Name,Args,World); }
     else if(Name==TEXT("PF.TestBuildingPlacement") || Name==TEXT("PF.ResetBuildings")) { R=BuildingCommand(Name,World); }
+    else if(Name==TEXT("PF.SetTimeOfDay"))
+    {
+        if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode()){Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));}
+        else
+        {
+            APFWorldClock* Clock=nullptr;int32 Count=0;for(TActorIterator<APFWorldClock> It(World);It;++It){Clock=*It;++Count;}
+            if(Count!=1 || !Clock->SetHour(FCString::Atof(*Args[0]))){Fail(R,TEXT("WorldClockMissing"),TEXT("Requires exactly one valid map clock."));}
+            else{R.Add(TEXT("Info"),TEXT("TimeChanged"),Clock->GetName(),FString::Printf(TEXT("Server time %.2f"),Clock->Hour));}
+        }
+    }
     else if(Name==TEXT("PF.SpawnCreature") || Name==TEXT("PF.ResetCreatures") || Name==TEXT("PF.TestCreatureAI")) { R=CreatureCommand(Name,Args,World); }
     else if(Name==TEXT("PF.TestGathering") || Name==TEXT("PF.TestCrafting") || Name==TEXT("PF.Craft") || Name==TEXT("PF.CancelCraft"))
     {R=CraftingCommand(Name,Args,World);}

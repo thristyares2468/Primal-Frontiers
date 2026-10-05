@@ -21,7 +21,7 @@ void UPFCraftingHUD::NativeTick(const FGeometry& Geometry,float Delta)
     Super::NativeTick(Geometry,Delta);const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());if(!PC){return;}
     Panel->SetVisibility(PC->IsCraftingOpen()?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);if(!PC->IsCraftingOpen()){return;}
     const auto* C=PC->GetCrafting();const auto* I=PC->GetInventory();if(!C || !C->Catalog || !I){Text->SetText(FText::FromString(TEXT("Crafting unavailable")));return;}
-    FString Lines=TEXT("CRAFTING  C close | R cancel\nKeep ingredients in your bag until complete.\n\n");
+    FString Lines=TEXT("CRAFTING  C / Y close | R / D-left cancel\nPad: X tool | D-up cook | D-down dry\nKeep ingredients in your bag until complete.\n\n");
     const FName Ids[]={TEXT("Recipe_Tool"),TEXT("Recipe_Cook"),TEXT("Recipe_Dry")};
     for(int32 N=0;N<3;++N)
     {

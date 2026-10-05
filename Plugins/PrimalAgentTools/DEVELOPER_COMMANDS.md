@@ -39,7 +39,7 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.SetThirst Value` | M2 server-only water reserve, clamped 0..100. Empty causes dehydration. |
 | `PF.SetExposure Value` | M2 server-only test exposure 0..1; zero restores volume-only exposure. |
 | `PF.RecoverNeeds` | M2 server-only recovery of 35 food/water through the component API. |
-| `PF.SetTimeOfDay Hour` | NOT IMPLEMENTED: time API absent. Finite hour from 0 through 23. |
+| `PF.SetTimeOfDay Hour` | Server-only change of the map's unique replicated world clock. Finite hour from 0 through 23; missing/ambiguous clocks and clients are rejected. M7 provides the clock. |
 | `PF.SaveWorld` | NOT IMPLEMENTED: gameplay save API absent. Never saves an editor map. |
 | `PF.LoadWorld` | NOT IMPLEMENTED: gameplay load API absent. |
 | `PF.TestGathering` | M4 server-only read-only integrity check of loaded resource definitions, hit counts and respawn state; fails if no nodes exist. Functional gathering is tested separately. |

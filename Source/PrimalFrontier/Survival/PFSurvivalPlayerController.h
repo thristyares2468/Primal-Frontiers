@@ -8,6 +8,7 @@ class UPFCraftingComponent;
 class UPFCraftingHUD;
 class UPFBuildingComponent;
 class UPFBuildingHUD;
+class UPFPauseMenu;
 
 UCLASS()
 class PRIMALFRONTIER_API APFSurvivalPlayerController : public APrimalFrontierPlayerController
@@ -19,6 +20,10 @@ public:
     UPROPERTY(EditDefaultsOnly, Category="Survival|UI") TSubclassOf<UPFSurvivalHUD> SurvivalHUDClass;
     UPROPERTY(Transient, BlueprintReadOnly, Category="Survival|UI") TObjectPtr<UPFSurvivalHUD> SurvivalHUD;
     UFUNCTION(BlueprintCallable, Category="Survival") void Interact();
+    void SetPauseMenuOpen(bool bOpen);
+    bool IsPauseMenuOpen() const {return bPauseMenuOpen;}
+    FString InteractionPrompt() const;
+    FString RecentInteractionMessage() const;
     UPFInventoryComponent* GetInventory() const;
     UPFCraftingComponent* GetCrafting() const;
     bool IsCraftingOpen() const {return bCraftingOpen;}
@@ -34,6 +39,18 @@ protected:
     virtual void SetupInputComponent() override;
     UFUNCTION(Server, Reliable) void ServerInteract();
 private:
+    void BindGamepadControls();
+    void GamepadPrimary();
+    void GamepadBack();
+    void GamepadUp();
+    void GamepadDown();
+    void GamepadLeft();
+    void GamepadRight();
+    UPROPERTY() TObjectPtr<UPFPauseMenu> PauseMenu;
+    bool bPauseMenuOpen=false;
+    bool bPausedWorld=false;
+    double MessageUntil=0;
+    void TogglePauseMenu();
     UPROPERTY() TObjectPtr<UPFBuildingHUD> BuildingHUD;
     void ToggleBuilding();
     void NextBuilding();

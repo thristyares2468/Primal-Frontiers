@@ -19,7 +19,7 @@ void UPFBuildingHUD::NativeTick(const FGeometry& Geometry,float Delta)
 {
     Super::NativeTick(Geometry,Delta);auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());auto* B=PC?PC->Building.Get():nullptr;if(!B){return;}
     Panel->SetVisibility(B->bBuildMode?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);if(!B->bBuildMode){return;}
-    FString Lines=TEXT("BUILD  B close | N next | T rotate\nClick place | H demolish | J damage\nE door / open storage\nU store selected bag item | O take first\n\n");
+    FString Lines=TEXT("BUILD  B / RB close | N / D-up next\nT / D-down rotate | Click / RT place\nH / LB demolish | J damage (debug)\nE / X door / open storage\nU / D-left store | O / D-right take first\n\n");
     const auto* D=B->Catalog?B->Catalog->Find(B->SelectedId()):nullptr;
     if(D){Lines+=FString::Printf(TEXT("%s | %d wood | %d degrees\n%s\n"),*D->Name.ToString(),D->WoodCost,B->Rotation*90,*B->PreviewMessage);}
     if(auto* Target=B->TracedPiece()){Lines+=FString::Printf(TEXT("Target: %s | Health %.0f\n"),*Target->DefinitionId.ToString(),Target->Health);}

@@ -15,6 +15,8 @@ protected:
     virtual void NativeOnInitialized() override;
     virtual void NativeTick(const FGeometry& Geometry, float DeltaTime) override;
 private:
+    UPROPERTY(Transient) TObjectPtr<UTextBlock> InteractionLabel;
+    float InteractionRefresh=0;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> HealthLabel;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> StaminaLabel;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> StateLabel;

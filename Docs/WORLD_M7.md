@@ -1,0 +1,7 @@
+# Milestone 7 survival arena
+
+Gate in progress. `L_M7SurvivalArena` is a 60 x 70 m bounded primitive arena, separate from previous milestone maps. Two PlayerStarts are in the safe southern clearing. Wood/stone/food exist nearby and in the central resource area. A small stepped rise provides height variation; the northern area contains a prowler, more resources and a marked exposure hazard with routes around it. A passive forager lives near the central area. Existing finite resources, food expiry, crafting, construction, creatures and respawn rules remain authoritative.
+
+One always-relevant replicated C++ world clock advances a 15-minute day. Gameplay Tags identify day (06:00-18:00) and night. Server-only `PF.SetTimeOfDay 0..23` sets its time; clients cannot mutate it. A movable directional sun and dim shadowless night fill keep this greybox navigable without sky art, water effects or large assets. No World Partition/streaming is needed at this size. The map has an exposure hazard rather than a water simulation. Performance must be measured uncapped in a rendered session; NullRHI verifies correctness only.
+
+Open `Content/PrimalFrontier/Maps/L_M7SurvivalArena` in the Editor and Play once its gate is recorded as passed. Use WASD/mouse/Space, E gather, Tab bag, C craft, B build and left-click attack/place. No free starter items are granted. Learn the basic loop in the safe area before approaching the north. Source setup refuses existing destinations and saves only the new map. User-owned art and technology progression stay deferred.
