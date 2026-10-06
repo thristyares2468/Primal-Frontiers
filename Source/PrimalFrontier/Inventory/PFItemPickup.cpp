@@ -40,9 +40,10 @@ void APFItemPickup::Initialize(FName Id,int32 Count,double Deadline)
 void APFItemPickup::BeginPlay()
 {
     Super::BeginPlay();
+    // Clients load the catalog too, so the floating label can show the display name.
+    Catalog=LoadObject<UPFItemCatalog>(nullptr,PFAssetPaths::ItemCatalog);
     if(HasAuthority())
     {
-        const auto* Catalog=LoadObject<UPFItemCatalog>(nullptr,PFAssetPaths::ItemCatalog);
         const auto* D=Catalog ? Catalog->Find(bInitialized?Contents.ItemId:ItemId) : nullptr;
         if(!D){Destroy();return;}
         // Level-placed pickup: create contents now, starting a fresh shelf life for perishables.
@@ -73,8 +74,10 @@ void APFItemPickup::Tick(float Delta)
     if(GetNetMode()!=NM_DedicatedServer)
     {
         const FString Fresh=Contents.ExpiresAt>0 ? FString::Printf(TEXT(" (%ds fresh)"),FMath::Max(0,FMath::CeilToInt(Left))) : TEXT("");
-        // NOTE: shows the raw item ID (e.g. "Item_Wood"); the HUD prompt shows the display name.
-        Label->SetText(FText::FromString(FString::Printf(TEXT("E: %s x%d%s"),*Contents.ItemId.ToString(),Contents.Quantity,*Fresh)));
+        // Display name from the catalog ("Wood"); falls back to the raw ID if the item is unknown.
+        const FPFItemDefinition* D=Catalog ? Catalog->Find(Contents.ItemId) : nullptr;
+        const FString Name=D ? D->DisplayName.ToString() : Contents.ItemId.ToString();
+        Label->SetText(FText::FromString(FString::Printf(TEXT("E: %s x%d%s"),*Name,Contents.Quantity,*Fresh)));
     }
 }
 

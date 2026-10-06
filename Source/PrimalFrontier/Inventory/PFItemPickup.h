@@ -17,6 +17,7 @@
 #include "Inventory/PFInventoryComponent.h"
 #include "PFItemPickup.generated.h"
 class UTextRenderComponent;
+class UPFItemCatalog;
 UCLASS(Blueprintable)
 class PRIMALFRONTIER_API APFItemPickup : public AActor
 {
@@ -49,6 +50,8 @@ private:
     /** Replicated to everyone (world items are public, unlike inventories). */
     UPROPERTY(Replicated) FPFItemStack Contents;
     UPROPERTY() TObjectPtr<UTextRenderComponent> Label;
+    /** Loaded on server and clients: validation on the server, label display name everywhere. */
+    UPROPERTY(Transient) TObjectPtr<UPFItemCatalog> Catalog;
     bool bInitialized=false;   // true when spawned via Initialize()
     bool bTaken=false;         // guards against double pickup before Destroy completes
 };
