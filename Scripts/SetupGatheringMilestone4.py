@@ -1,4 +1,14 @@
-"""Create M4 greybox fixtures; extend only the project-owned item catalog."""
+"""Create M4 greybox fixtures; extend only the project-owned item catalog.
+
+Milestone 4 (e7ffd71).
+  * Appends any item definitions that exist in the C++ defaults of UPFItemCatalog but
+    are missing from the saved DA_ItemCatalog (tool, cooked food, dried food), without
+    touching existing entries.
+  * Creates /Game/PrimalFrontier/Crafting/DA_CraftingCatalog (UPFCraftingCatalog).
+  * Creates /Game/PrimalFrontier/Maps/L_M4Gathering from L_M1Survival with one wood,
+    one stone and one food APFResourceNode.
+Refuses to run if the map or crafting catalog already exist.
+"""
 import unreal
 
 MAP = "/Game/PrimalFrontier/Maps/L_M4Gathering"

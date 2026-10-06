@@ -1,3 +1,19 @@
+// PFCommandTests.cpp
+//
+// Automation tests for the PF.* developer command layer (PFCommands.cpp).
+// History: ccbad56 (PrimalAgentTools foundation), extended in M3 340c538 and
+// M6 0c2d935 as inventory and creature commands were added.
+//   PF.PrimalAgentTools.CommandArguments: every command in CommandSpecs() is a
+//     registered console command with help text and refuses extra arguments;
+//     argument validation (quantities, IDs, NaN/inf, time and teleport bounds,
+//     path traversal in report names); PF.Help is recorded in the history.
+//   PF.PrimalAgentTools.MissingSystemsAreBlocked: commands without a backing system
+//     report NOT IMPLEMENTED; mutating commands need an authoritative world.
+//   PF.PrimalAgentTools.TeleportAndRuntimeReset: teleport in a real test world,
+//     collision/ground checks, PF.ResetTestWorld is honestly NOT IMPLEMENTED, and
+//     an ambiguous multiplayer target is refused.
+// Run: Session Frontend > Automation, filter "PF.PrimalAgentTools".
+
 #include "PFCommands.h"
 #if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
 #include "Components/BoxComponent.h"

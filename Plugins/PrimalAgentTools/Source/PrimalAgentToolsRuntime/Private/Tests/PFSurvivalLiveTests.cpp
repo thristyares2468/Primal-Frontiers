@@ -1,3 +1,16 @@
+// PFSurvivalLiveTests.cpp
+//
+// Live network test: PF.Survival.Live   (M1, f7ed11d)
+// Real possession and socket replication on the first-person map, no simulated roles.
+//   Stage 0: both sides see 100 health/stamina and authority matches the net role;
+//     the client's PF.SetHealth/SetStamina/Damage/Kill/Respawn and direct component
+//     mutations are refused.
+//   Stage 1: server runs PF.Damage 25 and PF.SetStamina 20; client sees 75/20.
+//   Stage 2: server runs PF.Kill; client observes death.
+//   Stage 3: a replacement pawn spawns alive with collision restored; export a report.
+//   Stage 4: linger 10 s, then finish.
+// Launch with: -PFRunSurvivalLiveTests (see Plugins/PrimalAgentTools/VERIFICATION.md).
+
 #include "PFCommands.h"
 #if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
 #include "Engine/Engine.h"

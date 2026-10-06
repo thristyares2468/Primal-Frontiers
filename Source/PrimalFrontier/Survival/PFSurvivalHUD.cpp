@@ -1,3 +1,8 @@
+// PFSurvivalHUD.cpp
+//
+// See PFSurvivalHUD.h. Layout: aim "+" at screen centre, prompt text just below
+// centre, and a vitals panel anchored to the bottom-left corner.
+
 #include "Survival/PFSurvivalHUD.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Survival/PFSurvivalPlayerController.h"
@@ -16,14 +21,33 @@ void UPFSurvivalHUD::NativeOnInitialized()
     if (WidgetTree->RootWidget) { return; }
     UCanvasPanel* Canvas = WidgetTree->ConstructWidget<UCanvasPanel>();
     WidgetTree->RootWidget = Canvas;
+
+    // Centred aim marker (M4): makes the server-derived interaction ray aimable.
     UTextBlock* AimMarker=WidgetTree->ConstructWidget<UTextBlock>();
-    AimMarker->SetText(FText::FromString(TEXT("+")));AimMarker->SetShadowColorAndOpacity(FLinearColor::Black);AimMarker->SetShadowOffset(FVector2D(1,1));
+    AimMarker->SetText(FText::FromString(TEXT("+")));
+    AimMarker->SetShadowColorAndOpacity(FLinearColor::Black);
+    AimMarker->SetShadowOffset(FVector2D(1,1));
     UCanvasPanelSlot* AimPlacement=Canvas->AddChildToCanvas(AimMarker);
-    AimPlacement->SetAnchors(FAnchors(0.5f,0.5f));AimPlacement->SetAlignment(FVector2D(0.5f,0.5f));AimPlacement->SetAutoSize(true);
+    AimPlacement->SetAnchors(FAnchors(0.5f,0.5f));
+    AimPlacement->SetAlignment(FVector2D(0.5f,0.5f));
+    AimPlacement->SetAutoSize(true);
     AimPlacement->SetPosition(FVector2D::ZeroVector);
-    InteractionLabel=WidgetTree->ConstructWidget<UTextBlock>();InteractionLabel->SetAutoWrapText(true);InteractionLabel->SetJustification(ETextJustify::Center);InteractionLabel->SetShadowColorAndOpacity(FLinearColor::Black);InteractionLabel->SetShadowOffset(FVector2D(1,1));
-    auto InteractionFont=InteractionLabel->GetFont();InteractionFont.Size=26;InteractionLabel->SetFont(InteractionFont);
-    auto* InteractionPlacement=Canvas->AddChildToCanvas(InteractionLabel);InteractionPlacement->SetAnchors(FAnchors(0.5f,0.62f));InteractionPlacement->SetAlignment(FVector2D(0.5f,0));InteractionPlacement->SetSize(FVector2D(800,140));
+
+    // Interaction prompt + latest server feedback, below the crosshair (M7).
+    InteractionLabel=WidgetTree->ConstructWidget<UTextBlock>();
+    InteractionLabel->SetAutoWrapText(true);
+    InteractionLabel->SetJustification(ETextJustify::Center);
+    InteractionLabel->SetShadowColorAndOpacity(FLinearColor::Black);
+    InteractionLabel->SetShadowOffset(FVector2D(1,1));
+    auto InteractionFont=InteractionLabel->GetFont();
+    InteractionFont.Size=26;
+    InteractionLabel->SetFont(InteractionFont);
+    auto* InteractionPlacement=Canvas->AddChildToCanvas(InteractionLabel);
+    InteractionPlacement->SetAnchors(FAnchors(0.5f,0.62f));
+    InteractionPlacement->SetAlignment(FVector2D(0.5f,0));
+    InteractionPlacement->SetSize(FVector2D(800,140));
+
+    // Vitals panel, bottom-left.
     UVerticalBox* Panel = WidgetTree->ConstructWidget<UVerticalBox>();
     UCanvasPanelSlot* PanelSlot = Canvas->AddChildToCanvas(Panel);
     PanelSlot->SetAnchors(FAnchors(0.f, 1.f));
@@ -42,17 +66,27 @@ void UPFSurvivalHUD::NativeOnInitialized()
     ThirstBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(ThirstBar);
     ThirstBar->SetFillColorAndOpacity(FLinearColor(0.2f,0.55f,0.9f));
     StateLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(StateLabel);
+
+    // Purely visual: never steal mouse clicks from gameplay.
     SetVisibility(ESlateVisibility::HitTestInvisible);
 }
+
 void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
 {
     Super::NativeTick(Geometry, DeltaTime);
+
+    // Prompt text involves traces, so rebuild it at 10 Hz rather than every frame.
     InteractionRefresh+=DeltaTime;
     if(InteractionLabel && InteractionRefresh>=0.1f)
     {
-        InteractionRefresh=0;if(const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer()))
-        {InteractionLabel->SetText(FText::FromString(PC->IsPauseMenuOpen()?FString():PC->InteractionPrompt()+TEXT("\n")+PC->RecentInteractionMessage()));}
+        InteractionRefresh=0;
+        if(const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer()))
+        {
+            InteractionLabel->SetText(FText::FromString(PC->IsPauseMenuOpen()?FString():PC->InteractionPrompt()+TEXT("\n")+PC->RecentInteractionMessage()));
+        }
     }
+
+    // The pawn changes on respawn, so look the survival component up every frame.
     const APawn* Pawn = GetOwningPlayerPawn();
     const UPFPlayerSurvivalComponent* Survival = Pawn ? Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>() : nullptr;
     if (!Survival) { if (StateLabel) { StateLabel->SetText(FText::FromString(TEXT("Waiting for survivor..."))); } return; }
@@ -64,11 +98,14 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
         HealthBar->SetPercent(V.Health / FMath::Max(1.f, V.MaxHealth));
         StaminaBar->SetPercent(V.Stamina / FMath::Max(1.f, V.MaxStamina));
         NeedsLabel->SetText(FText::FromString(FString::Printf(TEXT("FOOD %.0f | WATER %.0f | EXPOSURE %.0f%%"),V.Hunger,V.Thirst,V.Exposure*100)));
-        HungerBar->SetPercent(V.Hunger/100.f); ThirstBar->SetPercent(V.Thirst/100.f);
+        HungerBar->SetPercent(V.Hunger/100.f);
+        ThirstBar->SetPercent(V.Thirst/100.f);
+        // Most urgent condition first; otherwise a short controls reminder.
         StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") :
             (V.Hunger <= 0 || V.Thirst <= 0 ? TEXT("STARVING / DEHYDRATED - find a ration!") :
             (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : TEXT("WASD | E Interact | Tab Bag | C Craft | B Build | P Menu")))));
     }
+    // Blueprint presentation hooks (no-ops unless a BP child implements them).
     PresentVitals(V.Health, V.MaxHealth, V.Stamina, V.MaxStamina, Survival->IsDead());
     PresentNeeds(V.Hunger,V.Thirst,V.Exposure);
 }

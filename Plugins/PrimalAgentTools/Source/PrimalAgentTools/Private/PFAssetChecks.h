@@ -1,3 +1,7 @@
+// PFAssetChecks.h
+//
+// Editor asset checks behind PF.ValidateAssets, PF.CheckNaming and PF.CheckReferences.
+// All are read-only: they report, never fix, rename or save. History: ccbad56.
 #pragma once
 
 #include "PFResults.h"

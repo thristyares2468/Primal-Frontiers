@@ -1,4 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Project note: unused template GameMode. Survival maps use APFSurvivalGameMode
+// (Survival/PFSurvivalGameMode.h) via BP_SurvivalGameMode.
 
 #pragma once
 

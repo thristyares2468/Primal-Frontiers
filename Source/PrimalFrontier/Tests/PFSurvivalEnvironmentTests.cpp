@@ -1,3 +1,11 @@
+// PFSurvivalEnvironmentTests.cpp
+//
+// Automation test: PF.Survival.Environment   (M2, 8be2a14)
+// Real overlaps with hazard zones (strongest intensity wins, removal and exit),
+// ration consumption checks (authority, distance, line of sight, duplicates) and
+// perishable ration expiry (refused at the deadline even before cleanup runs).
+// Run: Session Frontend > Automation, filter "PF.Survival".
+
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Survival/PFSurvivalHazard.h"
 #include "Survival/PFRecoveryPickup.h"

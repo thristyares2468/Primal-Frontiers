@@ -1,13 +1,3 @@
-
-## Current input and interaction additions (2026-10-04)
-
-`PFInteraction` shares a server-compatible eye trace between prompts, pickup and resource gathering. The survivor camera is aligned to that stable eye. `PFPauseMenu` is a replaceable placeholder UMG presentation; `PFSurvivalPlayerController` owns local menu/input state and never pauses network simulation. `PFGamepadInput.cpp` maps contextual gamepad buttons to existing validated action paths. Existing Enhanced Input assets retain analog movement/look/jump. No template binary asset changes or new dependency are required. See `PLAYTEST.md` for keyboard/gamepad controls and verification limits.
-
----
-
-## `ARCHITECTURE.md`
-
-```md
 # Technical Architecture
 
 ## Technology
@@ -21,6 +11,8 @@
 - Dedicated-server-compatible architecture
 
 ## Gameplay Systems
+
+Milestone 7 input and interaction (2026-10-04): `PFInteraction` shares a server-compatible eye trace between prompts, pickup and resource gathering. The survivor camera is aligned to that stable eye. `PFPauseMenu` is a replaceable placeholder UMG presentation; `PFSurvivalPlayerController` owns local menu/input state and never pauses network simulation. `PFGamepadInput.cpp` maps contextual gamepad buttons to existing validated action paths. Existing Enhanced Input assets retain analog movement/look/jump. No template binary asset changes or new dependency are required. See `PLAYTEST.md` for keyboard/gamepad controls and verification limits.
 
 Milestone 7 adds a bounded separate survival arena and `APFWorldClock`. Authority advances and validates time; the replicated hour/Gameplay Tag phase drives lightweight client sun/night-fill presentation. Existing catalogs, interactions, hazards and capped AI are reused. No streaming or extra runtime dependency is introduced. See `WORLD_M7.md`.
 
@@ -68,3 +60,6 @@ Content/PrimalFrontier/         Game assets
 Plugins/PrimalAgentTools/       Editor and test automation
 Docs/                           Design and technical documentation
 Config/                         Unreal project configuration
+```
+
+For a file-by-file map of the C++ code, the authority pattern and how to add content, see `CODEBASE_GUIDE.md`.

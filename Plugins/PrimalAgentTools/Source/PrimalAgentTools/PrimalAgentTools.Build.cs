@@ -1,3 +1,5 @@
+// PrimalAgentTools (editor module): asset checks, L_Automation fixtures and viewport
+// capture for the bEditor PF.* commands. Restricted to development editor targets.
 using UnrealBuildTool;
 
 public class PrimalAgentTools : ModuleRules

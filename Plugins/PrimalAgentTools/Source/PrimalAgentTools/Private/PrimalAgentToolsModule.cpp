@@ -1,3 +1,11 @@
+// PrimalAgentToolsModule.cpp
+//
+// Editor module of the PrimalAgentTools plugin (development editor targets only, see
+// PrimalAgentTools.Build.cs). On startup it installs the backend for the bEditor PF.*
+// commands (asset validation, naming, references, L_Automation fixtures, viewport
+// screenshots, smoke test) via PF::AgentTools::SetEditorCommand. Game, server and PIE
+// worlds never reach this handler. History: ccbad56 (foundation).
+
 #include "Modules/ModuleManager.h"
 #include "Editor.h"
 #include "PFCommands.h"

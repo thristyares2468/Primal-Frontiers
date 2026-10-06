@@ -1,3 +1,9 @@
+// PFResults.cpp (editor module)
+//
+// PF.CaptureTestScreenshot: reads pixels from the active level-editor viewport (never
+// a Blueprint/asset-editor tab, PIE, commandlet or NullRHI) and writes a PNG to
+// Saved/AutomationReports using a safe label. History: ccbad56 (foundation).
+
 #include "PFResults.h"
 #include "Editor.h"
 #include "LevelEditorViewport.h"

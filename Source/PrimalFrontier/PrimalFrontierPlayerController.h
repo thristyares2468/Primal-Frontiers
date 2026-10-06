@@ -1,4 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Project note: Epic template controller, base of APFSurvivalPlayerController.
+// Adds the Enhanced Input mapping contexts (IMC_Default etc.) set on the Blueprint.
 
 #pragma once
 

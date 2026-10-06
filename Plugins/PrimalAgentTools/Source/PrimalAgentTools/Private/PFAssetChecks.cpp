@@ -1,3 +1,13 @@
+// PFAssetChecks.cpp
+//
+// Read-only asset checks for the PF.* editor commands (ccbad56):
+//   ValidateAssets   runs Unreal's DataValidation on saved assets under a /Game root.
+//   CheckNaming      checks /Game/PrimalFrontier asset names against the project
+//                    prefix table in NamingPrefix() (L_, BP_, SM_, M_, MI_, T_, DA_, ...).
+//   CheckReferences  reports redirectors and missing or transient package references.
+// Scope is limited to /Game roots (IsProjectRoot rejects other mounts and traversal).
+// An empty scope is reported as a warning ("no coverage") rather than a pass.
+
 #include "PFAssetChecks.h"
 
 #include "AssetRegistry/AssetRegistryModule.h"

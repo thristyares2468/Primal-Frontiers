@@ -1,14 +1,20 @@
+// PFCreatureCatalog.cpp — see PFCreatureCatalog.h.
+
 #include "Creatures/PFCreatureCatalog.h"
+
 UPFCreatureCatalog::UPFCreatureCatalog()
 {
+    // Passive forager: struct defaults (60 health, 170 speed, 2 food).
     FPFCreatureDefinition Passive;
     Passive.Id=TEXT("Creature_Forager"); Passive.Name=FText::FromString(TEXT("Greybox Forager"));
     Creatures.Add(Passive);
+    // Hostile prowler: tougher, faster, more loot.
     FPFCreatureDefinition Hostile;
     Hostile.Id=TEXT("Creature_Prowler"); Hostile.Name=FText::FromString(TEXT("Greybox Prowler"));
     Hostile.bHostile=true; Hostile.Health=100; Hostile.Speed=220; Hostile.FoodLoot=3;
     Creatures.Add(Hostile);
 }
+
 const FPFCreatureDefinition* UPFCreatureCatalog::Find(FName Id) const
 {
     const FPFCreatureDefinition* Found=nullptr;

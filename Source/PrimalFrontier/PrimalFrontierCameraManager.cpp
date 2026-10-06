@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Project note: see PrimalFrontierCameraManager.h.
 
 
 #include "PrimalFrontierCameraManager.h"

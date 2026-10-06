@@ -1,3 +1,8 @@
+// PFSurvivalGameMode.cpp
+//
+// See PFSurvivalGameMode.h. Respawn never reuses the dead pawn: a new
+// APFSurvivorCharacter (with fresh vitals) is spawned at a PlayerStart.
+
 #include "Survival/PFSurvivalGameMode.h"
 #include "Survival/PFSurvivorCharacter.h"
 #include "Survival/PFSurvivalPlayerController.h"
@@ -9,10 +14,12 @@
 
 APFSurvivalGameMode::APFSurvivalGameMode()
 {
+    // Native defaults; BP_SurvivalGameMode overrides these with the Blueprint presentation classes.
     DefaultPawnClass = APFSurvivorCharacter::StaticClass();
     PlayerControllerClass = APFSurvivalPlayerController::StaticClass();
     PlayerStateClass = APFInventoryPlayerState::StaticClass();
 }
+
 void APFSurvivalGameMode::RestartPlayer(AController* Controller)
 {
     if (!Controller || !HasAuthority()) { return; }
@@ -24,27 +31,34 @@ void APFSurvivalGameMode::RestartPlayer(AController* Controller)
     }
     RestartPlayerAtPlayerStart(Controller, Start);
 }
+
 void APFSurvivalGameMode::ScheduleRespawn(AController* Controller)
 {
     if (!Controller || !HasAuthority()) { return; }
+    // Weak pointers: the controller may disconnect or the pawn may be replaced before the timer fires.
     const TWeakObjectPtr<AController> WeakController(Controller);
     const TWeakObjectPtr<APawn> DeadPawn(Controller->GetPawn());
     FTimerHandle Timer;
     const float Delay = FMath::IsFinite(RespawnDelay) ? FMath::Max(0.1f, RespawnDelay) : 3.f;
     GetWorldTimerManager().SetTimer(Timer, FTimerDelegate::CreateWeakLambda(this, [this, WeakController, DeadPawn]
     {
+        // Only respawn if nothing else (e.g. PF.Respawn) already replaced the dead pawn.
         if (WeakController.IsValid() && DeadPawn.IsValid() && WeakController->GetPawn() == DeadPawn.Get()) { RespawnPlayer(WeakController.Get()); }
     }), Delay, false);
 }
+
 bool APFSurvivalGameMode::RespawnPlayer(AController* Controller)
 {
     APFSurvivorCharacter* Dead = Controller ? Cast<APFSurvivorCharacter>(Controller->GetPawn()) : nullptr;
     if (!HasAuthority() || !Dead || !Dead->Survival->IsDead()) { return false; }
+
+    // Unpossess first so RestartPlayer spawns a new pawn instead of reusing the old one.
     Controller->UnPossess();
     RestartPlayer(Controller);
     APFSurvivorCharacter* Replacement = Cast<APFSurvivorCharacter>(Controller->GetPawn());
     if (!Replacement)
     {
+        // Spawn failed (no PlayerStart, blocked, ...): keep the corpse possessed for a retry.
         Controller->Possess(Dead);
         UE_LOG(LogPFSurvival, Error, TEXT("[PrimalSurvival] Respawn failed; dead pawn retained for retry."));
         return false;

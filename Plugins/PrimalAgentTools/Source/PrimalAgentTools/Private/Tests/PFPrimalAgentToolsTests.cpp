@@ -1,3 +1,15 @@
+// PFPrimalAgentToolsTests.cpp
+//
+// Editor automation tests for the PrimalAgentTools plugin (ccbad56, adjusted in 78e4f30):
+//   PF.PrimalAgentTools.PolicyAndReports   scope/label/map safety rules and the JSON
+//                                          report format.
+//   PF.PrimalAgentTools.ScenarioIdempotence  reset/place fixture twice without
+//                                          duplicates (needs L_Automation and
+//                                          -PFRunScenarioTests, else it warns and skips).
+//   PF.PrimalAgentTools.ViewportCapture     real viewport PNG (needs a rendered editor
+//                                          and -PFRunViewportTest, else warns and skips).
+// Run: Session Frontend > Automation, filter "PF.PrimalAgentTools".
+
 #include "PFAssetChecks.h"
 #include "PFAutomationScenario.h"
 #include "PFResults.h"

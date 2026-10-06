@@ -1,4 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Project note: Epic first-person template character, kept as the base class of
+// APFSurvivorCharacter (Survival/PFSurvivorCharacter.h). It owns the owner-only
+// first-person mesh + camera and the Enhanced Input move/look/jump bindings.
+// Survival rules are added in the subclass; avoid editing this file so template
+// updates stay easy to merge.
 
 #pragma once
 

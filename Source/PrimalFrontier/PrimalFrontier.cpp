@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Project note: registers PrimalFrontier as the primary game module (Epic template).
 
 #include "PrimalFrontier.h"
 #include "Modules/ModuleManager.h"
