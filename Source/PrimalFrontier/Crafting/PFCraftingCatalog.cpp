@@ -15,6 +15,8 @@ UPFCraftingCatalog::UPFCraftingCatalog()
     AddResource(TEXT("Node_Wood"),TEXT("Wood pile"),TEXT("Item_Wood"));
     AddResource(TEXT("Node_Stone"),TEXT("Stone outcrop"),TEXT("Item_Stone"));
     AddResource(TEXT("Node_Food"),TEXT("Forage patch"),TEXT("Item_Food"));
+    AddResource(TEXT("Node_Fibre"),TEXT("Fibre patch"),TEXT("Item_Fibre"));
+    AddResource(TEXT("Node_Water"),TEXT("Freshwater collection"),TEXT("Item_Water"));
 }
 const FPFRecipeDefinition* UPFCraftingCatalog::Recipe(FName Id,const UPFItemCatalog* Items) const
 {

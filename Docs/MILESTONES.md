@@ -1,5 +1,11 @@
 # Milestone 7 — in progress 2026-09-30
 
+## Updated M7/M8 contract — 2026-10-06
+
+The user's updated contract adds explicit beach, woodland/grassland, rock, ruin and water-edge traversal spaces, plus fibre and water sources, before the M7 gate. Extend the existing bounded arena with primitives and local simple materials only. Add data-driven fibre/water nodes through existing inventory authority; a water portion is a greybox stand-in for a future container system. Verify focused gathering/consumption tests, the updated map and one-/two-client runs, then rendered interaction and the remaining manual route/overnight loop. Historical M7 reports certify the earlier map, not these additions. Imported user packs stay unused and unstaged. Current 32 GB host samples do not certify the requested 16 GB minimum.
+
+M8 starts only after M7 passes: versioned server-owned player attributes/location/inventory and world structures/storage saves; resource depletion and creature state where practical; bounded validation and corrupt-save handling; safe manual save/load commands; reconnect and restart tests covering duplication; dedicated-server compatibility and low-memory multiplayer evidence. Do not add autosave until the manual path is reliable. No learned-state system currently exists, so do not invent one just for saving. Stop after M8; no final art, external asset acquisition, Blender, third person or large-world expansion.
+
 ## 2026-10-06 verification checkpoint
 
 Implemented the small integrated arena, server clock, pause menu, pickup alignment/feedback and controller bindings. **M7 is not declared complete:** the sustained manual walking route between zones remains unverified. Computer Use can send short movement presses but cannot reliably hold movement through the route. Point-to-point manual checks below used explicit fixture teleports, and automated navigation paths do not replace that remaining manual check. Do not begin M8 until this gate is resolved. Physical gamepad delivery/feel also remains unverified; only mappings/action paths are tested.

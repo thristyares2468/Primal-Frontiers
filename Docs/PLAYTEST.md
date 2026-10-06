@@ -1,6 +1,6 @@
 # Playing and testing Primal Frontier
 
-Updated 2026-10-06. The integrated development level is **L_M7SurvivalArena**. Build, 16-test regression, one-/two-client checks and rendered interaction/hazard/day-night checks pass; the sustained manual walking route between zones is still pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
+Updated 2026-10-06. The integrated development level is **L_M7SurvivalArena**. It now includes beach, woodland, rocks, a ruin and water-edge placeholders; verification of these additions is in progress. The previous arena passed a 16-test regression and one-/two-client checks. Sustained manual traversal and an overnight core-loop session remain pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
 
 ## Open the game
 
@@ -60,14 +60,14 @@ Inventory, crafting and building overlays are mutually exclusive. A remains jump
 4. **Food:** gather the Forage patch or collect creature loot. Select food in the bag and consume one (Q / pad X). There is no unlimited eat button or free starting ration.
 5. **Cook:** one found food + one wood makes cooked food in six seconds. Two found food + two wood makes dried food in ten seconds. These greybox recipes do not yet need a campfire actor. Cancelling produces no output; ingredients are revalidated at completion.
 6. **Build:** collect extra wood. Select Foundation, aim at clear ground ahead, move out of the preview and place when the message says valid. Current pieces cost two wood. Add walls, floor/ceiling, door and storage. Support, overlap, resource cost and ownership are server-validated.
-7. **Explore:** leave the safe southern clearing for central resources, the stepped rise and the northern danger area. Exposure harms survival; retreat until Exposure is zero. Foragers flee; prowlers chase and attack.
+7. **Explore:** leave the southern beach for western woodland/fibre, eastern rocks/water, the stepped rise, northwest ruin and northern danger area. Blue planes mark water but have no swimming simulation. Exposure harms survival; retreat until Exposure is zero. Foragers flee; prowlers chase and attack.
 8. **Fight:** close overlays, approach a creature and left-click / RT in reach. Watch stamina/health. Death automatically respawns at PlayerStart. Inventory survives death within this session; that is not disk persistence.
 
 ## Food and survival
 
 Default freshness: found food **300 simulation seconds**, cooked **900**, dried **1,800**. The bag shows each batch's remaining time. Splitting, dropping, pickup and ordinary storage keep its deadline. Storage has **no preservation bonus**. Expired food is removed and cannot be eaten. Cooking/drying is the available preservation progression; refrigeration and technology unlocks are deferred.
 
-Found/cooked food restores some water as a greybox recovery mechanic. A complete drinking/container system is not present. Hunger/thirst drain and empty reserves damage health. Solo pause stops simulation/expiry. Multiplayer menus do not pause the world, enemies or food expiry: find safety first.
+Collect water at a labelled Freshwater collection node near the beach or eastern pool. It yields finite Water portions; select one in the bag and press Q / pad X to drink for 35 thirst. It costs one portion and does not restore food. Full thirst refuses consumption without wasting water. These nonperishable portions stand in for a future container/refill system. Fibre patches provide inventory fibre, but no fibre recipe is implemented yet. Found/cooked food still restores some water. Hunger/thirst drain and empty reserves damage health. Solo pause stops simulation/expiry. Multiplayer menus do not pause the world, enemies or food expiry: find safety first.
 
 ## If pickup seems broken
 

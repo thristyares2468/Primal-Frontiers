@@ -1,5 +1,9 @@
 \# Architecture and Design Decisions
 
+## 2026-10-06 — Updated M7 traversal and water/fibre scope
+
+Complete the user's explicit M7 zone/resource requirements within the existing 60 x 70 m footprint. Reuse primitive meshes and one local opaque colour material with five instances; imported packs remain unused. Water is a finite gathered inventory portion consumed through the existing server-validated action, with no free refill command and no new swimming/container system. Fibre is a data-driven resource reserved for later recipes. Preserve all existing item/recipe tuning. Keep M8 behind the manual M7 traversal/overnight gate; versioned server saves and reconnect validation are the last milestone, without post-M8 art expansion.
+
 ## 2026-10-06 — Preserve user asset imports while finishing the greybox gate
 
 The user has added Adventures_Pack, Bike, DynamicFalling, Modular_Rural_Cabin and Polyphoria and authorized sourcing other assets when needed. Keep these user changes outside the current M7 commit and preserve their paths/references. No imported pack is needed for the small arena verification. Before selecting an asset for a concrete feature, inspect suitability, dependency/memory cost and available usage rights; notify the user if a license, purchase or manual import is needed. This does not expand M1-M8 into final-art production or third-person gameplay.
