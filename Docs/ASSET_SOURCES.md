@@ -49,7 +49,7 @@ On Fab, use the **Add to Project** button (or download the files and drag them i
 |---|---|---|---|---|
 | 1 | [Mixamo](https://www.mixamo.com) | Thousands of humanoid animations (FBX) for the full-body player | Free with Adobe ID | ✅ Yes |
 | 2 | [Animal Variety Pack](https://www.fab.com/listings/2dd7964c-a601-4264-a53d-465dcae1644c) | Deer, wolf, fox, crow, fully animated | 🔵 Fab Free | ☑️ Probably |
-| 3 | [Open World Demo Collection](https://www.fab.com/listings/3262ab8f-f64a-4124-8efd-82cb19df6249) | Photoscanned trees, rocks, cliffs, grass | 🔵 Epic | ⚠️ Older |
+| 3 | Megascans free selection (search Fab: Megascans, Price: Free) | ~1500 photoscanned rocks, cliffs, ground, logs, plants | 🔵 Fab Free | ☑️ Probably |
 | 4 | [Megaplants – English Oak](https://www.fab.com/listings/83642c38-7661-4df1-8629-0422e1898d26) (and others below) | Realistic Nanite trees | 🔵 Fab Free | ☑️ Probably |
 | 5 | [Realistic Fire & Explosion Starter](https://www.fab.com/listings/2adf4e4e-5f1d-4543-9e8c-192fe3c9a8ed) | Campfires, torches, explosions | 🔵 Fab Free | ☑️ Probably |
 | 6 | [PBR Velociraptor (Animated)](https://sketchfab.com/3d-models/pbr-velociraptor-animated-8f1744af7b0847a2aabe3df90be802f0) | Realistic game-ready raptor | 🟡 CC-BY | ✅ Yes |
@@ -109,7 +109,6 @@ On Fab, use the **Add to Project** button (or download the files and drag them i
 
 | Asset | What it's for | License | UE 5.8.3 |
 |---|---|---|---|
-| [Open World Demo Collection](https://www.fab.com/listings/3262ab8f-f64a-4124-8efd-82cb19df6249) | 88 trees, bushes, stumps, rocks, cliffs | 🔵 Epic | ⚠️ Older |
 | [Spruce Forest (Project Nature)](https://www.fab.com/listings/f8044501-17a2-498f-b198-5f1bc71ee87a) | 15 spruce trees | 🔵 Fab Free | ☑️ Probably |
 | [Modular Rural House & Pine Forest](https://www.fab.com/listings/a081748c-6a49-4ba4-9008-9b10fadf8f73) | Pine forest and a house | ⚪ Check | ☑️ Probably |
 | Megascans free selection ([FAQ](https://support.fab.com/s/article/Fab-Transition-FAQs?language=en_US)) | About 1500 free rocks, ground surfaces, logs, plants. On Fab, search Megascans with "Price: Free" | 🔵 Fab Free | ☑️ Probably |
@@ -255,8 +254,9 @@ These Epic samples are whole projects. Fab only lets you **Create Project** with
 |---|---|---|
 | Game Animation Sample | Player movement animations | Mixamo, Free Animation Pack |
 | Niagara Examples Pack | Fire, smoke, impacts | Realistic Fire & Explosion Starter |
-| A Boy and His Kite, Electric Dreams, Project Titan | Forest and open-world meshes | Open World Demo Collection, Megaplants, Megascans, Poly Haven |
+| A Boy and His Kite, Electric Dreams, Project Titan | Forest and open-world meshes | Megaplants, Megascans, Poly Haven |
 | Sun Temple, Valley of the Ancient | Ruins and dark-world rocks | Fable X Ancient Ruins, Megascans rocks |
+| Open World Demo Collection | Photoscanned trees, rocks, cliffs | Megascans free selection, Megaplants, Spruce Forest, Poly Haven (doesn't work in UE 5.8.3) |
 | Control Rig Samples | Making arm animations | Make arm animations with Higgsfield (Gap 4) or Mixamo |
 
 ## 📝 Credits (required for CC-BY assets)
