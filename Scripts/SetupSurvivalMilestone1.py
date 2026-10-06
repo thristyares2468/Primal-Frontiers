@@ -1,4 +1,16 @@
-"""Run once in Unreal Editor Python. Creates project-owned M1 composition only."""
+"""Run once in Unreal Editor Python. Creates project-owned M1 composition only.
+
+Milestone 1 (f7ed11d). Creates:
+  * /Game/PrimalFrontier/Survival/BP_Survivor, BP_SurvivalController and
+    BP_SurvivalGameMode: copies of the First Person template Blueprints reparented
+    onto the C++ classes APFSurvivorCharacter, APFSurvivalPlayerController and
+    APFSurvivalGameMode. The GameMode Blueprint is pointed at the other two.
+  * /Game/PrimalFrontier/Maps/L_M1Survival: a primitive test map (floor, jump step,
+    look landmark, back wall, PlayerStart, light) using the new GameMode.
+
+Template assets are never modified. Refuses to run if any destination exists.
+Run from the editor: Tools > Execute Python Script, or `py Scripts/SetupSurvivalMilestone1.py`.
+"""
 import unreal
 
 ROOT = "/Game/PrimalFrontier/Survival"

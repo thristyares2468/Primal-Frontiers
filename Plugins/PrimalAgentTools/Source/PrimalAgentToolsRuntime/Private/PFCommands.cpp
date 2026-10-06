@@ -1,3 +1,32 @@
+// PFCommands.cpp
+//
+// The PF.* developer console commands (non-Shipping builds only).
+//
+// How a command runs:
+//   1. FPrimalAgentToolsRuntimeModule (bottom of this file) registers one console
+//      command per CommandSpecs() entry at startup.
+//   2. Typing e.g. "PF.GiveItem Item_Wood 20" calls ExecuteCommand(), which looks up
+//      the spec, validates the arguments, refuses mutations on clients, and then
+//      dispatches to one of the per-system adapters below (SurvivalCommand,
+//      InventoryCommand, CraftingCommand, BuildingCommand, CreatureCommand, Teleport).
+//   3. Adapters only call the game's own server-authoritative APIs (Grant, Start,
+//      SetHour, ...). They never bypass validation, never save maps, and report
+//      every outcome as an FResult that is logged and appended to History.
+//   4. Editor-only commands (bEditor) are forwarded to the handler the editor module
+//      installs with SetEditorCommand().
+//
+// Adding a command: add a CommandSpecs() row, add any argument rules to
+// ValidateArguments(), route it in ExecuteCommand(), document it in
+// Plugins/PrimalAgentTools/DEVELOPER_COMMANDS.md, and cover it in
+// Tests/PFCommandTests.cpp.
+//
+// History: the foundation commit ccbad56 shipped help, asset checks, teleport and
+// reports, and reserved most gameplay names as NOT IMPLEMENTED placeholders. Each
+// milestone then implemented its group: survival M1 f7ed11d (+stamina/damage/kill/
+// respawn), needs M2 8be2a14, inventory M3 340c538 (+RemoveItem), crafting M4
+// e7ffd71 (+Craft/CancelCraft), building M5 5702d4b (+ResetBuildings), creatures M6
+// 0c2d935 (+ResetCreatures), time of day M7 b5a3165.
+
 #include "PFCommands.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
@@ -25,14 +54,22 @@
 
 namespace PF::AgentTools
 {
+// Installed by the editor module; empty in game/server processes.
 static FEditorCommand EditorCommand;
+// Every command run in this process, in order; exported by PF.ExportTestReport.
 static TArray<FResult> History;
 void SetEditorCommand(FEditorCommand Handler) { EditorCommand = MoveTemp(Handler); }
 const TArray<FResult>& CommandHistory() { return History; }
 
+/**
+ * The command table. Columns: Name, Help, Blocker, MinArgs, MaxArgs, bEditor, bMutation.
+ * A non-empty Blocker marks the command NOT IMPLEMENTED (it is listed honestly instead
+ * of faking success). bMutation commands are refused on clients.
+ */
 const TArray<FCommandSpec>& CommandSpecs()
 {
     static const TArray<FCommandSpec> Specs = {
+        // Tooling, asset checks and reports (foundation).
         {TEXT("PF.Help"), TEXT("List all PF commands, usage and implementation status.")},
         {TEXT("PF.ValidateAssets"), TEXT("[/Game[/Subfolder]] Validate saved project assets without fixing or saving."), TEXT(""), 0, 1, true},
         {TEXT("PF.CheckNaming"), TEXT("Check naming under /Game/PrimalFrontier."), TEXT(""), 0, 0, true},
@@ -42,10 +79,12 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.RunSmokeTest"), TEXT("Run asset, naming and package-reference checks; no gameplay coverage."), TEXT(""), 0, 0, true},
         {TEXT("PF.ExportTestReport"), TEXT("[label] Export this process's execution history to Saved/AutomationReports."), TEXT(""), 0, 1},
         {TEXT("PF.CaptureTestScreenshot"), TEXT("[label] Capture rendered editor level viewport PNG."), TEXT(""), 0, 1, true},
+        // Inventory (M3) and creatures (M6).
         {TEXT("PF.GiveItem"), TEXT("ItemId Quantity: server-only grant to sole player's inventory, respecting capacity."), TEXT(""), 2, 2, false, true},
         {TEXT("PF.RemoveItem"), TEXT("ItemId Quantity: server-only removal from sole player's inventory."), TEXT(""), 2, 2, false, true},
         {TEXT("PF.SpawnCreature"), TEXT("CreatureId: server spawn near sole player, validated catalog/navigation/collision and world cap."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.ResetCreatures"), TEXT("Server: clear test creatures and pause spawn points only in standalone L_M6Creatures."), TEXT(""), 0, 0, false, true},
+        // Survival vitals (M1) and needs (M2).
         {TEXT("PF.SetHealth"), TEXT("Value: server-only survivor health, clamped to limits; cannot revive a dead pawn."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.SetStamina"), TEXT("Value: server-only survivor stamina, clamped to limits."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.Damage"), TEXT("Amount: apply positive damage through the server character damage API."), TEXT(""), 1, 1, false, true},
@@ -55,10 +94,13 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.SetThirst"), TEXT("Value: server-only water reserve clamped 0..100; zero dehydrates."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.SetExposure"), TEXT("Value: server-only test exposure 0..1; zero restores volume-only exposure."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.RecoverNeeds"), TEXT("Server-only placeholder recovery of 35 food/water; no inventory grant."), TEXT(""), 0, 0, false, true},
+        // World (M7) and movement (foundation).
         {TEXT("PF.SetTimeOfDay"), TEXT("Hour: 0 through 23; server-only set on the map's unique world clock."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.Teleport"), TEXT("X Y Z [PlayerId]: authority-only character teleport; collision, floor, 1km bounds; one player unless ID given."), TEXT(""), 3, 4, false, true},
+        // Persistence: deliberately unavailable until a save system exists.
         {TEXT("PF.SaveWorld"), TEXT("Request gameplay save (unavailable); never saves editor maps."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
         {TEXT("PF.LoadWorld"), TEXT("Request gameplay load (unavailable)."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
+        // Gathering/crafting (M4) and building (M5).
         {TEXT("PF.TestGathering"), TEXT("Server: validate loaded resource definitions and node state; no harvesting."), TEXT(""), 0, 0},
         {TEXT("PF.TestCrafting"), TEXT("Server: validate player recipe catalogs and queue state; no item grants."), TEXT(""), 0, 0},
         {TEXT("PF.Craft"), TEXT("RecipeId: start the sole player's server-validated timed craft."), TEXT(""), 1, 1, false, true},
@@ -66,8 +108,10 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.TestBuildingPlacement"), TEXT("Server: validate existing structure health, ownership and support; functional tests run separately."), TEXT(""), 0, 0},
         {TEXT("PF.ResetBuildings"), TEXT("Server: remove sole player's empty runtime structures only in L_M5Building; no refund or map save."), TEXT(""), 0, 0, false, true},
         {TEXT("PF.TestCreatureAI"), TEXT("Server: inspect creature definitions, health, state and AI controllers; functional navigation tested separately.")},
+        // Acceptance scenarios that do not exist yet.
         {TEXT("PF.TestMultiplayerReplication"), TEXT("Validate survival replication (unavailable)."), TEXT("No survival replication acceptance scenario exists; transport alone is not a pass.")},
         {TEXT("PF.TestPersistence"), TEXT("Validate persistence round trip (unavailable)."), TEXT("No gameplay persistence API exists.")},
+        // Aliases.
         {TEXT("PF.ResetAutomation"), TEXT("Alias of PF.ResetTestWorld."), TEXT(""), 0, 0, true, true},
         {TEXT("PF.CaptureScreenshot"), TEXT("[label] Alias of PF.CaptureTestScreenshot."), TEXT(""), 0, 1, true},
         {TEXT("PF.ExportResults"), TEXT("[label] Alias of PF.ExportTestReport."), TEXT(""), 0, 1}
@@ -75,12 +119,20 @@ const TArray<FCommandSpec>& CommandSpecs()
     return Specs;
 }
 
+/** Strict decimal parse: rejects empty strings, trailing junk, NaN and infinity. */
 static bool Number(const FString& Text, double& Out)
 {
     // LexTryParseString alone accepts numeric prefixes on some platforms.
     if (Text.IsEmpty() || !Text.IsNumeric()) { return false; }
     return LexTryParseString(Out, *Text) && FMath::IsFinite(Out);
 }
+
+/**
+ * Checks argument count and per-command syntax before anything runs.
+ * Returns an empty string when valid, otherwise a user-facing reason.
+ * IDs must be simple identifiers (never object paths) so a console line can't load
+ * arbitrary classes or assets; numbers must be finite and in range.
+ */
 FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 {
     if (A.Num() < S.MinArgs || A.Num() > S.MaxArgs) { return TEXT("Wrong argument count. Usage: ") + S.Name + TEXT(" ") + S.Help; }
@@ -95,6 +147,7 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
     if (S.Name == TEXT("PF.Craft") && (!IsSafeLabel(A[0]) || !A[0].StartsWith(TEXT("Recipe_")))) { return TEXT("Expected Recipe_ identifier, not an object path."); }
     if (S.Name.StartsWith(TEXT("PF.Set")) || S.Name == TEXT("PF.Teleport") || S.Name == TEXT("PF.Damage"))
     {
+        // Numeric commands: one value, or X Y Z (+ optional PlayerId) for teleport.
         const int32 Count = S.Name == TEXT("PF.Teleport") ? 3 : 1;
         for (int32 I = 0; I < Count; ++I)
         {
@@ -112,11 +165,19 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
             if (A[3].IsEmpty() || A[3].Len() > 10 || !LexTryParseString(Id, *A[3]) || Id < 0 || Id > MAX_int32) { return TEXT("Invalid PlayerId."); }
         }
     }
+    // Report/screenshot labels become file names, so no paths or traversal.
     if ((S.Name.Contains(TEXT("Export")) || S.Name.Contains(TEXT("Screenshot"))) && !A.IsEmpty() && !IsSafeLabel(A[0])) { return TEXT("Label must be 1-64 ASCII letters, digits, underscore or hyphen."); }
     return FString();
 }
 
 static void Fail(FResult& R, const TCHAR* Code, const FString& Message) { R.Add(TEXT("Error"), Code, FString(), Message); }
+
+/**
+ * PF.SpawnCreature / PF.ResetCreatures / PF.TestCreatureAI (M6).
+ * Spawning goes through APFCreatureSpawner::Spawn, so catalog, navmesh, collision
+ * and the world creature cap still apply. Reset is limited to the standalone M6 map.
+ * TestCreatureAI is an integrity scan only; behaviour is covered by PF.Creatures.*.
+ */
 static FResult CreatureCommand(const FString& Name,const TArray<FString>& Args,UWorld* World)
 {
     FResult R(Name);
@@ -127,37 +188,80 @@ static FResult CreatureCommand(const FString& Name,const TArray<FString>& Args,U
         if(World->GetNetMode()!=NM_Standalone || World->GetOutermost()->GetName()!=TEXT("/Game/PrimalFrontier/Maps/L_M6Creatures"))
         {Fail(R,TEXT("ResetScope"),TEXT("Requires standalone L_M6Creatures test map."));return R;}
         for(TActorIterator<APFCreatureSpawner> It(World);It;++It){It->bAutoSpawn=false;}
-        int32 Count=0;for(TActorIterator<APFCreature> It(World);It;++It){It->Destroy();++Count;}
-        R.Add(TEXT("Info"),TEXT("CreaturesReset"),FString(),FString::Printf(TEXT("Removed %d runtime test creatures, paused spawners, no loot or map save."),Count));return R;
+        int32 Count=0;
+        for(TActorIterator<APFCreature> It(World);It;++It){It->Destroy();++Count;}
+        R.Add(TEXT("Info"),TEXT("CreaturesReset"),FString(),FString::Printf(TEXT("Removed %d runtime test creatures, paused spawners, no loot or map save."),Count));
+        return R;
     }
     if(Name==TEXT("PF.SpawnCreature"))
     {
-        auto* PC=World->GetFirstPlayerController();APawn* P=PC?PC->GetPawn():nullptr;
+        // 4 m in front of the sole player, along the horizontal look direction.
+        auto* PC=World->GetFirstPlayerController();
+        APawn* P=PC?PC->GetPawn():nullptr;
         if(World->GetNumPlayerControllers()!=1 || !P){Fail(R,TEXT("AmbiguousPlayer"),TEXT("Requires one possessed player."));return R;}
         const FVector At=P->GetActorLocation()+PC->GetControlRotation().Vector().GetSafeNormal2D()*400;
         if(auto* C=APFCreatureSpawner::Spawn(World,FName(*Args[0]),At)){R.Add(TEXT("Info"),TEXT("CreatureSpawned"),C->GetName(),Args[0]);}
-        else{Fail(R,TEXT("SpawnRejected"),TEXT("Unknown definition, missing navigation, blocked position or eight-creature limit."));}return R;
+        else{Fail(R,TEXT("SpawnRejected"),TEXT("Unknown definition, missing navigation, blocked position or eight-creature limit."));}
+        return R;
     }
-    int32 Count=0;for(TActorIterator<APFCreature> It(World);It;++It)
-    {++Count;const auto* D=It->Definition();if(!D || !FMath::IsFinite(It->Health) || It->Health<0 || (D && It->Health>D->Health) || !It->State.IsValid() || (!It->IsDead() && !It->GetController())){Fail(R,TEXT("CreatureInvalid"),It->GetName());}}
+    // PF.TestCreatureAI: every creature has a definition, sane health, a state tag,
+    // and (unless dead) an AI controller.
+    int32 Count=0;
+    for(TActorIterator<APFCreature> It(World);It;++It)
+    {
+        ++Count;
+        const auto* D=It->Definition();
+        if(!D || !FMath::IsFinite(It->Health) || It->Health<0 || (D && It->Health>D->Health) || !It->State.IsValid() || (!It->IsDead() && !It->GetController())){Fail(R,TEXT("CreatureInvalid"),It->GetName());}
+    }
     if(Count==0){Fail(R,TEXT("NoCreatures"),TEXT("Spawn a creature before integrity validation."));}
-    R.Add(TEXT("Info"),TEXT("CreatureIntegrity"),FString(),FString::Printf(TEXT("Checked %d creatures; run PF.Creatures.Lifecycle/Live for functional behavior."),Count));return R;
+    R.Add(TEXT("Info"),TEXT("CreatureIntegrity"),FString(),FString::Printf(TEXT("Checked %d creatures; run PF.Creatures.Lifecycle/Live for functional behavior."),Count));
+    return R;
 }
+
+/**
+ * PF.TestBuildingPlacement / PF.ResetBuildings (M5).
+ * Reset removes only the sole player's pieces on the M5 test map, refuses while any
+ * of their storage holds items (no silent item loss), and never refunds.
+ */
 static FResult BuildingCommand(const FString& Name,UWorld* World)
 {
-    FResult R(Name);if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode()){Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));return R;}
+    FResult R(Name);
+    if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode()){Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));return R;}
     if(Name==TEXT("PF.ResetBuildings"))
     {
         if(World->GetOutermost()->GetName()!=TEXT("/Game/PrimalFrontier/Maps/L_M5Building") || World->GetNumPlayerControllers()!=1){Fail(R,TEXT("ResetScope"),TEXT("Requires standalone M5 test world and exactly one player."));return R;}
-        auto* PC=World->GetFirstPlayerController();TArray<APFBuildPiece*> Owned;
-        for(TActorIterator<APFBuildPiece> It(World);It;++It){if(It->Builder==PC->PlayerState){if(!It->Storage->GetStacks().IsEmpty()){Fail(R,TEXT("OccupiedStorage"),TEXT("Empty storage before reset."));return R;}Owned.Add(*It);}}
-        for(auto* Piece:Owned){Piece->Destroy();}R.Add(TEXT("Info"),TEXT("BuildingsReset"),FString(),FString::Printf(TEXT("Removed %d owned runtime pieces; no saved map changes."),Owned.Num()));return R;
+        auto* PC=World->GetFirstPlayerController();
+        TArray<APFBuildPiece*> Owned;
+        for(TActorIterator<APFBuildPiece> It(World);It;++It)
+        {
+            if(It->Builder==PC->PlayerState)
+            {
+                if(!It->Storage->GetStacks().IsEmpty()){Fail(R,TEXT("OccupiedStorage"),TEXT("Empty storage before reset."));return R;}
+                Owned.Add(*It);
+            }
+        }
+        for(auto* Piece:Owned){Piece->Destroy();}
+        R.Add(TEXT("Info"),TEXT("BuildingsReset"),FString(),FString::Printf(TEXT("Removed %d owned runtime pieces; no saved map changes."),Owned.Num()));
+        return R;
     }
-    int32 Count=0;for(TActorIterator<APFBuildPiece> It(World);It;++It)
-    {++Count;if(!IsValid(It->Builder) || !FMath::IsFinite(It->Health) || It->Health<=0 || (It->Kind!=EPFBuildKind::Foundation && !IsValid(It->Support))){Fail(R,TEXT("InvalidStructure"),It->GetName());}}
+    // PF.TestBuildingPlacement: every piece has an owner, positive finite health, and
+    // (unless it is a foundation) a live support piece.
+    int32 Count=0;
+    for(TActorIterator<APFBuildPiece> It(World);It;++It)
+    {
+        ++Count;
+        if(!IsValid(It->Builder) || !FMath::IsFinite(It->Health) || It->Health<=0 || (It->Kind!=EPFBuildKind::Foundation && !IsValid(It->Support))){Fail(R,TEXT("InvalidStructure"),It->GetName());}
+    }
     if(Count==0){Fail(R,TEXT("NoStructures"),TEXT("Place a structure before validation."));}
-    R.Add(TEXT("Info"),TEXT("StructureIntegrity"),FString(),FString::Printf(TEXT("Checked %d structures. Functional tests: PF.Building.PlacementAndStorage and PF.Building.Live."),Count));return R;
+    R.Add(TEXT("Info"),TEXT("StructureIntegrity"),FString(),FString::Printf(TEXT("Checked %d structures. Functional tests: PF.Building.PlacementAndStorage and PF.Building.Live."),Count));
+    return R;
 }
+
+/**
+ * PF.TestGathering / PF.TestCrafting / PF.Craft / PF.CancelCraft (M4).
+ * The two Test commands are read-only integrity scans. Craft/CancelCraft call the
+ * sole player's UPFCraftingComponent exactly as the ServerCraftAction RPC does.
+ */
 static FResult CraftingCommand(const FString& Name,const TArray<FString>& Args,UWorld* World)
 {
     FResult R(Name);
@@ -165,39 +269,54 @@ static FResult CraftingCommand(const FString& Name,const TArray<FString>& Args,U
     {Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));return R;}
     if(Name==TEXT("PF.TestGathering"))
     {
+        // A node is valid when its definition resolves and HitsRemaining/RespawnAt agree:
+        // depleted nodes have a respawn deadline, live nodes do not.
         int32 Count=0;
         for(TActorIterator<APFResourceNode> It(World);It;++It)
         {
-            ++Count;const auto* D=It->Catalog?It->Catalog->Resource(It->ResourceId,It->Items):nullptr;
+            ++Count;
+            const auto* D=It->Catalog?It->Catalog->Resource(It->ResourceId,It->Items):nullptr;
             if(!D || It->HitsRemaining<0 || (D && It->HitsRemaining>D->Hits) || !FMath::IsFinite(It->RespawnAt) ||
                 (It->HitsRemaining==0 && It->RespawnAt<=0) || (It->HitsRemaining>0 && It->RespawnAt!=0))
             {Fail(R,TEXT("InvalidResource"),It->GetPathName());}
         }
         if(Count==0){Fail(R,TEXT("NoResources"),TEXT("No runtime resource nodes to validate."));}
-        R.Add(TEXT("Info"),TEXT("ResourceIntegrity"),FString(),FString::Printf(TEXT("Checked %d nodes. Functional gathering is covered by PF.Crafting.Gathering/Live."),Count));return R;
+        R.Add(TEXT("Info"),TEXT("ResourceIntegrity"),FString(),FString::Printf(TEXT("Checked %d nodes. Functional gathering is covered by PF.Crafting.Gathering/Live."),Count));
+        return R;
     }
     if(Name==TEXT("PF.TestCrafting"))
     {
+        // Every player has a catalog whose recipes all validate, and an idle or
+        // correctly-timed craft queue.
         int32 Count=0;
         for(auto It=World->GetPlayerControllerIterator();It;++It)
         {
             auto* PS=It->Get()?It->Get()->PlayerState.Get():nullptr;
-            auto* C=PS?PS->FindComponentByClass<UPFCraftingComponent>():nullptr;auto* I=C?C->Inventory():nullptr;
+            auto* C=PS?PS->FindComponentByClass<UPFCraftingComponent>():nullptr;
+            auto* I=C?C->Inventory():nullptr;
             if(!C || !C->Catalog || !I || C->Catalog->Recipes.IsEmpty()){Fail(R,TEXT("CraftingUnavailable"),TEXT("Missing player catalog/component."));continue;}
             ++Count;
             for(const auto& D:C->Catalog->Recipes){if(!C->Catalog->Recipe(D.Id,I->Catalog)){Fail(R,TEXT("InvalidRecipe"),D.Id.ToString());}}
             if(!FMath::IsFinite(C->FinishAt) || (C->ActiveRecipe.IsNone()?C->FinishAt!=0:C->FinishAt<=0)){Fail(R,TEXT("InvalidQueue"),PS->GetName());}
         }
         if(Count==0){Fail(R,TEXT("NoPlayers"),TEXT("No player crafting components to validate."));}
-        R.Add(TEXT("Info"),TEXT("RecipeIntegrity"),FString(),FString::Printf(TEXT("Checked %d players. Functional transactions are covered by PF.Crafting.Transactions/Live."),Count));return R;
+        R.Add(TEXT("Info"),TEXT("RecipeIntegrity"),FString(),FString::Printf(TEXT("Checked %d players. Functional transactions are covered by PF.Crafting.Transactions/Live."),Count));
+        return R;
     }
+    // PF.Craft / PF.CancelCraft
     if(World->GetNumPlayerControllers()!=1){Fail(R,TEXT("AmbiguousPlayer"),TEXT("Craft developer commands require exactly one player."));return R;}
-    auto* PC=World->GetFirstPlayerController();auto* C=PC && PC->PlayerState?PC->PlayerState->FindComponentByClass<UPFCraftingComponent>():nullptr;
+    auto* PC=World->GetFirstPlayerController();
+    auto* C=PC && PC->PlayerState?PC->PlayerState->FindComponentByClass<UPFCraftingComponent>():nullptr;
     if(!C || !(Name==TEXT("PF.CancelCraft")?C->Cancel():C->Start(FName(*Args[0]),PC->GetPawn())))
     {Fail(R,TEXT("CraftRejected"),TEXT("Busy, missing ingredients, invalid recipe/life state or no active job."));}
     else{R.Add(TEXT("Info"),TEXT("CraftRequestAccepted"),FString(),C->Feedback);}
     return R;
 }
+
+/**
+ * PF.GiveItem / PF.RemoveItem (M3): server-side Grant/RemoveItem on the sole player's
+ * PlayerState inventory, so capacity, weight and catalog rules still apply.
+ */
 static FResult InventoryCommand(const FString& Name,const TArray<FString>& Args,UWorld* World)
 {
     FResult R(Name);
@@ -206,12 +325,20 @@ static FResult InventoryCommand(const FString& Name,const TArray<FString>& Args,
     if(World->GetNumPlayerControllers()!=1){Fail(R,TEXT("AmbiguousPlayer"),TEXT("Inventory developer commands require exactly one player."));return R;}
     const auto* PC=World->GetFirstPlayerController();
     auto* I=PC && PC->PlayerState ? PC->PlayerState->FindComponentByClass<UPFInventoryComponent>() : nullptr;
-    int32 Count=0; LexTryParseString(Count,*Args[1]); const FName Id(*Args[0]);
+    int32 Count=0;
+    LexTryParseString(Count,*Args[1]);  // already validated as a positive int32
+    const FName Id(*Args[0]);
     const bool Accepted=I && (Name==TEXT("PF.GiveItem") ? I->Grant(Id,Count) : I->RemoveItem(Id,Count));
     if(!Accepted){Fail(R,TEXT("InventoryRejected"),TEXT("Unknown item, capacity/quantity limit, insufficient items or unavailable inventory."));}
     else{R.Add(TEXT("Info"),TEXT("InventoryChanged"),Args[0],FString::Printf(TEXT("Quantity=%d total=%d weight=%.2f"),Count,I->Count(Id),I->GetWeight()));}
     return R;
 }
+
+/**
+ * Survival vitals (M1) and needs (M2) commands. All go through the survival
+ * component's own setters or the character's TakeDamage, so death, clamping and
+ * replication behave exactly as in gameplay. PF.Respawn uses the GameMode.
+ */
 static FResult SurvivalCommand(const FString& Name, const TArray<FString>& Args, UWorld* World)
 {
     FResult R(Name);
@@ -236,16 +363,23 @@ static FResult SurvivalCommand(const FString& Name, const TArray<FString>& Args,
     else if (Name == TEXT("PF.SetStamina")) { Accepted = Survival->ChangeStamina(FMath::Clamp(Value, 0.f, Survival->GetVitals().MaxStamina) - Survival->GetVitals().Stamina); }
     else if (Name == TEXT("PF.Damage") || Name == TEXT("PF.Kill"))
     { Accepted = Pawn->TakeDamage(Name == TEXT("PF.Kill") ? Survival->GetVitals().MaxHealth : Value, FDamageEvent(), PC, Pawn) > 0.f; }
-    else if (APFSurvivalGameMode* Mode = World->GetAuthGameMode<APFSurvivalGameMode>()) { Accepted = Mode->RespawnPlayer(PC); }
+    else if (APFSurvivalGameMode* Mode = World->GetAuthGameMode<APFSurvivalGameMode>()) { Accepted = Mode->RespawnPlayer(PC); }  // PF.Respawn
     if (!Accepted) { Fail(R, TEXT("SurvivalRequestRejected"), TEXT("Invalid life state or unavailable survival GameMode; no successful mutation reported.")); }
     else
     {
+        // Re-read from the controller's current pawn: PF.Respawn replaces the pawn.
         const UPFPlayerSurvivalComponent* Current = PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();
         const auto V = Current->GetVitals();
         R.Add(TEXT("Info"), TEXT("AuthoritativeVitals"), PC->GetPawn()->GetName(), FString::Printf(TEXT("Health=%.1f Stamina=%.1f Hunger=%.1f Thirst=%.1f Exposure=%.2f Dead=%d"), V.Health, V.Stamina, V.Hunger, V.Thirst, V.Exposure, Current->IsDead()));
     }
     return R;
 }
+
+/**
+ * PF.Teleport X Y Z [PlayerId] (foundation). With several players a PlayerId is
+ * required. The destination must be above KillZ, free of blocking collision for the
+ * capsule, and have walkable ground (normal Z >= 0.5) within 100 m below it.
+ */
 static FResult Teleport(const TArray<FString>& Args, UWorld* World)
 {
     FResult R(TEXT("PF.Teleport"));
@@ -261,7 +395,10 @@ static FResult Teleport(const TArray<FString>& Args, UWorld* World)
     }
     ACharacter* Character = Target ? Cast<ACharacter>(Target->GetPawn()) : nullptr;
     if (!Character || !Character->HasAuthority()) { Fail(R, TEXT("PlayerUnavailable"), TEXT("An authoritative possessed ACharacter is required.")); return R; }
-    double X, Y, Z; Number(Args[0], X); Number(Args[1], Y); Number(Args[2], Z);
+    double X, Y, Z;
+    Number(Args[0], X);
+    Number(Args[1], Y);
+    Number(Args[2], Z);
     const FVector Destination(X, Y, Z);
     UCapsuleComponent* Capsule = Character->GetCapsuleComponent();
     FCollisionQueryParams Query(SCENE_QUERY_STAT(PFDevTeleport), false, Character);
@@ -272,7 +409,8 @@ static FResult Teleport(const TArray<FString>& Args, UWorld* World)
         !World->LineTraceSingleByChannel(Floor, Destination, Destination - FVector(0, 0, 10000), ECC_Visibility, Query) ||
         Floor.ImpactNormal.Z < 0.5f)
     {
-        Fail(R, TEXT("UnsafeDestination"), TEXT("Destination overlaps blocking collision, is below KillZ, or lacks walkable ground within 100m.")); return R;
+        Fail(R, TEXT("UnsafeDestination"), TEXT("Destination overlaps blocking collision, is below KillZ, or lacks walkable ground within 100m."));
+        return R;
     }
     if (!Character->TeleportTo(Destination, Character->GetActorRotation(), false, false)) { Fail(R, TEXT("TeleportRejected"), TEXT("Unreal collision-aware TeleportTo rejected the destination.")); return R; }
     Character->GetCharacterMovement()->StopMovementImmediately();
@@ -281,6 +419,13 @@ static FResult Teleport(const TArray<FString>& Args, UWorld* World)
     return R;
 }
 
+/**
+ * Single entry point for every PF.* command (console, tests and the editor module).
+ * Order of checks: game thread -> argument validation -> client mutation refusal ->
+ * NOT IMPLEMENTED blockers -> built-ins (Help, Export) -> editor backend -> system
+ * adapters. The result is stamped, appended to History and optionally logged.
+ * In Shipping builds every command fails with ShippingDisabled.
+ */
 FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld* World, bool bLog)
 {
     FResult R(Name);
@@ -311,6 +456,7 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
     }
     else if (S->bEditor)
     {
+        // Editor commands only run in the editor world (not PIE or game processes).
         if (EditorCommand && (!World || World->WorldType == EWorldType::Editor)) { R = EditorCommand(Name, Args, World); }
         else { R.bNotImplemented = true; R.Add(TEXT("Info"), TEXT("NOT IMPLEMENTED"), FString(), TEXT("Requires editor backend outside PIE. Runtime gameplay reset/screenshot adapter is unavailable.")); }
     }
@@ -322,10 +468,13 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
     else if(Name==TEXT("PF.TestBuildingPlacement") || Name==TEXT("PF.ResetBuildings")) { R=BuildingCommand(Name,World); }
     else if(Name==TEXT("PF.SetTimeOfDay"))
     {
+        // M7: requires exactly one APFWorldClock in the map.
         if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode()){Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative gameplay world."));}
         else
         {
-            APFWorldClock* Clock=nullptr;int32 Count=0;for(TActorIterator<APFWorldClock> It(World);It;++It){Clock=*It;++Count;}
+            APFWorldClock* Clock=nullptr;
+            int32 Count=0;
+            for(TActorIterator<APFWorldClock> It(World);It;++It){Clock=*It;++Count;}
             if(Count!=1 || !Clock->SetHour(FCString::Atof(*Args[0]))){Fail(R,TEXT("WorldClockMissing"),TEXT("Requires exactly one valid map clock."));}
             else{R.Add(TEXT("Info"),TEXT("TimeChanged"),Clock->GetName(),FString::Printf(TEXT("Server time %.2f"),Clock->Hour));}
         }
@@ -338,7 +487,10 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
         if (!World || !World->IsGameWorld() || !World->GetAuthGameMode()) { Fail(R, TEXT("AuthorityWorldUnavailable"), TEXT("Requires a running authoritative gameplay world and GameMode.")); }
         else { R = Teleport(Args, World); }
     }
-    R.Command = Name; R.Map = Map; R.StartedUtc = Timestamp;
+    // Adapters build their own FResult, so restore the shared metadata afterwards.
+    R.Command = Name;
+    R.Map = Map;
+    R.StartedUtc = Timestamp;
     R.Add(TEXT("Info"), TEXT("Arguments"), FString(), FString::Join(Args, TEXT(" ")));
     History.Add(R);
     if (bLog) { LogResult(R); }
@@ -349,6 +501,11 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
 }
 }
 
+/**
+ * Registers one console command per CommandSpecs() entry (non-Shipping only).
+ * Commands run locally in the process whose console they are typed into; there is
+ * no network service and no client-to-server forwarding.
+ */
 class FPrimalAgentToolsRuntimeModule final : public IModuleInterface
 {
     TArray<IConsoleObject*> Commands;
@@ -374,4 +531,3 @@ public:
     }
 };
 IMPLEMENT_MODULE(FPrimalAgentToolsRuntimeModule, PrimalAgentToolsRuntime)
-

@@ -1,4 +1,12 @@
-"""Create only new M3 data and greybox fixtures through Unreal Editor APIs."""
+"""Create only new M3 data and greybox fixtures through Unreal Editor APIs.
+
+Milestone 3 (340c538). Creates:
+  * /Game/PrimalFrontier/Items/DA_ItemCatalog: a UPFItemCatalog data asset (its item
+    definitions come from the C++ constructor defaults).
+  * /Game/PrimalFrontier/Maps/L_M3Inventory: a copy of L_M1Survival with three
+    APFItemPickup actors (5 wood, 5 stone, 4 food).
+Refuses to run if either destination exists.
+"""
 import unreal
 
 CATALOG = "/Game/PrimalFrontier/Items/DA_ItemCatalog"

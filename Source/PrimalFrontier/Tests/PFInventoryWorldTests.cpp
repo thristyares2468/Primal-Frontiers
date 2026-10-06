@@ -1,3 +1,12 @@
+// PFInventoryWorldTests.cpp
+//
+// Automation test: PF.Inventory.WorldTransfers   (M3, 340c538)
+// Uses the real GameMode/PlayerState/pawn: saved catalog loads, drop/pickup
+// round trip keeps quantity and freshness, full bag leaves the pickup in the world,
+// distance and other-player checks, eating applies real nutrition, dead players
+// can't drop, and the inventory survives respawn.
+// Run: Session Frontend > Automation, filter "PF.Inventory".
+
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFItemPickup.h"

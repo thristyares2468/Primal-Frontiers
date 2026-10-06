@@ -1,3 +1,11 @@
+// PFSurvivalLifecycleTests.cpp
+//
+// Automation test: PF.Survival.Lifecycle   (M1, f7ed11d)
+// Real GameMode + PlayerStart: spawn position, first-person camera, server damage
+// pipeline, jump stamina cost, client-role refusal, and three timed
+// death -> respawn cycles (old pawn destroyed, vitals and collision restored).
+// Run: Session Frontend > Automation, filter "PF.Survival".
+
 #include "Survival/PFSurvivorCharacter.h"
 #include "Survival/PFSurvivalGameMode.h"
 #include "Survival/PFSurvivalPlayerController.h"

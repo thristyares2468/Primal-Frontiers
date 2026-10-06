@@ -1,4 +1,9 @@
-"""Create an isolated M2 greybox map through supported Unreal Editor APIs."""
+"""Create an isolated M2 greybox map through supported Unreal Editor APIs.
+
+Milestone 2 (8be2a14). Copies L_M1Survival to /Game/PrimalFrontier/Maps/L_M2Survival
+and adds one APFSurvivalHazard exposure zone and three APFRecoveryPickup rations.
+Refuses to overwrite an existing L_M2Survival; M1 assets stay unchanged.
+"""
 import unreal
 
 MAP = "/Game/PrimalFrontier/Maps/L_M2Survival"

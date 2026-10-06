@@ -1,4 +1,16 @@
-"""Create a new bounded greybox arena; never overwrite an existing destination."""
+"""Create a new bounded greybox arena; never overwrite an existing destination.
+
+Milestone 7 (b5a3165). Creates /Game/PrimalFrontier/Maps/L_M7SurvivalArena from
+L_M1Survival (keeping its GameMode), then replaces the geometry with a 60 x 70 m
+walled arena laid out south to north:
+  * safe start (two PlayerStarts facing north) with three nearby resource nodes,
+  * a central resource zone with six more nodes and a stepped rise to the west,
+  * a northern danger zone with an exposure hazard and the prowler spawn,
+plus three text signs, one APFWorldClock, an APFNavigationBounds and two creature
+spawners. PF.World.Live expects exactly 9 nodes, 2 creatures, 1 clock, 1 hazard.
+
+Rotations use keyword Rotator(pitch=, yaw=, roll=); see RepairWorldMilestone7Orientation.py.
+"""
 import unreal
 
 MAP = "/Game/PrimalFrontier/Maps/L_M7SurvivalArena"

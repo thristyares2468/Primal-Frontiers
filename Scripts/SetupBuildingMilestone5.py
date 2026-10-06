@@ -1,4 +1,9 @@
-"""Create only new M5 assets through supported editor APIs; refuse overwrite."""
+"""Create only new M5 assets through supported editor APIs; refuse overwrite.
+
+Milestone 5 (5702d4b). Creates /Game/PrimalFrontier/Building/DA_BuildingCatalog
+(UPFBuildingCatalog) and /Game/PrimalFrontier/Maps/L_M5Building, a copy of
+L_M4Gathering with a large extra floor (M5_BuildingGround) for placement tests.
+"""
 import unreal
 
 MAP = "/Game/PrimalFrontier/Maps/L_M5Building"

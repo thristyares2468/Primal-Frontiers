@@ -1,4 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Project note: see PrimalFrontierCharacter.h. APFSurvivorCharacter re-attaches the
+// camera to the capsule at BeginPlay so client and server share one eye position.
 
 #include "PrimalFrontierCharacter.h"
 #include "Animation/AnimInstance.h"

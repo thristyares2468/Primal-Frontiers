@@ -1,3 +1,5 @@
+// PFCraftingHUD.cpp — see PFCraftingHUD.h.
+
 #include "Crafting/PFCraftingHUD.h"
 #include "Crafting/PFCraftingComponent.h"
 #include "Inventory/PFItemCatalog.h"
@@ -7,29 +9,55 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
+
 void UPFCraftingHUD::NativeOnInitialized()
 {
-    Super::NativeOnInitialized();auto* Canvas=WidgetTree->ConstructWidget<UCanvasPanel>();WidgetTree->RootWidget=Canvas;
-    Panel=WidgetTree->ConstructWidget<UBorder>();auto* Placement=Canvas->AddChildToCanvas(Panel);
-    Placement->SetPosition(FVector2D(20,20));Placement->SetSize(FVector2D(670,690));
-    Panel->SetBrushColor(FLinearColor(0.02f,0.02f,0.02f,0.95f));Panel->SetPadding(FMargin(12));
-    Text=WidgetTree->ConstructWidget<UTextBlock>();auto Font=Text->GetFont();Font.Size=22;Text->SetFont(Font);Text->SetAutoWrapText(true);Panel->SetContent(Text);
+    Super::NativeOnInitialized();
+    // 670x690 dark panel at the top-left with one wrapped text block.
+    auto* Canvas=WidgetTree->ConstructWidget<UCanvasPanel>();
+    WidgetTree->RootWidget=Canvas;
+    Panel=WidgetTree->ConstructWidget<UBorder>();
+    auto* Placement=Canvas->AddChildToCanvas(Panel);
+    Placement->SetPosition(FVector2D(20,20));
+    Placement->SetSize(FVector2D(670,690));
+    Panel->SetBrushColor(FLinearColor(0.02f,0.02f,0.02f,0.95f));
+    Panel->SetPadding(FMargin(12));
+    Text=WidgetTree->ConstructWidget<UTextBlock>();
+    auto Font=Text->GetFont();
+    Font.Size=22;
+    Text->SetFont(Font);
+    Text->SetAutoWrapText(true);
+    Panel->SetContent(Text);
     SetVisibility(ESlateVisibility::HitTestInvisible);
 }
+
 void UPFCraftingHUD::NativeTick(const FGeometry& Geometry,float Delta)
 {
-    Super::NativeTick(Geometry,Delta);const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());if(!PC){return;}
-    Panel->SetVisibility(PC->IsCraftingOpen()?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);if(!PC->IsCraftingOpen()){return;}
-    const auto* C=PC->GetCrafting();const auto* I=PC->GetInventory();if(!C || !C->Catalog || !I){Text->SetText(FText::FromString(TEXT("Crafting unavailable")));return;}
+    Super::NativeTick(Geometry,Delta);
+    const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
+    if(!PC){return;}
+    Panel->SetVisibility(PC->IsCraftingOpen()?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);
+    if(!PC->IsCraftingOpen()){return;}
+    const auto* C=PC->GetCrafting();
+    const auto* I=PC->GetInventory();
+    if(!C || !C->Catalog || !I){Text->SetText(FText::FromString(TEXT("Crafting unavailable")));return;}
+
     FString Lines=TEXT("CRAFTING  C / Y close | R / D-left cancel\nPad: X tool | D-up cook | D-down dry\nKeep ingredients in your bag until complete.\n\n");
+    // Fixed list matching hotkeys 1/2/3 in the controller.
     const FName Ids[]={TEXT("Recipe_Tool"),TEXT("Recipe_Cook"),TEXT("Recipe_Dry")};
     for(int32 N=0;N<3;++N)
     {
-        const auto* D=C->Catalog->Recipe(Ids[N],I->Catalog);if(!D){continue;}
+        const auto* D=C->Catalog->Recipe(Ids[N],I->Catalog);
+        if(!D){continue;}
         Lines+=FString::Printf(TEXT("%d: %s (%.0fs)\n"),N+1,*D->DisplayName.ToString(),D->Duration);
+        // "have/need" per ingredient (Recipe() already guaranteed each item exists).
         for(const auto& Ingredient:D->Ingredients)
-        {const auto* Item=I->Definition(Ingredient.ItemId);Lines+=FString::Printf(TEXT("  %s %d/%d\n"),*Item->DisplayName.ToString(),I->Count(Ingredient.ItemId),Ingredient.Quantity);}
+        {
+            const auto* Item=I->Definition(Ingredient.ItemId);
+            Lines+=FString::Printf(TEXT("  %s %d/%d\n"),*Item->DisplayName.ToString(),I->Count(Ingredient.ItemId),Ingredient.Quantity);
+        }
     }
     if(!C->ActiveRecipe.IsNone()){Lines+=FString::Printf(TEXT("\nWorking: %.1fs remaining\n"),FMath::Max(0.0,C->FinishAt-UPFInventoryComponent::ServerTime(GetWorld())));}
-    Lines+=TEXT("\n")+C->Feedback;Text->SetText(FText::FromString(Lines));
+    Lines+=TEXT("\n")+C->Feedback;
+    Text->SetText(FText::FromString(Lines));
 }

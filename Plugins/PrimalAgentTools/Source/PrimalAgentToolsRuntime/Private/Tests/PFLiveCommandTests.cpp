@@ -1,3 +1,18 @@
+// PFLiveCommandTests.cpp
+//
+// Live network test: PF.LiveDeveloperCommands   (added in 78e4f30, after M1)
+// Runs the PF.* developer commands in a live dedicated server + 2 client session
+// (or standalone). Sequence: wait 30 s for players, exercise, wait 20 s, snapshot.
+//   Client: PF.Teleport/GiveItem/SaveWorld/LoadWorld/ResetTestWorld are refused
+//     with NotAuthority and the pawn does not move.
+//   Server: teleports every real character by PlayerId and checks the result,
+//     runs every other command once as a smoke test, and rejects a negative
+//     quantity safely.
+//   Snapshot: logs every character's replicated role/location and exports a
+//     report; the dedicated server lingers 30 s for late clients.
+// See Plugins/PrimalAgentTools/DEVELOPER_COMMANDS.md.
+// Launch with: -PFRunLiveTests (never in a normal gameplay session).
+
 #include "PFCommands.h"
 #if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
 #include "Engine/Engine.h"

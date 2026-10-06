@@ -1,4 +1,14 @@
-"""Create only new M6 definitions and small navigation arena via supported APIs."""
+"""Create only new M6 definitions and small navigation arena via supported APIs.
+
+Milestone 6 (0c2d935). Creates /Game/PrimalFrontier/Creatures/DA_CreatureCatalog
+(UPFCreatureCatalog) and /Game/PrimalFrontier/Maps/L_M6Creatures from L_M5Building
+with an arena floor, a path obstacle (the creature live test checks that navigation
+detours around it), the PlayerStart moved to the arena, an APFNavigationBounds that
+builds the navmesh, and forager/prowler APFCreatureSpawner actors.
+
+Pass -PFResumeM6Setup on the editor command line to finish a setup that was
+interrupted after the catalog/map were created (it still refuses duplicate M6_ actors).
+"""
 import unreal
 
 MAP = "/Game/PrimalFrontier/Maps/L_M6Creatures"

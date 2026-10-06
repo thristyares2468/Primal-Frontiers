@@ -1,3 +1,19 @@
+// PFSurvivalNeedsLiveTests.cpp
+//
+// Live network test: PF.Survival.NeedsLive   (M2, 8be2a14)
+// Server plus 1-2 clients; every process watches every survivor's replicated vitals.
+//   Stage 0: client PF.SetHunger/SetThirst/SetExposure/RecoverNeeds and direct
+//     component mutations (own and remote pawns) are refused; server stops drains.
+//   Stage 1: server sets hunger 40, thirst 50, exposure 0.25 and spawns food with a
+//     5 s shelf life (clients must see it, then see it expire).
+//   Stage 2: server recovers +35/+35 and clears exposure -> 75/85/0.
+//   Stage 3: server zeroes needs and advances 2 s -> starvation/dehydration damage
+//     leaves 90 health.
+//   Stage 4: server kills everyone with an 8 s respawn delay.
+//   Stage 5: respawned survivors are back to full needs; export a report.
+//   Stage 6: linger 10 s, then finish.
+// Launch with: -PFRunNeedsLiveTests -PFExpectedPlayers=1|2.
+
 #include "PFCommands.h"
 #if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
 #include "Engine/Engine.h"

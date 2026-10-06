@@ -1,3 +1,11 @@
+// PFSurvivalComponentTests.cpp
+//
+// Automation test: PF.Survival.Component   (M1, d32fbaf/f7ed11d)
+// Component-level health/stamina rules: defaults, damage, NaN rejection,
+// stamina spend/clamp/recovery, client-role refusal, death (stamina zero,
+// dead tag, no revive) and the Hunger/Thirst stat tags.
+// Run: Session Frontend > Automation, filter "PF.Survival".
+
 #include "Survival/PFPlayerSurvivalComponent.h"
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Engine/World.h"

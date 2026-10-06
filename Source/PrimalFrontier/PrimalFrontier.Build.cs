@@ -8,6 +8,11 @@ public class PrimalFrontier : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		// Engine modules used by the game. Why each non-template one is here:
+		//   AIModule, NavigationSystem  - creature AIController + navmesh pathing (M6)
+		//   UMG, Slate, SlateCore       - native placeholder HUD widgets (M1+)
+		//   GameplayTags                - life/creature/world state and item categories
+		//   StateTree*                  - used only by the template Variant_Shooter AI
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",
 			"CoreUObject",
@@ -26,6 +31,9 @@ public class PrimalFrontier : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
+		// Variant_Horror / Variant_Shooter are Epic template samples, not part of the
+		// survival game. They still compile into this module; removing them (code,
+		// include paths and Content/Variant_*) is a safe future cleanup.
 		PublicIncludePaths.AddRange(new string[] {
 			"PrimalFrontier",
 			"PrimalFrontier/Variant_Horror",

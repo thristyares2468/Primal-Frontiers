@@ -1,4 +1,11 @@
-"""One narrow correction to the new M7 map's Python positional Rotator usage."""
+"""One narrow correction to the new M7 map's Python positional Rotator usage.
+
+Milestone 7 (b5a3165). The first M7 setup built rotations with positional
+unreal.Rotator(0, 90, 0), whose argument order is (roll, pitch, yaw) in Unreal Python,
+not (pitch, yaw, roll), so starts, signs and nodes faced the wrong way. This script
+re-applies keyword rotations to exactly 2 starts, 3 signs and 9 nodes and refuses to
+change anything if the map does not contain that fixture set.
+"""
 import unreal
 MAP="/Game/PrimalFrontier/Maps/L_M7SurvivalArena"
 levels=unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)

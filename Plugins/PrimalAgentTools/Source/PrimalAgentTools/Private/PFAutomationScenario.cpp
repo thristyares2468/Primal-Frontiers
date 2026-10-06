@@ -1,3 +1,10 @@
+// PFAutomationScenario.cpp
+//
+// Builds or resets the owned editor fixture (PF_TestCube, PF_TestFloor, PF_TestStart,
+// PF_TestLight) in an approved L_Automation map only. Runs inside one undoable editor
+// transaction, refuses to touch actors that carry a fixture name without the owner
+// tag, and never saves the map. History: ccbad56 (foundation).
+
 #include "PFAutomationScenario.h"
 
 #include "Components/PointLightComponent.h"

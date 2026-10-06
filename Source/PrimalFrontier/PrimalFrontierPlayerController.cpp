@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Project note: see PrimalFrontierPlayerController.h.
 
 
 #include "PrimalFrontierPlayerController.h"

@@ -1,3 +1,12 @@
+// PFSurvivalNeedsTests.cpp
+//
+// Automation test: PF.Survival.Needs   (M2, 8be2a14)
+// Deterministic needs simulation via AdvanceNeeds: drain, recovery clamping,
+// threshold damage counted only for time actually spent empty (and independent
+// of how the time is split into steps), exposure damage, optional fed healing,
+// invalid input, client-role refusal and death from needs.
+// Run: Session Frontend > Automation, filter "PF.Survival".
+
 #include "Survival/PFPlayerSurvivalComponent.h"
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Engine/World.h"

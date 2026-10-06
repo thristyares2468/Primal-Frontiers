@@ -1,3 +1,10 @@
+// PFResults.cpp
+//
+// FResult helpers and the JSON report writer behind PF.ExportTestReport.
+// Reports go to Saved/AutomationReports/PF_<label>_<utc>_<guid>.json (schemaVersion 2)
+// with an overall status: Failed if any run has errors, NeedsAttention if any run is
+// not a clean pass, otherwise Passed. History: ccbad56 (foundation).
+
 #include "PFResults.h"
 
 #include "Dom/JsonObject.h"

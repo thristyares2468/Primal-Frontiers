@@ -1,3 +1,8 @@
+// PFAutomationScenario.h
+//
+// Editor test fixtures for the approved L_Automation map (PF.ResetTestWorld,
+// PF.PlaceTestActor). Fixture actors are tagged with OwnerTag plus their role name,
+// so only actors this tool created are ever touched. History: ccbad56.
 #pragma once
 
 #include "PFResults.h"

@@ -1,3 +1,12 @@
+// PFInventoryTests.cpp
+//
+// Automation test: PF.Inventory.Transactions   (M3, 340c538)
+// Pure component test (no pawn): stacking and spill-over, split conservation,
+// atomic weight/slot failures, invalid IDs/quantities, stale stack IDs,
+// per-batch food freshness (split keeps the deadline, different batches never
+// merge, only the old batch expires), client-role refusal and invalid designer data.
+// Run: Session Frontend > Automation, filter "PF.Inventory".
+
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFItemCatalog.h"
 #if WITH_DEV_AUTOMATION_TESTS

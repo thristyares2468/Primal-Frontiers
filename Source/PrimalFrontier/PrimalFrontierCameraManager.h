@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Project note: template camera manager; limits look pitch to -70..80 degrees.
 
 #pragma once
 
