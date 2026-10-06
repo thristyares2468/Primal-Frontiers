@@ -6,6 +6,7 @@
 // Stacks = MoveTemp(Proposed). A failure anywhere leaves the real inventory untouched.
 
 #include "Inventory/PFInventoryComponent.h"
+#include "PFAssetPaths.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFItemPickup.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -26,7 +27,7 @@ UPFInventoryComponent::UPFInventoryComponent()
 void UPFInventoryComponent::BeginPlay()
 {
     Super::BeginPlay();
-    if (!Catalog) { Catalog=LoadObject<UPFItemCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Items/DA_ItemCatalog.DA_ItemCatalog")); }
+    if (!Catalog) { Catalog=LoadObject<UPFItemCatalog>(nullptr,PFAssetPaths::ItemCatalog); }
     SetComponentTickEnabled(Authority());
 }
 
@@ -105,7 +106,9 @@ bool UPFInventoryComponent::AddExisting(FName Id,int32 Quantity,double Deadline)
     for(auto& S:Proposed)
     {
         if(S.ItemId!=Id || S.ExpiresAt!=Deadline){ continue; }
-        const int32 Added=FMath::Min(Remaining,D->StackLimit-S.Quantity);
+        // Clamp at 0: a stack above a since-lowered StackLimit must not go negative
+        // (that would shrink the stack and inflate Remaining, creating items).
+        const int32 Added=FMath::Min(Remaining,FMath::Max(0,D->StackLimit-S.Quantity));
         S.Quantity+=Added;
         Remaining-=Added;
     }
@@ -232,7 +235,7 @@ bool UPFInventoryComponent::Transform(const TArray<FPFItemStack>& Inputs,FName O
     {
         if(S.ItemId==Output && S.ExpiresAt==Deadline)
         {
-            const int32 N=FMath::Min(Left,D->StackLimit-S.Quantity);
+            const int32 N=FMath::Min(Left,FMath::Max(0,D->StackLimit-S.Quantity));  // see AddExisting
             S.Quantity+=N;
             Left-=N;
         }

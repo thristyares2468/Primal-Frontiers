@@ -1,6 +1,8 @@
 // PFBuildingComponent.cpp — see PFBuildingComponent.h for the snapping rules.
 
 #include "Building/PFBuildingComponent.h"
+#include "PFAssetPaths.h"
+#include "PFRequestCodes.h"
 #include "Building/PFBuildPiece.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -23,7 +25,7 @@ UPFBuildingComponent::UPFBuildingComponent()
 void UPFBuildingComponent::BeginPlay()
 {
     Super::BeginPlay();
-    if(!Catalog){Catalog=LoadObject<UPFBuildingCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Building/DA_BuildingCatalog.DA_BuildingCatalog"));}
+    if(!Catalog){Catalog=LoadObject<UPFBuildingCatalog>(nullptr,PFAssetPaths::BuildingCatalog);}
 }
 
 APFSurvivalPlayerController* UPFBuildingComponent::Controller() const{return Cast<APFSurvivalPlayerController>(GetOwner());}
@@ -225,9 +227,9 @@ void UPFBuildingComponent::ServerTargetAction_Implementation(uint8 Action)
     if(!RateLimit()){return;}
     auto* Piece=TracedPiece();
     bool Done=false;
-    if(Action==0){Done=Demolish(Piece);}
-    else if(Action==1){Done=Interact(Piece);}
-    else if(Action==2 && InReach(Piece)){Done=Piece->TakeDamage(25,FDamageEvent(),Controller(),Controller()->GetPawn())>0;}
+    if(Action==PFBuildAction::Demolish){Done=Demolish(Piece);}
+    else if(Action==PFBuildAction::Interact){Done=Interact(Piece);}
+    else if(Action==PFBuildAction::Damage && InReach(Piece)){Done=Piece->TakeDamage(25,FDamageEvent(),Controller(),Controller()->GetPawn())>0;}
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalBuilding] Action=%d accepted=%d"),Action,Done);
     ClientResult(Done?TEXT("Done"):TEXT("Refused: ownership, support, contents, reach or target"));
 }

@@ -11,6 +11,7 @@ Design intent lives in the other docs (`GAME_VISION.md`, `CORE_LOOP.md`, `ARCHIT
 | Folder | Files | Added in | Read with |
 |---|---|---|---|
 | `Source/PrimalFrontier/` (root) | `PrimalFrontier*.h/.cpp` | Template `cb67f77` | Unmodified First Person template. The project subclasses or replaces it. |
+| | `PFAssetPaths.h` (catalog asset paths), `PFRequestCodes.h` (RPC action codes) | Refinement pass | Shared constants, sections 2–3 |
 | `Survival/` | `PFSurvivorCharacter`, `PFPlayerSurvivalComponent`, `PFSurvivalGameMode`, `PFSurvivalPlayerController`, `PFSurvivalHUD` | M1 `d32fbaf`/`f7ed11d` | `SURVIVAL_M1.md` |
 | | `PFSurvivalHazard`, `PFRecoveryPickup` (and hunger, thirst and exposure on the component) | M2 `8be2a14` | `SURVIVAL_M2.md` |
 | | `PFInteraction`, `PFPauseMenu`, `PFGamepadInput.cpp` | M7 `b5a3165` | `WORLD_M7.md`, `PLAYTEST.md` |
@@ -63,12 +64,12 @@ Rules that hold everywhere (keep them when you extend the code):
 - **Freshness travels with the batch.** Each perishable stack keeps its own `ExpiresAt` deadline through split, drop, pickup and storage.
 - **Owner-only privacy.** Inventory and storage contents replicate only to their owner (`COND_OwnerOnly`). Other players see the structure, not its contents.
 
-### Action codes (uint8 in RPCs)
+### Action codes (uint8 in RPCs, named in `PFRequestCodes.h`)
 
 | RPC | 0 | 1 | 2 |
 |---|---|---|---|
-| `ServerInventoryAction(StackId, Action, Quantity)` | split | drop | consume (quantity must be 1) |
-| `UPFBuildingComponent::ServerTargetAction(Action)` | demolish | interact (open storage, toggle door) | owner hammer (25 damage) |
+| `ServerInventoryAction(StackId, Action, Quantity)` — `PFInventoryAction::` | `Split` | `Drop` | `Consume` (quantity must be 1) |
+| `UPFBuildingComponent::ServerTargetAction(Action)` — `PFBuildAction::` | `Demolish` | `Interact` (open storage, toggle door) | `Damage` (owner hammer, 25) |
 
 Any other code is ignored. The live tests send code 255 on purpose to prove this.
 
@@ -85,7 +86,7 @@ All content is defined in `UDataAsset` catalogs. Their default entries are set i
 | `/Game/PrimalFrontier/Building/DA_BuildingCatalog` | `UPFBuildingCatalog` | `Build_Foundation`, `Build_Wall`, `Build_Floor`, `Build_Ceiling`, `Build_Door`, `Build_Storage` |
 | `/Game/PrimalFrontier/Creatures/DA_CreatureCatalog` | `UPFCreatureCatalog` | `Creature_Forager`, `Creature_Prowler` |
 
-Components load these catalogs with `LoadObject` from the fixed paths above when no catalog is assigned. Don't move or rename the assets without updating those paths (see section 7).
+Components load these catalogs with `LoadObject` when no catalog is assigned. The paths are defined only in `Source/PrimalFrontier/PFAssetPaths.h`. If you move or rename an asset, check redirectors and update that header.
 
 ### Adding content
 
@@ -155,11 +156,11 @@ Launch pattern (based on `DEVELOPER_COMMANDS.md`): start the server with `Unreal
 
 ## 7. Known issues and recommendations
 
-These were found while annotating the code. None of them have been changed in behaviour.
+These were found while annotating the code. Items 1–3 were fixed in the refinement commit that follows the annotation commit. The rest are open.
 
-1. **Hard-coded catalog paths.** Nine `LoadObject` calls repeat four asset paths. Collect them in one header, or move to soft references or the Asset Manager as `AGENTS.md` prefers, so a rename can't silently break lookups.
-2. **Magic action codes.** Inventory and building actions are raw `uint8` values (table above). Named constants would keep the RPC signature and make call sites self-explaining.
-3. **Lowered stack limits.** The stack-merge loops in `UPFInventoryComponent` compute `StackLimit - Quantity`. If a designer lowers a stack limit below an existing stack, the result is negative. Clamp it with `FMath::Max(0, …)`.
+1. **Catalog paths (partly fixed).** The nine `LoadObject` calls now use `PFAssetPaths.h` instead of repeating literals. `AGENTS.md` still prefers soft references or the Asset Manager, a larger change.
+2. **Magic action codes (fixed).** Gameplay code uses `PFInventoryAction`/`PFBuildAction`. The RPCs still take `uint8`, and the tests still send raw values on purpose.
+3. **Lowered stack limits (fixed).** The stack-merge loops in `UPFInventoryComponent` computed `StackLimit - Quantity`. That went negative when a stack sat above a lowered limit, which would shrink the stack and create items once saves exist. It is now clamped at 0.
 4. **Item pickup label shows the raw ID.** `APFItemPickup` shows "E: Item_Wood x5" instead of the catalog display name.
 5. **Storage transfer keys only work in build mode.** E opens storage anywhere, but U and O (deposit and take) only work while the build overlay is on.
 6. **No server target.** `AGENTS.md` names `PrimalFrontierServer`, but there is no `Source/PrimalFrontierServer.Target.cs`, so dedicated-server builds can't be produced yet.

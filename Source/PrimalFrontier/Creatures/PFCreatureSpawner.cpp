@@ -1,6 +1,7 @@
 // PFCreatureSpawner.cpp — see PFCreatureSpawner.h.
 
 #include "Creatures/PFCreatureSpawner.h"
+#include "PFAssetPaths.h"
 #include "Creatures/PFCreature.h"
 #include "NavigationSystem.h"
 #include "EngineUtils.h"
@@ -24,7 +25,7 @@ APFCreature* APFCreatureSpawner::Spawn(UWorld* World,FName Id,FVector Location,U
 {
     // Authority, sane location and the global 8-creature cap.
     if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode() || Location.ContainsNaN() || Location.GetAbsMax()>100000 || Count(World)>=8){return nullptr;}
-    if(!DefinitionCatalog){DefinitionCatalog=LoadObject<UPFCreatureCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Creatures/DA_CreatureCatalog.DA_CreatureCatalog"));}
+    if(!DefinitionCatalog){DefinitionCatalog=LoadObject<UPFCreatureCatalog>(nullptr,PFAssetPaths::CreatureCatalog);}
     if(!DefinitionCatalog || !DefinitionCatalog->Find(Id)){return nullptr;}
     // Must land on the navmesh, with room for the capsule (radius 38, half-height 50).
     auto* Nav=FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);

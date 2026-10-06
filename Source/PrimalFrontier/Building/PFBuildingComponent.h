@@ -68,7 +68,7 @@ public:
 
     // ---- RPCs (owning client -> server), rate limited to one per 0.25 s ----
     UFUNCTION(Server,Reliable) void ServerPlace(FName Id,int32 QuarterTurns);
-    /** Action on the aimed-at piece: 0 = demolish, 1 = interact (door/storage), 2 = 25 owner damage. */
+    /** Action on the aimed-at piece (PFBuildAction in PFRequestCodes.h): 0 = demolish, 1 = interact (door/storage), 2 = 25 owner damage. */
     UFUNCTION(Server,Reliable) void ServerTargetAction(uint8 Action);
     UFUNCTION(Server,Reliable) void ServerTransfer(bool bDeposit,FGuid StackId,int32 Quantity);
 

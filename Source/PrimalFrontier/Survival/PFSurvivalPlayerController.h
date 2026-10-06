@@ -76,7 +76,7 @@ public:
     int32 GetSelectedInventoryIndex() const {return SelectedInventoryIndex;}
     const FString& GetInventoryMessage() const {return InventoryMessage;}
     // Only operations on the owning player's existing stack IDs. No item-grant RPC.
-    /** Action codes: 0 = split Quantity off, 1 = drop Quantity, 2 = eat one (Quantity must be 1). */
+    /** Action codes (PFInventoryAction in PFRequestCodes.h): 0 = split Quantity off, 1 = drop Quantity, 2 = eat one (Quantity must be 1). */
     UFUNCTION(Server,Reliable) void ServerInventoryAction(FGuid StackId,uint8 Action,int32 Quantity);
 
 protected:

@@ -1,6 +1,7 @@
 // PFResourceNode.cpp — see PFResourceNode.h.
 
 #include "Crafting/PFResourceNode.h"
+#include "PFAssetPaths.h"
 #include "Crafting/PFCraftingCatalog.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFInventoryComponent.h"
@@ -39,8 +40,8 @@ void APFResourceNode::BeginPlay()
 {
     Super::BeginPlay();
     // Clients load the catalogs too, for the label's display name.
-    if(!Catalog){Catalog=LoadObject<UPFCraftingCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Crafting/DA_CraftingCatalog.DA_CraftingCatalog"));}
-    if(!Items){Items=LoadObject<UPFItemCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Items/DA_ItemCatalog.DA_ItemCatalog"));}
+    if(!Catalog){Catalog=LoadObject<UPFCraftingCatalog>(nullptr,PFAssetPaths::CraftingCatalog);}
+    if(!Items){Items=LoadObject<UPFItemCatalog>(nullptr,PFAssetPaths::ItemCatalog);}
     // An invalid ResourceId leaves HitsRemaining at 0 (an inert node).
     if(HasAuthority())
     {

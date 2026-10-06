@@ -1,6 +1,7 @@
 // PFItemPickup.cpp — see PFItemPickup.h.
 
 #include "Inventory/PFItemPickup.h"
+#include "PFAssetPaths.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "GameFramework/PlayerState.h"
@@ -41,7 +42,7 @@ void APFItemPickup::BeginPlay()
     Super::BeginPlay();
     if(HasAuthority())
     {
-        const auto* Catalog=LoadObject<UPFItemCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Items/DA_ItemCatalog.DA_ItemCatalog"));
+        const auto* Catalog=LoadObject<UPFItemCatalog>(nullptr,PFAssetPaths::ItemCatalog);
         const auto* D=Catalog ? Catalog->Find(bInitialized?Contents.ItemId:ItemId) : nullptr;
         if(!D){Destroy();return;}
         // Level-placed pickup: create contents now, starting a fresh shelf life for perishables.

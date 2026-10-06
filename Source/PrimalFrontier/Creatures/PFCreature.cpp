@@ -1,6 +1,7 @@
 // PFCreature.cpp — see PFCreature.h for the state machine overview.
 
 #include "Creatures/PFCreature.h"
+#include "PFAssetPaths.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Inventory/PFItemPickup.h"
 #include "Inventory/PFItemCatalog.h"
@@ -48,7 +49,7 @@ const FPFCreatureDefinition* APFCreature::Definition() const {return Catalog?Cat
 void APFCreature::BeginPlay()
 {
     Super::BeginPlay();
-    if(!Catalog){Catalog=LoadObject<UPFCreatureCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Creatures/DA_CreatureCatalog.DA_CreatureCatalog"));}
+    if(!Catalog){Catalog=LoadObject<UPFCreatureCatalog>(nullptr,PFAssetPaths::CreatureCatalog);}
     if(HasAuthority())
     {
         DefinitionId=CreatureId;
@@ -242,7 +243,7 @@ void APFCreature::Die()
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     // Exactly one perishable food pickup, using the normal pickup/expiry rules.
     const auto* D=Definition();
-    const auto* Items=LoadObject<UPFItemCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Items/DA_ItemCatalog.DA_ItemCatalog"));
+    const auto* Items=LoadObject<UPFItemCatalog>(nullptr,PFAssetPaths::ItemCatalog);
     const auto* Food=Items?Items->Find(TEXT("Item_Food")):nullptr;
     if(D && Food)
     {

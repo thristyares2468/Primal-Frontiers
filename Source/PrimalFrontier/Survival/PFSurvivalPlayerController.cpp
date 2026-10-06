@@ -7,6 +7,7 @@
 // Gamepad bindings are in PFGamepadInput.cpp and reuse the same handlers.
 
 #include "Survival/PFSurvivalPlayerController.h"
+#include "PFRequestCodes.h"
 #include "Survival/PFSurvivalHUD.h"
 #include "Survival/PFRecoveryPickup.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -147,7 +148,7 @@ void APFSurvivalPlayerController::Interact()
     if(!IsLocalController() || bPauseMenuOpen){return;}
     // E prioritizes a nearby pickup/resource even while build preview is open.
     if(PFInteraction::FindTarget(GetPawn())){ServerInteract();}
-    else if(Building->TracedPiece()){Building->ServerTargetAction(1);}  // 1 = open door / storage
+    else if(Building->TracedPiece()){Building->ServerTargetAction(PFBuildAction::Interact);}  // open door / storage
     else{ServerInteract();}  // server replies with a "nothing in reach" hint
 }
 
@@ -225,9 +226,9 @@ void APFSurvivalPlayerController::InventoryNext()
 }
 
 void APFSurvivalPlayerController::InventoryPrevious(){if(bInventoryOpen){SelectedInventoryIndex=FMath::Max(0,SelectedInventoryIndex-1);}}
-void APFSurvivalPlayerController::InventorySplit(){SendInventoryAction(0);}
-void APFSurvivalPlayerController::InventoryDrop(){SendInventoryAction(1);}
-void APFSurvivalPlayerController::InventoryConsume(){SendInventoryAction(2);}
+void APFSurvivalPlayerController::InventorySplit(){SendInventoryAction(PFInventoryAction::Split);}
+void APFSurvivalPlayerController::InventoryDrop(){SendInventoryAction(PFInventoryAction::Drop);}
+void APFSurvivalPlayerController::InventoryConsume(){SendInventoryAction(PFInventoryAction::Consume);}
 
 void APFSurvivalPlayerController::SendInventoryAction(uint8 Action)
 {
@@ -236,7 +237,7 @@ void APFSurvivalPlayerController::SendInventoryAction(uint8 Action)
     SelectedInventoryIndex=FMath::Clamp(SelectedInventoryIndex,0,I->GetStacks().Num()-1);
     const auto S=I->GetStacks()[SelectedInventoryIndex];
     // Only the stable stack GUID travels; the server looks it up in *its own* copy.
-    ServerInventoryAction(S.StackId,Action,Action==0 ? S.Quantity/2 : 1);
+    ServerInventoryAction(S.StackId,Action,Action==PFInventoryAction::Split ? S.Quantity/2 : 1);
 }
 
 void APFSurvivalPlayerController::ServerInventoryAction_Implementation(FGuid StackId,uint8 Action,int32 Quantity)
@@ -249,9 +250,9 @@ void APFSurvivalPlayerController::ServerInventoryAction_Implementation(FGuid Sta
     bool Accepted=false;
     if(HasAuthority() && I && S && !S->IsDead() && Quantity>0 && Quantity<=1000)
     {
-        if(Action==0){Accepted=I->Split(StackId,Quantity);}
-        else if(Action==1){Accepted=I->Drop(StackId,Quantity,GetPawn())!=nullptr;}
-        else if(Action==2 && Quantity==1){Accepted=I->Consume(StackId,GetPawn());}
+        if(Action==PFInventoryAction::Split){Accepted=I->Split(StackId,Quantity);}
+        else if(Action==PFInventoryAction::Drop){Accepted=I->Drop(StackId,Quantity,GetPawn())!=nullptr;}
+        else if(Action==PFInventoryAction::Consume && Quantity==1){Accepted=I->Consume(StackId,GetPawn());}
     }
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalInventory] Request action=%d quantity=%d accepted=%d owner=%s"),Action,Quantity,Accepted,*GetName());
     ClientInventoryFeedback(Accepted ? TEXT("Done") : TEXT("Refused: invalid stack, quantity, space or life state"));
@@ -356,8 +357,8 @@ void APFSurvivalPlayerController::ServerAttackCreature_Implementation()
 }
 
 // Building target actions: 0 = demolish, 1 = open door/storage, 2 = 25-damage owner hammer.
-void APFSurvivalPlayerController::DemolishBuilding(){if(Building->bBuildMode){Building->ServerTargetAction(0);}}
-void APFSurvivalPlayerController::DamageBuilding(){if(Building->bBuildMode){Building->ServerTargetAction(2);}}
+void APFSurvivalPlayerController::DemolishBuilding(){if(Building->bBuildMode){Building->ServerTargetAction(PFBuildAction::Demolish);}}
+void APFSurvivalPlayerController::DamageBuilding(){if(Building->bBuildMode){Building->ServerTargetAction(PFBuildAction::Damage);}}
 
 // Deposit one of the selected bag stack into the open storage box.
 void APFSurvivalPlayerController::StoreItem()

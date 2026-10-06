@@ -1,6 +1,7 @@
 // PFCraftingComponent.cpp — see PFCraftingComponent.h for the craft lifecycle.
 
 #include "Crafting/PFCraftingComponent.h"
+#include "PFAssetPaths.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
@@ -17,7 +18,7 @@ UPFCraftingComponent::UPFCraftingComponent()
 void UPFCraftingComponent::BeginPlay()
 {
     Super::BeginPlay();
-    if(!Catalog){Catalog=LoadObject<UPFCraftingCatalog>(nullptr,TEXT("/Game/PrimalFrontier/Crafting/DA_CraftingCatalog.DA_CraftingCatalog"));}
+    if(!Catalog){Catalog=LoadObject<UPFCraftingCatalog>(nullptr,PFAssetPaths::CraftingCatalog);}
     SetComponentTickEnabled(GetOwner()->HasAuthority());
 }
 
