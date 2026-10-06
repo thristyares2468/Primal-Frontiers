@@ -156,14 +156,14 @@ Launch pattern (based on `DEVELOPER_COMMANDS.md`): start the server with `Unreal
 
 ## 7. Known issues and recommendations
 
-These were found while annotating the code. Items 1–3 were fixed in the refinement commit that follows the annotation commit. The rest are open.
+These were found while annotating the code. Items marked fixed or changed were done in the follow-up refinement commits on the same branch. The rest are recommendations.
 
 1. **Catalog paths (partly fixed).** The nine `LoadObject` calls now use `PFAssetPaths.h` instead of repeating literals. `AGENTS.md` still prefers soft references or the Asset Manager, a larger change.
 2. **Magic action codes (fixed).** Gameplay code uses `PFInventoryAction`/`PFBuildAction`. The RPCs still take `uint8`, and the tests still send raw values on purpose.
 3. **Lowered stack limits (fixed).** The stack-merge loops in `UPFInventoryComponent` computed `StackLimit - Quantity`. That went negative when a stack sat above a lowered limit, which would shrink the stack and create items once saves exist. It is now clamped at 0.
-4. **Item pickup label shows the raw ID.** `APFItemPickup` shows "E: Item_Wood x5" instead of the catalog display name.
-5. **Storage transfer keys only work in build mode.** E opens storage anywhere, but U and O (deposit and take) only work while the build overlay is on.
-6. **No server target.** `AGENTS.md` names `PrimalFrontierServer`, but there is no `Source/PrimalFrontierServer.Target.cs`, so dedicated-server builds can't be produced yet.
+4. **Pickup label showed the raw ID (fixed).** `APFItemPickup` now loads the item catalog on clients too and shows "E: Wood x5" instead of "E: Item_Wood x5". It falls back to the ID for unknown items.
+5. **Storage transfers need build mode (by design, revisit).** E opens storage anywhere, but U/O and the gamepad D-pad only transfer in build mode, because the storage panel is drawn inside the build overlay (`PLAYTEST.md` documents this). If that feels awkward in playtests, show the storage panel whenever `OpenStorage` is set and allow transfers then.
+6. **Server target (added).** `Source/PrimalFrontierServer.Target.cs` now exists, as named in `AGENTS.md`. Building it needs a source-built engine; the launcher install still builds the Game and Editor targets. Live tests can keep using `UnrealEditor-Cmd.exe … -server`.
 7. **Large controller.** `APFSurvivalPlayerController` holds input, HUD, menu, inventory, crafting and attack request code. Split it into small input and request components when it next grows. Moving gameplay keys from `BindKey` to Enhanced Input actions would also let players rebind them.
-8. **Unused template code and plugins.** `Variant_Horror`/`Variant_Shooter` are still compiled (StateTree is needed only for them). The `.uproject` also enables many experimental PCG, Water and Toolset plugins that the game does not use. Removing them would cut build time and editor startup noise. Check for references first.
-9. **Docs drift.** `ARCHITECTURE.md` contains a pasted copy of itself inside a code block. The milestone docs are the accurate per-system record.
+8. **Unused template code and plugins.** `Variant_Horror`/`Variant_Shooter` are still compiled (StateTree is needed only for them), and `Content/Variant_*` Blueprints and maps depend on those C++ classes. Remove the C++ together with that content, in the editor, or neither. The `.uproject` also enables many experimental PCG, Water and Toolset plugins that the game does not use. Disabling them would cut build time and editor startup noise. Check for references first.
+9. **Docs drift (fixed).** `ARCHITECTURE.md` was wrapped in one unclosed code block, so it rendered as raw text. It is now normal Markdown with the same content. The milestone docs remain the detailed per-system record.
