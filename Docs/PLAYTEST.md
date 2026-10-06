@@ -1,8 +1,10 @@
 # Playing and testing Primal Frontier
 
-Updated 2026-10-06. The integrated development level is **L_M7SurvivalArena**. Build, 16-test regression, one-/two-client checks and rendered interaction/hazard/day-night checks pass; the sustained manual walking route between zones is still pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
+Updated 2026-10-06. The integrated development level is **L_M7SurvivalArena**. Latest merged-source build, 17-test regression, one-/two-client checks and rendered water/fibre checks pass. Prior rendered interaction/hazard/day-night evidence is in MILESTONES.md; sustained manual walking and overnight survival are still pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
 
 ## Open the game
+
+The latest world extension adds primitive woodland, rocky ground, a roofed ruin, fibre and freshwater collection nodes to this same continuous level. At a labelled freshwater node, aim and press E to gather finite portions. Open Tab, select Water portion, and press Q to drink one (controller X in inventory). It restores 35 thirst, restores no hunger, and is not spent at full thirst. Food still has expiry timers. Blue surfaces are visual water placeholders; swimming is not implemented. See [ROADMAP_STATUS.md](ROADMAP_STATUS.md) for the final open-world direction and current greybox limitations.
 
 1. Open `C:\UnrealProjects\PrimalFrontier\PrimalFrontier.uproject`.
 2. In the Content Drawer, browse **Content > PrimalFrontier > Maps**.

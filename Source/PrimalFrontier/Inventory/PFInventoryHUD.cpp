@@ -40,7 +40,7 @@ void UPFInventoryHUD::NativeTick(const FGeometry& Geometry,float Delta)
     if(!I){Text->SetText(FText::FromString(TEXT("Waiting for inventory...")));return;}
 
     // Header with capacity and controls.
-    FString Lines=FString::Printf(TEXT("INVENTORY   %d/%d slots   %.1f/%.1f kg\nTab / View close | Up/Down select\nKeys: X split | G drop | Q eat\nPad: D-left split | D-right drop | X eat\n\n"),I->GetStacks().Num(),I->SlotLimit,I->GetWeight(),I->WeightLimit);
+    FString Lines=FString::Printf(TEXT("INVENTORY   %d/%d slots   %.1f/%.1f kg\nTab / View close | Up/Down select\nKeys: X split | G drop | Q eat/drink\nPad: D-left split | D-right drop | X eat/drink\n\n"),I->GetStacks().Num(),I->SlotLimit,I->GetWeight(),I->WeightLimit);
 
     // One row per stack: ">" marks the selection; perishables show seconds remaining.
     const int32 Selected=FMath::Clamp(PC->GetSelectedInventoryIndex(),0,I->GetStacks().Num()-1);

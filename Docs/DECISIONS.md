@@ -1,5 +1,13 @@
 \# Architecture and Design Decisions
 
+## 2026-10-06 — Continuous world prototype and finite water
+
+The full M0-M25 roadmap is preserved in FULL_PROJECT_ROADMAP.md; ROADMAP_STATUS.md defines the current M7/M8 execution boundary and the final open-world requirement. Keep the M7 prototype continuously traversable across its zones. Its small bounded geometry is an integration fixture, not a final open-world or streaming implementation. Do not confuse automated path connectivity with a completed manual travel gate.
+
+Add fibre and water through existing item/resource data definitions. Water is a finite, nonperishable placeholder inventory portion; collecting it uses server range/aim/cooldown/depletion/capacity checks, and drinking spends exactly one portion through the existing owned inventory RPC. It restores thirst only and is refused at full thirst. Physical vessels, water contamination, swimming and water simulation are future features. Fibre has no new recipe in this increment. No external dependency or imported art is required.
+
+Recover only missing M7 changes after the user/Claude merge at 6d3ee12; preserve centralized asset paths, named request codes, inventory capacity fix, pickup labels and documentation refactors. Rebuild and retest the merged source rather than treating pre-merge evidence as current certification.
+
 ## 2026-10-06 — Preserve user asset imports while finishing the greybox gate
 
 The user has added Adventures_Pack, Bike, DynamicFalling, Modular_Rural_Cabin and Polyphoria and authorized sourcing other assets when needed. Keep these user changes outside the current M7 commit and preserve their paths/references. No imported pack is needed for the small arena verification. Before selecting an asset for a concrete feature, inspect suitability, dependency/memory cost and available usage rights; notify the user if a license, purchase or manual import is needed. This does not expand M1-M8 into final-art production or third-person gameplay.

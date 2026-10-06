@@ -38,6 +38,11 @@ UPFItemCatalog::UPFItemCatalog()
     Items.Last().StackLimit=10;Items.Last().ShelfLifeSeconds=900;Items.Last().FoodRecovery=55;Items.Last().WaterRecovery=10;
     Add(TEXT("Item_DriedFood"),TEXT("Dried food"),0.15f,TAG_PF_Food);
     Items.Last().StackLimit=10;Items.Last().ShelfLifeSeconds=1800;Items.Last().FoodRecovery=45;
+
+    // M7 world resources: water is gathered and spent one portion at a time.
+    Add(TEXT("Item_Fibre"),TEXT("Plant fibre"),0.1f,TAG_PF_Resource);
+    Add(TEXT("Item_Water"),TEXT("Water portion (placeholder)"),0.5f,TAG_PF_Resource);
+    Items.Last().StackLimit=10;Items.Last().WaterRecovery=35;
 }
 
 const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const

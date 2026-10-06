@@ -102,7 +102,7 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
         ThirstBar->SetPercent(V.Thirst/100.f);
         // Most urgent condition first; otherwise a short controls reminder.
         StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") :
-            (V.Hunger <= 0 || V.Thirst <= 0 ? TEXT("STARVING / DEHYDRATED - find a ration!") :
+            (V.Hunger <= 0 || V.Thirst <= 0 ? TEXT("STARVING / DEHYDRATED - gather food or water!") :
             (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : TEXT("WASD | E Interact | Tab Bag | C Craft | B Build | P Menu")))));
     }
     // Blueprint presentation hooks (no-ops unless a BP child implements them).
