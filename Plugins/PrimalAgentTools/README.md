@@ -72,6 +72,12 @@ M7 adds server-authoritative `PF.SetTimeOfDay` for the unique replicated world c
 
 See [VERIFICATION.md](VERIFICATION.md) for the completed acceptance run, exact findings, evidence, and remaining manual setup.
 
+For the M7 World Partition candidate, opt-in automation test `PF.World.Streaming` runs only in an isolated Standalone Editor binary with `-PFRunWorldStreamingTests`. It supports NullRHI, performs real landmark unload/reload and checks that harvesting/clock/core collision survive. It changes runtime test state only, saves no map/assets, and does not certify manual traversal. This test is excluded from Shipping and non-editor binaries; it is not a console command listed by PF.Help.
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' 'C:\UnrealProjects\PrimalFrontier\PrimalFrontier.uproject' /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld -game -nullrhi -unattended -nosplash -nosound -NoLiveCoding -PFRunWorldStreamingTests '-ExecCmds=Automation RunTests PF.World.Streaming' '-TestExit=Automation Test Queue Empty' '-ReportExportPath=C:\UnrealProjects\PrimalFrontier\Saved\AutomationReports\M7Streaming' '-abslog=C:\UnrealProjects\PrimalFrontier\Saved\Logs\PFM7Streaming.log'
+```
+
 Run the narrow suite `PF.PrimalAgentTools` in an **isolated editor process**, not a working editor with unsaved user changes. Scenario and screenshot integration tests require explicit flags; absent flags produce a setup warning and do not exercise those features.
 
 ```powershell

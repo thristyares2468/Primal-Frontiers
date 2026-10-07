@@ -1,5 +1,14 @@
 # Milestone 7 — in progress 2026-09-30
 
+## 2026-10-08 isolated runtime streaming checkpoint
+
+**M7 still awaits the user's sustained route/overnight confirmation; M8 has not started.** Added only an opt-in automated streaming probe and documentation. No gameplay implementation, map, imported asset or project setting changed in this checkpoint. No Computer Use was needed.
+
+- New `PF.World.Streaming` runs in an isolated Standalone Editor binary on `L_PrimalFrontier_OpenWorld`, with `-PFRunWorldStreamingTests`; NullRHI is supported. It harvests a real wood node through server validation, freezes movement for a deliberate distant test probe, waits for all four landmark actors to unload, then returns and waits for their actual reload. It checks active-world identity/counts of all 15 resources, unchanged harvested hit state, the same unique clock remaining at night, and camp ground collision. Player movement/location/look, needs rates and clock tuning are restored after the test. It saves no assets/maps. This is a streaming/state regression, not manual travel or overnight evidence, and not a new console command.
+- Editor build passed in **33.62 s**; strengthened active-world identity assertions rebuilt in **8.62 s**, no compiler warnings. `Saved/AutomationReports/M7StreamingProbe/index.json` and final-source `M7StreamingVerified/index.json` each report **PF.World.Streaming: 1 passed, 0 failed, 0 test warnings**, exit status 0. Final log: `Saved/Logs/PFM7StreamingVerified.log`. No C++ changes followed the verified run.
+- Sampled final peak working set/private memory: **1.79/1.76 GiB**. NullRHI does not measure rendered FPS or stuttering. Earlier 19-test regression and actual one-/two-client integration results are separate evidence below; this new Standalone probe does not replace them.
+- Log investigation: existing experimental Toolsets Python errors and TEDS warnings remain. The uncooked `-game` launch also warns that converter-created HLOD builder settings cannot initially load `/Script/WorldPartitionHLODUtilities`/builder classes. These warnings also occur in the prior `PFM7OpenPolicyClient1.log`; its editor module loads after the warnings. Engine HLOD builder settings are editor-only data. This is consistent with uncooked editor-module load order; cooked HLOD generation/loading is not certified. No new gameplay error, ensure or RHI crash occurred in the probe. The older `PrimalFrontier.log` is not this run's evidence.
+
 ## 2026-10-08 settings and World Partition checkpoint
 
 **M7 remains in progress; M8 has not started.** Settings and the open-world candidate are implemented. The New Editor Window PIE presentation bottleneck and sustained manual route/overnight gate remain open.

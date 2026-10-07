@@ -8,6 +8,8 @@ Retain the M7 arena as a regression fixture. The open-world request is represent
 
 The user's October 8 authorization to push everything supersedes leaving imports outside automatic commits. Preserve user packs in a separate LFS commit; do not integrate them into this greybox or claim provenance/rights verification. Archive the reconciled stash before dropping it. Use the requested Codex GPT-6.1 Sol co-author footer going forward.
 
+Prefer source, commandlets, Unreal APIs, logs and bounded NullRHI tests; minimize Computer Use to required visual/manual checks. Use existing assets first and handle straightforward setup through supported scripts; flag specific asset gaps or imports needing extensive UI work when a milestone actually requires them. No new external asset is needed for M7 verification. The isolated streaming probe supplements the pending human route/overnight gate and does not authorize M8 before confirmation.
+
 ## 2026-10-06 — Continuous world prototype and finite water
 
 The full M0-M25 roadmap is preserved in FULL_PROJECT_ROADMAP.md; ROADMAP_STATUS.md defines the current M7/M8 execution boundary and the final open-world requirement. Keep the M7 prototype continuously traversable across its zones. Its small bounded geometry is an integration fixture, not a final open-world or streaming implementation. Do not confuse automated path connectivity with a completed manual travel gate.
