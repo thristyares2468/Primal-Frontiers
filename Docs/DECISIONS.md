@@ -1,5 +1,13 @@
 \# Architecture and Design Decisions
 
+## 2026-10-08 — Local settings and bounded open-world streaming
+
+Use a project UGameUserSettings subclass for local preferences and native scalability/display controls. Draft until Apply; revert unconfirmed display changes after 15 real-time seconds. Explicitly load/save game scalability in Editor sessions because the base Editor path uses EditorSettings.ini. Motion blur defaults off. Project Music/Effects/UI sound classes and a preference SoundMix provide category routing; existing explicitly assigned third-party classes require deliberate routing. No plugin dependency or external media was added.
+
+Retain the M7 arena as a regression fixture. The open-world request is represented by a separate 400 x 400 m World Partition greybox candidate. Keep its small simulation camp and collision boundary loaded; stream distant stateless landmarks until M8 defines persistent simulation lifetimes. Asset/network checks do not certify full traversal. M8 remains gated by manual route/overnight play. Selected Viewport PIE/F11 is a measured workaround for the New Editor Window presentation delay; retain that unresolved diagnostic explicitly rather than changing project RHI settings without evidence.
+
+The user's October 8 authorization to push everything supersedes leaving imports outside automatic commits. Preserve user packs in a separate LFS commit; do not integrate them into this greybox or claim provenance/rights verification. Archive the reconciled stash before dropping it. Use the requested Codex GPT-6.1 Sol co-author footer going forward.
+
 ## 2026-10-06 — Continuous world prototype and finite water
 
 The full M0-M25 roadmap is preserved in FULL_PROJECT_ROADMAP.md; ROADMAP_STATUS.md defines the current M7/M8 execution boundary and the final open-world requirement. Keep the M7 prototype continuously traversable across its zones. Its small bounded geometry is an integration fixture, not a final open-world or streaming implementation. Do not confuse automated path connectivity with a completed manual travel gate.

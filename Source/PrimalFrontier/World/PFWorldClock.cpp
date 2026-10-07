@@ -21,11 +21,13 @@ APFWorldClock::APFWorldClock()
     Sun->SetupAttachment(GetRootComponent());
     Sun->SetMobility(EComponentMobility::Movable);
     Sun->SetIntensity(3);
+    Sun->SetForwardShadingPriority(1);
     // Fixed dim moonlight-style fill so night is dark but still navigable.
     NightFill=CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("NightVisibility"));
     NightFill->SetupAttachment(GetRootComponent());
     NightFill->SetMobility(EComponentMobility::Movable);
     NightFill->SetIntensity(0.2f);
+    NightFill->SetForwardShadingPriority(0);
     NightFill->SetCastShadows(false);
     NightFill->SetRelativeRotation(FRotator(-60,180,0));
 }

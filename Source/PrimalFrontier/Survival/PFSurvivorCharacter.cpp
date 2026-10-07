@@ -4,6 +4,7 @@
 // GameMode; this file wires input/movement/presentation to those rules.
 
 #include "Survival/PFSurvivorCharacter.h"
+#include "Settings/PFGameUserSettings.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Survival/PFSurvivalGameMode.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -61,6 +62,16 @@ void APFSurvivorCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 void APFSurvivorCharacter::Tick(float DeltaSeconds)
 {
+    if(IsLocallyControlled())
+    {
+        if(const auto* Settings=UPFGameUserSettings::Get())
+        {
+            auto* Camera=GetFirstPersonCameraComponent();
+            Camera->SetFieldOfView(Settings->Preferences.FieldOfView);
+            Camera->PostProcessSettings.bOverride_MotionBlurAmount=true;
+            Camera->PostProcessSettings.MotionBlurAmount=Settings->Preferences.bMotionBlur?0.5f:0;
+        }
+    }
     Super::Tick(DeltaSeconds);
 
     // Server derives the flag from the authoritative inventory (on PlayerState).
@@ -82,6 +93,13 @@ void APFSurvivorCharacter::Tick(float DeltaSeconds)
         ToolHead->SetVisibility(bHasGatheringTool && IsLocallyControlled());
         RemoteTool->SetVisibility(bHasGatheringTool && !IsLocallyControlled());
     }
+}
+
+void APFSurvivorCharacter::DoAim(float Yaw,float Pitch)
+{
+    const auto* Settings=UPFGameUserSettings::Get();
+    const float Scale=Settings?Settings->Preferences.LookSensitivity:1;
+    Super::DoAim(Yaw*Scale,Pitch*Scale*(Settings && Settings->Preferences.bInvertLook?-1:1));
 }
 
 void APFSurvivorCharacter::BeginPlay()

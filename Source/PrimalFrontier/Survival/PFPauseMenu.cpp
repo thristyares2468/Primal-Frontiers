@@ -15,6 +15,7 @@
 #include "Components/Button.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/World.h"
+#include "Settings/PFSettingsMenu.h"
 
 void UPFPauseMenu::NativeOnInitialized()
 {
@@ -59,6 +60,10 @@ void UPFPauseMenu::NativeOnInitialized()
     ResumeButton->SetContent(Text(TEXT("Resume"),30));
     Rows->AddChild(ResumeButton);
     ResumeButton->OnClicked.AddDynamic(this,&UPFPauseMenu::Resume);
+    SettingsButton=WidgetTree->ConstructWidget<UButton>();
+    SettingsButton->SetContent(Text(TEXT("Settings"),30));
+    Rows->AddChild(SettingsButton);
+    SettingsButton->OnClicked.AddDynamic(this,&UPFPauseMenu::Settings);
     QuitButton=WidgetTree->ConstructWidget<UButton>();
     QuitLabel=Text(TEXT("End session"),30);
     QuitLabel->SetAutoWrapText(false);
@@ -72,6 +77,7 @@ void UPFPauseMenu::Refresh()
 {
     bConfirmQuit=false;
     bQuitSelected=false;
+    SelectedButton=0;
     UpdateSelection();
     QuitLabel->SetText(FText::FromString(TEXT("End session")));
     Description->SetText(FText::FromString(GetWorld()->GetNetMode()==NM_Standalone?TEXT("Paused\nWorld changes are not saved yet.\n"):TEXT("Multiplayer continues while this menu is open.\nWorld changes are not saved yet.\n")));
@@ -94,8 +100,17 @@ void UPFPauseMenu::Quit()
 
 void UPFPauseMenu::UpdateSelection()
 {
-    ResumeButton->SetBackgroundColor(bQuitSelected?FLinearColor::Gray:FLinearColor(0.2f,0.6f,0.9f));
-    QuitButton->SetBackgroundColor(bQuitSelected?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
+    ResumeButton->SetBackgroundColor(SelectedButton==0?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
+    SettingsButton->SetBackgroundColor(SelectedButton==1?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
+    QuitButton->SetBackgroundColor(SelectedButton==2?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
+}
+
+void UPFPauseMenu::Settings()
+{
+    SettingsMenu=CreateWidget<UPFSettingsMenu>(GetOwningPlayer());
+    SettingsMenu->ReturnFocus=this;
+    SettingsMenu->AddToPlayerScreen(110);
+    SettingsMenu->SetKeyboardFocus();
 }
 
 FReply UPFPauseMenu::NativeOnPreviewKeyDown(const FGeometry& G,const FKeyEvent& E)
@@ -108,16 +123,16 @@ FReply UPFPauseMenu::NativeOnPreviewKeyDown(const FGeometry& G,const FKeyEvent& 
         return FReply::Handled();
     }
     // D-pad moves the highlight between the two buttons.
-    if(K==EKeys::Gamepad_DPad_Up || K==EKeys::Gamepad_DPad_Down)
+    if(K==EKeys::Gamepad_DPad_Up || K==EKeys::Gamepad_DPad_Down || K==EKeys::Up || K==EKeys::Down)
     {
-        bQuitSelected=K==EKeys::Gamepad_DPad_Down;
+        SelectedButton=(SelectedButton+((K==EKeys::Gamepad_DPad_Down || K==EKeys::Down)?1:2))%3;
         UpdateSelection();
         return FReply::Handled();
     }
     // A activates the highlighted button (ignore key-repeat so a held A can't double-confirm).
-    if(K==EKeys::Gamepad_FaceButton_Bottom)
+    if(K==EKeys::Gamepad_FaceButton_Bottom || K==EKeys::Enter)
     {
-        if(!E.IsRepeat()){if(bQuitSelected){Quit();}else{Resume();}}
+        if(!E.IsRepeat()){if(SelectedButton==2){Quit();}else if(SelectedButton==1){Settings();}else{Resume();}}
         return FReply::Handled();
     }
     return Super::NativeOnPreviewKeyDown(G,E);

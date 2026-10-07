@@ -56,6 +56,7 @@ protected:
 
     /** Movement input is ignored while dead. */
     virtual void DoMove(float Right, float Forward) override;
+    virtual void DoAim(float Yaw,float Pitch) override;
 
     /** Freeze the body, disable collision and (on the server) schedule a respawn. */
     UFUNCTION() void HandleDeath();

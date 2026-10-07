@@ -31,6 +31,7 @@
 #include "Survival/PFPauseMenu.h"
 #include "Survival/PFInteraction.h"
 #include "GameFramework/PlayerInput.h"
+#include "Settings/PFGameUserSettings.h"
 
 APFSurvivalPlayerController::APFSurvivalPlayerController()
 {
@@ -44,6 +45,7 @@ void APFSurvivalPlayerController::BeginPlay()
     // Widgets exist only for the local player (never on the server for remote clients).
     if (IsLocalController() && GetLocalPlayer() && SurvivalHUDClass)
     {
+        if(auto* Settings=UPFGameUserSettings::Get()){Settings->ApplyNonResolutionSettings();Settings->ApplyToWorld(GetWorld());}
         SurvivalHUD = CreateWidget<UPFSurvivalHUD>(this, SurvivalHUDClass);
         if (SurvivalHUD) { SurvivalHUD->AddToPlayerScreen(); }
         InventoryHUD=CreateWidget<UPFInventoryHUD>(this,UPFInventoryHUD::StaticClass());

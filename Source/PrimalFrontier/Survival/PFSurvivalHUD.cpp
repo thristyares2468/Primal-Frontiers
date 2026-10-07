@@ -13,6 +13,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/Pawn.h"
+#include "Settings/PFGameUserSettings.h"
 
 void UPFSurvivalHUD::NativeOnInitialized()
 {
@@ -23,7 +24,7 @@ void UPFSurvivalHUD::NativeOnInitialized()
     WidgetTree->RootWidget = Canvas;
 
     // Centred aim marker (M4): makes the server-derived interaction ray aimable.
-    UTextBlock* AimMarker=WidgetTree->ConstructWidget<UTextBlock>();
+    AimMarker=WidgetTree->ConstructWidget<UTextBlock>();
     AimMarker->SetText(FText::FromString(TEXT("+")));
     AimMarker->SetShadowColorAndOpacity(FLinearColor::Black);
     AimMarker->SetShadowOffset(FVector2D(1,1));
@@ -54,6 +55,7 @@ void UPFSurvivalHUD::NativeOnInitialized()
     PanelSlot->SetAlignment(FVector2D(0.f, 1.f));
     PanelSlot->SetPosition(FVector2D(32.f, -32.f));
     PanelSlot->SetSize(FVector2D(440.f, 215.f));
+    PanelSlot->SetAutoSize(true);
     HealthLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(HealthLabel);
     HealthBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(HealthBar);
     HealthBar->SetFillColorAndOpacity(FLinearColor(0.8f, 0.15f, 0.1f));
@@ -77,7 +79,18 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
 
     // Prompt text involves traces, so rebuild it at 10 Hz rather than every frame.
     InteractionRefresh+=DeltaTime;
-    if(InteractionLabel && InteractionRefresh>=0.1f)
+    if(InteractionRefresh<0.1f){return;}
+    InteractionRefresh=0;
+    if(const auto* Settings=UPFGameUserSettings::Get())
+    {
+        const auto& P=Settings->Preferences;
+        for(auto* Label:{HealthLabel.Get(),StaminaLabel.Get(),NeedsLabel.Get(),StateLabel.Get(),InteractionLabel.Get()})
+        {
+            if(Label){auto Font=Label->GetFont();const int32 Size=FMath::RoundToInt(22*P.HUDScale);if(Font.Size!=Size){Font.Size=Size;Label->SetFont(Font);}}
+        }
+        if(AimMarker){AimMarker->SetVisibility(P.bCrosshair?ESlateVisibility::HitTestInvisible:ESlateVisibility::Hidden);auto Font=AimMarker->GetFont();const int32 Size=FMath::RoundToInt(24*P.CrosshairScale);if(Font.Size!=Size){Font.Size=Size;AimMarker->SetFont(Font);}}
+    }
+    if(InteractionLabel)
     {
         InteractionRefresh=0;
         if(const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer()))
@@ -103,7 +116,7 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
         // Most urgent condition first; otherwise a short controls reminder.
         StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") :
             (V.Hunger <= 0 || V.Thirst <= 0 ? TEXT("STARVING / DEHYDRATED - gather food or water!") :
-            (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : TEXT("WASD | E Interact | Tab Bag | C Craft | B Build | P Menu")))));
+            (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : (UPFGameUserSettings::Get() && !UPFGameUserSettings::Get()->Preferences.bControlHints?TEXT(""):TEXT("WASD | E Interact | Tab Bag | C Craft | B Build | P Menu"))))));
     }
     // Blueprint presentation hooks (no-ops unless a BP child implements them).
     PresentVitals(V.Health, V.MaxHealth, V.Stamina, V.MaxStamina, Survival->IsDead());

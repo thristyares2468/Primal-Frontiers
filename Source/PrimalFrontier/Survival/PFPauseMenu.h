@@ -13,6 +13,7 @@
 #include "PFPauseMenu.generated.h"
 class UTextBlock;
 class UButton;
+class UPFSettingsMenu;
 UCLASS()
 class PRIMALFRONTIER_API UPFPauseMenu : public UUserWidget
 {
@@ -33,10 +34,14 @@ private:
     UPROPERTY() TObjectPtr<UTextBlock> QuitLabel;
     UPROPERTY() TObjectPtr<UButton> ResumeButton;
     UPROPERTY() TObjectPtr<UButton> QuitButton;
+    UPROPERTY() TObjectPtr<UButton> SettingsButton;
+    UPROPERTY() TObjectPtr<UPFSettingsMenu> SettingsMenu;
+    int32 SelectedButton=0;
     bool bQuitSelected=false;   // gamepad highlight: false = Resume, true = End session
     /** Recolour the two buttons to show the highlighted one. */
     void UpdateSelection();
     bool bConfirmQuit=false;    // first End-session press arms it, the second quits
     UFUNCTION() void Resume();
     UFUNCTION() void Quit();
+    UFUNCTION() void Settings();
 };

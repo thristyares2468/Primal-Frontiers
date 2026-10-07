@@ -4,7 +4,7 @@ Updated 2026-10-06. [FULL_PROJECT_ROADMAP.md](FULL_PROJECT_ROADMAP.md) preserves
 
 Primal Frontier is an open-world first-person survival game. The intended world is a connected, freely explored space with resource, settlement, danger and discovery areas, not a sequence of disconnected challenge rooms. M1-M6 maps remain isolated regression fixtures. M7 brings those mechanics together in one continuous map, `L_M7SurvivalArena`, without loading screens between its zones.
 
-The present 60 x 70 m bounded map is a small integration prototype, not the final open world, an island coastline, or a streaming-performance certification. It contains a beach-coloured safe area, primitive woodland, rocky area, roofed ruin, water-edge placeholder and connected gathering/building/danger spaces. Keep this affordable while validating the survival loop. World Partition, landscape-scale terrain, larger distances and streaming belong to the separately gated world-expansion work, with profiling before scale increases.
+The retained 60 x 70 m map is a small integration prototype. The October 8 follow-up adds a separate 400 x 400 m World Partition candidate, `L_PrimalFrontier_OpenWorld`, with runtime streaming and the same primitive survival camp. Core simulation stays loaded while distant landmarks stream. Asset/network checks are partial evidence; full walking/overnight play and streaming-transition performance remain gated. Neither map is a final island or production-scale world. Landscape-scale terrain and final art remain deferred.
 
 ## Current execution boundary
 

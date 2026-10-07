@@ -1,6 +1,16 @@
 # Milestone 7 survival arena
 
+## Open-world candidate — 2026-10-08
+
+`L_PrimalFrontier_OpenWorld` is a separate **400 x 400 m World Partition** map with runtime streaming, the survival camp and distant primitive landmarks. Editor Python/native conversion preserved the old arena. Repeatable `ConfigureOpenWorldMilestone7.py` restricts changes to this candidate: 68 core actors stay loaded; eight stateless landmarks may stream. This prevents clock/resources/spawners resetting on unload before persistence. Floor and boundaries remain loaded for collision safety.
+
+Asset loading and one-/two-client NullRHI networking passed after the streaming policy change; full walking/streaming transitions and overnight play remain pending. Keep the arena for repeatable system checks while the candidate finishes its gate. Final landscape, swimming, external art, production streaming scale and M8 saves are not implied. Older paragraphs below describe the retained arena.
+
 Gate in progress. `L_M7SurvivalArena` is a 60 x 70 m bounded primitive arena, separate from previous milestone maps. Two PlayerStarts are in the safe southern clearing. Wood/stone/food exist nearby and in the central resource area. A small stepped rise provides height variation; the northern area contains a prowler, more resources and a marked exposure hazard with routes around it. A passive forager lives near the central area. Existing finite resources, food expiry, crafting, construction, creatures and respawn rules remain authoritative.
+
+The October 6 extension adds a sand-coloured beach, western primitive woodland, eastern boulders, a roofed northwest ruin and blue water-edge planes within these bounds. It uses existing simple materials and no external art. Two water nodes yield finite portions consumed through the validated inventory action for 35 thirst; two fibre patches supply fibre for later recipes. The map has 15 resource nodes, five resource types and two creature spawners. Water is a visual placeholder without swimming physics. The extension script and resource tests were already recovered into the branch; these descriptive notes were recovered while reconciling the GitHub Desktop stash on October 8.
+
+`Scripts/ExtendWorldMilestone7.py` refuses an already-extended destination, appends missing catalogue entries without changing existing tuning and rebuilds navigation through Unreal APIs. The installed engine's material-vector setter can return false despite success, so the script checks the resulting value. Manual full-route and overnight acceptance remain required.
 
 One always-relevant replicated C++ world clock advances a 15-minute day. Gameplay Tags identify day (06:00-18:00) and night. Server-only `PF.SetTimeOfDay 0..23` sets its time; clients cannot mutate it. A movable directional sun and dim shadowless night fill keep this greybox navigable without sky art, water effects or large assets. No World Partition/streaming is needed at this size. The map has an exposure hazard rather than a water simulation. Performance must be measured uncapped in a rendered session; NullRHI verifies correctness only.
 

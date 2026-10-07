@@ -1,6 +1,6 @@
 # Playing and testing Primal Frontier
 
-Updated 2026-10-06. The integrated development level is **L_M7SurvivalArena**. Latest merged-source build, 17-test regression, one-/two-client checks and rendered water/fibre checks pass. Prior rendered interaction/hazard/day-night evidence is in MILESTONES.md; sustained manual walking and overnight survival are still pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
+Updated 2026-10-08. The integrated regression level is **L_M7SurvivalArena**; **L_PrimalFrontier_OpenWorld** is the new World Partition development candidate. Latest Editor build, 19-test regression and one-/two-client NullRHI checks pass. Settings were checked in rendered play. Prior interaction/hazard/day-night evidence is in MILESTONES.md; sustained manual walking and overnight survival are still pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
 
 ## Open the game
 
@@ -9,10 +9,12 @@ The latest world extension adds primitive woodland, rocky ground, a roofed ruin,
 1. Open `C:\UnrealProjects\PrimalFrontier\PrimalFrontier.uproject`.
 2. In the Content Drawer, browse **Content > PrimalFrontier > Maps**.
 3. Double-click **L_M7SurvivalArena**. The template `Lvl_FirstPerson` is not the survival test map.
-4. In the Play dropdown choose **one player**, **Standalone** net mode, and **Selected Viewport** or **New Editor Window**.
+4. In the Play dropdown choose **one player**, **Standalone** net mode, and **Selected Viewport**. Press **F11** for immersive view. This avoids the observed slow New Editor Window presentation path; the stationary sample averaged 107.81 FPS at 2560x1392 with 75% render scale.
 5. Click Play, then click the game view. Move with WASD, look with the mouse and jump with Space.
 
 **P** opens the pause menu. **Esc may stop PIE** before the game receives it. Shift+F1 releases the mouse to the Editor; click the game to recapture it. The Editor Stop button ends the session. No map save is needed to play.
+
+**P → Settings** opens Game, Graphics, Audio and Accessibility. Apply retains changes; Cancel discards the draft. Motion blur defaults off. Display changes require a 15-second confirmation in standalone; PIE owns its window. See [SETTINGS.md](SETTINGS.md). New Editor Window PIE has an unresolved D3D12 presentation delay. `L_PrimalFrontier_OpenWorld` is the new World Partition development candidate; its full traversal/overnight gate remains pending.
 
 If modules need rebuilding, close the Editor and build **PrimalFrontierEditor / Development Editor / Win64** in Visual Studio. Reflected C++ changes need a full restart rather than Live Coding.
 
@@ -52,7 +54,7 @@ Xbox button names are used below: A bottom, B right, X left, Y top. Connect befo
 | Storage transfers | In building mode, D-pad Left stores selected bag item, Right takes first stored item |
 | Close gameplay overlays | B |
 
-Inventory, crafting and building overlays are mutually exclusive. A remains jump outside the pause menu. Console/debug structure damage use keyboard. Remapping, rumble, device glyphs and a sensitivity screen are deferred. If sticks work but survival buttons do not, check the map and latest compiled module.
+Inventory, crafting and building overlays are mutually exclusive. A remains jump outside the pause menu. Console/debug structure damage use keyboard. Look sensitivity and inversion are in P → Settings → Game. Remapping, rumble and device glyphs are deferred. If sticks work but survival buttons do not, check the map and latest compiled module.
 
 ## First ten minutes
 

@@ -21,9 +21,9 @@ class PRIMALFRONTIER_API UPFSurvivalHUD : public UUserWidget
     GENERATED_BODY()
 
 public:
-    /** Called every frame with the possessed survivor's health/stamina. */
+    /** Refreshed at 10 Hz with the possessed survivor's health/stamina. */
     UFUNCTION(BlueprintImplementableEvent, Category="Survival|UI") void PresentVitals(float Health, float MaxHealth, float Stamina, float MaxStamina, bool bDead);
-    /** Called every frame with food/water (0..100) and exposure (0..1). */
+    /** Refreshed at 10 Hz with food/water (0..100) and exposure (0..1). */
     UFUNCTION(BlueprintImplementableEvent, Category="Survival|UI") void PresentNeeds(float Hunger, float Thirst, float Exposure);
 
 protected:
@@ -33,6 +33,7 @@ protected:
     virtual void NativeTick(const FGeometry& Geometry, float DeltaTime) override;
 
 private:
+    UPROPERTY(Transient) TObjectPtr<UTextBlock> AimMarker;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> InteractionLabel;
     float InteractionRefresh=0;   // seconds since the prompt text was last rebuilt
     UPROPERTY(Transient) TObjectPtr<UTextBlock> HealthLabel;
