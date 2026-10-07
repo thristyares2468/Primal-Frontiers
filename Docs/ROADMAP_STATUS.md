@@ -12,6 +12,10 @@ The retained 60 x 70 m map is a small integration prototype. The October 8 follo
 - On October 8 the user deferred the unpassed M7 manual gate and then authorized continuing until an immediate user action is needed. Continue M8 incrementally: player codec, server adapter and safe-file tests now exist; whole-world saves, restart/reconnect and multiplayer duplication checks remain. Do not mark M7 complete or certify the complete playable loop without its missing evidence.
 - Stop after M8 for this development pass. The supplied later milestones are a plan, not evidence of completion or permission to skip gates.
 
+## Future adaptation request (October 8)
+
+The user requested a Subnautica 2-inspired adaptation system, with independent research and modifications appropriate to Primal Frontier. [ADAPTATION_DIRECTION.md](ADAPTATION_DIRECTION.md) records primary-source observations, an original land-survival proposal and server/save/test requirements. Candidate window: M12 progression with M13 ecology integration. No implementation is added to M8; refresh research before that future milestone.
+
 ## Asset handling
 
 The user/Claude imports and source refactors are preserved. Existing Adventures_Pack, Bike, DynamicFalling, Modular_Rural_Cabin and Polyphoria assets are now committed by the user; older checkpoint notes describing them as untracked are historical. Current M7 uses engine primitives and project-owned simple materials only.
