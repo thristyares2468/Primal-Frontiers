@@ -1,8 +1,16 @@
 # Milestone 8 — persistence foundation
 
+## Server adapter and safe-file checkpoint (October 8)
+
+The user subsequently authorized continuing through the remaining work until their action is required. M7 stays unverified. Added a server-issued public PlayerState GUID, server-only capture/restore, atomic inventory replacement, collision/ground/identity checks and offline food aging. Reloading replaces inventory rather than appending; stale food is omitted. Existing crafting jobs cancel on restoration. No client restoration RPC exists. These APIs are exercised in native worlds; world commands/reconnect are still pending.
+
+`PFSaveFileStore` writes bounded checksummed A/B generations under `Saved/Persistence`. It verifies a pending file before replacing only the inactive generation; the active save survives a failed/interrupted replacement. The prior generation is a backup. Read reports backup recovery explicitly; writes refuse to overwrite corrupt evidence. This is not a claim of transactional filesystem replacement or power-loss durability on every filesystem. Slot identifiers cannot contain paths. Generic file integrity does not replace semantic codec validation.
+
+First Editor build failed because DOREPLIFETIME requires the exact `OutLifetimeProps` parameter name; corrected it. Rebuild passed in **18.19 s**, final fixture-only rebuild **5.70 s**, no compiler warnings. `M8PlayerRuntime/index.json` contains eight Success states: PF.Inventory.Transactions; PF.Inventory.WorldTransfers; PF.Persistence.CorruptPlayerData; PF.Persistence.FileGenerations; PF.Persistence.PlayerRoundTrip; PF.Persistence.PlayerValidation; PF.Persistence.ServerPlayerAdapter; PF.Survival.Lifecycle. Seven were clean, the new adapter fixture had expected missing-socket warnings from native meshless presentation. Matched that known warning explicitly as the existing Lifecycle fixture does. Final `M8PlayerAdapterVerified/index.json`: **ServerPlayerAdapter 1 passed, 0 failed, 0 test warnings**, engine exit 0. Initial sampled working/private peaks **2.949/2.806 GiB**. Logs: `PFM8PlayerRuntime.log`, `PFM8PlayerAdapterVerified.log`. NullRHI cannot certify rendered performance/manual persistence. File tests create and clean only their unique Automation slot through Unreal APIs.
+
 ## Current scope
 
-Data-only checkpoint, October 8: `FPFPlayerSaveData`, `FPFSavedItemStack`, trusted `FPFPlayerSaveLimits` and `FPFPlayerSaveFormat` in `Source/PrimalFrontier/Persistence`. No gameplay call sites, Blueprint mutation, network request or file write. M7 manual route/overnight remains unpassed; the user explicitly authorized independent preparation. M8 is not complete.
+Initial data-only checkpoint, October 8: `FPFPlayerSaveData`, `FPFSavedItemStack`, trusted `FPFPlayerSaveLimits` and `FPFPlayerSaveFormat` in `Source/PrimalFrontier/Persistence`. The later adapter/file checkpoint above extends it. M7 manual route/overnight remains unpassed; M8 is not complete.
 
 V1 records one stable player GUID, location, normalized look rotation, health/stamina/hunger/thirst and distinct inventory batches (stack GUID, catalog item ID, quantity, remaining food lifetime). Dead health=0 is representable; respawn/load behavior is not implemented. Exposure is derived from the environment and not persisted here. Maximum vitals and inventory capacity come from trusted configuration, not the file. This format is not a complete world save.
 
@@ -18,7 +26,7 @@ The little-endian Win64 envelope contains four uint32 fields: signature `0x50504
 
 ## Pending integration and policy
 
-No disk-save durability, backup rotation, authoritative world transaction, inventory injection, server restart/reconnect, structure ownership/support IDs, storage, resources, creatures, offline spoilage or migration has been implemented. Remaining lifetime is represented, but no offline aging policy is active yet. The current PlayerState actor/display name cannot serve as an authenticated save identity. PF.SaveWorld, PF.LoadWorld and PF.TestPersistence remain unavailable until real adapters and integration tests exist. No assets or rendering settings change in this checkpoint.
+The player adapter subtracts nonnegative offline age from remaining food lifetime. World transactions, server restart/reconnect credentials, persistent structure ownership/support, storage/resources/creatures and migration are pending. The public PlayerState GUID cannot authenticate a reconnect by itself. PF.SaveWorld, PF.LoadWorld and PF.TestPersistence remain unavailable until whole-world adapters and integration tests exist. No assets or rendering settings changed.
 
 ## Verification
 

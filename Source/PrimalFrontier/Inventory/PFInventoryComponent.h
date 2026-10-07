@@ -24,6 +24,7 @@ class UPFItemCatalog;
 class APawn;
 class APFItemPickup;
 struct FPFItemDefinition;
+struct FPFSavedItemStack;
 
 /** One inventory slot: a quantity of one item from one acquisition batch. */
 USTRUCT(BlueprintType)
@@ -46,6 +47,11 @@ class PRIMALFRONTIER_API UPFInventoryComponent : public UActorComponent
 
 public:
     UPFInventoryComponent();
+
+    /** Trusted server persistence only; validate all batches before replacing the bag. */
+    bool PreparePersistence(const TArray<FPFSavedItemStack>& Saved, double AgeSeconds,
+        TArray<FPFItemStack>& OutStacks, FString& Error) const;
+    bool RestorePersistence(const TArray<FPFSavedItemStack>& Saved, double AgeSeconds, FString& Error);
 
     /** Item definitions. Loaded from DA_ItemCatalog at BeginPlay if not assigned (tests assign their own). */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory") TObjectPtr<UPFItemCatalog> Catalog;

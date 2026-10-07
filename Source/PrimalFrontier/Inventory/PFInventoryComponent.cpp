@@ -15,6 +15,7 @@
 #include "GameFramework/Pawn.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
+#include "Persistence/PFPlayerSaveFormat.h"
 
 UPFInventoryComponent::UPFInventoryComponent()
 {
@@ -22,6 +23,34 @@ UPFInventoryComponent::UPFInventoryComponent()
     // 1 Hz is enough to remove spoiled batches; mutations also prune first.
     PrimaryComponentTick.bCanEverTick=true;
     PrimaryComponentTick.TickInterval=1;
+}
+
+bool UPFInventoryComponent::PreparePersistence(const TArray<FPFSavedItemStack>& Saved, double AgeSeconds,
+    TArray<FPFItemStack>& OutStacks, FString& Error) const
+{
+    if (!Authority() || !Catalog || !IsInGameThread() || !FMath::IsFinite(AgeSeconds) || AgeSeconds < 0)
+    {
+        Error = TEXT("Persistence requires authority, catalog and finite nonnegative age"); return false;
+    }
+    FPFPlayerSaveData Check; Check.PlayerId = FGuid(1, 1, 1, 1); Check.Inventory = Saved;
+    FPFPlayerSaveLimits Limits; Limits.Slots = SlotLimit; Limits.Weight = WeightLimit;
+    if (!FPFPlayerSaveFormat::Validate(Check, *Catalog, Limits, Error)) { return false; }
+    TArray<FPFItemStack> Proposed;
+    const double Now = ServerTime(GetWorld());
+    for (const auto& Record : Saved)
+    {
+        const double Remaining = Record.RemainingFreshnessSeconds;
+        if (Remaining > 0 && Remaining <= AgeSeconds) { continue; }
+        Proposed.Add({Record.StackId, Record.ItemId, Record.Quantity, Remaining > 0 ? Now + Remaining - AgeSeconds : 0});
+    }
+    OutStacks = MoveTemp(Proposed); return true;
+}
+
+bool UPFInventoryComponent::RestorePersistence(const TArray<FPFSavedItemStack>& Saved, double AgeSeconds, FString& Error)
+{
+    TArray<FPFItemStack> Proposed;
+    if (!PreparePersistence(Saved, AgeSeconds, Proposed, Error)) { return false; }
+    Stacks = MoveTemp(Proposed); Changed(TEXT("restored-server-save")); return true;
 }
 
 void UPFInventoryComponent::BeginPlay()

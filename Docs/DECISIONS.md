@@ -1,5 +1,11 @@
 \# Architecture and Design Decisions
 
+## 2026-10-08 — Server restoration and preserved file generations
+
+Continue M8 under the user's explicit autonomous-continuation instruction, without converting M7's missing manual evidence into a pass. Separate the public replicated PlayerState ownership GUID from a future private reconnect credential. Validate server identity/capacity/vitals and capsule/ground safety before restoring. Replace inventory atomically, preserve batch GUIDs and subtract elapsed offline age; do not grant new shelf life. Cancel in-progress crafting rather than serializing pending conversions.
+
+Use two bounded checksummed file generations. Unreal's generic file move deletes an existing destination before rename, so only replace the inactive file after pending-write verification. Keep the active generation and refuse overwriting corrupt evidence. No new dependency; file I/O uses Core APIs. Whole-world capture/restore and authenticated reconnect integration remain subsequent M8 work.
+
 ## 2026-10-08 — Bounded player-save format before live persistence
 
 The user explicitly deferred the unpassed M7 manual route/overnight gate. Start only an independent M8 data-format checkpoint and keep both milestones incomplete. Earlier gate statements below describe their original checkpoints; this authorization permits preparation, not a claimed manual pass.

@@ -20,6 +20,13 @@ class PRIMALFRONTIER_API APFInventoryPlayerState : public APlayerState
 public:
     APFInventoryPlayerState();
 
+    /** Server-issued public ownership key. A reconnect credential is a separate secret. */
+    UPROPERTY(Replicated, BlueprintReadOnly) FGuid PersistentPlayerId;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+protected:
+    virtual void BeginPlay() override;
+public:
+
     /** The player's bag (8 slots / 30 kg by default). Contents replicate to the owner only. */
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly) TObjectPtr<UPFInventoryComponent> Inventory;
 

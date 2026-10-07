@@ -9,7 +9,7 @@ The retained 60 x 70 m map is a small integration prototype. The October 8 follo
 ## Current execution boundary
 
 - M7 remains in progress until sustained walking, the complete survival route and overnight play pass. Fixture teleports and navigation assertions are partial evidence only.
-- On October 8 the user explicitly deferred the unpassed M7 manual gate and authorized a workaround. M8 may start with an independent data-only player save format and validation tests. Live persistence and the complete playable loop remain unverified; do not mark M7 complete. M8 still requires authoritative player/world saves, corrupt-save handling, restart/reconnect and multiplayer duplication checks.
+- On October 8 the user deferred the unpassed M7 manual gate and then authorized continuing until an immediate user action is needed. Continue M8 incrementally: player codec, server adapter and safe-file tests now exist; whole-world saves, restart/reconnect and multiplayer duplication checks remain. Do not mark M7 complete or certify the complete playable loop without its missing evidence.
 - Stop after M8 for this development pass. The supplied later milestones are a plan, not evidence of completion or permission to skip gates.
 
 ## Asset handling

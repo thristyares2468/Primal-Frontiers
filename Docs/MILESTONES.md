@@ -1,5 +1,11 @@
 # Milestone 7 — in progress 2026-09-30
 
+## 2026-10-08 M8 server adapter/file checkpoint
+
+The user authorized continuing through remaining milestones until an immediate user action is required. Continue M8 incrementally while retaining the deferred M7 manual gate. Added server-only player capture/restoration and public stable ownership ID; validate identity, capacity and safe capsule/ground location before replacement. Food ages by elapsed offline seconds; repeated restoration does not duplicate items. Added bounded A/B file generations with pending-write verification, active-save preservation and explicit corrupt-generation recovery/refusal. Whole-world persistence, reconnect and PF save/load commands remain pending.
+
+Compiler failure: DOREPLIFETIME's required OutLifetimeProps name, fixed. Editor rebuild **18.19 s**, final fixture rebuild **5.70 s**, no compiler warnings. `M8PlayerRuntime/index.json`: eight Success test states (seven clean, adapter had native missing-mesh socket warnings); after matching the known meshless fixture warning, `M8PlayerAdapterVerified/index.json` records **1 passed, 0 failed, 0 test warnings**, engine exit 0. Exact tests/logs and limits in `PERSISTENCE_M8.md`. Peak initial process working/private **2.949/2.806 GiB**. No asset/settings edit or Computer Use; no manual/restart/multiplayer persistence pass claimed yet.
+
 ## 2026-10-08 M8 preparation with M7 manual gate deferred
 
 The user explicitly reported that the M7 route/overnight playtest has not passed and asked to work around it. **M7 remains unverified and incomplete.** This supersedes the earlier strict sequencing for a bounded, data-only M8 foundation; it does not certify gameplay or authorize final art/world expansion.
