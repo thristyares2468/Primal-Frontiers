@@ -1,5 +1,13 @@
 \# Architecture and Design Decisions
 
+## 2026-10-08 — Bounded player-save format before live persistence
+
+The user explicitly deferred the unpassed M7 manual route/overnight gate. Start only an independent M8 data-format checkpoint and keep both milestones incomplete. Earlier gate statements below describe their original checkpoints; this authorization permits preparation, not a claimed manual pass.
+
+Use native Unreal memory archives with explicit fixed scalar fields, bounded ASCII catalog IDs and bounded stack counts. A version/length/CRC envelope rejects incompatible, truncated and accidentally corrupt data before decoding; CRC is not authentication. Use trusted catalog and capacity/max-vital limits rather than values supplied by a save. Decode into a candidate and replace outputs only after full validation. No new module/plugin dependency.
+
+Player and inventory stack GUIDs are values; no actor pointers, display-name identity, arbitrary object paths or serialized absolute server-time expiry. Food stores remaining freshness without merging batches or renewing lifetime. A future server adapter must define authenticated player-ID mapping, offline spoilage policy and atomic capture/restore before these records become usable saves. Unknown versions/items fail explicitly; migration is not yet implemented. No live-world mutation, RPC, disk write or PF save/load command is added in this step.
+
 ## 2026-10-08 — Local settings and bounded open-world streaming
 
 Use a project UGameUserSettings subclass for local preferences and native scalability/display controls. Draft until Apply; revert unconfirmed display changes after 15 real-time seconds. Explicitly load/save game scalability in Editor sessions because the base Editor path uses EditorSettings.ini. Motion blur defaults off. Project Music/Effects/UI sound classes and a preference SoundMix provide category routing; existing explicitly assigned third-party classes require deliberate routing. No plugin dependency or external media was added.

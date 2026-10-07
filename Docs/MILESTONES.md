@@ -1,5 +1,18 @@
 # Milestone 7 — in progress 2026-09-30
 
+## 2026-10-08 M8 preparation with M7 manual gate deferred
+
+The user explicitly reported that the M7 route/overnight playtest has not passed and asked to work around it. **M7 remains unverified and incomplete.** This supersedes the earlier strict sequencing for a bounded, data-only M8 foundation; it does not certify gameplay or authorize final art/world expansion.
+
+Current increment: added a versioned native C++ player-record codec, trusted catalog/capacity validation, bounded corrupt-data rejection and in-memory round-trip tests. No save-file I/O, runtime capture/restoration, authenticated reconnect identity, structure/world persistence, autosave or gameplay change. PF.SaveWorld, PF.LoadWorld and PF.TestPersistence remain explicitly unavailable. See `PERSISTENCE_M8.md` for the format and limitations.
+
+- `PrimalFrontierEditor` built successfully in **12.53 s**; test-fixture correction rebuilt successfully in **5.58 s**, no compiler warnings. Installed engine reports **5.8.3**, not the requested 5.8.2; no engine change was made.
+- Initial run `Saved/Logs/PFM8PlayerFormat.log`: **PF.Inventory.Transactions, PF.Inventory.WorldTransfers, PF.Persistence.CorruptPlayerData and PF.Persistence.PlayerRoundTrip each completed Success**. PF.Persistence.PlayerValidation then crashed (process exit 3) at the new fixture's `TArray::Add` alias check because it added an element from the same container. Corrected only the fixture to copy first, and guarded a failed-output assertion against secondary out-of-bounds access. No codec/gameplay fix was needed.
+- Final-source run `Saved/AutomationReports/M8PlayerFormatVerified/index.json`: **PF.Persistence.CorruptPlayerData, PF.Persistence.PlayerRoundTrip and PF.Persistence.PlayerValidation all Success; 3 passed, 0 failed, 0 test warnings, exit 0**. Matching `Saved/Logs/PFM8PlayerFormatVerified.log` has no warning/error/ensure/fatal lines. Existing inventory results above are from the initial run, not a claim that its complete queue passed. The older `PrimalFrontier.log` remains an October 7 normal shutdown, not this run's evidence.
+- Final peak sampled working set/private memory: **2.991/2.848 GiB**. NullRHI data tests do not measure rendered FPS, traversal or stuttering. No manual/multiplayer save/restart test is possible yet because live persistence is absent. No Computer Use, asset or rendering-setting edits. Changed files: `Persistence/PFPlayerSaveFormat.h/.cpp`, `Tests/PFPlayerSaveFormatTests.cpp`, this document, `PERSISTENCE_M8.md`, `ARCHITECTURE.md`, `DECISIONS.md` and `ROADMAP_STATUS.md`.
+
+Remaining M8 progression: server capture/restore and atomic file replacement/backups; stable player/structure identity; world/storage/resource records; restart/reconnect and duplication tests; then the full playable persistence gate. Each increment needs its own verification. The deferred M7 manual route/overnight result is still required before claiming the complete greybox loop passes.
+
 ## 2026-10-08 isolated runtime streaming checkpoint
 
 **M7 still awaits the user's sustained route/overnight confirmation; M8 has not started.** Added only an opt-in automated streaming probe and documentation. No gameplay implementation, map, imported asset or project setting changed in this checkpoint. No Computer Use was needed.

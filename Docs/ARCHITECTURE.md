@@ -12,6 +12,8 @@
 
 ## Gameplay Systems
 
+Milestone 8 preparation (2026-10-08): `Persistence/PFPlayerSaveFormat` is a data-only native codec for one player record, survival values, position/look and item batches. It uses bounded memory archives, a version/length/CRC envelope and trusted catalog/capacity validation; failed operations preserve outputs. It has no runtime or file-I/O integration. Stable authenticated identity, authoritative capture/restoration, world saves and reconnect remain future M8 work. See `PERSISTENCE_M8.md`; the user's explicit M7 gate deferral does not certify that milestone.
+
 Milestone 7 input and interaction (2026-10-04): `PFInteraction` shares a server-compatible eye trace between prompts, pickup and resource gathering. The survivor camera is aligned to that stable eye. `PFPauseMenu` is a replaceable placeholder UMG presentation; `PFSurvivalPlayerController` owns local menu/input state and never pauses network simulation. `PFGamepadInput.cpp` maps contextual gamepad buttons to existing validated action paths. Existing Enhanced Input assets retain analog movement/look/jump. No template binary asset changes or new dependency are required. See `PLAYTEST.md` for keyboard/gamepad controls and verification limits.
 
 Milestone 7 adds a bounded separate survival arena and `APFWorldClock`. Authority advances and validates time; the replicated hour/Gameplay Tag phase drives lightweight client sun/night-fill presentation. Existing catalogs, interactions, hazards and capped AI are reused. No streaming or extra runtime dependency is introduced. See `WORLD_M7.md`.
