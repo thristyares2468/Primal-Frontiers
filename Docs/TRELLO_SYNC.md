@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Later October 8 M18 task: bounded AI Programming compatibility-plan subtask Doing → Done after checking current contracts and documenting migration/backup/time/fixture gates. Parent M18 stays To Do, with its preceding acceptance dependencies preserved. No migration was implemented; M7/M8 manual gates remain open. Rejected-load checkpoint pushed a2e6548; plan gets its own scoped Sol-attributed commit.
+
 Later October 8 rejected-load task: added AI Programming subtask Verify rejected loads preserve live world. Retained test-only C2665 build failure; fixed assertion, rebuilt and passed the focused four-case real-file preservation test. Immediately recorded exact report/log/memory and moved the bounded task Done. It does not close the parent manual persistence gate. Native verdict tool checkpoint pushed 44e9da8; current test-only scoped commit/push follows.
 
 Later October 8 M8 verdict-tool task: added one AI Testing subtask, Gate automation on report verdicts, Doing during implementation. Real retained failure/success, fresh focused pass, unmatched-selection failure and safe-input/schema checks verified. Updated the card with exact engine-versus-runner outcomes and moved it Done immediately; M7/M8 parent manual gates remain Doing. No members/dates changed. Scripts/RunNativeAutomation.ps1 and AUTOMATION_VERIFICATION.md describe the bounded task; legacy setup docs remain excluded from staging.

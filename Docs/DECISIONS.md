@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Explicit layered save compatibility plan
+
+SAVE_COMPATIBILITY_PLAN.md proposes bounded known-edge value-record migrations, separate verified original backups beyond A/B rotation, explicit item/layout policies and unchanged food-age/identity anchors. Keep file/world/player/profile versions distinct; unknown future schemas and unmapped content refuse rather than guess or drop data. Synthetic frozen fixtures establish compatibility before any live publication. This is document planning only; no schema/runtime migration or full M18 acceptance.
+
 ## 2026-10-08 — Gate native automation on structured outcomes
 
 Unreal exit 0 occurred after a real twelve-assertion failure and an unmatched selection. Native verification therefore checks nonempty clean report records/counts, actual engine exit and fatal/ensure logs, instead of exit alone. Keep raw-log review and manual/live/rendered gates explicit. Use bounded hidden NullRHI processes, unique evidence and only owned-process cleanup; never close a user's Editor or upload identity/save data. Scripts/RunNativeAutomation.ps1 adds no plugin/dependency or gameplay/settings change.

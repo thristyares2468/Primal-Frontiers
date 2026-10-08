@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M18 independent compatibility planning
+
+SAVE_COMPATIBILITY_PLAN.md checks current file/world/player/profile contracts and defines deliberate version edges, catalog/layout/ownership/missing-data rules, separate verified backups before A/B rotation, offline-food time anchors and synthetic fixture/native/live/manual gates. Document/source consistency only; no migration/schema/runtime/save/asset/settings change or new build/test/performance claim. Latest gameplay evidence is the focused M8 rejected-load test, not M18 acceptance. Bounded AI plan task Done; full M18 To Do, preceding manual/provenance gates open.
+
 ## 2026-10-08 M8 rejected-load preservation verification
 
 Added PF.Persistence.RejectedLoadPreservesWorld: four real checksummed files (unsupported version, wrong map, resource-layout mismatch, unsafe player ground) are refused without changing running player/pawn/location/health, bag quantity/batch, structure/storage/owner/support, resource/clock, active slot or active generation/payload. Valid saving afterward still succeeds; unique disposable files cleaned. Runtime source/assets/schema unchanged.
