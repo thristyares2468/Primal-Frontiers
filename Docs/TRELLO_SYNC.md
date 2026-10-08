@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Later October 8 dead-player conservation task: added bounded AI Programming native test for the remaining M8 death/save/respawn integration gap. Editor build and focused real-file test passed first run; no runtime fix needed. Immediately record stable identity/batch conservation, safe pending-respawn refusal, zero warnings/errors and exact report/memory, then move Done. It adds evidence without closing parent manual gates.
+
 Later October 8 post-fix checkpoint: reopened the existing bounded M8 automated create/restart Testing card after real corpse/doorway fixes, preserving earlier evidence. Two opt-in editor setup warnings made the overbroad selection fail the strict verdict; retained and corrected only selection. Thirty native tests and ten fresh one-/two-client create/restart reports passed with actual process/report checks and memory/log review. Updated the card immediately and returned it Done. Full M7/M8 manual gates and packaged Server limitation remain; no unrelated cards/members/dates/assets changed.
 
 Later October 8 structure collision task: AI Programming subtask Doing reproduced four real post-load doorway/foundation blockers. Applied stored NoCollision/BlockAll profile fix, passed focused replay, three related native tests and Editor/Game builds. Immediately record exact retained failure/success/build/memory evidence and move this bounded fix Done; parent M7/M8 remain Personal Doing. No unrelated cards, members, deadlines, assets or manual acceptance changed.

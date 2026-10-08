@@ -500,4 +500,82 @@ bool FPFWorldStructureCollisionTest::RunTest(const FString&)
     AddInfo(TEXT("[PrimalPersistence] Real structure save/load traces checked: open gap, solid frame/closed panel, no hidden platform blockers and owner toggles"));
     return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFWorldDeadPlayerTest, "PF.Persistence.DeadPlayerRespawn",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FPFWorldDeadPlayerTest::RunTest(const FString&)
+{
+    AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"), EAutomationExpectedMessageFlags::Contains, 0);
+    FTestWorldWrapper Fixture; if (!Fixture.CreateTestWorld(EWorldType::Game)) { return false; }
+    UWorld* W = Fixture.GetTestWorld();
+    W->GetOutermost()->Rename(*(TEXT("/Temp/PFDeadPlayer/") + FGuid::NewGuid().ToString(EGuidFormats::Digits) + TEXT("/L_Automation")),
+        nullptr, REN_DontCreateRedirectors | REN_NonTransactional);
+    W->SetGameMode(FURL(nullptr, TEXT("/Engine/Maps/Entry?game=/Script/PrimalFrontier.PFSurvivalGameMode"), TRAVEL_Absolute));
+    auto* Floor = W->SpawnActor<AActor>(); auto* Box = NewObject<UBoxComponent>(Floor); Floor->SetRootComponent(Box);
+    Box->SetBoxExtent(FVector(2000, 2000, 25)); Box->SetCollisionProfileName(TEXT("BlockAll")); Box->RegisterComponent();
+    Floor->SetActorLocation(FVector(0, 0, -25));
+    auto* Start = W->SpawnActor<APlayerStart>(FVector(-500, 0, 120), FRotator::ZeroRotator);
+    W->SpawnActor<APFWorldClock>();
+    if (!Fixture.BeginPlayInTestWorld()) { return false; }
+    auto* Mode = W->GetAuthGameMode<APFSurvivalGameMode>(); Mode->RespawnDelay = 0.1f;
+    auto* PC = W->SpawnActor<APFSurvivalPlayerController>(); Mode->RestartPlayer(PC);
+    auto* Pawn = Cast<APFSurvivorCharacter>(PC->GetPawn());
+    auto* Persistence = W->GetSubsystem<UPFWorldPersistence>();
+    if (!TestNotNull(TEXT("Native survivor"), Pawn) || !TestNotNull(TEXT("Bag"), PC->GetInventory())) { return false; }
+    Persistence->Login(PC, TEXT(""));
+    auto* Bag = PC->GetInventory(); FString Error;
+    if (!TestTrue(TEXT("Original conserved batch"), Bag->Grant(TEXT("Item_Wood"), 5))) { return false; }
+    const FGuid BatchId = Bag->GetStacks()[0].StackId;
+    const FGuid PlayerId = PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId;
+    const FString Slot = TEXT("AutomationDead_") + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    ON_SCOPE_EXIT
+    {
+        Persistence->ActiveSlot.Reset(); // Fixture teardown must not recreate its deleted files.
+        for (bool B : {false, true}) { IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot, B)); }
+    };
+    Pawn->TakeDamage(1000, FDamageEvent(), PC, nullptr);
+    TestTrue(TEXT("Actual death before save"), Pawn->Survival->IsDead());
+    if (!TestTrue(TEXT("Save dead player to real file"), Persistence->Save(Slot, Error))) { AddError(Error); return false; }
+    auto RespawnAndCheck = [&]() -> bool
+    {
+        const TWeakObjectPtr<APFSurvivorCharacter> Previous(Pawn);
+        for (int32 Tick = 0; Tick < 5; ++Tick) { Fixture.TickTestWorld(0.1f); }
+        Pawn = Cast<APFSurvivorCharacter>(PC->GetPawn());
+        if (!TestNotNull(TEXT("Automatic replacement after dead state"), Pawn)) { return false; }
+        TestFalse(TEXT("Dead pawn destroyed exactly once"), Previous.IsValid());
+        TestFalse(TEXT("Replacement is alive"), Pawn->Survival->IsDead());
+        TestEqual(TEXT("Respawn health resets"), Pawn->Survival->GetVitals().Health, 100.f);
+        TestTrue(TEXT("Respawn uses PlayerStart"), FVector2D(Pawn->GetActorLocation()).Equals(FVector2D(Start->GetActorLocation()), 1));
+        TestTrue(TEXT("Replacement collision enabled"), Pawn->GetActorEnableCollision());
+        TestTrue(TEXT("PlayerState bag survives pawn replacement"), PC->GetInventory() == Bag);
+        TestEqual(TEXT("Stable identity through respawn"), PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId, PlayerId);
+        TestEqual(TEXT("Conserved quantity through respawn"), Bag->Count(TEXT("Item_Wood")), 5);
+        TestEqual(TEXT("One conserved batch"), Bag->GetStacks().Num(), 1);
+        if (!Bag->GetStacks().IsEmpty()) { TestEqual(TEXT("Conserved stack identity"), Bag->GetStacks()[0].StackId, BatchId); }
+        int32 Pawns = 0, Pickups = 0;
+        for (TActorIterator<APFSurvivorCharacter> It(W); It; ++It) { ++Pawns; }
+        for (TActorIterator<APFItemPickup> It(W); It; ++It) { ++Pickups; }
+        TestEqual(TEXT("No duplicate survivor"), Pawns, 1);
+        TestEqual(TEXT("Death/load does not generate duplicate drops"), Pickups, 0);
+        return true;
+    };
+    if (!RespawnAndCheck()) { return false; }
+    for (int32 Repeat = 0; Repeat < 2; ++Repeat)
+    {
+        Bag->RemoveItem(TEXT("Item_Wood"), 5); Bag->Grant(TEXT("Item_Stone"), 1);
+        if (!TestTrue(TEXT("Restore saved dead state"), Persistence->Load(Slot, Error))) { AddError(Error); return false; }
+        TestTrue(TEXT("Saved zero health follows death lifecycle"), Pawn->Survival->IsDead());
+        TestFalse(TEXT("Load during pending respawn is refused"), Persistence->Load(Slot, Error));
+        TestTrue(TEXT("Pending-respawn refusal is explicit"), Error.Contains(TEXT("awaits respawn")));
+        TestEqual(TEXT("Refusal preserves restored quantity"), Bag->Count(TEXT("Item_Wood")), 5);
+        TestEqual(TEXT("Unsaved item removed once"), Bag->Count(TEXT("Item_Stone")), 0);
+        if (!RespawnAndCheck()) { return false; }
+    }
+    if (!TestTrue(TEXT("Save replacement alive state"), Persistence->Save(Slot, Error)) ||
+        !TestTrue(TEXT("Restore alive state after dead generations"), Persistence->Load(Slot, Error))) { AddError(Error); return false; }
+    TestFalse(TEXT("Latest generation remains alive"), Pawn->Survival->IsDead());
+    TestEqual(TEXT("Latest load still conserves batch quantity"), Bag->Count(TEXT("Item_Wood")), 5);
+    Fixture.ForwardErrorMessages(this);
+    AddInfo(TEXT("[PrimalPersistence] Real dead-state file load, repeated automatic respawn, safe pending-respawn refusal and identity/quantity conservation checked"));
+    return true;
+}
 #endif

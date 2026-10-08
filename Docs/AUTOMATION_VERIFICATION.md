@@ -32,7 +32,7 @@ Inspection is restricted to project-local `Saved/AutomationReports/.../index.jso
 
 ## October 8 verification
 
-For the combined M8 native checkpoint, use these two selections. They cover the original 26 native tests plus the four new persistence safety/collision cases (30 distinct tests). Splitting stays within the runner's 200-character filter bound:
+For the combined M8 native checkpoint, use these two selections. They covered the original 26 native tests plus four persistence safety/collision cases at 31dce6b (30 distinct tests). The subsequent DeadPlayerRespawn addition increases current selection to 31; it passed a separate focused run, not a repeated full suite. Splitting stays within the runner's 200-character filter bound:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunNativeAutomation.ps1 -TestFilter PF.Building+PF.Crafting+PF.Creatures+PF.Input+PF.Interaction+PF.Inventory+PF.Persistence+PF.Settings+PF.Survival+PF.World -Label M8Native

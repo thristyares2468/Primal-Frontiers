@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 dead-player load and respawn conservation
+
+Added test-only PF.Persistence.DeadPlayerRespawn: real dead-state file save/load invokes automatic PlayerStart respawn, retains one PlayerState/inventory and stable five-wood batch, removes unsaved stone once, creates no duplicate pawn/drop, refuses repeated load during pending respawn, then saves/restores the living generation. Three actual respawn cycles passed. Editor build passed 6.20 s without compiler warnings; focused Automation_M8DeadPlayer_20261008_053248356_7725d18a passed 1/1, engine/runner 0, no test/raw-log warning/error/ensure/fatal. Run 16.10 s, sampled working/private 2.979/2.816 GiB. This focused addition follows the separate 30-test/ten-live-report checkpoint; that full checkpoint was not rerun after this test-only addition. No runtime/source behavior, assets, schema or settings changed; manual gates remain open.
+
 ## 2026-10-08 M8 combined post-fix checkpoint
 
 Source 31dce6b: Editor/Game incremental checks up to date, passed 1.13/1.11 s with no compilation actions/warnings. Native gameplay/persistence selection passed 27 and runtime command selection passed 3: all original 26 plus four new persistence cases, 30 distinct passes, no test/raw-log warnings/errors/ensure/fatal. Exact names and reports: [M8_POST_FIX_VERIFICATION.md](M8_POST_FIX_VERIFICATION.md). Initial overbroad selection correctly failed strict verdict on two opt-in editor setup warnings (engine 0/runner 1); retained, no code/warning suppression.
