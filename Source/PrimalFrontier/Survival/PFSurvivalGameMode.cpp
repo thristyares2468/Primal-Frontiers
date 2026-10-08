@@ -55,11 +55,15 @@ void APFSurvivalGameMode::PostLogin(APlayerController* PC)
     const TWeakObjectPtr<APFSurvivalPlayerController> WeakPC(Cast<APFSurvivalPlayerController>(PC));
     GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this, WeakPC]
     {
-        if (WeakPC.IsValid() && !GetWorld()->GetSubsystem<UPFWorldPersistence>()->RestorePlayer(WeakPC.Get()))
+        if(!WeakPC.IsValid()){return;}
+        bool bRestored=false;
+        if (!GetWorld()->GetSubsystem<UPFWorldPersistence>()->RestorePlayer(WeakPC.Get(),&bRestored))
         {
             WeakPC->ClientReturnToMainMenuWithTextReason(FText::FromString(TEXT("Saved player restoration failed; previous record preserved. Check server log.")));
             WeakPC->Destroy();
+            return; // Never acknowledge failed restoration as successful setup.
         }
+        WeakPC->ClientConfirmPlayerSetup(bRestored);
     }));
 }
 

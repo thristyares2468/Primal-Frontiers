@@ -99,28 +99,38 @@ void UPFWorldPersistence::Login(APFSurvivalPlayerController* PC, const FString& 
         Fresh.CapturedUtc = PersistenceUtcNow(); Roster.Players.Add(Fresh); Entry = &Roster.Players.Last();
     }
     PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId = Entry->PlayerId;
+    RestoredLogins.Remove(Entry->PlayerId);
     if (!Entry->Data.IsEmpty()) { PendingRestores.Add(Entry->PlayerId); }
     PC->GetPlayerState<APFInventoryPlayerState>()->ForceNetUpdate();
     for (TActorIterator<APFBuildPiece> It(GetWorld()); It; ++It) { It->BindPersistentOwner(PC->PlayerState); }
 }
 
-bool UPFWorldPersistence::RestorePlayer(APFSurvivalPlayerController* PC)
+bool UPFWorldPersistence::RestorePlayer(APFSurvivalPlayerController* PC, bool* bOutRestored)
 {
+    if(bOutRestored){*bOutRestored=false;}
     FString Error;
     if (!Authority(Error) || !IsValid(PC) || !PC->GetPlayerState<APFInventoryPlayerState>()) { return false; }
     const FGuid Id = PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId;
     const auto* Entry = Roster.Players.FindByPredicate([&](const auto& P) { return P.PlayerId == Id; });
+    if(!Entry){return false;} // No setup success for an unregistered survivor.
     // PostLogin's deferred call runs after SetPlayer has attached the network connection.
     // Sending this RPC during InitNewPlayer silently executes before it can reach the client.
     if (Entry) { PC->ClientRememberReconnectCredential(Entry->ReconnectCredential); }
-    if (!PendingRestores.Contains(Id)) { return true; } // Startup Apply may already have restored this controller.
-    if (!Entry || Entry->Data.IsEmpty()) { return true; }
+    if (!PendingRestores.Contains(Id))
+    {
+        // Startup Apply may already have successfully restored this controller.
+        if(bOutRestored){*bOutRestored=RestoredLogins.Contains(Id);}
+        return true;
+    }
+    if (Entry->Data.IsEmpty()) { return false; } // Pending restoration requires a saved record.
     FPFPlayerSaveData Data;
     if (!UnpackPlayer(Entry->Data, 30, Data, Error) || !FPFPlayerSaveAdapter::Restore(PC, Data, FMath::Max<int64>(0, PersistenceUtcNow() - Entry->CapturedUtc), Error))
     {
         UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Reconnect restoration refused: %s"), *Error); return false;
     }
     PendingRestores.Remove(Id);
+    RestoredLogins.Add(Id);
+    if(bOutRestored){*bOutRestored=true;}
     UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Reconnect restored server-owned player record"));
     return true;
 }
@@ -129,6 +139,7 @@ void UPFWorldPersistence::Logout(APFSurvivalPlayerController* PC)
 {
     FString Error; FPFPlayerSaveData Player;
     const auto* PS = PC ? PC->GetPlayerState<APFInventoryPlayerState>() : nullptr;
+    if(PS){RestoredLogins.Remove(PS->PersistentPlayerId);}
     // A failed restore must never replace its prior save with the default spawn's empty bag.
     if (PS && PendingRestores.Contains(PS->PersistentPlayerId)) { PendingRestores.Remove(PS->PersistentPlayerId); return; }
     if (!Authority(Error) || !FPFPlayerSaveAdapter::Capture(PC, Player, Error)) { return; }
@@ -319,10 +330,12 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
     for (const auto& R : Data.Resources) { Nodes[R.Name]->RestorePersistence(R.Hits, R.Respawn); }
     for (const auto& S : Data.Spawners) { SpawnPoints[S.Name]->RestorePersistence(Animals.FindRef(S.Resident), S.Respawn, S.Enabled); }
     Clocks[0]->SetHour(Data.Hour); Roster.Players = Data.Players;
+    RestoredLogins.Reset();
     for (auto* A : Staged) { A->SetActorHiddenInGame(false); A->SetActorEnableCollision(true); A->ForceNetUpdate(); }
     for (const auto& P : Players)
     {
         PendingRestores.Remove(P.Data.PlayerId);
+        RestoredLogins.Add(P.Data.PlayerId);
         for (auto& Pair : Pieces) { Pair.Value->BindPersistentOwner(P.PC->PlayerState); }
     }
     return true;

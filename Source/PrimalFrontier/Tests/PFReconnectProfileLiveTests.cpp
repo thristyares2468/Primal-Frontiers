@@ -58,6 +58,7 @@ public:
                 LoginBefore.StartsWith(TEXT("PFReconnect=")) && FGuid::ParseExact(LoginBefore.Mid(12),EGuidFormats::Digits,Credential)))
             {return true;}
             Test->TestTrue(TEXT("Deferred server credential write reports Saved"),PC->GetLocalReconnectStatus()==EPFLocalReconnectStatus::Saved);
+            Test->TestTrue(TEXT("Actual fresh server setup is confirmed separately"),PC->GetPlayerSetupStatus()==EPFPlayerSetupStatus::NewSurvivor);
             StackCount=PC->GetInventory()->GetStacks().Num();
             PC->SetPauseMenuOpen(true);Pause=FindReconnectWidget<UPFPauseMenu>(PC->GetWorld());
             if(!Test->TestNotNull(TEXT("Pause exists"),Pause.Get())){return true;}
@@ -128,6 +129,9 @@ private:
         auto* Text=Cast<UTextBlock>(Pause->WidgetTree->FindWidget(TEXT("PF_ReconnectFeedback")));
         if(!Test->TestNotNull(TEXT("Reconnect feedback widget"),Text)){return;}
         const FString Value=Text->GetText().ToString();
+        auto* Setup=Cast<UTextBlock>(Pause->WidgetTree->FindWidget(TEXT("PF_ServerSetupFeedback")));
+        if(Test->TestNotNull(TEXT("Separate server setup label"),Setup))
+        {Test->TestTrue(TEXT("Fresh setup never falsely says saved survivor restored"),Setup->GetText().ToString().Contains(TEXT("new survivor")));}
         Test->TestTrue(TEXT("Actual outcome visible"),Text->GetVisibility()==ESlateVisibility::HitTestInvisible &&
             Value.Contains(bFailed?TEXT("could not be saved"):TEXT("saved on this device")));
         Test->TestTrue(TEXT("Profile outcome does not claim world persistence"),Value.Contains(TEXT("does not save world state")));

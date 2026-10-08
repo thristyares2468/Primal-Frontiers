@@ -35,6 +35,10 @@ class UPFPauseMenu;
 UENUM(BlueprintType)
 enum class EPFLocalReconnectStatus : uint8 { Unknown, Saved, Failed };
 
+/** Owner-only presentation of server-confirmed setup, not predicted client readiness. */
+UENUM(BlueprintType)
+enum class EPFPlayerSetupStatus : uint8 { Unconfirmed, NewSurvivor, Restored };
+
 UCLASS()
 class PRIMALFRONTIER_API APFSurvivalPlayerController : public APrimalFrontierPlayerController
 {
@@ -47,6 +51,10 @@ public:
     UFUNCTION(Client, Reliable) void ClientRememberReconnectCredential(FGuid Credential);
     UFUNCTION(BlueprintPure, Category="Survival|UI") EPFLocalReconnectStatus GetLocalReconnectStatus() const {return LocalReconnectStatus;}
     UFUNCTION(BlueprintPure, Category="Survival|UI") FText GetLocalReconnectStatusText() const;
+    /** Sent only after server setup/restoration succeeds; never grants gameplay state. */
+    UFUNCTION(Client, Reliable) void ClientConfirmPlayerSetup(bool bRestored);
+    UFUNCTION(BlueprintPure, Category="Survival|UI") EPFPlayerSetupStatus GetPlayerSetupStatus() const {return PlayerSetupStatus;}
+    UFUNCTION(BlueprintPure, Category="Survival|UI") FText GetPlayerSetupStatusText() const;
 
     /** Building mode state, placement preview and building RPCs (lives on the controller). */
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly) TObjectPtr<UPFBuildingComponent> Building;
@@ -102,6 +110,7 @@ protected:
 
 private:
     UPROPERTY(Transient) EPFLocalReconnectStatus LocalReconnectStatus=EPFLocalReconnectStatus::Unknown;
+    UPROPERTY(Transient) EPFPlayerSetupStatus PlayerSetupStatus=EPFPlayerSetupStatus::Unconfirmed;
     void BindControl(FKey Key,void (APFSurvivalPlayerController::*Handler)(),const TCHAR* Context,const TCHAR* Action,bool bWhenPaused=false);
     TArray<FPFControlHint> RegisteredControlHints;
     // ---- Gamepad routing (PFGamepadInput.cpp) ----

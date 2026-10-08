@@ -58,7 +58,24 @@ void APFSurvivalPlayerController::ClientRememberReconnectCredential_Implementati
         UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Local reconnect profile saved; credential omitted from log"));
     }
     // Update presentation without resetting focus, navigation or quit confirmation.
-    if(PauseMenu){PauseMenu->UpdateReconnectFeedback();}
+    if(PauseMenu){PauseMenu->UpdatePersistenceFeedback();}
+}
+
+void APFSurvivalPlayerController::ClientConfirmPlayerSetup_Implementation(bool bRestored)
+{
+    if(!IsLocalController() || !GetLocalPlayer()){return;}
+    PlayerSetupStatus=bRestored?EPFPlayerSetupStatus::Restored:EPFPlayerSetupStatus::NewSurvivor;
+    if(PauseMenu){PauseMenu->UpdatePersistenceFeedback();}
+    UE_LOG(LogPFSurvival,Display,TEXT("[PrimalPersistence] Server confirmed player setup; restored=%d"),bRestored);
+}
+
+FText APFSurvivalPlayerController::GetPlayerSetupStatusText() const
+{
+    if(PlayerSetupStatus==EPFPlayerSetupStatus::Restored)
+    {return NSLOCTEXT("PrimalUI","ServerPlayerRestored","Server restored your saved survivor for this connection.");}
+    if(PlayerSetupStatus==EPFPlayerSetupStatus::NewSurvivor)
+    {return NSLOCTEXT("PrimalUI","ServerPlayerNew","Server set up a new survivor for this connection.");}
+    return NSLOCTEXT("PrimalUI","ServerSetupUnconfirmed","Server player setup has not been confirmed.");
 }
 
 FText APFSurvivalPlayerController::GetLocalReconnectStatusText() const

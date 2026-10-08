@@ -2,6 +2,8 @@
 
 October9,2026. Bounded local UI feature; full milestone/manual acceptance remains unverified.
 
+Later separate server setup acknowledgment and its current verification: [SERVER_SETUP_FEEDBACK_M11.md](SERVER_SETUP_FEEDBACK_M11.md). Local profile status remains independent; the original evidence below describes its own checkpoint.
+
 The server-issued credential callback records Unknown/Saved/Failed locally. Pause shows the actual successful write or sanitized failure and explains that this does not save world state. Unknown shows no outcome. Blueprint presentation can read the typed status/text; it cannot grant a credential through a new setter. Feedback changes update only their label, preserving modal focus, selected button and quit confirmation. No added RPC, replicated gameplay field, save schema, asset or dependency.
 
 The isolated rendered fixture uses a unique14-character UI-prefixed identity profile supplied by RunControlsAutomation.ps1. It reads the real deferred server-issued profile from disk, rejects an invalid credential without changing prior disk-backed login options, then rewrites the valid credential. It checks feedback, bounds, credential omission, Controls focus, End-session confirmation and unchanged inventory. The deliberately rejected invalid credential registers exactly one sanitized expected warning; Unreal automation demotes that matching log to Verbose. Unexpected test warnings/errors still fail. This tests rejection, not disk-full/permission failure, and does not prove production account identity or network reconnection.

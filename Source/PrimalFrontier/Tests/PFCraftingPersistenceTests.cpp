@@ -40,6 +40,11 @@ bool FPFCraftingPersistenceTest::RunTest(const FString&)
     auto* Persistence = W->GetSubsystem<UPFWorldPersistence>();
     if (!TestNotNull(TEXT("Bag"), PC->GetInventory()) || !TestNotNull(TEXT("Crafting"), PC->GetCrafting())) { return false; }
     Persistence->Login(PC, TEXT(""));
+    bool bRestored = true;
+    TestFalse(TEXT("Refused null setup is not ready"), Persistence->RestorePlayer(nullptr, &bRestored));
+    TestFalse(TEXT("Refused setup clears stale restored outcome"), bRestored);
+    TestTrue(TEXT("Fresh registered survivor is ready"), Persistence->RestorePlayer(PC, &bRestored));
+    TestFalse(TEXT("Fresh survivor was not restored"), bRestored);
     auto* Pawn = CastChecked<APFSurvivorCharacter>(PC->GetPawn()); Pawn->GetCharacterMovement()->DisableMovement();
     // Keep the fixture alive while time advances; use the existing recipe/catalog.
     Pawn->Survival->HungerDrainPerSecond = 0; Pawn->Survival->ThirstDrainPerSecond = 0;
@@ -71,7 +76,14 @@ bool FPFCraftingPersistenceTest::RunTest(const FString&)
         if (!TestTrue(TEXT("Start real timed craft before save"), Craft->Start(TEXT("Recipe_Tool"), Pawn)) ||
             !TestTrue(TEXT("Save while craft is active"), Persistence->Save(Slot, Error))) { AddError(Error); return false; }
         TestEqual(TEXT("Save alone does not cancel live job"), Craft->ActiveRecipe, FName(TEXT("Recipe_Tool")));
+        if (Repeat == 0)
+        {
+            TestTrue(TEXT("Saving a fresh survivor leaves setup ready"), Persistence->RestorePlayer(PC, &bRestored));
+            TestFalse(TEXT("Saving alone is not restoration"), bRestored);
+        }
         if (!TestTrue(TEXT("Restore active-craft file"), Persistence->Load(Slot, Error))) { AddError(Error); return false; }
+        TestTrue(TEXT("Loaded survivor setup remains ready"), Persistence->RestorePlayer(PC, &bRestored));
+        TestTrue(TEXT("Successful real-file load is restoration"), bRestored);
         TestTrue(TEXT("Restore clears active recipe"), Craft->ActiveRecipe.IsNone());
         TestEqual(TEXT("Restore clears completion deadline"), Craft->FinishAt, 0.);
         CheckIngredients(); Advance(); CheckIngredients();
@@ -97,7 +109,8 @@ bool FPFCraftingPersistenceTest::RunTest(const FString&)
     if (!TestTrue(TEXT("Reload departure checkpoint without a controller"), Persistence->Load(Slot, Error))) { AddError(Error); return false; }
     if (!TestTrue(TEXT("Departed identity can reconnect"), Persistence->CheckLogin(Options, Error))) { AddError(Error); return false; }
     PC = W->SpawnActor<APFSurvivalPlayerController>(); Mode->RestartPlayer(PC); Persistence->Login(PC, Options);
-    if (!TestTrue(TEXT("Reconnect restores ingredients"), Persistence->RestorePlayer(PC))) { return false; }
+    if (!TestTrue(TEXT("Reconnect restores ingredients"), Persistence->RestorePlayer(PC, &bRestored))) { return false; }
+    TestTrue(TEXT("New login reports actual saved survivor restoration"), bRestored);
     Pawn = CastChecked<APFSurvivorCharacter>(PC->GetPawn()); Pawn->GetCharacterMovement()->DisableMovement();
     Bag = PC->GetInventory(); Craft = PC->GetCrafting();
     TestTrue(TEXT("Reconnect job idle"), Craft->ActiveRecipe.IsNone());

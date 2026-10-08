@@ -40,7 +40,7 @@ Reflow rather than only enlarge fonts. Future tests cover 1280x720 and 2560x1440
 
 ## Reconnect and save feedback contract
 
-October9 M11 review/readability checkpoint: full bag uses the scaled right-side four-row window and separate feedback footer. Craft/build and survival checkpoints were reviewed. Local credential save/failure feedback is now implemented in Pause, separately from server/world saving; [RECONNECT_FEEDBACK_M11.md](RECONNECT_FEEDBACK_M11.md) records bounded verification. Connecting/restoring screens and progression/research backends remain future scope. [M11_REVIEW.md](M11_REVIEW.md) retains the manual usability gate; it has not passed.
+October9 M11 review/readability checkpoint: full bag uses the scaled right-side four-row window and separate feedback footer. Craft/build and survival checkpoints were reviewed. Local credential save/failure feedback is now implemented in Pause, separately from server/world saving; [RECONNECT_FEEDBACK_M11.md](RECONNECT_FEEDBACK_M11.md) records bounded verification. A separate server-owned setup acknowledgment is implemented, with verification recorded in [SERVER_SETUP_FEEDBACK_M11.md](SERVER_SETUP_FEEDBACK_M11.md); it does not prove client replication readiness or world saving. Full connecting/restoring screens and progression/research backends remain future scope. [M11_REVIEW.md](M11_REVIEW.md) retains the manual usability gate; it has not passed.
 
 | State | Player-facing message / allowed action |
 | --- | --- |

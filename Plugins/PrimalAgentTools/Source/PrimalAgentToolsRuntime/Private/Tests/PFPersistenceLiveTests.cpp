@@ -102,6 +102,8 @@ public:
                 Test->TestEqual(TEXT("Rejected network request preserves structures"), Buildings, 2);
                 Test->TestTrue(TEXT("Real server credential RPC reports local profile saved"),
                     PC->GetLocalReconnectStatus()==EPFLocalReconnectStatus::Saved);
+                Test->TestTrue(TEXT("Real server confirms fresh versus restored player setup correctly"),
+                    PC->GetPlayerSetupStatus()==(bRestore?EPFPlayerSetupStatus::Restored:EPFPlayerSetupStatus::NewSurvivor));
                 Test->TestTrue(TEXT("Real client reconnect profile is readable without exposing credential"),
                     PC->GetLocalPlayer() && PC->GetLocalPlayer()->GetGameLoginOptions().StartsWith(TEXT("PFReconnect=")));
                 int32 OtherPlayers = 0, StoragePieces = 0, OwnedStorage = 0;

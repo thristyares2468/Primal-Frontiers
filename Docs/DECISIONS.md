@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Server setup acknowledgment is separate from profile storage
+
+Use the existing deferred PostLogin restore result to send one reliable owner-client acknowledgment of NewSurvivor/Restored; remain Unconfirmed until it arrives. Track successful restoration transiently per login rather than infer it from a nonempty saved record: saving alone is not restoring. Failed setup returns to menu without acknowledgment. Pause labels and Blueprint getters are read-only presentation, preserve focus and reveal no credentials. This confirms server setup for this connection, not client replication arrival, later manual world loads, world-save success or production authentication. No save schema or gameplay RPC mutation is added. Exact evidence/limits: SERVER_SETUP_FEEDBACK_M11.md.
+
 ## 2026-10-09 — Local reconnect credential feedback is a separate UI outcome
 
 Record Unknown/Saved/Failed only after the existing local profile write returns. Expose read-only Blueprint status/text and update Pause's label without refreshing navigation or modal focus. Credential storage success never implies world state is saved or the server has restored a player. Never include capabilities/login URLs in feedback. Rendered fixtures use separate unique profiles; an expected invalid-payload rejection cannot stand in for disk-full or production identity testing.

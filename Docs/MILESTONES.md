@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-09 M11 server player-setup acknowledgment
+
+Separate server-confirmed NewSurvivor/Restored from local reconnect-profile storage in Pause. Existing deferred restoration succeeds before owner-client acknowledgment; failure cannot acknowledge success. Transient per-login restoration tracking distinguishes a real restore from saving a fresh record. Editor retry2.63s/Game26.60s clean; earlier locked-DLL LNK1104 failure retained. Native persistence4/4,rendered profile1/1 each720p/1440p with six inspected PNGs,and one-client4/two-client lag-loss6 PF.Persistence.Live reports all passed. No new raw severity beyond known widget/HLOD/Python startup categories; no headless Client2 crash. Exact tests,logs,reports,memory and limits: [SERVER_SETUP_FEEDBACK_M11.md](SERVER_SETUP_FEEDBACK_M11.md). Personal M7/M8/M11 acceptance remains unverified; no assets/schema or client gameplay authority added. Trello task https://trello.com/c/2w6xgXcR Done. Thirty-six open card descriptions also received exact level/step/expected/evidence guides in pushed0816ded; manual statuses preserved.
+
 ## 2026-10-09 M11 settings draft and Cancel verification
 
 Added opt-in real Slate/menu fixture; no runtime implementation fix needed. Editor20.27s/Game26.49s clean. PF.UI.SettingsCancelLive1/1 each720p/1440p and native PF.Settings.Preferences1/1 passed. Eight screenshots inspected. Four category drafts,Defaults,Cancel/focus/teardown preserved live preferences,quality/display/renderer/inventory and user config contents. No Apply/display/audio/maximum-scale acceptance. Exact evidence/memory/log limits: [SETTINGS_CANCEL_M11.md](SETTINGS_CANCEL_M11.md). All rendered launch cases now isolate their identity profile; two default files stayed unchanged in the earlier Controls preservation check. Human gates remain unverified; next independent M11 slice is server restoration acknowledgment.

@@ -23,7 +23,8 @@ public:
     bool Decode(const TArray<uint8>& Bytes, FPFWorldSaveData& Out, FString& Error);
     bool CheckLogin(const FString& Options, FString& Error) const;
     void Login(APFSurvivalPlayerController* PC, const FString& Options);
-    bool RestorePlayer(APFSurvivalPlayerController* PC);
+    /** Optional outcome describes successful server restoration; never local credential storage. */
+    bool RestorePlayer(APFSurvivalPlayerController* PC, bool* bOutRestored=nullptr);
     void Logout(APFSurvivalPlayerController* PC);
     void ConfigureStartup();
     void ApplyStartup();
@@ -40,6 +41,8 @@ private:
     bool bStartupBlocked = false;
     bool bLoadedWorld = false;
     TSet<FGuid> PendingRestores;
+    /** Actual successful restoration in the current login; saving alone never sets it. */
+    TSet<FGuid> RestoredLogins;
     bool Authority(FString& Error);
     bool Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FString& Error);
     bool PackPlayer(const FPFPlayerSaveData& Player, double Weight, FString& Out, FString& Error);
