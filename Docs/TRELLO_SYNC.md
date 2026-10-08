@@ -32,6 +32,8 @@ Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed
 
 ## Every continue/task
 
+October9 settings Cancel check: https://trello.com/c/WwM89qzB Doing → Done after Editor/Game,Preferences and two rendered SettingsCancelLive runs passed; eight PNGs/logs inspected. Exact limits in SETTINGS_CANCEL_M11.md: no Apply/display/max-scale/audio certification. Personal cards unchanged. Next eligible M11 task is server-owned restoration acknowledgment,not a declaration of full UI acceptance.
+
 October9 UI-runner isolation: https://trello.com/c/rCmZYZFy Doing → Done after the launcher supplied unique profiles for every rendered case and actual ControlsLive passed1/1. Before/after read-only hashes verified both existing default Local files unchanged; no profile content/recovery edited. Three PNGs and known raw severity categories reviewed; no C++ build was needed. Next independent bounded task is settings draft/cancel/focus.
 
 October9 six-board ownership readback:79 open cards/13 Personal,all13 numbered1/2/3. Added the previously missed Audio priority3, clarified asset-provenance and rendered-persistence human titles, and appended current35-native/reconnect evidence to stale M8/M11 cards. Membership/deadlines and open manual statuses preserved. AI audit https://trello.com/c/7265EZ3E immediately Done; this corrects the earlier five-board-only audit. It is not a human gameplay pass. New source finding: every isolated rendered login automatically writes a credential, so all UI test cases need unique profiles, not just Reconnect.

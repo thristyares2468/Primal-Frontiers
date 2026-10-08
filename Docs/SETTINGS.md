@@ -1,5 +1,7 @@
 # Local settings and performance
 
+October9 bounded rendered draft/Cancel verification passed at720p/1440p with live preferences,renderer and user config contents unchanged: [SETTINGS_CANCEL_M11.md](SETTINGS_CANCEL_M11.md). This does not verify display Apply/timeout or physical audio/controller acceptance.
+
 Open **P → Settings** while playing. Game, Graphics, Audio and Accessibility tabs are available with mouse, keyboard and controller. Arrow keys/D-pad select and change rows; controller LB/RB change tabs; Enter/A applies, B returns, Y selects defaults. Changes are a draft until Apply. Cancel discards the draft. Display changes require confirmation within 15 real-time seconds, including while the solo world is paused; timeout restores the prior display.
 
 Game controls cover FOV, look sensitivity, vertical inversion and control hints. Graphics include window mode, supported display resolutions, render scale, VSync, uncapped/limited FPS, motion blur, depth of field, quality presets and individual scalability groups. PIE owns its own window resolution/mode, so those controls are unavailable there. Test display changes in a standalone game window.

@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-09 M11 settings draft and Cancel verification
+
+Added opt-in real Slate/menu fixture; no runtime implementation fix needed. Editor20.27s/Game26.49s clean. PF.UI.SettingsCancelLive1/1 each720p/1440p and native PF.Settings.Preferences1/1 passed. Eight screenshots inspected. Four category drafts,Defaults,Cancel/focus/teardown preserved live preferences,quality/display/renderer/inventory and user config contents. No Apply/display/audio/maximum-scale acceptance. Exact evidence/memory/log limits: [SETTINGS_CANCEL_M11.md](SETTINGS_CANCEL_M11.md). All rendered launch cases now isolate their identity profile; two default files stayed unchanged in the earlier Controls preservation check. Human gates remain unverified; next independent M11 slice is server restoration acknowledgment.
+
 ## 2026-10-09 M11 local reconnect-profile outcome
 
 Implemented read-only typed local profile Saved/Failed feedback in Pause, with explicit separation from world-save success, private credential omission and focus/quit-state preservation. Editor/Game and final network-fixture builds passed without compiler warnings; native Gamepad/FileGenerations2/2 and rendered profile fixture1/1 each720p/1440p passed. Six PNGs inspected. Real one-client create/restart4/4 and two-client75ms/1% lag/loss6/6 passed including actual RPC outcome/profile reads. Exact evidence/memory/logs and intentional invalid-payload failure limitation: [RECONNECT_FEEDBACK_M11.md](RECONNECT_FEEDBACK_M11.md). No assets/save schema/server gameplay changes. Full M11/M7/M8 human acceptance remains unverified; independent work continues under the latest authorization.
