@@ -49,6 +49,8 @@ Changed areas: Persistence/PFWorldSaveData, PFWorldSaveFormat, PFWorldPersistenc
 
 Remaining: clean-working-set build and scoped commit/push; then M7 manual route/overnight and M8 manual persistence playtest. Production account authentication, globally rollback-atomic restoration, save migration, cooked streaming/HLOD and packaged-server certification are outside this verified development scenario. See PERSISTENCE_M8.md and PLAYTEST.md.
 
+Post-commit c3d221f clean-working-set Editor build passed in **20.76 s** and Development Game in **31.45 s**, no compiler warnings; both game and plugin compiled as unity translation units. Trello audit read back all 53 cards, corrected stale status/roadmap detail and added native M7/M8 evidence gates. Task titles use (Personal)/(AI); manual gates stay open. The user's later authorization permits independent planning tasks beyond this checkpoint, not fabricated manual passes or gated gameplay/art expansion.
+
 ## Historical checkpoints
 
 # Milestone 7 — in progress 2026-09-30

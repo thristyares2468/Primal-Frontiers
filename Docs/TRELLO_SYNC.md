@@ -2,11 +2,15 @@
 
 ## Every continue/task
 
-1. Read current Trello cards and Docs/CURRENT_STATE.md / MILESTONES.md before selecting work. On continue, select the next eligible bounded task from Trello, respecting milestone acceptance and the M8 execution boundary.
+1. Read current Trello cards and Docs/CURRENT_STATE.md / MILESTONES.md before selecting work. On continue, select the next eligible bounded task from Trello, respecting milestone acceptance and the current authorized scope. The user's October 8 follow-up permits independent planning/audit tasks while M7/M8 manual acceptance waits; it does not make those gates passed.
 2. Reconcile stale cards with actual source/log/report evidence. Move the active bounded task to Doing; describe dependencies, scope, next action and evidence. Do not infer a manual pass from automation or generic Done cards.
 3. Immediately when a task completes, update its existing card with changed areas, exact build/test verdicts, report paths, warnings and remaining limits, then move that task Done. Update it before beginning another task. A narrow test can be Done while its parent milestone remains Doing.
 4. On failure, retain Doing and state the exact failed assertion/error and next diagnostic. Mark a genuine dependency as blocked in its description. Preserve failed evidence and record a successful retry separately.
 5. Refresh Docs/CURRENT_STATE.md after meaningful changes/results and verify remote Trello writes by reading the affected board/card. Preserve unrelated cards, members, assignments and deadlines. Do not create duplicate boards/cards, invent dates or upload private save/profile/credential data.
+
+## User action marker
+
+Start every project card title with **(Personal)** or **(AI)**, as explicitly requested. Personal means the next required action needs the user (manual sustained playtest, physical controller check, or unavailable setup/approval). State the exact action in the description. AI means independently actionable agent work or future agent implementation plans. Reevaluate the prefix when the dependency is resolved; future manual acceptance does not make every future milestone Personal now. Milestone numbers remain in the title. This is next-action ownership, not a claim of historical authorship. The earlier [YOU] marker is superseded.
 
 ## Existing boards
 
@@ -17,7 +21,7 @@
 - [Sound & Audio](https://trello.com/b/Hbm7xohf/primal-frontier-sound-audio): audio preferences/coverage and later authored sound.
 - [Testing](https://trello.com/b/WwUL7l6L/primal-frontier-testing): automated checkpoints and separate manual acceptance.
 
-All use To Do → Doing → Done. No Level Design or Game Design Document board is required. Milestone descriptions come from FULL_PROJECT_ROADMAP.md; later cards are planning, not permission to skip acceptance or begin M9 automatically.
+All use To Do → Doing → Done. No Level Design or Game Design Document board is required. Milestone descriptions come from FULL_PROJECT_ROADMAP.md; future cards do not themselves authorize implementation or skipping acceptance. Only independent planning/audit work proceeds under the user's latest continuation instruction while M7/M8 manual gates are open.
 
 ## October 8 audit
 

@@ -63,6 +63,7 @@ combat, crafting, construction, and creature logic in C++.
 * Prefer reversible migrations.
 * Update architecture and decision documents when changing a major system.
 * When the user says continue, first inspect Trello for the next eligible task and reconcile it with Docs/CURRENT_STATE.md and Docs/MILESTONES.md. At the start of every project task, correct stale status and keep the bounded active task in Doing. Immediately after completing a task, update its Trello evidence/status before starting another task. Do not mark manual/unverified gates Done; preserve unrelated cards, deadlines and assignments. Follow Docs/TRELLO_SYNC.md.
+* Every project Trello card title starts with (Personal) or (AI). Use (Personal) when the next required action must be performed by the user; explain the concrete action and why it needs them in the description. Use (AI) for independently actionable agent work and future agent implementation plans. Reevaluate the prefix when a dependency resolves; do not label every future milestone Personal just because it may eventually need playtesting. These labels indicate the next actor, not historical authorship.
 * After every meaningful change and build/test result, update Docs/CURRENT_STATE.md with the current game state, completed work, verification gaps and next development step. Do not present implemented but untested work as passed.
 
 

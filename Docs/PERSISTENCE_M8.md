@@ -65,6 +65,8 @@ Changed areas: Persistence/PFWorldSaveData, PFWorldSaveFormat, PFWorldPersistenc
 
 Remaining: clean-working-set build and scoped commit/push; then M7 manual route/overnight and M8 manual persistence playtest. Production account authentication, globally rollback-atomic restoration, save migration, cooked streaming/HLOD and packaged-server certification are outside this verified development scenario. See PERSISTENCE_M8.md and PLAYTEST.md.
 
+Final post-commit builds of c3d221f with a clean Git working set passed: Editor **20.76 s**, Development Game **31.45 s**, no compiler warnings. Source compiled in unity translation units, resolving the earlier adaptive-build exclusion gap. No C++ behavior changed after the passing final regression/live tests.
+
 ## Historical foundation checkpoints
 
 The entries below preserve earlier results/failures. Statements that world integration or commands were pending describe their original checkpoint and are superseded by the current contract above.
