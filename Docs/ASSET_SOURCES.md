@@ -1,6 +1,6 @@
 # Primal Frontier – Free Asset List
 
-Every asset here is **free**. They were picked for a realistic first-person prehistoric survival game: a forest start, wildlife and dinosaurs, stone tools, base building, ancient ruins and strange "Frontier" biomes.
+Historical candidate shortlist; prices, rights and UE compatibility below were not comprehensively verified and must not be treated as intake approval. A plain file extension alone does not establish skeleton, material, collision or rendering compatibility. Follow ASSET_PIPELINE_M9.md and confirm the exact source/license/acquisition evidence before selecting an asset. Nothing in this list authorizes a download/import or source-pack redistribution. The original recommendations below are retained as historical research.
 
 Compiled 2026-10-06 and reformatted for readability.
 

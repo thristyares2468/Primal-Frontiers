@@ -10,7 +10,7 @@ The retained 60 x 70 m map is a small integration prototype. The October 8 follo
 
 - M7 remains in progress until sustained walking, the complete survival route and overnight play pass. Fixture teleports and navigation assertions are partial evidence only.
 - On October 8 the user deferred the unpassed M7 manual gate and then authorized continuing until an immediate user action is needed. M8 whole-world saves, server lifecycle/commands and development reconnect now pass 26 focused regressions plus ten one-/two-client NullRHI create/restart process reports. Remaining: rendered/manual persistence acceptance and packaged Server setup (installed engine rejects Server targets). Keep M7/M8 Doing in Trello; do not mark M7 complete or certify the complete playable loop without its missing evidence.
-- Stop after M8 for this development pass. The supplied later milestones are a plan, not evidence of completion or permission to skip gates.
+- The user's later October 8 instruction permits continuing independent eligible planning/audit tasks without further prompts. M9 intake rules and read-only inventory are now documented/tested; full acceptance/candidate approval stays open. No M10 art/gameplay integration begins while M7/M8 manual gates and candidate rights/compatibility remain unverified. Later roadmap cards are still plans, not completed milestones.
 
 ## Future adaptation request (October 8)
 

@@ -2,7 +2,7 @@
 
 ## Milestone commits and attribution
 
-For Codex-authored milestone work, include `Milestone N` in the commit subject and add `Co-authored-by: Codex GPT-6 Astra <codex@openai.com>` as a trailer. Retain the repository's configured primary Git author. Commit and push the task's reviewed, verified changes without staging unrelated user work. Describe incomplete gates honestly in checkpoint commits; never label a milestone complete before its playtest gate passes.
+For Codex-authored milestone work, include `Milestone N` in the commit subject and add `Co-authored-by: Codex GPT-6.1 Sol <codex@openai.com>` as a trailer (the user's current attribution preference supersedes Astra). Retain the repository's configured primary Git author. Commit and push the task's reviewed, verified changes without staging unrelated user work. Describe incomplete gates honestly in checkpoint commits; never label a milestone complete before its playtest gate passes.
 
 Git LFS tracks `*.uasset`, `*.umap`, and the existing `*.psd` rule. Commit `.gitattributes` with the project. GitHub Desktop can commit and push these files once Git LFS is installed; new command-line clones should run `git lfs install` and `git lfs pull` if needed.
 

@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Metadata-first intake while manual gates wait
+
+Use a read-only Asset Registry/package-size inventory before candidate integration. Do not load heavy models/textures, move legacy packs or fix redirectors during intake. Registry metadata/disk footprint is screening evidence, not runtime memory, compatibility or provenance approval. Document proposed small material/texture/LOD/collision budgets and replace placeholders through reversible presentation references while preserving gameplay IDs/authority. ASSET_PIPELINE_M9.md records the process; no new runtime dependency or asset operation is introduced.
+
+Volume preferences are separate from authored sound coverage: class/mix controls and a passing preferences test do not prove footstep/creature/UI/music playback. AUDIO_COVERAGE.md records that gap. Further art/gameplay acceptance depends on the open manual gates and actual source/license/candidate checks.
+
 ## 2026-10-08 — Bounded world saves and development reconnect
 
 Use a game-owned WorldSubsystem with built-in Json/JsonUtilities and catalog-only V1 records for the small greybox world. Validate the whole record before restoration; stage actors and replace inventories, never append saved contents. Preserve stable structure/player identities and reject invalid ownership/support graphs. Keep PrimalAgentTools as a non-Shipping adapter, with no reverse gameplay dependency.

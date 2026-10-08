@@ -1,0 +1,13 @@
+# Audio coverage — read-only checkpoint
+
+October 8, 2026. This completes the existing Trello task to audit preference controls versus authored coverage. It does not certify audibility or add sounds.
+
+PFGameUserSettings validates/persists Master/Music/Effects/UI values and mute-when-unfocused. ApplyToWorld skips dedicated servers, sets the local audio-device primary volume, loads the small preference mix and applies the three class overrides. PFSettingsMenu exposes those values. The latest PF.Settings.Preferences regression passed in M8FinalRegression; that verifies preference rules, not hearing a sound or every external class route.
+
+The UE Asset Registry inventory reports SC_Music, SC_Effects, SC_UI and SMX_Preferences under /Game/PrimalFrontier/Audio. The only /Game SoundWave is the existing template /Game/Weapons/GrenadeLauncher/Audio/FirstPersonTemplateWeaponFire02. No project-owned survival SoundWave, SoundCue or MetaSound coverage appears in this registry snapshot. Core source search found no explicit PlaySound/SpawnSound/AudioComponent emitter hooks; imported/template Blueprint or engine audio is not ruled out by that source search.
+
+Therefore music, creature voices, footsteps, gathering/crafting/building, UI and environmental ambience do not have a verified authored coverage set. Category routing of the template wave was not inspected by loading it, and sliders do not prove that a pack's sounds use the intended class. Do not claim a complete audio system just because settings exist.
+
+Evidence: Saved/AutomationReports/M9AssetInventory_20261008T030703Z_8a96b8c959134bbdb6908726df977477/inventory.json; Saved/Logs/PFM9AssetInventory.log; Source/PrimalFrontier/Settings/PFGameUserSettings.cpp / PFSettingsMenu.cpp; Scripts/CreateSettingsAudio.py; Saved/AutomationReports/M8FinalRegression/index.json. This read-only review changed no asset/source/audio setting. No repeated build/test is required for documentation alone; no audio-output playtest was performed.
+
+Next: the Personal audibility test remains open, as do M7/M8 manual acceptance. Plan a small approved original/existing sound set and per-class routes only when the later audio/feedback milestone is eligible. Confirm provenance and measure one local client; dedicated servers must stay free of audio work. No downloads, generation or broad asset-pack integration were performed.

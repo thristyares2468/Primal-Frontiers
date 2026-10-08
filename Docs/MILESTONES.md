@@ -1,5 +1,19 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M9 independent asset-pipeline planning and read-only audit
+
+The user authorized continuing eligible independent tasks without further prompts. M7/M8 manual acceptance remains pending; this is a planning/audit checkpoint, **not a full M9 acceptance or first-art gameplay pass**. Added Scripts/AuditExistingAssets.py using supported Unreal Asset Registry APIs, with unique generated output; it never loads/saves asset objects. No import, asset move/rename, redirector fix, world change, rendering setting or gameplay source changed.
+
+Isolated UnrealEditor-Cmd Python commandlet with -nullrhi -unattended -NoSaveConfig exited **0**. Generated report explicitly says InventoryCompleted: **7,268 registry assets, 7,270 package files, 44,799,493,793 disk bytes (41.723 GiB), 13 redirectors, zero registry packages without matching files**. Git status confirms no binary asset/map change. Log has no warning/error/ensure/fatal lines. Working/private process memory **1.820/1.720 GiB**; no rendered FPS, stutter, runtime residency or VRAM measurement. Texture Dimensions tags identify 1,014 at 4096 and 94 at 8192 maximum dimensions; no textures were changed.
+
+Evidence: Saved/AutomationReports/M9AssetInventory_20261008T030703Z_8a96b8c959134bbdb6908726df977477/inventory.json and summary.md; Saved/Logs/PFM9AssetInventory.log. No C++ changed in this increment, so no repeated build/gameplay automation is claimed or required for the docs/read-only script. The M8 clean-working-set builds and 26-test/live reports remain the most recent gameplay verification.
+
+ASSET_PIPELINE_M9.md records bounded intake/provenance, naming, folder/material/texture/LOD/collision rules, reversible wrappers/references, redirector review, measurement and Git/LFS policy. ASSET_SOURCES.md now clearly identifies its old claims as an unverified shortlist. The possible Modular Rural Cabins source was checked on Fab; local pack version/acquisition/exact license and compatibility remain unconfirmed. No candidate is approved merely because it is free. M9 remains Doing with a Personal source/approval dependency; first-art integration also waits for M7/M8 manual acceptance.
+
+The independent audio preference/coverage task is Done: native local volume/mix routes exist and PF.Settings.Preferences passed in M8FinalRegression; registry has three project SoundClasses/one SoundMix and only one template weapon SoundWave. Authored survival sound coverage and audibility are unverified. AUDIO_COVERAGE.md records exact evidence/limits. Trello was updated immediately after both task completions. No sound source/asset/settings changed.
+
+Changed files for this checkpoint: Scripts/AuditExistingAssets.py; Docs/ASSET_PIPELINE_M9.md, AUDIO_COVERAGE.md, ASSET_SOURCES.md, CURRENT_STATE.md, MILESTONES.md, ROADMAP_STATUS.md, DECISIONS.md, GIT_WORKFLOW.md, PRIMAL_AGENT_TOOLS.md and TRELLO_SYNC.md. The legacy Trello setup docs from the other chat remain untracked/preserved.
+
 ## 2026-10-08 M8 world persistence and reconnect verification
 
 **M8 implementation and automated verification advanced; milestone acceptance is still pending.** M7's sustained manual open-world route/overnight result and M8's rendered gather/craft/build/storage/save/close/restart/reconnect playtest remain unverified. The user authorized independent M8 work while deferring M7. No M9 work starts from this checkpoint.
