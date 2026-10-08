@@ -1,5 +1,7 @@
 # Controls, reconnect feedback and research UI plan — M11–M13
 
+October9 bounded update: real non-resolution Settings Apply and same-process disposable disk reload now passed at720p/1440p. Camera FOV/blur and vitals HUD scale consume applied values; personal settings stay unchanged. [SETTINGS_APPLY_M11.md](SETTINGS_APPLY_M11.md) has exact failure/success/log/memory evidence. Display confirmation/revert and process-restart/physical audio acceptance remain separate pending checks. Full M11/manual gates remain open.
+
 October 8, 2026. Independent planning complete. **M11 read-only controls/help is now implemented and verified within its bounded scope:** [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md). Stable stack selection and survival damage/urgent/possession feedback are implemented; see INVENTORY_SELECTION_M11.md and SURVIVAL_FEEDBACK_M11.md. Normal1440p VSM-budget check now passes the bounded profile fix in SHADOW_BUDGET_M11.md. Full M11 remains in progress; remapping and M12/M13 research/progression views are not implemented. Latest continuation authorization allows independent implementation while Personal tests remain deferred/unverified. Historical baseline below describes the planning checkpoint, not every later change.
 
 ## Source-verified baseline

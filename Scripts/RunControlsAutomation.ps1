@@ -1,7 +1,7 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [switch]$LowShadowDiagnostic,
       [ValidateRange(60,600)][int]$TimeoutSeconds=180)
@@ -23,20 +23,29 @@ $personalSettingsBefore=@(Get-PersonalSettingsSnapshot)
 $run='M11'+$TestCase+$Resolution+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
 $report=Join-Path $projectRoot ('Saved\AutomationReports\'+$run)
 $settingsTarget=Join-Path $report 'GameUserSettings.ini'
+if(Test-Path -LiteralPath $report){throw 'Refusing reused UI report/settings destination.'}
 $log=Join-Path $projectRoot ('Saved\Logs\'+$run+'.log')
 $width=if($Resolution -eq '720'){1280}else{2560}
 $height=if($Resolution -eq '720'){720}else{1440}
-$filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'} 'Overlays'{'PF.UI.ActionOverlaysLive'} 'Reconnect'{'PF.UI.ReconnectProfileLive'} 'Settings'{'PF.UI.SettingsCancelLive'}}
+$filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'} 'Overlays'{'PF.UI.ActionOverlaysLive'} 'Reconnect'{'PF.UI.ReconnectProfileLive'} 'Settings'{'PF.UI.SettingsCancelLive'} 'SettingsApply'{'PF.UI.SettingsApplyLive'}}
 # Every game login saves a server-issued credential, including ordinary UI fixtures.
 # Always isolate the profile; never replace the user's default Local reconnect details.
 $profileArgument=' -PFIdentityProfile=UI'+[Guid]::NewGuid().ToString('N').Substring(0,12)
 # Explicit optional renderer diagnostic: halve directional shadow resolution,
 # keep the existing page budget, do not persist settings or mute warnings.
 $shadowCommands=if($LowShadowDiagnostic){'r.Shadow.Virtual.ResolutionLodBiasDirectional 1,r.Shadow.Virtual.ResolutionLodBiasDirectionalMoving 1,'}else{''}
-$arguments='"{0}" /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld -game -windowed -ForceRes -ResX={1} -ResY={2} -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig -PFRunControlsUITest -PFControlsEvidence={3} -PFHUDScale={7} -ExecCmds="t.MaxFPS 0,r.VSync 0,{8}Automation RunTests {6}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{4}" -abslog="{5}"' -f (Join-Path $projectRoot 'PrimalFrontier.uproject'),$width,$height,$run,$report,$log,$filter,([string]$HUDScale),$shadowCommands
+# Apply must own r.VSync through GameUserSettings. A SetByConsole override would
+# prevent that supported path; the fixture checks the actual off/unlimited state.
+$vsyncCommand=if($TestCase -eq 'SettingsApply'){''}else{'r.VSync 0,'}
+$arguments='"{0}" /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld -game -windowed -ForceRes -ResX={1} -ResY={2} -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig -PFRunControlsUITest -PFControlsEvidence={3} -PFHUDScale={7} -ExecCmds="t.MaxFPS 0,{9}{8}Automation RunTests {6}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{4}" -abslog="{5}"' -f (Join-Path $projectRoot 'PrimalFrontier.uproject'),$width,$height,$run,$report,$log,$filter,([string]$HUDScale),$shadowCommands,$vsyncCommand
 $arguments+=$profileArgument
 # Supported FConfigCacheIni::GetDestIniFilename override: only this run owns the destination.
 $arguments+=' -GameUserSettingsINI="'+$settingsTarget+'"'
+# Only the guarded Apply fixture deliberately saves to its disposable destination.
+if($TestCase -eq 'SettingsApply'){
+    $arguments=$arguments.Replace(' -NoSaveConfig','')
+    $arguments+=' -PFRunSettingsApplyTest'
+}
 $process=$null;$working=0L;$private=0L;$timedOut=$false;$watch=[Diagnostics.Stopwatch]::StartNew()
 try {
     $process=Start-Process -FilePath $exe -ArgumentList $arguments -WorkingDirectory $projectRoot -WindowStyle Hidden -PassThru

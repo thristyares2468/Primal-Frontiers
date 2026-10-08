@@ -32,6 +32,8 @@ Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed
 
 ## Every continue/task
 
+October9 non-resolution Apply: https://trello.com/c/sIfh4PuZ Doing → Done after Editor/Game and actual720p/1440p SettingsApplyLive passes,six screenshots/default-config preservation. Initial C2666 and VSync-priority strict failure retained;fixed only test/runner,no suppression. Inline exact-level/replay/evidence guide retained. Personal gates,members/deadlines/assets unchanged. Display confirmation is separate next task.
+
 October9 settings config prerequisite: https://trello.com/c/3DWwvvZU Doing → Done after fixing cache-key/filename lookup,final Editor/Game,two rendered guarded SettingsCancelLive passes/eightPNG inspection and actual default-file hash/presence preservation. Initial2-error failure retained; corrected historical file assertion on WwM89qzB instead of inventing evidence. Two new startup ConsoleManager priority warnings investigated/recorded;not suppressed. No actual Apply/display or Personal acceptance inferred. Next task must explicitly guard disposable writes before Apply.
 
 October9 server setup acknowledgment: https://trello.com/c/2w6xgXcR Doing → Done after clean unlocked Editor/Game,native4,rendered2/sixPNGs and live one-client4/two-client lag-loss6 checks. Kept initial locked-DLL failure and prelaunch argument rejection distinct from runtime tests; no manual pass assumed. SERVER_SETUP_FEEDBACK_M11.md records exact reports/raw categories/memory. User-test guides identify observable new/restored labels without equating either to world saving. Next independent M11 slice is isolated settings Apply/display confirmation verification; Personal cards remain open.
