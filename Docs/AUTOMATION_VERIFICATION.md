@@ -2,7 +2,7 @@
 
 `Scripts/RunNativeAutomation.ps1` runs bounded, non-rendered Editor automation. Live server/client tests and human playtest gates are separate. Unreal can exit 0 after assertion failures or an unmatched selection; always check the report.
 
-From the project root, run the eight native persistence tests:
+From the project root, run the native persistence tests:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunNativeAutomation.ps1 -TestFilter PF.Persistence -Label M8Persistence

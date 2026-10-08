@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 rejected-load preservation verification
+
+Added PF.Persistence.RejectedLoadPreservesWorld: four real checksummed files (unsupported version, wrong map, resource-layout mismatch, unsafe player ground) are refused without changing running player/pawn/location/health, bag quantity/batch, structure/storage/owner/support, resource/clock, active slot or active generation/payload. Valid saving afterward still succeeds; unique disposable files cleaned. Runtime source/assets/schema unchanged.
+
+First Editor build failed C2665 (TObjectPtr/raw-pointer TestEqual, line 321, exit 6, 2.78 s); fixed only that assertion, Editor rebuild passed 6.96 s with no warnings. Logs PFM8RejectedLoadEditorBuild{,Retry}.log preserve both. Focused Automation_M8RejectedLoad_20261008_044007915_1b40fffb: 1 Success/0 failed/0 test warnings, engine/runner exits 0, raw log zero warnings/errors/ensure/fatal. 16.82 s, sampled working/private 2.979/2.835 GiB. Report/summary Saved/AutomationReports/<name>/index.json and run-summary.json; log Saved/Logs/PF<name>.log. Bounded Trello test task Done; full M7/M8 manual and packaged Server gates remain open. No repeated live tests or rendered performance claim.
+
 ## 2026-10-08 M8 native automation verdict tooling
 
 Added Scripts/RunNativeAutomation.ps1 with unique report/log/summary output, bounded owned-process timeout and sampled memory. Reject failed/missing/empty/incomplete/warned reports regardless of Unreal exit 0; reject unsafe inputs and a second Editor. Retained real failure/success inspection returned runner exits 1/0. Fresh Automation_M8ReportGate_20261008_042918633_adb3d3f7 passed StartupFailurePreservesSave 1/1, engine/runner exits 0, no test/raw-log warnings/errors/ensure/fatal; 2.999/2.856 GiB working/private, 18.16 s.

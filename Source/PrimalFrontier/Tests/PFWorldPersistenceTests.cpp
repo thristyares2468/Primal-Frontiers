@@ -245,4 +245,101 @@ bool FPFWorldStartupFailureTest::RunTest(const FString&)
     AddInfo(TEXT("[PrimalPersistence] Exercised unsupported startup payload and authored-layout mismatch: login/capture/save refusal and original generation/payload preservation assertions"));
     return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFWorldRejectedLoadTest, "PF.Persistence.RejectedLoadPreservesWorld",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FPFWorldRejectedLoadTest::RunTest(const FString&)
+{
+    AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"), EAutomationExpectedMessageFlags::Contains, 0);
+    FTestWorldWrapper Fixture;
+    if (!Fixture.CreateTestWorld(EWorldType::Game)) { return false; }
+    UWorld* W = Fixture.GetTestWorld();
+    W->GetOutermost()->Rename(*(TEXT("/Temp/PFRejectedLoad/") + FGuid::NewGuid().ToString(EGuidFormats::Digits) + TEXT("/L_Automation")),
+        nullptr, REN_DontCreateRedirectors | REN_NonTransactional);
+    W->SetGameMode(FURL(nullptr, TEXT("/Engine/Maps/Entry?game=/Script/PrimalFrontier.PFSurvivalGameMode"), TRAVEL_Absolute));
+    auto* Floor = W->SpawnActor<AActor>(); auto* Box = NewObject<UBoxComponent>(Floor); Floor->SetRootComponent(Box);
+    Box->SetBoxExtent(FVector(4000, 4000, 25)); Box->SetCollisionProfileName(TEXT("BlockAll")); Box->RegisterComponent();
+    Floor->SetActorLocation(FVector(0, 0, -25));
+    W->SpawnActor<APlayerStart>(FVector(-500, 0, 120), FRotator::ZeroRotator);
+    auto* Clock = W->SpawnActor<APFWorldClock>();
+    auto* Node = W->SpawnActor<APFResourceNode>(FVector(0, 1000, 0), FRotator::ZeroRotator);
+    if (!Fixture.BeginPlayInTestWorld()) { return false; }
+    auto* PC = W->SpawnActor<APFSurvivalPlayerController>(); W->GetAuthGameMode<APFSurvivalGameMode>()->RestartPlayer(PC);
+    auto* Persistence = W->GetSubsystem<UPFWorldPersistence>();
+    auto* Pawn = Cast<APFSurvivorCharacter>(PC->GetPawn()); FString Error;
+    if (!TestNotNull(TEXT("Save subsystem"), Persistence) || !TestNotNull(TEXT("Survivor"), Pawn) ||
+        !TestNotNull(TEXT("Player inventory"), PC->GetInventory())) { return false; }
+    Persistence->Login(PC, TEXT(""));
+    auto* Buildings = NewObject<UPFBuildingCatalog>();
+    auto SpawnPiece = [&](FName Id, FVector At, APFBuildPiece* Support)
+    {
+        const FTransform T(At); auto* Piece = W->SpawnActorDeferred<APFBuildPiece>(APFBuildPiece::StaticClass(), T);
+        Piece->Initialize(*Buildings->Find(Id), PC->PlayerState, Support); Piece->FinishSpawning(T); return Piece;
+    };
+    auto* Base = SpawnPiece(TEXT("Build_Foundation"), FVector(600, 600, 10), nullptr);
+    auto* Chest = SpawnPiece(TEXT("Build_Storage"), FVector(600, 600, 60), Base);
+    if (!TestTrue(TEXT("Player wood fixture"), PC->GetInventory()->Grant(TEXT("Item_Wood"), 4)) ||
+        !TestTrue(TEXT("Storage stone fixture"), Chest->Storage->Grant(TEXT("Item_Stone"), 2)) ||
+        !TestTrue(TEXT("Partial resource fixture"), Node->RestorePersistence(1, 0))) { return false; }
+    Pawn->Survival->SetHealth(65); Clock->SetHour(22);
+    const FVector Location = Pawn->GetActorLocation();
+    const FGuid ChestId = Chest->PersistentId, OwnerId = Chest->PersistentOwnerId;
+    const FGuid BagBatch = PC->GetInventory()->GetStacks()[0].StackId, ChestBatch = Chest->Storage->GetStacks()[0].StackId;
+    FPFWorldSaveData Good;
+    if (!TestTrue(TEXT("Capture running baseline"), Persistence->Capture(Good, Error))) { AddError(Error); return false; }
+    const FString ActiveSlot = TEXT("AutomationRejected_") + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    TArray<FString> Slots{ActiveSlot};
+    ON_SCOPE_EXIT
+    {
+        // Prevent fixture teardown from publishing a logout checkpoint after unique-file cleanup.
+        Persistence->ActiveSlot.Reset();
+        for (const auto& Slot : Slots) { for (bool B : {false, true}) { IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot, B)); } }
+    };
+    if (!TestTrue(TEXT("Save good active world"), Persistence->Save(ActiveSlot, Error))) { AddError(Error); return false; }
+    FPFSavedFile Original;
+    if (!TestTrue(TEXT("Read active generation"), FPFSaveFileStore::Read(ActiveSlot, Original, Error))) { return false; }
+    const TCHAR* Cases[] = {TEXT("unsupported version"), TEXT("wrong map"), TEXT("resource layout"), TEXT("unsafe player ground")};
+    for (int32 Case = 0; Case < UE_ARRAY_COUNT(Cases); ++Case)
+    {
+        auto Bad = Good; Bad.Hour = 5; Bad.Structures[0].Health = 50; Bad.Resources[0].Hits = 0;
+        if (Case == 0) { Bad.Version = 2; }
+        if (Case == 1) { Bad.Map = TEXT("L_M7SurvivalArena"); }
+        if (Case == 2) { Bad.Resources[0].Name = TEXT("DifferentAuthoredNode"); }
+        if (Case == 3)
+        {
+            FPFPlayerSaveData Unsafe;
+            if (!TestTrue(TEXT("Decode fixture player"), FPFWorldSaveFormat::UnpackPlayer(Bad.Players[0].Data, *PC->GetInventory()->Catalog, 30, Unsafe, Error))) { return false; }
+            Unsafe.Location = FVector(100000, 0, 120); // Finite/bounded, but outside this fixture's walkable floor.
+            if (!TestTrue(TEXT("Encode unsafe location fixture"), FPFWorldSaveFormat::PackPlayer(Unsafe, *PC->GetInventory()->Catalog, 30, Bad.Players[0].Data, Error))) { return false; }
+        }
+        const FString RejectedSlot = ActiveSlot + FString::Printf(TEXT("_%d"), Case); Slots.Add(RejectedSlot);
+        TArray<uint8> Bytes;
+        if (!TestTrue(TEXT("Encode rejected candidate"), FPFWorldSaveFormat::Encode(Bad, Bytes, Error)) ||
+            !TestTrue(TEXT("Write checksummed rejected candidate"), FPFSaveFileStore::Write(RejectedSlot, Bytes, Error))) { AddError(Error); return false; }
+        TestFalse(*FString::Printf(TEXT("Refuse %s"), Cases[Case]), Persistence->Load(RejectedSlot, Error));
+        TestFalse(TEXT("Explicit load refusal reason"), Error.IsEmpty());
+        TestEqual(TEXT("Active slot preserved"), Persistence->ActiveSlot, ActiveSlot);
+        TestTrue(TEXT("Same pawn remains possessed"), PC->GetPawn() == Pawn);
+        TestEqual(TEXT("Player position preserved"), Pawn->GetActorLocation(), Location);
+        TestEqual(TEXT("Health preserved"), Pawn->Survival->GetVitals().Health, 65.f);
+        TestEqual(TEXT("Inventory quantity preserved"), PC->GetInventory()->Count(TEXT("Item_Wood")), 4);
+        TestEqual(TEXT("Inventory batch preserved"), PC->GetInventory()->GetStacks()[0].StackId, BagBatch);
+        if (!TestTrue(TEXT("Original structure actors retained"), IsValid(Base) && IsValid(Chest))) { return false; }
+        TestEqual(TEXT("Storage identity preserved"), Chest->PersistentId, ChestId);
+        TestTrue(TEXT("Owner and support retained"), Chest->PersistentOwnerId == OwnerId && Chest->Builder == PC->PlayerState && Chest->Support == Base);
+        TestEqual(TEXT("Storage quantity preserved"), Chest->Storage->Count(TEXT("Item_Stone")), 2);
+        TestEqual(TEXT("Storage batch preserved"), Chest->Storage->GetStacks()[0].StackId, ChestBatch);
+        TestEqual(TEXT("Structure health preserved"), Base->Health, Good.Structures[0].Health);
+        TestEqual(TEXT("Resource state preserved"), Node->HitsRemaining, 1);
+        TestEqual(TEXT("Clock preserved"), Clock->Hour, 22.f);
+        int32 Pieces = 0; for (TActorIterator<APFBuildPiece> It(W); It; ++It) { ++Pieces; }
+        TestEqual(TEXT("No replacement/duplicate structures"), Pieces, 2);
+        FPFSavedFile After;
+        if (!TestTrue(TEXT("Active file still readable"), FPFSaveFileStore::Read(ActiveSlot, After, Error))) { return false; }
+        TestTrue(TEXT("Active generation and bytes unchanged"), After.Generation == Original.Generation && After.Payload == Original.Payload);
+    }
+    TestTrue(TEXT("Valid saving remains available after refusals"), Persistence->Save(ActiveSlot, Error));
+    Fixture.ForwardErrorMessages(this);
+    AddInfo(TEXT("[PrimalPersistence] Rejected real-file version/map/layout/unsafe-ground loads checked against running player, inventory, structures/storage/owner, resource, clock and active generation"));
+    return true;
+}
 #endif

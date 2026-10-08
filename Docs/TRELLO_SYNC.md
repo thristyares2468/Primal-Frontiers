@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Later October 8 rejected-load task: added AI Programming subtask Verify rejected loads preserve live world. Retained test-only C2665 build failure; fixed assertion, rebuilt and passed the focused four-case real-file preservation test. Immediately recorded exact report/log/memory and moved the bounded task Done. It does not close the parent manual persistence gate. Native verdict tool checkpoint pushed 44e9da8; current test-only scoped commit/push follows.
+
 Later October 8 M8 verdict-tool task: added one AI Testing subtask, Gate automation on report verdicts, Doing during implementation. Real retained failure/success, fresh focused pass, unmatched-selection failure and safe-input/schema checks verified. Updated the card with exact engine-versus-runner outcomes and moved it Done immediately; M7/M8 parent manual gates remain Doing. No members/dates changed. Scripts/RunNativeAutomation.ps1 and AUTOMATION_VERIFICATION.md describe the bounded task; legacy setup docs remain excluded from staging.
 
 Later October 8 independent M8 continuation: added one bounded AI Programming subtask, Preserve save after failed startup restoration, Doing during reproduction/fix. Record the initial one-test/12-assertion failure, fixed Editor/Game builds, focused retry, eight persistence regressions and four normal live create/restart reports before moving it Done. No parent manual gate is passed by this task; source/assets outside its scope remain untouched.
