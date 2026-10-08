@@ -4,6 +4,8 @@ Updated 2026-10-08. Use **L_PrimalFrontier_OpenWorld** for current open-world/M8
 
 ## Open the game
 
+**Controls/help:** P → Controls & help. Left/Right or LB/RB selects keyboard/controller; Up/Down or D-pad scrolls; Esc/P/B/Menu returns to Pause. Bindings are read-only and derived from registered controls/current Enhanced Input mappings. Pause alone is safe in standalone; multiplayer continues. Save explicitly before ending. [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md) records automated rendered720p/1440p evidence; human/controller acceptance remains unverified and nonblocking for independent development.
+
 The latest world extension adds primitive woodland, rocky ground, a roofed ruin, fibre and freshwater collection nodes to this same continuous level. At a labelled freshwater node, aim and press E to gather finite portions. Open Tab, select Water portion, and press Q to drink one (controller X in inventory). It restores 35 thirst, restores no hunger, and is not spent at full thirst. Food still has expiry timers. Blue surfaces are visual water placeholders; swimming is not implemented. See [ROADMAP_STATUS.md](ROADMAP_STATUS.md) for the final open-world direction and current greybox limitations.
 
 1. Open `C:\UnrealProjects\PrimalFrontier\PrimalFrontier.uproject`.

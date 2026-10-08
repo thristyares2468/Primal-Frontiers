@@ -1,6 +1,6 @@
 # Controls, reconnect feedback and research UI plan — M11–M13
 
-October 8, 2026. **Independent planning complete; these UI extensions are not implemented.** Full M11–M13 remain To Do behind their acceptance gates. Existing controls/settings/HUD are retained. No widget, input asset, binding, preference, save or gameplay code changes in this task.
+October 8, 2026. Independent planning complete. **M11 read-only controls/help is now implemented and verified within its bounded scope:** [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md). Full M11 remains in progress; remapping and M12/M13 research/progression views are not implemented. Latest continuation authorization allows independent implementation while Personal tests remain deferred/unverified. Historical baseline below describes the planning checkpoint, not every later change.
 
 ## Source-verified baseline
 
@@ -15,7 +15,7 @@ Sources: survival controller/gamepad/HUD, inventory/crafting/building HUDs, PFSe
 
 ## First implementation slice: read-only controls and feedback
 
-After preceding acceptance, begin with a small controls/help panel and clearer current-state feedback. Use existing text/primitive styling; no icon pack or external dependency is needed. Preserve the first-person center view and native crosshair. Blueprint/UMG may own presentation/tuning; C++ supplies validated state and action results.
+Begin with a small controls/help panel and clearer current-state feedback. Use existing text/primitive styling; no icon pack or external dependency is needed. Preserve the first-person center view and native crosshair. Blueprint/UMG may own presentation/tuning; C++ supplies validated state and action results.
 
 | Surface | Required behavior |
 | --- | --- |

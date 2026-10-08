@@ -20,6 +20,7 @@
 
 #pragma once
 #include "PrimalFrontierPlayerController.h"
+#include "Survival/PFControlHint.h"
 #include "PFSurvivalPlayerController.generated.h"
 class UPFSurvivalHUD;
 class UPFInventoryHUD;
@@ -48,12 +49,14 @@ public:
     UPROPERTY(EditDefaultsOnly, Category="Survival|UI") TSubclassOf<UPFSurvivalHUD> SurvivalHUDClass;
     UPROPERTY(Transient, BlueprintReadOnly, Category="Survival|UI") TObjectPtr<UPFSurvivalHUD> SurvivalHUD;
 
-    /** E / Pad X: pick up, gather or eat a ration in reach; otherwise open an owned door/storage. */
+    /** E / Pad X: pick up, gather or use a recovery pickup in reach; otherwise open owned door/storage. */
     UFUNCTION(BlueprintCallable, Category="Survival") void Interact();
 
     // ---- Pause menu (local UI only; world pauses only in Standalone) ----
     void SetPauseMenuOpen(bool bOpen);
     bool IsPauseMenuOpen() const {return bPauseMenuOpen;}
+    /** Descriptions recorded beside real legacy bindings plus current Enhanced Input mappings. */
+    TArray<FPFControlHint> GetControlHints(bool bGamepad) const;
 
     // ---- Text for the HUD ----
     /** Context prompt for whatever the crosshair is on (e.g. "E / Pad X - Pick up Wood x5"). */
@@ -91,6 +94,8 @@ protected:
     UFUNCTION(Server, Reliable) void ServerInteract();
 
 private:
+    void BindControl(FKey Key,void (APFSurvivalPlayerController::*Handler)(),const TCHAR* Context,const TCHAR* Action,bool bWhenPaused=false);
+    TArray<FPFControlHint> RegisteredControlHints;
     // ---- Gamepad routing (PFGamepadInput.cpp) ----
     // Face/D-pad buttons are contextual: they act on whichever overlay is open.
     void BindGamepadControls();

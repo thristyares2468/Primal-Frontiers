@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Latest October 8 authorization: continue independent implementation while the user's tests are deferred. Personal M7/M8/controller observations are nonblocking for development but remain UNVERIFIED. Never assume or report a manual pass. This supersedes earlier planning-only continuation notes below. M11 registered-binding controls/help is the active bounded HUD & UI task; art provenance and real technical failures remain dependencies.
+
 Later October 8 two-client diagnostic: completed/pushed one-client task 8b62612 first, then selected separate AI M8 two-client lag/loss scope Doing. All six Create/Restart reports/settings/log categories/memory reviewed; immediately moved that bounded task Done. Manual parent gates remain Doing and broader hardening remains planned. No members/dates or unrelated cards changed.
 
 Later October 8 M8 network diagnostic: selected existing automated persistence scope, added a bounded AI Testing one-client lag/loss task Doing. Four actual Create/Restart reports passed with engine-confirmed session settings and reviewed raw startup categories. Immediately record exact evidence/memory and move one-client task Done before selecting the separate practical two-client profile. Manual parents, members, dates and unrelated cards unchanged.
@@ -30,7 +32,7 @@ Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed
 
 ## Every continue/task
 
-1. Read current Trello cards and Docs/CURRENT_STATE.md / MILESTONES.md before selecting work. On continue, select the next eligible bounded task from Trello, respecting milestone acceptance and the current authorized scope. The user's October 8 follow-up permits independent planning/audit tasks while M7/M8 manual acceptance waits; it does not make those gates passed.
+1. Read current Trello cards and Docs/CURRENT_STATE.md / MILESTONES.md before selecting work. On continue, select the next eligible bounded task from Trello within the latest authorized scope. The user's latest October 8 follow-up permits independent implementation while Personal tests wait; deferred tests remain unverified and nonblocking, not passed.
 2. Reconcile stale cards with actual source/log/report evidence. Move the active bounded task to Doing; describe dependencies, scope, next action and evidence. Do not infer a manual pass from automation or generic Done cards.
 3. Immediately when a task completes, update its existing card with changed areas, exact build/test verdicts, report paths, warnings and remaining limits, then move that task Done. Update it before beginning another task. A narrow test can be Done while its parent milestone remains Doing.
 4. On failure, retain Doing and state the exact failed assertion/error and next diagnostic. Mark a genuine dependency as blocked in its description. Preserve failed evidence and record a successful retry separately.

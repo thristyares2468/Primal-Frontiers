@@ -13,9 +13,11 @@
 #include "Components/VerticalBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/SizeBox.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/World.h"
 #include "Settings/PFSettingsMenu.h"
+#include "Survival/PFControlsMenu.h"
 
 void UPFPauseMenu::NativeOnInitialized()
 {
@@ -31,14 +33,15 @@ void UPFPauseMenu::NativeOnInitialized()
     Back->SetAnchors(FAnchors(0,0,1,1));
     Back->SetOffsets(FMargin(0));
 
-    // Centred 620x460 panel holding a vertical list of rows.
+    // Centred panel holding a vertical list of rows.
     auto* Panel=WidgetTree->ConstructWidget<UBorder>();
     Panel->SetBrushColor(FLinearColor(0.04f,0.04f,0.04f,1));
     Panel->SetPadding(FMargin(24));
-    auto* Placement=Canvas->AddChildToCanvas(Panel);
+    auto* Sizing=WidgetTree->ConstructWidget<USizeBox>();Sizing->SetWidthOverride(620);Sizing->SetContent(Panel);
+    auto* Placement=Canvas->AddChildToCanvas(Sizing);
     Placement->SetAnchors(FAnchors(0.5f,0.5f));
     Placement->SetAlignment(FVector2D(0.5f,0.5f));
-    Placement->SetSize(FVector2D(620,460));
+    Placement->SetAutoSize(true);
     auto* Rows=WidgetTree->ConstructWidget<UVerticalBox>();
     Panel->SetContent(Rows);
 
@@ -64,6 +67,10 @@ void UPFPauseMenu::NativeOnInitialized()
     SettingsButton->SetContent(Text(TEXT("Settings"),30));
     Rows->AddChild(SettingsButton);
     SettingsButton->OnClicked.AddDynamic(this,&UPFPauseMenu::Settings);
+    ControlsButton=WidgetTree->ConstructWidget<UButton>();
+    ControlsButton->SetContent(Text(TEXT("Controls & help"),30));
+    Rows->AddChild(ControlsButton);
+    ControlsButton->OnClicked.AddDynamic(this,&UPFPauseMenu::Controls);
     QuitButton=WidgetTree->ConstructWidget<UButton>();
     QuitLabel=Text(TEXT("End session"),30);
     QuitLabel->SetAutoWrapText(false);
@@ -76,18 +83,18 @@ void UPFPauseMenu::NativeOnInitialized()
 void UPFPauseMenu::Refresh()
 {
     bConfirmQuit=false;
-    bQuitSelected=false;
+    CloseChildMenus();
     SelectedButton=0;
     UpdateSelection();
     QuitLabel->SetText(FText::FromString(TEXT("End session")));
-    Description->SetText(FText::FromString(GetWorld()->GetNetMode()==NM_Standalone?TEXT("Paused\nWorld changes are not saved yet.\n"):TEXT("Multiplayer continues while this menu is open.\nWorld changes are not saved yet.\n")));
+    Description->SetText(FText::FromString(GetWorld()->GetNetMode()==NM_Standalone?TEXT("Paused\nSave explicitly before ending the session.\n"):TEXT("Multiplayer continues while this menu is open.\nSave explicitly; ending does not autosave.\n")));
 }
 
 void UPFPauseMenu::Resume(){if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetPauseMenuOpen(false);}}
 
 void UPFPauseMenu::Quit()
 {
-    // Two-step confirmation: there is no persistence yet, so quitting loses the world.
+    // Explicit save/load exists; ending does not automatically publish a world save.
     if(!bConfirmQuit)
     {
         bConfirmQuit=true;
@@ -102,38 +109,56 @@ void UPFPauseMenu::UpdateSelection()
 {
     ResumeButton->SetBackgroundColor(SelectedButton==0?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
     SettingsButton->SetBackgroundColor(SelectedButton==1?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
-    QuitButton->SetBackgroundColor(SelectedButton==2?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
+    ControlsButton->SetBackgroundColor(SelectedButton==2?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
+    QuitButton->SetBackgroundColor(SelectedButton==3?FLinearColor(0.2f,0.6f,0.9f):FLinearColor::Gray);
 }
 
 void UPFPauseMenu::Settings()
 {
+    CloseChildMenus();
     SettingsMenu=CreateWidget<UPFSettingsMenu>(GetOwningPlayer());
     SettingsMenu->ReturnFocus=this;
     SettingsMenu->AddToPlayerScreen(110);
     SettingsMenu->SetKeyboardFocus();
 }
 
-FReply UPFPauseMenu::NativeOnPreviewKeyDown(const FGeometry& G,const FKeyEvent& E)
+void UPFPauseMenu::Controls()
 {
-    const FKey K=E.GetKey();
+    CloseChildMenus();
+    ControlsMenu=CreateWidget<UPFControlsMenu>(GetOwningPlayer());
+    if(!ControlsMenu){return;}
+    ControlsMenu->ReturnFocus=this;
+    ControlsMenu->AddToPlayerScreen(110);ControlsMenu->SetKeyboardFocus();
+    UE_LOG(LogTemp,Display,TEXT("[PrimalUI] Read-only controls opened; bindings supplied by local controller."));
+}
+void UPFPauseMenu::CloseChildMenus()
+{
+    if(ControlsMenu){ControlsMenu->RemoveFromParent();ControlsMenu=nullptr;}
+    if(SettingsMenu){SettingsMenu->RemoveFromParent();SettingsMenu=nullptr;}
+}
+void UPFPauseMenu::NativeDestruct(){CloseChildMenus();Super::NativeDestruct();}
+
+FReply UPFPauseMenu::HandleNavigation(FKey K,bool bRepeat)
+{
     // Any "back/menu" key resumes.
     if(K==EKeys::P || K==EKeys::Escape || K==EKeys::Gamepad_Special_Right || K==EKeys::Gamepad_FaceButton_Right)
     {
-        Resume();
+        if(!bRepeat){Resume();}
         return FReply::Handled();
     }
-    // D-pad moves the highlight between the two buttons.
+    // D-pad moves the highlight between all four buttons.
     if(K==EKeys::Gamepad_DPad_Up || K==EKeys::Gamepad_DPad_Down || K==EKeys::Up || K==EKeys::Down)
     {
-        SelectedButton=(SelectedButton+((K==EKeys::Gamepad_DPad_Down || K==EKeys::Down)?1:2))%3;
+        SelectedButton=(SelectedButton+((K==EKeys::Gamepad_DPad_Down || K==EKeys::Down)?1:3))%4;
         UpdateSelection();
         return FReply::Handled();
     }
     // A activates the highlighted button (ignore key-repeat so a held A can't double-confirm).
     if(K==EKeys::Gamepad_FaceButton_Bottom || K==EKeys::Enter)
     {
-        if(!E.IsRepeat()){if(SelectedButton==2){Quit();}else if(SelectedButton==1){Settings();}else{Resume();}}
+        if(!bRepeat){if(SelectedButton==3){Quit();}else if(SelectedButton==2){Controls();}else if(SelectedButton==1){Settings();}else{Resume();}}
         return FReply::Handled();
     }
-    return Super::NativeOnPreviewKeyDown(G,E);
+    return FReply::Handled();
 }
+FReply UPFPauseMenu::NativeOnPreviewKeyDown(const FGeometry&,const FKeyEvent& E){return HandleNavigation(E.GetKey(),E.IsRepeat());}

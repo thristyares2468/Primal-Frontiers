@@ -8,6 +8,8 @@ The retained 60 x 70 m map is a small integration prototype. The October 8 follo
 
 ## Current execution boundary
 
+Latest October 8 instruction supersedes the earlier planning-only boundary below: independent implementation may proceed while Personal playtests are deferred. M11 controls/help starts with existing placeholder UI, without M10 art dependencies. No manual result is assumed; M7/M8/controller checks remain UNVERIFIED. Asset provenance and technical build/test failures still govern affected tasks.
+
 Independent M11–M13 controls/reconnect/research UI planning is complete in [UI_CONTROLS_PLAN.md](UI_CONTROLS_PLAN.md). Read-only help precedes future remapping; progression views wait for real backends. No UI implementation or acceptance was added; preceding gates remain required.
 
 Independent M18 compatibility planning is complete in [SAVE_COMPATIBILITY_PLAN.md](SAVE_COMPATIBILITY_PLAN.md). Full migration implementation/acceptance remains To Do behind preceding gates. No source/save/schema or art change; M7/M8 remain unverified manually.

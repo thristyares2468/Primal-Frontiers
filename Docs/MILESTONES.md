@@ -1,5 +1,13 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M11 registered-binding controls/help
+
+Latest user authorization permits independent implementation while Personal tests remain nonblocking but UNVERIFIED. Implemented P → Controls & help, keyboard/controller contextual pages from actual registered bindings and current public Enhanced Input view, pickup/food/save/pause guidance, safe Back focus, child modal cleanup and content-sized pause background. No assets/plugins/server mutations/remapping. Full M11 remains incomplete.
+
+Editor final PASSED6.31 s; Development Game PASSED41.75 s; no compiler warnings. PF.Input.Gamepad + PF.Settings.Preferences PASSED2/2 (Automation_M11Controls_20261008_090734672_36578953,16.07 s,2.920/2.782 GiB). Real Slate/rendered PF.UI.ControlsLive PASSED1/1 at720p and1440p: M11Controls720_20261008_091400974_9c4f8bcf (32.61 s,3.079/4.090 GiB) and M11Controls1440_20261008_091446844_c3fb51c8 (37.27 s,3.166/4.367 GiB). Test warnings/errors0, engine/strict verdict0. Final screenshots inspected; uncapped/VSync0 confirmed. Stationary menus do not establish traversal FPS/stutter.
+
+Retained initial C2248 Editor failure and rendered three-assertion focus failure; corrected public accessor/include and deferred focus fixture timing, then replayed. Known raw widget/HLOD warnings and engine Python startup traces remain; no crash/ensure/fatal. [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md) gives exact logs/reports/commands/limits. Trello bounded task https://trello.com/c/X5Ub0K1x; Personal gates remain open.
+
 ## 2026-10-08 M8 current-state handoff reconciliation
 
 Documentation/status task only: rechecked retained final food/crafting report summaries (each 1/1, engine/runner0, zero warnings/errors/ensure/fatal), final Editor build logs (6.12/5.67 s, no compiler warnings), and source/remote equality at7869ccd. Replaced accumulated CURRENT_STATE chronology with an authoritative snapshot and preserved the entire prior document in CURRENT_STATE_HISTORY_2026-10-08.md. Corrected stale 26/30/31/32-count presentation in current guide/roadmap/Trello without rewriting historical reports: current intended selection33, combined30 plus three separate focused passes, no full33 rerun. Clarified Personal M7 route/overnight and M8 rendered persistence actions/why they require human evidence. No new build/test process, gameplay/assets/source/settings, manual acceptance or milestone completion; local document links/whitespace/evidence checked. Bounded task https://trello.com/c/EG6SOrl5; preceding gates remain open.

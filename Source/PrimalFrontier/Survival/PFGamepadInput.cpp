@@ -21,18 +21,18 @@
 // These buttons share the keyboard paths and their server-validated RPCs.
 void APFSurvivalPlayerController::BindGamepadControls()
 {
-    InputComponent->BindKey(EKeys::Gamepad_Special_Right,IE_Pressed,this,&APFSurvivalPlayerController::TogglePauseMenu).bExecuteWhenPaused=true;
-    InputComponent->BindKey(EKeys::Gamepad_Special_Left,IE_Pressed,this,&APFSurvivalPlayerController::ToggleInventory);
-    InputComponent->BindKey(EKeys::Gamepad_FaceButton_Top,IE_Pressed,this,&APFSurvivalPlayerController::ToggleCrafting);
-    InputComponent->BindKey(EKeys::Gamepad_RightShoulder,IE_Pressed,this,&APFSurvivalPlayerController::ToggleBuilding);
-    InputComponent->BindKey(EKeys::Gamepad_FaceButton_Left,IE_Pressed,this,&APFSurvivalPlayerController::GamepadPrimary);
-    InputComponent->BindKey(EKeys::Gamepad_FaceButton_Right,IE_Pressed,this,&APFSurvivalPlayerController::GamepadBack);
-    InputComponent->BindKey(EKeys::Gamepad_DPad_Up,IE_Pressed,this,&APFSurvivalPlayerController::GamepadUp);
-    InputComponent->BindKey(EKeys::Gamepad_DPad_Down,IE_Pressed,this,&APFSurvivalPlayerController::GamepadDown);
-    InputComponent->BindKey(EKeys::Gamepad_DPad_Left,IE_Pressed,this,&APFSurvivalPlayerController::GamepadLeft);
-    InputComponent->BindKey(EKeys::Gamepad_DPad_Right,IE_Pressed,this,&APFSurvivalPlayerController::GamepadRight);
-    InputComponent->BindKey(EKeys::Gamepad_RightTrigger,IE_Pressed,this,&APFSurvivalPlayerController::PlaceBuilding);
-    InputComponent->BindKey(EKeys::Gamepad_LeftShoulder,IE_Pressed,this,&APFSurvivalPlayerController::DemolishBuilding);
+    BindControl(EKeys::Gamepad_Special_Right,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Menu: pause / resume"),true);
+    BindControl(EKeys::Gamepad_Special_Left,&APFSurvivalPlayerController::ToggleInventory,TEXT("General"),TEXT("View: open / close inventory"));
+    BindControl(EKeys::Gamepad_FaceButton_Top,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Y: open / close crafting"));
+    BindControl(EKeys::Gamepad_RightShoulder,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("RB: open / close building"));
+    BindControl(EKeys::Gamepad_FaceButton_Left,&APFSurvivalPlayerController::GamepadPrimary,TEXT("Contextual"),TEXT("X: inventory consume; crafting tool; otherwise interact"));
+    BindControl(EKeys::Gamepad_FaceButton_Right,&APFSurvivalPlayerController::GamepadBack,TEXT("General"),TEXT("B: close overlay / resume"));
+    BindControl(EKeys::Gamepad_DPad_Up,&APFSurvivalPlayerController::GamepadUp,TEXT("Contextual"),TEXT("Inventory previous; crafting cook; building next piece"));
+    BindControl(EKeys::Gamepad_DPad_Down,&APFSurvivalPlayerController::GamepadDown,TEXT("Contextual"),TEXT("Inventory next; crafting dry; building rotate"));
+    BindControl(EKeys::Gamepad_DPad_Left,&APFSurvivalPlayerController::GamepadLeft,TEXT("Contextual"),TEXT("Inventory split; crafting cancel; building store one"));
+    BindControl(EKeys::Gamepad_DPad_Right,&APFSurvivalPlayerController::GamepadRight,TEXT("Contextual"),TEXT("Inventory drop one; building take one"));
+    BindControl(EKeys::Gamepad_RightTrigger,&APFSurvivalPlayerController::PlaceBuilding,TEXT("Building / world"),TEXT("RT: place preview; attack when overlays are closed"));
+    BindControl(EKeys::Gamepad_LeftShoulder,&APFSurvivalPlayerController::DemolishBuilding,TEXT("Building"),TEXT("LB: demolish owned targeted piece"));
 }
 
 /** X: eat (bag open), craft tool (crafting open), otherwise interact. */

@@ -55,6 +55,25 @@ bool FPFGamepadTest::RunTest(const FString&)
     PC->SetControlRotation(FRotator::ZeroRotator);
     PC->SetAsLocalPlayerController();
     PC->InitInputSystem();
+    // Help and binding registration share a source. Every legacy key has exactly
+    // one description, partitioned by device; compare against actual delegates.
+    TSet<FKey> Described;
+    for(bool bPad:{false,true})
+    {
+        const auto Hints=PC->GetControlHints(bPad);
+        TestTrue(TEXT("Nonempty controls page"),!Hints.IsEmpty());
+        for(const auto& Hint:Hints)
+        {
+            TestEqual(TEXT("Help device family matches key"),Hint.Key.IsGamepadKey(),bPad);
+            TestTrue(TEXT("Help names action and context"),!Hint.Action.IsEmpty() && !Hint.Context.IsEmpty());
+            if(Hint.Context==TEXT("Movement / view")){continue;} // Enhanced mapping table, not legacy delegate.
+            TestFalse(TEXT("One description per legacy key"),Described.Contains(Hint.Key));
+            Described.Add(Hint.Key);
+            TestTrue(TEXT("Help key has registered press handler"),PC->InputComponent->KeyBindings.ContainsByPredicate([&](const FInputKeyBinding& B){return B.Chord.Key==Hint.Key && B.KeyEvent==IE_Pressed && B.KeyDelegate.IsBound();}));
+        }
+    }
+    for(const auto& Binding:PC->InputComponent->KeyBindings)
+    {if(Binding.KeyEvent==IE_Pressed){TestTrue(TEXT("Actual press binding is documented"),Described.Contains(Binding.Chord.Key));}}
     // Simulate a press by invoking the bound delegate for that key.
     auto Press=[&](FKey Key)
     {

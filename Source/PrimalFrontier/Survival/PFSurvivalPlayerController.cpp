@@ -34,6 +34,9 @@
 #include "Settings/PFGameUserSettings.h"
 #include "Persistence/PFLocalPlayer.h"
 #include "Persistence/PFWorldPersistence.h"
+#include "EnhancedPlayerInput.h"
+#include "EnhancedActionKeyMapping.h"
+#include "InputAction.h"
 
 APFSurvivalPlayerController::APFSurvivalPlayerController()
 {
@@ -83,35 +86,61 @@ void APFSurvivalPlayerController::BeginPlay()
 void APFSurvivalPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
+    RegisteredControlHints.Reset();
     BindGamepadControls();
     // Legacy key bindings for the greybox survival actions. Movement/look/jump come
     // from the template Enhanced Input context (IMC_Default) via the base class.
     // P is the reliable pause key in PIE, where Esc may end the Play session.
-    InputComponent->BindKey(EKeys::P,IE_Pressed,this,&APFSurvivalPlayerController::TogglePauseMenu).bExecuteWhenPaused=true;
-    InputComponent->BindKey(EKeys::Escape,IE_Pressed,this,&APFSurvivalPlayerController::TogglePauseMenu).bExecuteWhenPaused=true;
-    InputComponent->BindKey(EKeys::E,IE_Pressed,this,&APFSurvivalPlayerController::Interact);
+    BindControl(EKeys::P,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Pause / resume (preferred in Editor Play)"),true);
+    BindControl(EKeys::Escape,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Pause / resume (Editor may stop PIE)"),true);
+    BindControl(EKeys::E,&APFSurvivalPlayerController::Interact,TEXT("World"),TEXT("Pick up / gather / use door or storage"));
     // Inventory (M3)
-    InputComponent->BindKey(EKeys::Tab,IE_Pressed,this,&APFSurvivalPlayerController::ToggleInventory);
-    InputComponent->BindKey(EKeys::Down,IE_Pressed,this,&APFSurvivalPlayerController::InventoryNext);
-    InputComponent->BindKey(EKeys::Up,IE_Pressed,this,&APFSurvivalPlayerController::InventoryPrevious);
-    InputComponent->BindKey(EKeys::X,IE_Pressed,this,&APFSurvivalPlayerController::InventorySplit);
-    InputComponent->BindKey(EKeys::G,IE_Pressed,this,&APFSurvivalPlayerController::InventoryDrop);
-    InputComponent->BindKey(EKeys::Q,IE_Pressed,this,&APFSurvivalPlayerController::InventoryConsume);
+    BindControl(EKeys::Tab,&APFSurvivalPlayerController::ToggleInventory,TEXT("General"),TEXT("Open / close inventory"));
+    BindControl(EKeys::Down,&APFSurvivalPlayerController::InventoryNext,TEXT("Inventory"),TEXT("Select next stack"));
+    BindControl(EKeys::Up,&APFSurvivalPlayerController::InventoryPrevious,TEXT("Inventory"),TEXT("Select previous stack"));
+    BindControl(EKeys::X,&APFSurvivalPlayerController::InventorySplit,TEXT("Inventory"),TEXT("Split selected stack"));
+    BindControl(EKeys::G,&APFSurvivalPlayerController::InventoryDrop,TEXT("Inventory"),TEXT("Drop one selected item"));
+    BindControl(EKeys::Q,&APFSurvivalPlayerController::InventoryConsume,TEXT("Inventory"),TEXT("Consume one selected edible item"));
     // Crafting (M4)
-    InputComponent->BindKey(EKeys::C,IE_Pressed,this,&APFSurvivalPlayerController::ToggleCrafting);
-    InputComponent->BindKey(EKeys::One,IE_Pressed,this,&APFSurvivalPlayerController::CraftTool);
-    InputComponent->BindKey(EKeys::Two,IE_Pressed,this,&APFSurvivalPlayerController::CookFood);
-    InputComponent->BindKey(EKeys::Three,IE_Pressed,this,&APFSurvivalPlayerController::DryFood);
-    InputComponent->BindKey(EKeys::R,IE_Pressed,this,&APFSurvivalPlayerController::CancelCraft);
+    BindControl(EKeys::C,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Open / close crafting"));
+    BindControl(EKeys::One,&APFSurvivalPlayerController::CraftTool,TEXT("Crafting"),TEXT("Craft primitive tool"));
+    BindControl(EKeys::Two,&APFSurvivalPlayerController::CookFood,TEXT("Crafting"),TEXT("Cook food"));
+    BindControl(EKeys::Three,&APFSurvivalPlayerController::DryFood,TEXT("Crafting"),TEXT("Dry food"));
+    BindControl(EKeys::R,&APFSurvivalPlayerController::CancelCraft,TEXT("Crafting"),TEXT("Cancel craft; ingredients are not consumed"));
     // Building (M5) and attack (M6, left click outside overlays)
-    InputComponent->BindKey(EKeys::B,IE_Pressed,this,&APFSurvivalPlayerController::ToggleBuilding);
-    InputComponent->BindKey(EKeys::N,IE_Pressed,this,&APFSurvivalPlayerController::NextBuilding);
-    InputComponent->BindKey(EKeys::T,IE_Pressed,this,&APFSurvivalPlayerController::RotateBuilding);
-    InputComponent->BindKey(EKeys::LeftMouseButton,IE_Pressed,this,&APFSurvivalPlayerController::PlaceBuilding);
-    InputComponent->BindKey(EKeys::H,IE_Pressed,this,&APFSurvivalPlayerController::DemolishBuilding);
-    InputComponent->BindKey(EKeys::J,IE_Pressed,this,&APFSurvivalPlayerController::DamageBuilding);
-    InputComponent->BindKey(EKeys::U,IE_Pressed,this,&APFSurvivalPlayerController::StoreItem);
-    InputComponent->BindKey(EKeys::O,IE_Pressed,this,&APFSurvivalPlayerController::TakeStoredItem);
+    BindControl(EKeys::B,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("Open / close building"));
+    BindControl(EKeys::N,&APFSurvivalPlayerController::NextBuilding,TEXT("Building"),TEXT("Select next piece"));
+    BindControl(EKeys::T,&APFSurvivalPlayerController::RotateBuilding,TEXT("Building"),TEXT("Rotate preview"));
+    BindControl(EKeys::LeftMouseButton,&APFSurvivalPlayerController::PlaceBuilding,TEXT("Building / world"),TEXT("Place preview; attack when overlays are closed"));
+    BindControl(EKeys::H,&APFSurvivalPlayerController::DemolishBuilding,TEXT("Building"),TEXT("Demolish owned targeted piece"));
+    BindControl(EKeys::J,&APFSurvivalPlayerController::DamageBuilding,TEXT("Building"),TEXT("Developer damage to targeted piece"));
+    BindControl(EKeys::U,&APFSurvivalPlayerController::StoreItem,TEXT("Building"),TEXT("Store one item in targeted owned storage"));
+    BindControl(EKeys::O,&APFSurvivalPlayerController::TakeStoredItem,TEXT("Building"),TEXT("Take one item from targeted owned storage"));
+}
+
+void APFSurvivalPlayerController::BindControl(FKey Key,void (APFSurvivalPlayerController::*Handler)(),const TCHAR* Context,const TCHAR* Action,bool bWhenPaused)
+{
+    InputComponent->BindKey(Key,IE_Pressed,this,Handler).bExecuteWhenPaused=bWhenPaused;
+    RegisteredControlHints.Add({Key,Context,Action});
+}
+
+TArray<FPFControlHint> APFSurvivalPlayerController::GetControlHints(bool bGamepad) const
+{
+    TArray<FPFControlHint> Result;
+    // Query current player mappings, including context changes, rather than duplicating template keys.
+    if(const auto* Enhanced=Cast<UEnhancedPlayerInput>(PlayerInput))
+    {
+        for(const auto& Mapping:Enhanced->GetEnhancedActionMappingsView())
+        {
+            if(!Mapping.Action || Mapping.Key.IsGamepadKey()!=bGamepad){continue;}
+            FString Action=Mapping.Action->ActionDescription.ToString();
+            if(Action.IsEmpty()){Action=Mapping.Action->GetName();Action.RemoveFromStart(TEXT("IA_"));}
+            if(!Result.ContainsByPredicate([&](const FPFControlHint& H){return H.Key==Mapping.Key && H.Action==Action;}))
+            {Result.Add({Mapping.Key,TEXT("Movement / view"),Action});}
+        }
+    }
+    for(const auto& Hint:RegisteredControlHints){if(Hint.Key.IsGamepadKey()==bGamepad){Result.Add(Hint);}}
+    return Result;
 }
 
 // ---------------------------------------------------------------------------
@@ -151,6 +180,7 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
     }
     else
     {
+        if(PauseMenu){PauseMenu->CloseChildMenus();}
         if(bPausedWorld)
         {
             SetPause(false);

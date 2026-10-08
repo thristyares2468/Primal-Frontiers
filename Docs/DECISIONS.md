@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Registered bindings drive read-only controls help
+
+M11 help records descriptions beside real legacy key registration and reads movement/view/jump from the current public Enhanced Input mapping view. Keep UI local/read-only; eventual remapping must change both binding routes. Explicit device pages avoid stealing focus. Pause owns/removes child modals; help Back returns to Pause without resuming or forwarding gameplay keys. Content-size the pause background for wrapped text. Automated Slate input/screenshots complement physical-device/human acceptance. Latest user authorization makes Personal tests nonblocking for independent implementation; their results remain unverified.
+
 ## 2026-10-08 — Controls and reconnect UI follow real authority/state
 
 UI_CONTROLS_PLAN.md proposes read-only controls/help before remapping, binding descriptions tied to actual handlers, one action per overlay context and server-accepted transaction feedback. Keep local preferences separate from world state; show sanitized reconnect/profile/save failures without exposing capability data or offering client repair. Future research/adaptation views require their C++ backend before presentation can claim unlocks/effects. This is a document contract, not UI/gameplay implementation.
