@@ -83,6 +83,8 @@ M8 gameplay persistence now has real server APIs; general runtime automation res
 
 ## M8 disposable persistence automation
 
+For repeatable one-/two-client Create/Restart runs, use project-local `Scripts/RunPersistenceAutomation.ps1`; run `-Players 1` before `-Players 2 -SimulateLagLoss`. It generates isolated test slots/profiles and checks process reports, real RPC refusal, owner/foreign privacy roles, deadlines and network settings. Raw logs still require review. Full invocation/options/evidence: [AUTOMATION_VERIFICATION.md](../../Docs/AUTOMATION_VERIFICATION.md).
+
 PF.Persistence.WorldRecords / WorldRuntime run in an isolated NullRHI Editor regression. PF.Persistence.Live is an opt-in game/server test: **never run it in user gameplay/save slots**. It deliberately gathers/crafts/builds, modifies vitals/time, writes world files and replaces runtime state.
 
 Use UnrealEditor-Cmd.exe and the absolute project path. Server map: /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld -server -port=<unused port>. Clients: 127.0.0.1:<same port> -game. Common flags: -nullrhi -unattended -NoSaveConfig -PFRunPersistenceLiveTests -PFExpectedPlayers=1 (then 2) -PFSaveSlot=AutomationM8<unique ASCII suffix> -ExecCmds="Automation RunTests PF.Persistence.Live" -TestExit="Automation Test Queue Empty". Give each process unique -log and absolute -ReportExportPath under Saved/AutomationReports. Clients use distinct -PFIdentityProfile values (maximum 16 characters). Start clients promptly and wait for every process/report; test errors matter even if engine exit is 0.

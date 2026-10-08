@@ -47,3 +47,47 @@ Do not select the whole PF.PrimalAgentTools prefix for this checkpoint. Its edit
 - Missing report and unsafe filter rejected; outside-report inspection refused. PowerShell parsing and nonzero-exit, null-count and duplicate-ID rejection checks passed. Temporary malformed-reader fixtures were isolated outside the project and removed; engine evidence was not edited.
 
 Installed engine: **5.8.3**, originally requested 5.8.2. No C++ changed in this tooling increment; earlier successful M8 Editor/Game builds remain applicable. M7/M8 manual acceptance remains open. See [PERSISTENCE_M8.md](PERSISTENCE_M8.md) and [PLAYTEST.md](PLAYTEST.md).
+
+## Repeatable M8 live create/restart runner
+
+`Scripts/RunPersistenceAutomation.ps1` replaces the untracked temporary helpers for the existing opt-in `PF.Persistence.Live` test. Run sequentially from the project root after closing any active Editor session:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunPersistenceAutomation.ps1 -Players 1
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunPersistenceAutomation.ps1 -Players 2 -SimulateLagLoss
+```
+
+The first command runs a server and one client, creates/saves the disposable scenario, waits for both processes, then launches a separate server/client restart using the same test slot, endpoint and private profiles. The second runs the same flow with two independent clients under fixed outgoing 75 ms lag and 1% simulated loss. Default baseline explicitly sets outgoing PktLag=0/PktLoss=0; both profiles require confirmation in every engine log. These settings are session-only, are not measured RTT/loss and do not certify other emulation parameters.
+
+Map is fixed to L_PrimalFrontier_OpenWorld, all processes use NullRHI/NoSaveConfig, and slots/profiles are generated fresh; there is no personal-slot parameter. The runner deliberately changes disposable runtime state and writes test saves. It does not build, save maps/assets, change settings, delete prior evidence or close user processes. C++ changes require a build first. Packaged Server compatibility and rendered/manual acceptance remain separate.
+
+Options: Players 1 or 2; Port 1024–65535 (default 17989); TimeoutSeconds 30–600 per phase (default 210); EngineRoot and ProjectRoot for another checkout/installation. Server readiness has a maximum 45-second deadline, bounded by the phase timeout. Phase timing includes launch, waiting, cleanup and report inspection; it is not per-process frame timing. Cleanup attempts every owned handle, allows at most five seconds per exit wait and records any cleanup failure instead of passing or killing processes by name.
+
+Exit **0** requires both phases and all process reports to pass the native verdict reader, exactly PF.Persistence.Live, no fatal/ensure, confirmed network settings, the expected server RPC refusals/client acknowledgements, and exactly one owner-client plus Players-1 foreign-client privacy roles. Exit **1** means a launched run failed, timed out or lacks required evidence; Restart is not attempted after failed Create. Exit **2** is preflight refusal, including missing files, a running Editor or occupied UDP port. Parameter-binding errors can return 1 before execution.
+
+Outputs: each process has Saved/AutomationReports/M8Live<players>_<UTC>_<id><Create|Restart><Server|ClientN>/index.json and matching Saved/Logs/PF<run>.log. The overall summary is Saved/AutomationReports/M8Live<players>_<UTC>_<id>/run-summary.json. Summaries retain per-process tests/exits/contract checks, role coverage, sampled working/private memory, raw severity counts and timeout/cleanup state. Missing reports are failures. No log events, private profile names, reconnect credentials or save payloads are printed in summaries. Raw engine logs can contain login options; redact before sharing them.
+
+`LogReviewRequired` remains independent: a clean report can coexist with engine startup warnings/errors. The runner does not silently waive them. Inspect causes before accepting gameplay; summary success alone does not certify clean raw logs, rendering, FPS, manual playtesting or the 16 GB minimum.
+
+### Runner verification — October 8
+
+- PowerShell parsing passed. Missing engine and deliberately occupied UDP port returned 2, with no launched Unreal processes or report directories.
+- Initial deliberate 30-second timeout M8Live1_20261008_070426957_133a89de returned 1, terminated its two owned processes (engine exits -1), failed missing/incomplete reports and did not launch Restart. Summary/logs retained. Baseline was subsequently tightened to explicitly confirm outgoing zero lag/loss.
+- One-client baseline M8Live1_20261008_070611505_6d2d8154: four PF.Persistence.Live reports passed 1/1, engine/report/runner exits 0, zero test warnings/errors/fatal/ensure; outgoing 0/0 and owner role confirmed.
+- Two-client profile M8Live2_20261008_070924038_40cb7ddc: six reports passed 1/1 with the same clean test outcomes, confirmed outgoing 75/1, exact server refusals and both privacy roles. Client 2 did not crash.
+- Final cleanup hardening was followed by a focused 30-second timeout replay M8Live1_20261008_071131922_8e2876ab: exit 1, TimedOut=true, no cleanup failures, both owned exits -1, no remaining Unreal process, missing reports refused and Restart not launched. This is an intentional tooling negative test, not a gameplay regression. Successful full runs above preceded only that cleanup hardening; the changed termination path was replayed separately.
+
+| Normal run | Working GiB | Private GiB | Phase elapsed s |
+| --- | --- | --- | --- |
+| M8Live1_20261008_070611505_6d2d8154CreateServer | 1.711 | 1.606 | 51.77 |
+| M8Live1_20261008_070611505_6d2d8154CreateClient1 | 1.807 | 1.770 | 51.77 |
+| M8Live1_20261008_070611505_6d2d8154RestartServer | 1.715 | 1.613 | 40.13 |
+| M8Live1_20261008_070611505_6d2d8154RestartClient1 | 1.794 | 1.770 | 40.13 |
+| M8Live2_20261008_070924038_40cb7ddcCreateServer | 1.717 | 1.609 | 53.64 |
+| M8Live2_20261008_070924038_40cb7ddcCreateClient1 | 1.813 | 1.788 | 53.64 |
+| M8Live2_20261008_070924038_40cb7ddcCreateClient2 | 1.817 | 1.783 | 53.64 |
+| M8Live2_20261008_070924038_40cb7ddcRestartServer | 1.715 | 1.608 | 41.91 |
+| M8Live2_20261008_070924038_40cb7ddcRestartClient1 | 1.791 | 1.762 | 41.91 |
+| M8Live2_20261008_070924038_40cb7ddcRestartClient2 | 1.793 | 1.761 | 41.91 |
+
+All ten normal raw logs were reviewed: only the known 24 widget/HLOD warning lines and 14 installed Toolsets Python error lines per process, no other warning/error categories. Summaries correctly set LogReviewRequired=true. Default PrimalFrontier.log remains stale at October 6 22:44:15 UTC because these runs use unique abslog files. Individual process peaks must not be added and called a simultaneous system peak. No C++ changed or repeated Editor/Game build required; prior source/test builds remain applicable. M7/M8 manual gates remain open.
