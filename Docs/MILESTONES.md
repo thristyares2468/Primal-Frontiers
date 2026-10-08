@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 two-client lag/loss create and restart
+
+Following the passed one-client prerequisite, existing PF.Persistence.Live passed all six M8Lag2_20261008_062152_3aa7a6 server/client Create/Restart reports under engine-confirmed session-only PktLag=75/PktLoss=1. Each 1/1, engine/report 0, zero test warnings/errors/timeout/ensure/fatal; Client 2 passed both phases. Two-client working sets create 1.723/1.814/1.801 GiB, restart 1.716/1.791/1.794 GiB. Known raw log categories unchanged, no other warnings/errors. Exact paths/private-memory/limits: [M8_NETWORK_DIAGNOSTICS.md](M8_NETWORK_DIAGNOSTICS.md). No source/assets/settings/new build or rendered/manual/M15 acceptance claim. Bounded Trello task complete; M7/M8 Personal gates remain open.
+
 ## 2026-10-08 M8 one-client lag/loss create and restart
 
 Existing PF.Persistence.Live scenario passed all four server/client Create/Restart reports with session-only PktLag=75 / PktLoss=1 on both sides; applied settings confirmed in every engine log. M8Lag1_20261008_061744_29d940 reports each 1/1, engine/report exits 0, zero test warnings/errors/ensure/fatal. Maximum sampled process working/private 1.805/1.780 GiB; phase totals 52.21/38.91 s. Known raw editor-widget/HLOD warnings and installed Toolsets Python traces remain, no other warning/error categories. [M8_NETWORK_DIAGNOSTICS.md](M8_NETWORK_DIAGNOSTICS.md) records exact names and limitations. No source/assets/project settings or new build claim; no measured RTT/loss rate, race/flood/soak/rendering or manual acceptance claim. One-client bounded Trello task Done, two-client profile scope separate.

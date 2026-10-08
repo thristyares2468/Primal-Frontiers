@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Later October 8 two-client diagnostic: completed/pushed one-client task 8b62612 first, then selected separate AI M8 two-client lag/loss scope Doing. All six Create/Restart reports/settings/log categories/memory reviewed; immediately moved that bounded task Done. Manual parent gates remain Doing and broader hardening remains planned. No members/dates or unrelated cards changed.
+
 Later October 8 M8 network diagnostic: selected existing automated persistence scope, added a bounded AI Testing one-client lag/loss task Doing. Four actual Create/Restart reports passed with engine-confirmed session settings and reviewed raw startup categories. Immediately record exact evidence/memory and move one-client task Done before selecting the separate practical two-client profile. Manual parents, members, dates and unrelated cards unchanged.
 
 Later October 8 M15–M16 planning: selected the future Programming hardening/optimization task, added a bounded AI readiness-audit subtask Doing, and checked live source/installed engine diagnostics. Completed NETWORK_PROFILING_READINESS.md and immediately moved only the bounded plan Done. Parent M15/M16 and implementation task remain To Do; no members/dates or manual acceptance changed. Dead-player test pushed 03cd042; plan gets a scoped co-authored commit.

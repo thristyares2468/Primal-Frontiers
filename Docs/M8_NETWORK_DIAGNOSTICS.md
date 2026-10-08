@@ -23,4 +23,19 @@ Test exercised real gathering, timed tool crafting, foundation/storage, item con
 
 No repeated build was needed for diagnostic-only session arguments. Earlier Editor test build passed 6.20 s; runtime Editor/Game collision builds and source checkpoint are documented in PERSISTENCE_M8.md. Installed engine is 5.8.3; packaged Server remains blocked by its distribution. User saves/profiles and all failed evidence are preserved; the bounded helper lives outside the repo. NullRHI has no FPS/stutter/rendered-physics/manual traversal proof, and this 31.93 GiB host does not certify a 16 GB minimum.
 
-One-client bounded Trello diagnostic is complete. A separate two-client task may follow; neither closes M7 route/overnight, M8 rendered persistence, physical-controller or asset-provenance gates.
+One-client bounded Trello diagnostic is complete, committed/pushed 8b62612. The separate two-client scope below also passed; neither closes M7 route/overnight, M8 rendered persistence, physical-controller or asset-provenance gates.
+
+## Two-client modest lag/loss
+
+After the one-client prerequisite, repeated the same profile/map/test/exit/port with a fresh isolated save and two independent private profiles. Every one of the six engine logs confirms PktLag set to 75 and PktLoss set to 1. Each PF.Persistence.Live report passed 1/1, engine/report exits 0, zero test errors/warnings/ensure/fatal/timeouts. Client 2 passed create and restart without crashing.
+
+| Run | Working GiB | Private GiB | Phase elapsed s |
+| --- | --- | --- | --- |
+| M8Lag2_20261008_062152_3aa7a6CreateServer | 1.723 | 1.627 | 51.17 |
+| M8Lag2_20261008_062152_3aa7a6CreateClient1 | 1.814 | 1.771 | 51.62 |
+| M8Lag2_20261008_062152_3aa7a6CreateClient2 | 1.801 | 1.768 | 52.05 |
+| M8Lag2_20261008_062152_3aa7a6RestartServer | 1.716 | 1.614 | 39.88 |
+| M8Lag2_20261008_062152_3aa7a6RestartClient1 | 1.791 | 1.709 | 40.30 |
+| M8Lag2_20261008_062152_3aa7a6RestartClient2 | 1.794 | 1.722 | 40.73 |
+
+All six raw logs retain the same 24 editor-widget/HLOD warnings and 14 installed-engine Toolsets Python error lines, with no other warning/error categories. All owned processes finished and no user Editor session was closed. Bounded two-client Trello task complete; no additional source/assets/settings or build change. Profile parameters are session-only and do not establish measured RTT/loss, a soak, reliable-queue limits, client-request races or rendered stability. Broader tests are described in NETWORK_PROFILING_READINESS.md.
