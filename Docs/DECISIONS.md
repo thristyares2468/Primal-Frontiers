@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Low/medium VSM quality matches the existing budget
+
+Project scalability reduces stationary/moving directional shadow resolution at low/medium instead of increasing the inherited512-page pool. Higher tiers remain engine-defined and settings keep the player's chosen tier. Actual group switching/restoration and two normal1440p rendered replays verify the bounded overflow fix; do not infer a general performance gain without matching traversal measurements. Do not force unrelated groups in a focused fixture when explicit game settings intentionally override blur/DOF.
+
 ## 2026-10-08 — HUD observation is read-only and possession scoped
 
 Infer a brief damage cue only from decreased health on the same current pawn; no predicted damage/source/direction. Reset on possession gaps/replacement, clear unknown vitals and suppress dead/missing action prompts. Distinct needs/health/exposure warnings survive disabled control hints. Blueprint presentation gets explicit availability. Keep rendering diagnostic profile separate from normal-profile acceptance: session-only reduced shadow resolution proved the1440p pool warning is avoidable without increasing memory, but does not fix default scalability.

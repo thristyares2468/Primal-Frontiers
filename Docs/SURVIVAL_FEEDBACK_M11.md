@@ -1,5 +1,7 @@
 # Survival HUD feedback — M11
 
+Later checkpoint: [SHADOW_BUDGET_M11.md](SHADOW_BUDGET_M11.md) fixes the low/medium profile and records two clean normal1440p passes without diagnostic overrides. The failures below are retained evidence from the earlier HUD checkpoint.
+
 The HUD reads the current server-owned survival snapshot at10Hz. A same-pawn health decrease produces a1.5-second text cue with two-decimal precision; it does not infer a source/direction or predict damage. A new pawn or missing possession resets observation. Critical health, low/empty food, low/empty water and exposure have independent text warnings, including when control hints are disabled. Death waits for server respawn rather than promising a successful spawn. Missing possession clears old numeric vitals/bars and hides aim/interaction prompts; dead/menu states suppress aim/prompts. Empty status/cue rows collapse. The wrapped480-unit panel honors HUDScale; Blueprint children receive the new PresentStatus availability/status/damage event alongside existing vitals/needs events.
 
 No authority/RPC, replicated field, save data, map, Blueprint asset or dependency changed. The test uses the actual UMG widgets, authoritative needs/damage, automatic GameMode respawn and a temporary possession gap in one isolated rendered standalone world. It refuses a non-fresh inventory fixture.

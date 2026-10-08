@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M11/M16 low/medium VSM budget prerequisite
+
+Supported DefaultScalability.ini directional bias1 at tiers0/1 reduces shadow resolution/demand without increasing the512-page pool, changing selected quality or modifying assets. Editor19.12/4.71s and Game25.05s passed. Native Preferences/ShadowBudget2/2 clean; actual tier switching verifies high-tier inheritance/session restoration. First overbroad all-group fixture failed strict check on10blur/DOF priority warnings; retained and narrowed to shadow callback. Two normal1440p survival feedback runs PASSED1/1 at scales1/1.5 with no diagnostic override, no VSM overflow and no test warnings/errors. Ten PNGs inspected. [SHADOW_BUDGET_M11.md](SHADOW_BUDGET_M11.md) has exact reports/logs/memory and remaining startup categories. Adds one native test (intended35; no combined35 rerun). Bounded Trello https://trello.com/c/LMulR1lr; no sustained FPS/full M16/manual acceptance claim.
+
 ## 2026-10-08 M11 survival HUD feedback
 
 Added independent urgent needs/health/exposure warnings, short observed same-pawn damage text, availability/cleared vitals and aim/prompts during death/missing possession, reset on pawn replacement and Blueprint status hook. No server APIs/assets/save changes. Editor final6.05s and Game27.09s passed without compiler warnings. Native survival4/4 passed; final normal720p maximum text scale1/1 passed. Normal1440p strict check failed twice on one VSM pool warning (no HUD assertion failures); optional session-only low-shadow diagnostic1440p1/1 passed. Ten final PNGs inspected. [SURVIVAL_FEEDBACK_M11.md](SURVIVAL_FEEDBACK_M11.md) records all reports, memory and retained failures; normal1440p renderer remains a separate next fix. This slice adds no native-selection test, only opt-in rendered PF.UI.SurvivalFeedbackLive. Full M11/manual gates remain open/nonblocking/unverified; bounded Trello https://trello.com/c/z43ZUagT.

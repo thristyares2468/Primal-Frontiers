@@ -1,6 +1,6 @@
 # Controls, reconnect feedback and research UI plan — M11–M13
 
-October 8, 2026. Independent planning complete. **M11 read-only controls/help is now implemented and verified within its bounded scope:** [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md). Stable stack selection and survival damage/urgent/possession feedback are implemented; see INVENTORY_SELECTION_M11.md and SURVIVAL_FEEDBACK_M11.md. Normal1440p VSM-budget check remains failed pending a separate profile fix. Full M11 remains in progress; remapping and M12/M13 research/progression views are not implemented. Latest continuation authorization allows independent implementation while Personal tests remain deferred/unverified. Historical baseline below describes the planning checkpoint, not every later change.
+October 8, 2026. Independent planning complete. **M11 read-only controls/help is now implemented and verified within its bounded scope:** [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md). Stable stack selection and survival damage/urgent/possession feedback are implemented; see INVENTORY_SELECTION_M11.md and SURVIVAL_FEEDBACK_M11.md. Normal1440p VSM-budget check now passes the bounded profile fix in SHADOW_BUDGET_M11.md. Full M11 remains in progress; remapping and M12/M13 research/progression views are not implemented. Latest continuation authorization allows independent implementation while Personal tests remain deferred/unverified. Historical baseline below describes the planning checkpoint, not every later change.
 
 ## Source-verified baseline
 
