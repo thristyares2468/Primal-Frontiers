@@ -1,5 +1,11 @@
 \# Architecture and Design Decisions
 
+## 2026-10-08 — Maintained state summary and stable structure-owner key
+
+Update Docs/CURRENT_STATE.md after every meaningful change and build/test result, separating implemented code from verified behavior and milestone acceptance. Preserve failures and subsequent retries rather than replacing failure history with a pass. Record future adaptations and active/passive biological modifiers as planning, outside M8 gameplay.
+
+Use the server-issued PlayerState GUID as a structure's stable owner key. Builder remains the current presentation/replication pointer and can be rebound only by a matching stable identity. Public ownership IDs are not credentials. Update the existing ownership fixture to hand over the key as well as the pointer, and verify replacement-PlayerState access plus different-key refusal. Actual authenticated reconnect and restart tests remain pending; a native object replacement is not that evidence.
+
 ## 2026-10-08 — Server restoration and preserved file generations
 
 Continue M8 under the user's explicit autonomous-continuation instruction, without converting M7's missing manual evidence into a pass. Separate the public replicated PlayerState ownership GUID from a future private reconnect credential. Validate server identity/capacity/vitals and capsule/ground safety before restoring. Replace inventory atomically, preserve batch GUIDs and subtract elapsed offline age; do not grant new shelf life. Cancel in-progress crafting rather than serializing pending conversions.

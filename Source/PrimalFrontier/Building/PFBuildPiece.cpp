@@ -2,6 +2,7 @@
 
 #include "Building/PFBuildPiece.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/Controller.h"
@@ -42,11 +43,30 @@ void APFBuildPiece::Initialize(const FPFBuildingDefinition& D,APlayerState* Owne
     DefinitionId=D.Id;
     Kind=D.Kind;
     Builder=OwnerState;
+    PersistentId=FGuid::NewGuid();
+    if(const auto* PS=Cast<APFInventoryPlayerState>(OwnerState)){PersistentOwnerId=PS->PersistentPlayerId;}
     Support=Parent;
     Health=D.MaxHealth;
     // Actor owner = the builder's PlayerController, so owner-only storage replication reaches them.
     SetOwner(OwnerState?OwnerState->GetOwner():nullptr);
     OnRepShape();
+}
+
+bool APFBuildPiece::IsOwnedBy(const APlayerState* Requester) const
+{
+    if (!Requester) { return false; }
+    if (PersistentOwnerId.IsValid())
+    {
+        const auto* PS = Cast<APFInventoryPlayerState>(Requester);
+        return PS && PS->PersistentPlayerId == PersistentOwnerId;
+    }
+    return Builder == Requester; // Native legacy fixtures without persistent PlayerState.
+}
+
+void APFBuildPiece::BindPersistentOwner(APlayerState* OwnerState)
+{
+    if (!HasAuthority() || !IsOwnedBy(OwnerState)) { return; }
+    Builder = OwnerState; SetOwner(OwnerState->GetOwner()); ForceNetUpdate();
 }
 
 void APFBuildPiece::OnRepShape()
@@ -89,7 +109,7 @@ bool APFBuildPiece::CanRemove() const{return !HasDependents() && (Kind!=EPFBuild
 
 bool APFBuildPiece::ToggleDoor(APlayerState* Requester)
 {
-    if(!HasAuthority() || !Requester || Builder!=Requester || Kind!=EPFBuildKind::Door){return false;}
+    if(!HasAuthority() || !IsOwnedBy(Requester) || Kind!=EPFBuildKind::Door){return false;}
     bDoorOpen=!bDoorOpen;
     OnRepShape();
     ForceNetUpdate();
@@ -99,7 +119,7 @@ bool APFBuildPiece::ToggleDoor(APlayerState* Requester)
 float APFBuildPiece::TakeDamage(float Amount,const FDamageEvent&,AController* EventInstigator,AActor*)
 {
     // Only the owner's controller can damage (cooperative rule; PvP rules are future work).
-    if(!HasAuthority() || !EventInstigator || EventInstigator->PlayerState!=Builder || !FMath::IsFinite(Amount) || Amount<=0){return 0;}
+    if(!HasAuthority() || !EventInstigator || !IsOwnedBy(EventInstigator->PlayerState) || !FMath::IsFinite(Amount) || Amount<=0){return 0;}
     // Expired food doesn't count as "contents" when deciding if storage is empty.
     Storage->PruneExpired();
     if(Amount>=Health && !CanRemove()){return 0;}  // refuse lethal damage on load-bearing/occupied pieces
@@ -116,6 +136,7 @@ void APFBuildPiece::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
     DOREPLIFETIME(APFBuildPiece,Kind);
     DOREPLIFETIME(APFBuildPiece,DefinitionId);
     DOREPLIFETIME(APFBuildPiece,Builder);
+    DOREPLIFETIME(APFBuildPiece,PersistentOwnerId);
     DOREPLIFETIME(APFBuildPiece,Support);
     DOREPLIFETIME(APFBuildPiece,Health);
     DOREPLIFETIME(APFBuildPiece,bDoorOpen);

@@ -4,8 +4,9 @@
 // Spawned only by UPFBuildingComponent::Place on the server and replicated to all.
 //
 // Rules held here:
-//  - Ownership: Builder is the placing player's PlayerState; only the owner may
-//    open the door, damage or demolish it (cooperative greybox rule, not PvP).
+//  - Ownership: PersistentOwnerId is the server-assigned ownership key. Builder
+//    is the currently bound PlayerState and can be rebound after reconnect.
+//    Only the owner may open, damage or demolish (cooperative rule, not PvP).
 //  - Support: Support points at the piece this one rests on. A piece that still
 //    supports others (or a storage box that isn't empty) can't be removed or
 //    destroyed, so nothing is left floating and no items are silently lost.
@@ -29,12 +30,17 @@ class PRIMALFRONTIER_API APFBuildPiece : public AActor
 
 public:
     APFBuildPiece();
+    UPROPERTY() FGuid PersistentId;
+    UPROPERTY(Replicated, BlueprintReadOnly) FGuid PersistentOwnerId;
+    bool IsOwnedBy(const APlayerState* Requester) const;
+    void BindPersistentOwner(APlayerState* OwnerState);
+    void RefreshPersistenceShape() { OnRepShape(); }
 
     /** Which shape to show; replicated so clients rebuild the shape on change. */
     UPROPERTY(ReplicatedUsing=OnRepShape,BlueprintReadOnly) EPFBuildKind Kind=EPFBuildKind::Foundation;
     /** Catalog ID it was built from (shown on the build HUD). */
     UPROPERTY(Replicated,BlueprintReadOnly) FName DefinitionId;
-    /** Owning player's PlayerState (survives that player's respawns). */
+    /** Current owner's PlayerState; rebind by stable ownership key after reconnect. */
     UPROPERTY(Replicated,BlueprintReadOnly) TObjectPtr<APlayerState> Builder;
     /** Piece this one rests on; null for foundations. */
     UPROPERTY(Replicated,BlueprintReadOnly) TObjectPtr<APFBuildPiece> Support;

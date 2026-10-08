@@ -1,5 +1,13 @@
 # Milestone 7 — in progress 2026-09-30
 
+## 2026-10-08 current-state documentation and M8 ownership preparation
+
+Maintain [CURRENT_STATE.md](CURRENT_STATE.md) after every meaningful change and build/test outcome, per the user's instruction. It distinguishes completed work, passed evidence, local integration work, outstanding gates and the next development step. Requested adaptations and optional active/passive biological modifiers are documented as future M12/M13 planning only.
+
+The M8 stable structure-owner keys/rebinding compiled. A unity-build C4459 name collision was fixed without changing the player-save format. `M8CurrentStateRegression/index.json`: **12 passed, 1 failed, 0 test warnings**. The building fixture's simulated handover changed only Builder and left the persistent owner key unchanged; updated the fixture and added replacement-PlayerState and wrong-identity checks. Final Editor build **16.26 s**, no compiler warnings. Focused `M8BuildingIdentityVerified/index.json`: **PF.Building.PlacementAndStorage passed, 0 failures/test warnings**, exit 0. Matching final log has no warning/error/ensure/fatal lines. Exact initial passes and paths: CURRENT_STATE.md / PERSISTENCE_M8.md. Only the failed test was rerun after the fixture fix.
+
+Retry sampled working/private memory **2.940/2.801 GiB**, NullRHI; initial monitor's Int32 overflow invalidated its peak and is documented. No new manual or live-network persistence pass is claimed. World-codec/restoration/reconnect source is still being integrated; save/load commands remain unavailable. The large LFS push completed and remote master at `24bace4` plus archive tag were verified; this does not push remaining uncommitted source. M7 and M8 remain incomplete.
+
 ## 2026-10-08 M8 server adapter/file checkpoint
 
 The user authorized continuing through remaining milestones until an immediate user action is required. Continue M8 incrementally while retaining the deferred M7 manual gate. Added server-only player capture/restoration and public stable ownership ID; validate identity, capacity and safe capsule/ground location before replacement. Food ages by elapsed offline seconds; repeated restoration does not duplicate items. Added bounded A/B file generations with pending-write verification, active-save preservation and explicit corrupt-generation recovery/refusal. Whole-world persistence, reconnect and PF save/load commands remain pending.

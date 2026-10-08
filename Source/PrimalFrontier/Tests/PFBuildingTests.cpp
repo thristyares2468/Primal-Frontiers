@@ -12,6 +12,7 @@
 #include "Building/PFBuildingComponent.h"
 #include "Building/PFBuildPiece.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Survival/PFSurvivalGameMode.h"
 #include "Survival/PFSurvivalPlayerController.h"
@@ -84,7 +85,9 @@ bool FPFBuildingTest::RunTest(const FString&)
     if(!TestNotNull(TEXT("Rotated door/frame placed"),Door)){AddError(B->Feedback);return false;}
     TestTrue(TEXT("Owned door opens"),Door->ToggleDoor(PC->PlayerState));
     TestTrue(TEXT("Door state changed"),Door->bDoorOpen);
-    auto* Other=W->SpawnActor<APlayerState>();
+    auto* Other=W->SpawnActor<APFInventoryPlayerState>();
+    TestTrue(TEXT("Separate server-issued ownership identities"),
+        Other->PersistentPlayerId.IsValid() && Other->PersistentPlayerId != PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId);
     TestFalse(TEXT("Other player cannot open"),Door->ToggleDoor(Other));
 
     // Roof snaps 320 cm above the wall's platform (foundation at z=10 -> roof at z=330).
@@ -121,12 +124,26 @@ bool FPFBuildingTest::RunTest(const FString&)
     TestTrue(TEXT("Withdraw"),B->Transfer(false,Stored.StackId,1));
     TestFalse(TEXT("Replay withdrawal rejected"),B->Transfer(false,Stored.StackId,1));
 
-    // Ownership checks: temporarily hand the chest to another PlayerState.
+    // Ownership checks: hand over both the stable ownership key and current presentation pointer.
+    const FGuid OriginalOwnerId=Chest->PersistentOwnerId;
     Chest->Builder=Other;
+    Chest->PersistentOwnerId=Other->PersistentPlayerId;
     TestFalse(TEXT("Unauthorized demolition"),B->Demolish(Chest));
     TestFalse(TEXT("Unauthorized storage"),B->Transfer(true,Food.StackId,1));
     TestEqual(TEXT("Unauthorized damage"),Chest->TakeDamage(25,FDamageEvent(),PC,P),0.f);
     Chest->Builder=PC->PlayerState;
+    Chest->PersistentOwnerId=OriginalOwnerId;
+
+    // A reconnect creates a new PlayerState but preserves its server-assigned ownership key.
+    auto* Reconnected=W->SpawnActor<APFInventoryPlayerState>();
+    Reconnected->PersistentPlayerId=OriginalOwnerId;
+    TestTrue(TEXT("Ownership survives replacement PlayerState"),Chest->IsOwnedBy(Reconnected));
+    TestFalse(TEXT("Another stable identity is refused"),Chest->IsOwnedBy(Other));
+    Chest->BindPersistentOwner(Reconnected);
+    TestEqual(TEXT("Reconnect rebinds builder"),Chest->Builder.Get(),static_cast<APlayerState*>(Reconnected));
+    Chest->BindPersistentOwner(Other);
+    TestEqual(TEXT("Wrong identity cannot rebind"),Chest->Builder.Get(),static_cast<APlayerState*>(Reconnected));
+    Chest->BindPersistentOwner(PC->PlayerState);
 
     // Owner damage, demolition of empty storage, and rebuilding in the same spot.
     TestEqual(TEXT("Owner damage"),Chest->TakeDamage(25,FDamageEvent(),PC,P),25.f);

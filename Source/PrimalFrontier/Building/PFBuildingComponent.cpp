@@ -54,7 +54,7 @@ APFBuildPiece* UPFBuildingComponent::TracedPiece() const
 
 bool UPFBuildingComponent::InReach(APFBuildPiece* Piece) const
 {
-    return Living() && IsValid(Piece) && Piece->GetWorld()==GetWorld() && Piece->Builder==Controller()->PlayerState && FVector::DistSquared(Controller()->GetPawn()->GetActorLocation(),Piece->GetActorLocation())<FMath::Square(700.0);
+    return Living() && IsValid(Piece) && Piece->GetWorld()==GetWorld() && Piece->IsOwnedBy(Controller()->PlayerState) && FVector::DistSquared(Controller()->GetPawn()->GetActorLocation(),Piece->GetActorLocation())<FMath::Square(700.0);
 }
 
 bool UPFBuildingComponent::Candidate(FName Id,int32 Q,FTransform& Out,APFBuildPiece*& Parent,FString& Reason) const

@@ -1,5 +1,13 @@
 # Milestone 8 — persistence foundation
 
+## Stable structure ownership and current-state checkpoint (October 8)
+
+Added persistent piece GUIDs and replicated server-assigned owner GUIDs. Door, damage, demolition, placement-support and storage reach checks use the stable owner key; `BindPersistentOwner` rebinds the current PlayerState/actor owner only for a matching identity. Native fixtures without that key retain the prior pointer check. The public key is not a reconnect credential. This prepares ownership for restoration but does not certify a network reconnect.
+
+The pending world integration compiled after fixing a unity-build collision: file-store local `Magic` hid the player-codec constant. Renamed the constant, preserving the encoded format. First build failed in 18.32 s; corrected build passed in 16.96 s. Regression `M8CurrentStateRegression/index.json`: 12 passes, one failure, no test warnings. Failed `PF.Building.PlacementAndStorage` had four assertions because its simulated handover changed only Builder, leaving the stable owner key unchanged. Updated that fixture to transfer both fields and test replacement PlayerState, correct rebinding and wrong-key refusal. Final build passed in 16.26 s, no compiler warnings; `M8BuildingIdentityVerified/index.json`: one passed, zero failed/test warnings, engine exit 0. Matching `PFM8BuildingIdentityVerified.log` has no warning/error/ensure/fatal lines. All five existing persistence tests passed in the regression; exact other passes are listed in [CURRENT_STATE.md](CURRENT_STATE.md).
+
+The initial regression monitor overflowed Int32; discard its peak figure. Corrected Int64 monitoring on the retry sampled 2.940 GiB working set / 2.801 GiB private memory. Both runs use NullRHI and provide no rendered performance/manual gameplay evidence. M8 world records/restoration helpers and local development credential code remain in-progress source, without GameMode/command activation or a world/restart/reconnect test pass. M7's manual gate and M8 remain incomplete.
+
 ## Server adapter and safe-file checkpoint (October 8)
 
 The user subsequently authorized continuing through the remaining work until their action is required. M7 stays unverified. Added a server-issued public PlayerState GUID, server-only capture/restore, atomic inventory replacement, collision/ground/identity checks and offline food aging. Reloading replaces inventory rather than appending; stale food is omitted. Existing crafting jobs cancel on restoration. No client restoration RPC exists. These APIs are exercised in native worlds; world commands/reconnect are still pending.

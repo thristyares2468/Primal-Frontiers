@@ -7,7 +7,7 @@
 
 namespace
 {
-    constexpr uint32 Magic = 0x50504650; // PFPP, archive little-endian on Win64
+    constexpr uint32 PlayerSaveMagic = 0x50504650; // PFPP, archive little-endian on Win64
     constexpr int32 MaxStacks = 64;
     constexpr int32 MaxItemIdLength = 64;
 
@@ -137,7 +137,7 @@ bool FPFPlayerSaveFormat::Encode(const FPFPlayerSaveData& Data, const UPFItemCat
     }
     TArray<uint8> Encoded;
     FMemoryWriter Envelope(Encoded, true);
-    uint32 WireMagic = Magic;
+    uint32 WireMagic = PlayerSaveMagic;
     uint32 Version = CurrentVersion;
     uint32 Size = Payload.Num();
     uint32 Crc = FCrc::MemCrc32(Payload.GetData(), Payload.Num());
@@ -159,7 +159,7 @@ bool FPFPlayerSaveFormat::Decode(const TArray<uint8>& Bytes, const UPFItemCatalo
     FMemoryReader Reader(Bytes, true);
     uint32 WireMagic = 0, Version = 0, Size = 0, Crc = 0;
     Reader << WireMagic << Version << Size << Crc;
-    if (WireMagic != Magic) { return Refuse(Error, TEXT("Invalid save signature")); }
+    if (WireMagic != PlayerSaveMagic) { return Refuse(Error, TEXT("Invalid save signature")); }
     if (Version != CurrentVersion) { return Refuse(Error, TEXT("Unsupported save version; migration required")); }
     if (Size != static_cast<uint32>(Bytes.Num() - EnvelopeBytes))
     {
