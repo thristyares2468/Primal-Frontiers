@@ -1,6 +1,8 @@
 # Trello task workflow
 
-October 8 progression planning checkpoint: selected the live Programming M12/M13 planning card, moved it Doing, then completed only its document contract in PROGRESSION_PLAN.md. Full M12/M13 stay To Do; M7/M8 manual gates stay Doing. No members/dates changed. Next eligible independent task is the Sound & Audio feedback plan, not art/gameplay integration.
+October 8 progression/audio planning checkpoint: selected the live Programming M12/M13 planning card, moved it Doing, then completed only its document contract in PROGRESSION_PLAN.md and immediately moved it Done. Commit/push 775785a verified. Selected the live Sound & Audio feedback-plan card and completed AUDIO_FEEDBACK_PLAN.md; its planning task is Done. Full M12/M13/M17 stay To Do; M7/M8 manual gates stay Doing. The Personal audio check describes current preferences/missing coverage, not a possible acceptance test of nonexistent replicated sound emitters. No members/dates changed. Remaining implementation depends on the recorded acceptance/source gates.
+
+Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed cards. Counts (To Do/Doing/Done): Main 16/3/7; Programming 1/1/3; Greyboxing 1/3/2; HUD & UI 2/1/2; Sound & Audio 3/0/2; Testing 3/2/2. The two completed planning cards were updated/read back immediately; parent M12/M13/M17 remain To Do with planning evidence, and M7/M8/M9 remain Personal Doing. No acceptance gate was promoted based on these documents.
 
 ## Every continue/task
 

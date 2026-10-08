@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Presentation-only bounded audio plan
+
+AUDIO_FEEDBACK_PLAN.md proposes typed feedback at accepted gameplay outcomes, with local UI and range-limited cosmetic world events. Do not parse text strings or replay initial/save-restored snapshots; keep listen-server playback single-path and missing cues harmless. Dedicated servers must not load audio presentation. Use existing built-in class preferences and proposed concurrency/attenuation limits before any broader sound library; numerical budgets still need measurement and human audibility.
+
+This task changes documents only, not dependencies/assets/source/settings. Future cue selection follows M9 provenance and preceding manual gates. Correct future adaptation planning to acknowledge that generic Exposure needs a typed hazard contract and inspected stamina actions do not include sprint.
+
 ## 2026-10-08 — Original progression planning without gating baseline survival
 
 PROGRESSION_PLAN.md is a provisional future M12/M13 contract, not implementation. Preserve baseline gathering/tool/cooking/drying/shelter access. Separate ordinary XP/technology knowledge, unique challenge discoveries, lasting adaptations and equipped biological modifiers. Player-specific authority/owner-only progression must not confer environmental access to a less-progressed co-op partner. Respec cannot replay rewards or refresh food; future V1 migration starts at baseline rather than awarding XP retroactively.

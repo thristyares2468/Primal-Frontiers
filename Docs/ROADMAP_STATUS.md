@@ -20,6 +20,8 @@ The user requested a Subnautica 2-inspired adaptation system, with independent r
 
 ## Asset handling
 
+Independent audio feedback planning is complete in [AUDIO_FEEDBACK_PLAN.md](AUDIO_FEEDBACK_PLAN.md), following the read-only coverage audit. M17 stays planned; no sound implementation, sourcing/import, audio acceptance or new performance result is implied. The open manual/provenance gates still govern integration.
+
 The user/Claude imports and source refactors are preserved. Existing Adventures_Pack, Bike, DynamicFalling, Modular_Rural_Cabin and Polyphoria assets are now committed by the user; older checkpoint notes describing them as untracked are historical. Current M7 uses engine primitives and project-owned simple materials only.
 
 No additional asset is needed for this greybox step. Before M9 integration, audit the actual imported assets against required first-person hands/tools, remote player mesh, original creature visuals/animations, modular structures, terrain/foliage, UI and sound. Check provenance, usage rights, dependencies, collision, LODs and memory cost. The asset-source list is a shortlist, not a completed license or suitability audit. Notify the user of specific gaps before custom asset creation, purchases or manual imports. Do not substitute another game's protected creature designs, maps or UI.

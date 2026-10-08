@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M9/M17 independent audio feedback planning
+
+Completed AUDIO_FEEDBACK_PLAN.md: minimal action/UI/creature/footstep/ambience coverage, server outcome versus local presentation, missing-cue safety, duplicate/replay refusal, dedicated-server guards, concurrency/range/memory targets, source/rights intake, visual fallbacks and future tests. Reviewed the real crafting/building/interaction/vitals/creature/settings routes and Epic's current 5.8 concurrency/attenuation documentation. Clarified PROGRESSION_PLAN.md against source: current exposure has no heat/cold category, and jump rather than sprint has the existing stamina hook.
+
+Document link/whitespace consistency checks only. No sound/source/assets/settings modified; no new Editor build, automation, audibility playtest or runtime performance measurement is claimed. The bounded audio-plan task is Done, not M17 acceptance. M7/M8 manual and asset provenance gates remain open; latest gameplay test evidence is unchanged. Changed docs: AUDIO_FEEDBACK_PLAN.md, AUDIO_COVERAGE.md, PROGRESSION_PLAN.md and state/milestone/decision/roadmap/Trello records.
+
 ## 2026-10-08 M12/M13 independent progression planning
 
 Completed the bounded Trello planning task in PROGRESSION_PLAN.md, with XP sources/caps, a provisional ten-level economy (2,700 XP, 27 earned points; 20 points across six proposed unlocks), prerequisites, respec/co-op/discovery policy, separate adaptation/loadout rules and authority/save migration/test requirements. Existing portable food processing/basic construction remains baseline knowledge. The proposal is original and data-driven; no new gameplay, catalog assets, dependencies or save-format changes. Corrected the food document's outdated offline policy to match M8.
