@@ -17,8 +17,9 @@ $log=Join-Path $projectRoot ('Saved\Logs\'+$run+'.log')
 $width=if($Resolution -eq '720'){1280}else{2560}
 $height=if($Resolution -eq '720'){720}else{1440}
 $filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'} 'Overlays'{'PF.UI.ActionOverlaysLive'} 'Reconnect'{'PF.UI.ReconnectProfileLive'}}
-# Only the credential fixture writes an identity profile; isolate it from the user's Local profile.
-$profileArgument=if($TestCase -eq 'Reconnect'){' -PFIdentityProfile=UI'+[Guid]::NewGuid().ToString('N').Substring(0,12)}else{''}
+# Every game login saves a server-issued credential, including ordinary UI fixtures.
+# Always isolate the profile; never replace the user's default Local reconnect details.
+$profileArgument=' -PFIdentityProfile=UI'+[Guid]::NewGuid().ToString('N').Substring(0,12)
 # Explicit optional renderer diagnostic: halve directional shadow resolution,
 # keep the existing page budget, do not persist settings or mute warnings.
 $shadowCommands=if($LowShadowDiagnostic){'r.Shadow.Virtual.ResolutionLodBiasDirectional 1,r.Shadow.Virtual.ResolutionLodBiasDirectionalMoving 1,'}else{''}

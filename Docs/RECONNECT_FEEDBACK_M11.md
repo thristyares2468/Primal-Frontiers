@@ -33,3 +33,9 @@ powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunControl
 ```
 
 The runner refuses an existing Unreal process and retains generated private test profiles locally. Do not publish identity files/world saves or full login URLs. Physical-controller feel, human open-world usability, M7 overnight and M8 rendered save/restart remain Personal gates.
+
+## Rendered launcher profile-isolation follow-up
+
+Source review found that ordinary standalone PostLogin writes a credential for every rendered test, not only Reconnect. The runner now supplies a fresh UI-prefixed profile for every case. The previous runner could overwrite default Local details via login; this fix preserves existing files and does not attempt recovery or replacement of earlier credentials/world saves.
+
+PF.UI.ControlsLive PASSED1/1 with the fixed launcher: M11Controls720_20261008_222930630_3f0e3575,32.09s,3.081/4.100GiB,engine/strict0,test warnings/errors0. Read-only SHA256 comparisons surrounding that whole launch found two default Local profile files before/two after,zero changed/added files. No hashes or credential contents were published; the comparison result is recorded here from the shell verification. Three PNGs inspected; raw24 known startup warnings/14 Python lines,zero other warning/error/ensure/fatal. No C++ changes/new build required for this script-only fix. Trello https://trello.com/c/rCmZYZFy.
