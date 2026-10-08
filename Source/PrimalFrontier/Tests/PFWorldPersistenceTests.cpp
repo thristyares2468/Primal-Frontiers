@@ -22,6 +22,7 @@
 #include "Misc/AutomationTest.h"
 #include "Misc/DateTime.h"
 #include "Misc/ScopeExit.h"
+#include "Misc/CommandLine.h"
 #include <limits>
 #include "HAL/FileManager.h"
 #include "Engine/World.h"
@@ -185,6 +186,63 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
     TestTrue(TEXT("Disconnect preserves change since manual save"), DepartedPlayer.Inventory.ContainsByPredicate([](const auto& S) { return S.ItemId == TEXT("Item_Fibre") && S.Quantity == 1; }));
     Fixture.ForwardErrorMessages(this);
     AddInfo(TEXT("[PrimalPersistence] Real file/world restore twice: player, storage, ownership, depletion, clock, pickup and creature IDs; no append duplication"));
+    return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFWorldStartupFailureTest, "PF.Persistence.StartupFailurePreservesSave",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FPFWorldStartupFailureTest::RunTest(const FString&)
+{
+    AddExpectedError(TEXT("Startup load refused:"), EAutomationExpectedErrorFlags::Contains, 1);
+    AddExpectedError(TEXT("Startup world restore refused:"), EAutomationExpectedErrorFlags::Contains, 1);
+    for (bool bLayoutMismatch : {false, true})
+    {
+        FTestWorldWrapper Fixture;
+        if (!Fixture.CreateTestWorld(EWorldType::Game)) { return false; }
+        UWorld* W = Fixture.GetTestWorld();
+        W->GetOutermost()->Rename(*(TEXT("/Temp/PFStartupFailure/") + FGuid::NewGuid().ToString(EGuidFormats::Digits) + TEXT("/L_Automation")),
+            nullptr, REN_DontCreateRedirectors | REN_NonTransactional);
+        W->SetGameMode(FURL(nullptr, TEXT("/Engine/Maps/Entry?game=/Script/PrimalFrontier.PFSurvivalGameMode"), TRAVEL_Absolute));
+        W->SpawnActor<APFWorldClock>();
+        if (!Fixture.BeginPlayInTestWorld()) { return false; }
+        auto* Persistence = W->GetSubsystem<UPFWorldPersistence>();
+        if (!TestNotNull(TEXT("Startup fixture subsystem"), Persistence)) { return false; }
+        FPFWorldSaveData Data; Data.Map = TEXT("L_Automation");
+        if (bLayoutMismatch)
+        {
+            FPFResourceSaveRecord Node; Node.Name = TEXT("SavedOnlyNode"); Node.Definition = TEXT("Node_Wood"); Node.Hits = 3;
+            Data.Resources.Add(Node); // Valid record; this authored node is absent from the current map.
+        }
+        else { Data.Version = 2; } // Valid file checksum; unsupported world payload.
+        FString Error; TArray<uint8> Bytes;
+        const FString Slot = TEXT("AutomationStartupFailure_") + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+        ON_SCOPE_EXIT
+        {
+            for (bool B : {false, true}) { IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot, B)); }
+        };
+        if (!TestTrue(TEXT("Encode startup failure fixture"), FPFWorldSaveFormat::Encode(Data, Bytes, Error)) ||
+            !TestTrue(TEXT("Write unique startup fixture"), FPFSaveFileStore::Write(Slot, Bytes, Error))) { AddError(Error); return false; }
+        FPFSavedFile Before;
+        if (!TestTrue(TEXT("Read original generation"), FPFSaveFileStore::Read(Slot, Before, Error))) { return false; }
+        {
+            // Configure through the real startup path; restore process arguments before other tests/world teardown.
+            const FString PreviousCommandLine(FCommandLine::Get());
+            ON_SCOPE_EXIT { FCommandLine::Set(*PreviousCommandLine); };
+            FCommandLine::Set(*(PreviousCommandLine + TEXT(" -PFSaveSlot=") + Slot + TEXT(" -PFLoadSave")));
+            Persistence->ConfigureStartup(); Persistence->ApplyStartup();
+        }
+        TestFalse(TEXT("Failed startup refuses login"), Persistence->CheckLogin(TEXT(""), Error));
+        FPFWorldSaveData Output; Output.Map = TEXT("Preserved");
+        TestFalse(TEXT("Failed startup refuses default-world capture"), Persistence->Capture(Output, Error));
+        TestEqual(TEXT("Refused capture preserves output"), Output.Map, FString(TEXT("Preserved")));
+        TestFalse(TEXT("Failed startup refuses default-world save"), Persistence->Save(Slot, Error));
+        TestTrue(TEXT("Save refusal identifies startup failure"), Error.Contains(TEXT("Startup")));
+        FPFSavedFile After;
+        if (!TestTrue(TEXT("Original generation remains readable"), FPFSaveFileStore::Read(Slot, After, Error))) { return false; }
+        TestEqual(TEXT("No new generation published after failure"), After.Generation, Before.Generation);
+        TestTrue(TEXT("Original payload preserved"), After.Payload == Before.Payload);
+        Fixture.ForwardErrorMessages(this);
+    }
+    AddInfo(TEXT("[PrimalPersistence] Exercised unsupported startup payload and authored-layout mismatch: login/capture/save refusal and original generation/payload preservation assertions"));
     return true;
 }
 #endif

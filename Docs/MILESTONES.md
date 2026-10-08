@@ -1,5 +1,15 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 startup restoration save-safety fix
+
+Source review and PF.Persistence.StartupFailurePreservesSave reproduced a real gap: after unsupported payload or authored-layout startup failure, login refused but capture/save published a newer empty/default-world generation. Initial report M8StartupFailureReproduced_1791432857773: 0 passed/1 failed, 12 assertion errors, engine exit 0. Preserved failure evidence; disposable generated test slots only.
+
+Added a five-line bStartupBlocked capture guard (Save calls Capture), with an explicit diagnose/restart refusal. No save version, asset/map or new gameplay change. Editor builds passed: test-first 20.52 s, fixed 19.16 s; Development Game passed 28.52 s. No compiler warnings. Focused retry M8StartupFailureVerified_1791432964361 passed 1/1; M8StartupGuardRegression_1791433050190 passed all eight: CorruptPlayerData, FileGenerations, PlayerRoundTrip, PlayerValidation, ServerPlayerAdapter, StartupFailurePreservesSave, WorldRecords, WorldRuntime under PF.Persistence. Zero test errors/warnings; exits 0.
+
+Normal PF.Persistence.Live one-client create/restart passed on both server and client (four reports): M8GuardCreate_1791433114412Server/Client; M8GuardRestart_1791433114412Server/Client. Used L_PrimalFrontier_OpenWorld, same port/identity profile across restart, unique AutomationM8 slot, -nullrhi, -PFExpectedPlayers=1 and existing opt-in automation/TestExit arguments. This is automated gameplay/authority/restart evidence, not human walking/overnight/rendered play. Live working memory create 1.713/1.811 GiB, restart 1.717/1.790 GiB; focused native working/private 2.958/2.825 GiB. No FPS/stutter sample. Known installed-engine ToolsetRegistry PythonTestRunner startup error remains in live logs; test events are clean. Packaged Server remains blocked by the engine distribution.
+
+Evidence: Saved/AutomationReports/<name>/index.json and Saved/Logs/PF<name>.log; Saved/Logs/PFM8StartupGuardGameBuild.log. Changed files: Source/PrimalFrontier/Persistence/PFWorldPersistence.cpp, Tests/PFWorldPersistenceTests.cpp and CURRENT_STATE/PERSISTENCE_M8/MILESTONES/DECISIONS/TRELLO_SYNC docs. Trello bounded AI task Done; M7/M8 parent manual acceptance remains open.
+
 ## 2026-10-08 M9/M17 independent audio feedback planning
 
 Completed AUDIO_FEEDBACK_PLAN.md: minimal action/UI/creature/footstep/ambience coverage, server outcome versus local presentation, missing-cue safety, duplicate/replay refusal, dedicated-server guards, concurrency/range/memory targets, source/rights intake, visual fallbacks and future tests. Reviewed the real crafting/building/interaction/vitals/creature/settings routes and Epic's current 5.8 concurrency/attenuation documentation. Clarified PROGRESSION_PLAN.md against source: current exposure has no heat/cold category, and jump rather than sprint has the existing stamina hook.

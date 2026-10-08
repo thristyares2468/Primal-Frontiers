@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Never publish the default world after a failed startup restore
+
+Latch startup restoration failure through Capture/Save as well as login. Generic file-checksum validity is insufficient: a future semantic version or changed authored layout can fail world restoration while still being a readable file generation. Refuse publication with a specific diagnose/restart reason instead of making default state the newest save. Keep files, output records and schema unchanged; recovery is deliberate, not a silent overwrite. A test-first failure, successful focused/native regressions and normal one-client create/restart establish the narrow fix; rendered/manual gates remain separate.
+
 ## 2026-10-08 — Presentation-only bounded audio plan
 
 AUDIO_FEEDBACK_PLAN.md proposes typed feedback at accepted gameplay outcomes, with local UI and range-limited cosmetic world events. Do not parse text strings or replay initial/save-restored snapshots; keep listen-server playback single-path and missing cues harmless. Dedicated servers must not load audio presentation. Use existing built-in class preferences and proposed concurrency/attenuation limits before any broader sound library; numerical budgets still need measurement and human audibility.

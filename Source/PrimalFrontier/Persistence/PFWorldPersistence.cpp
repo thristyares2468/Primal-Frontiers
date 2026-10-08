@@ -141,6 +141,11 @@ void UPFWorldPersistence::Logout(APFSurvivalPlayerController* PC)
 
 bool UPFWorldPersistence::Capture(FPFWorldSaveData& Out, FString& Error)
 {
+    if (bStartupBlocked)
+    {
+        Error = TEXT("Startup restoration failed; capture/save refused to preserve saved data. Resolve the load failure and restart.");
+        return false;
+    }
     if (!Authority(Error)) { return false; }
     FPFWorldSaveData Data; Data.Map = PersistenceMapName(GetWorld()); Data.Players = Roster.Players;
     int32 ClockCount = 0;
