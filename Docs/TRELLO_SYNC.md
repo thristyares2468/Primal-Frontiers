@@ -32,6 +32,8 @@ Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed
 
 ## Every continue/task
 
+October9 consolidated native continuation: checked live M11 parent/Testing board and current-state evidence, selected the independently actionable35-test coverage gap within M11, created https://trello.com/c/ZKdNDaOC Doing, and ran32+3 native batches sequentially. Exact35 identity reconciliation and clean raw/report outcomes complete this bounded checkpoint; immediately move it Done before another task. Update stale aggregate native counts on the existing M8 automation card, preserving live evidence/manual gates. Full M11 remains Personal Doing; no assumed playtest pass or next milestone implementation.
+
 October9 M11 review: checked live HUD board/M11 parent first, created one bounded AI review/full-bag task Doing, reproduced height/scaling failures, then recorded final Editor/Game, native3/3, rendered720p/1440p1/1, eight inspected PNGs and limits before moving https://trello.com/c/h1bRvrVr Done. Corrected stale survival shadow-fix note and overlay commit/evidence scope. Parent M11 now Personal Doing for mandatory human usability; existing building/storage/pause/settings Personal card extended with M11 action, preserving historical gate/link. Latest request stops at required human playtest; no next milestone started or manual pass assumed. No unrelated deadlines/members/cards changed.
 
 1. Read current Trello cards and Docs/CURRENT_STATE.md / MILESTONES.md before selecting work. On continue, select the next eligible bounded task from Trello within the latest authorized scope. The user's latest October 8 follow-up permits independent implementation while Personal tests wait; deferred tests remain unverified and nonblocking, not passed.

@@ -32,6 +32,8 @@ Inspection is restricted to project-local `Saved/AutomationReports/.../index.jso
 
 ## October 8 verification
 
+Historical checkpoint notes below are superseded for current native coverage by the October9 [35-test checkpoint](NATIVE_CHECKPOINT_M11.md) on source `df648eb`:32+3 sequential batches, all clean Success, exact identities reconciled, raw logs clean. They remain valid historical evidence; no new live/rendered/manual acceptance is implied.
+
 Active-craft addition increases the current native selection to 33. `PF.Persistence.ActiveCraftCancellation` passed separately in Automation_M8CraftFinal_20261008_082409203_d54be484; no combined 33-test or new live checkpoint is implied. Focused usage: `-TestFilter PF.Persistence.ActiveCraftCancellation -Label M8ActiveCraft -TimeoutSeconds 120`. Real files, old completion ticks and actual controller teardown exercise cancellation/conservation; native fixture evidence is separate from multiplayer/manual play. Exact build/report/log/memory: [PERSISTENCE_M8.md](PERSISTENCE_M8.md).
 
 Current native selection contains 32 distinct tests after the focused DeadPlayerRespawn and OfflineFoodAging additions. Each new test passed separately; the earlier combined 30-test checkpoint remains historical, not a rerun of all 32. Focused food verification:

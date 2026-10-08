@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-09 M11 consolidated native regression checkpoint
+
+Current source `df648eb` passed all35 intended native regressions in two sequential NullRHI batches (32 gameplay/settings +3 runtime command tests). Exact manifest reconciliation found35 unique records and no missing/extra test. Engine/runner exits0, raw/test warnings/errors/ensure0. Editor up-to-date check passed1.14s with no compile actions; sampled peaks2.920/2.761GiB and3.064/2.947GiB. Exact reports, names and scope: [NATIVE_CHECKPOINT_M11.md](NATIVE_CHECKPOINT_M11.md). No source/assets change, new multiplayer/rendered result or full milestone acceptance. Mandatory Personal M11 usability remains next.
+
 ## 2026-10-09 M11 review and full-bag readability
 
 Reviewed previous M11 source/contracts and retained final overlay/survival reports, corrected stale Trello/evidence claims, and reproduced ignored inventory HUD scaling and overflowing text allocation. Shared right-side panel/four-row selection window/fixed footer/10Hz refresh preserves stable GUID and server authority. Editor24.88s/Game31.52s passed without compiler warnings; native inventory/input3/3 and real rendered inventory720p/1440p maximum scale1.5 each1/1 passed. Eight final PNGs inspected. Exact retained failure, report/log paths, startup warnings, memory and limitations: [M11_REVIEW.md](M11_REVIEW.md). Full M11 remains unaccepted; next mandatory gate is the Personal first-person usability playtest. Stop there per latest request; M7/M8 manual gates remain unverified.
