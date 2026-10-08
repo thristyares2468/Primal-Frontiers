@@ -29,7 +29,8 @@ public class PrimalFrontier : ModuleRules
 			"GameplayTags"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		// Built-in bounded world-save metadata conversion (M8); no external plugin.
+		PrivateDependencyModuleNames.AddRange(new string[] { "Json", "JsonUtilities" });
 
 		// Variant_Horror / Variant_Shooter are Epic template samples, not part of the
 		// survival game. They still compile into this module; removing them (code,

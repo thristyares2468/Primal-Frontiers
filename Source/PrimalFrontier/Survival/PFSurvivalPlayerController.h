@@ -36,7 +36,10 @@ class PRIMALFRONTIER_API APFSurvivalPlayerController : public APrimalFrontierPla
     GENERATED_BODY()
 
 public:
+    virtual void Destroyed() override;
     APFSurvivalPlayerController();
+    /** Server-issued LAN development credential; never used as public ownership ID. */
+    UFUNCTION(Client, Reliable) void ClientRememberReconnectCredential(FGuid Credential);
 
     /** Building mode state, placement preview and building RPCs (lives on the controller). */
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly) TObjectPtr<UPFBuildingComponent> Building;

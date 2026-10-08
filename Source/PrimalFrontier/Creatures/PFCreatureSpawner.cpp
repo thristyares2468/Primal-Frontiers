@@ -45,6 +45,17 @@ APFCreature* APFCreatureSpawner::Spawn(UWorld* World,FName Id,FVector Location,U
     return IsValid(Creature)?Creature:nullptr;
 }
 
+double APFCreatureSpawner::PersistenceRespawnRemaining() const
+{
+    return FMath::Clamp(NextSpawn - GetWorld()->GetTimeSeconds(), 0., 300.);
+}
+
+void APFCreatureSpawner::RestorePersistence(APFCreature* Creature, double Remaining, bool bEnabled)
+{
+    if (!HasAuthority() || !FMath::IsFinite(Remaining) || Remaining < 0 || Remaining > 300) { return; }
+    Resident = Creature; bAutoSpawn = bEnabled; NextSpawn = GetWorld()->GetTimeSeconds() + Remaining;
+}
+
 void APFCreatureSpawner::BeginPlay()
 {
     Super::BeginPlay();

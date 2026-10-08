@@ -61,6 +61,9 @@ bool FPFArgumentsTest::RunTest(const FString&)
     TestFalse(TEXT("Teleport nonfinite"), Valid(TEXT("PF.Teleport"), {TEXT("NaN"), TEXT("0"), TEXT("200")}));
     TestFalse(TEXT("Teleport fractional player ID"), Valid(TEXT("PF.Teleport"), {TEXT("0"), TEXT("0"), TEXT("200"), TEXT("1.5")}));
     TestFalse(TEXT("Export traversal"), Valid(TEXT("PF.ExportTestReport"), {TEXT("../escape")}));
+    TestTrue(TEXT("World slot identifier"), Valid(TEXT("PF.SaveWorld"), {TEXT("Automation_Example")}));
+    for (const TCHAR* Slot : {TEXT("../escape"), TEXT("C:/World"), TEXT("bad-name"), TEXT("")})
+    { TestFalse(TEXT("Invalid save/load slot"), Valid(TEXT("PF.LoadWorld"), {Slot})); }
     TestTrue(TEXT("Help through console"), IConsoleManager::Get().ProcessUserConsoleInput(TEXT("PF.Help"), *GLog, nullptr));
     TestEqual(TEXT("Help execution recorded"), CommandHistory().Last().Command, FString(TEXT("PF.Help")));
     TestFalse(TEXT("Timestamp recorded"), CommandHistory().Last().StartedUtc.IsEmpty());
@@ -83,6 +86,8 @@ bool FPFMissingSystemsTest::RunTest(const FString&)
     TestTrue(TEXT("Item grant without authoritative world rejected"), ExecuteCommand(TEXT("PF.GiveItem"), {TEXT("Item_Unknown"), TEXT("1")}, nullptr, false).HasErrors());
     TestTrue(TEXT("Creature spawning requires authoritative world"), ExecuteCommand(TEXT("PF.SpawnCreature"), {TEXT("UnknownCreature")}, nullptr, false).HasErrors());
     TestTrue(TEXT("Null gameplay world cannot teleport"), ExecuteCommand(TEXT("PF.Teleport"), {TEXT("0"), TEXT("0"), TEXT("200")}, nullptr, false).HasErrors());
+    for (const TCHAR* Name : {TEXT("PF.SaveWorld"), TEXT("PF.LoadWorld"), TEXT("PF.TestPersistence")})
+    { TestTrue(TEXT("Persistence requires authoritative world"), ExecuteCommand(Name, {}, nullptr, false).HasErrors()); }
     AddInfo(TEXT("These assertions verify honest blockers, not item grants, spawning, clamping or persistence. Those integration tests require the missing gameplay APIs."));
     return true;
 }

@@ -83,6 +83,17 @@ void APFResourceNode::Tick(float Delta)
     }
 }
 
+bool APFResourceNode::RestorePersistence(int32 Hits, double RemainingRespawn)
+{
+    const auto* D = Catalog ? Catalog->Resource(ResourceId, Items) : nullptr;
+    if (!HasAuthority() || !D || Hits < 0 || Hits > D->Hits || !FMath::IsFinite(RemainingRespawn) ||
+        RemainingRespawn < 0 || RemainingRespawn > D->RespawnSeconds || (Hits > 0 && RemainingRespawn != 0)) { return false; }
+    HitsRemaining = Hits;
+    RespawnAt = Hits == 0 ? UPFInventoryComponent::ServerTime(GetWorld()) + RemainingRespawn : 0;
+    NextHitAt = UPFInventoryComponent::ServerTime(GetWorld()) + 0.5;
+    ForceNetUpdate(); return true;
+}
+
 bool APFResourceNode::Gather(APawn* Pawn)
 {
     if(!HasAuthority() || !IsValid(Pawn) || !Pawn->HasAuthority() || Pawn->GetWorld()!=GetWorld() || !Pawn->GetController() || HitsRemaining<=0){return false;}

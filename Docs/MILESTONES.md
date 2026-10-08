@@ -1,3 +1,56 @@
+# Primal Frontier milestone evidence
+
+## 2026-10-08 M8 world persistence and reconnect verification
+
+**M8 implementation and automated verification advanced; milestone acceptance is still pending.** M7's sustained manual open-world route/overnight result and M8's rendered gather/craft/build/storage/save/close/restart/reconnect playtest remain unverified. The user authorized independent M8 work while deferring M7. No M9 work starts from this checkpoint.
+
+Implemented bounded V1 whole-world records, server-only save/load, startup restoration and development reconnect identities. Saves include player vitals/location/inventory, structure health/support/ownership/storage/door state, authored resource depletion/respawn, creature identities/health/home/corpse timers, spawner residents and pickups, plus world time. Food ages offline; expired batches are omitted; repeated restoration replaces inventories. A failed player restoration cannot overwrite the saved player with an empty default spawn. Login/restore uses a deferred PostLogin step; disconnect captures the pawn before destruction. Commands PF.SaveWorld [slot], PF.LoadWorld [slot] and read-only PF.TestPersistence now call real APIs and reject clients. No map/assets were saved or changed.
+
+Builds: PrimalFrontierEditor **passed (6.33 s)**; PrimalFrontier Development **passed (69.65 s)**, no compiler warnings. Installed engine reports **5.8.3**, not the originally requested 5.8.2. PrimalFrontierServer was **blocked before compilation (0.73 s)**: "Server targets are not currently supported from this engine distribution." The existing Server target is retained; uncooked Editor -server is the tested dedicated-server route. A post-commit working-set build is still pending.
+
+Final regression: **26 passed, 0 failed, 0 test warnings**, engine exit 0. Report: Saved/AutomationReports/M8FinalRegression/index.json; log: Saved/Logs/PFM8FinalRegression.log. Exact Success tests:
+
+- PF.Building.PlacementAndStorage
+- PF.Crafting.Gathering
+- PF.Crafting.Transactions
+- PF.Creatures.Lifecycle
+- PF.Input.Gamepad
+- PF.Interaction.TargetAndPickup
+- PF.Inventory.Transactions
+- PF.Inventory.WorldTransfers
+- PF.Persistence.CorruptPlayerData
+- PF.Persistence.FileGenerations
+- PF.Persistence.PlayerRoundTrip
+- PF.Persistence.PlayerValidation
+- PF.Persistence.ServerPlayerAdapter
+- PF.Persistence.WorldRecords
+- PF.Persistence.WorldRuntime
+- PF.PrimalAgentTools.CommandArguments
+- PF.PrimalAgentTools.MissingSystemsAreBlocked
+- PF.PrimalAgentTools.TeleportAndRuntimeReset
+- PF.Settings.Preferences
+- PF.Survival.Component
+- PF.Survival.Environment
+- PF.Survival.Lifecycle
+- PF.Survival.Needs
+- PF.World.Clock
+- PF.World.OpenWorldAsset
+- PF.World.Resources
+
+Focused prerequisites also passed: M8WorldFixture (WorldRecords and WorldRuntime: 2); M8WorldHookRegression (12); M8DisconnectVerified (WorldRuntime: 1). Actual one-client Create/Restart produced four passing PF.Persistence.Live reports: M8CreateOneVerifiedServer, M8CreateOneVerifiedClient, M8RestartOneVerifiedServer, M8RestartOneVerifiedClient. Actual two-client Create/Restart produced six passing PF.Persistence.Live reports: M8CreateTwoVerifiedServer, M8CreateTwoVerifiedClient1, M8CreateTwoVerifiedClient2, M8RestartTwoVerifiedServer, M8RestartTwoVerifiedClient1, M8RestartTwoVerifiedClient2. All ten have zero failures/test warnings and engine exits 0, under Saved/AutomationReports/<name>/index.json; matching logs are Saved/Logs/PF<name>.log.
+
+Live tests use L_PrimalFrontier_OpenWorld, separate uncooked dedicated server and one/two clients with NullRHI. They perform real gathering, timed tool craft, foundation/storage placement, file save/load, client authority refusals and replicated owner/vitals/items/time. A separate server restart restores the crafted tool, health, storage, ownership and a fibre marker changed after the manual save and captured on disconnect. Fixture teleports and time overrides are **not manual traversal/overnight evidence**.
+
+Preserved failures: first world fixture build lacked the pickup deadline argument (fixed; two tests then passed). Original M8RestartOneServer failed five assertions; client failed with timeout/network aftermath (2 errors/39 warnings). Credential RPC ran before the engine attached the client connection; moving it to deferred PostLogin and capturing departure before pawn destruction fixed the fresh verified runs. Initial M8CreateTwoServer/Client1/Client2 each timed out at a test prerequisite: the test filtered stone nodes to a region containing only one, but required two. Removed that test-only filter; no map change; rebuilt and all six fresh create/restart reports passed. Older failed reports remain evidence. Engine exit 0 alone is not a test verdict.
+
+Final regression sampled working/private memory **2.896/2.769 GiB**. Two-client create sampled server/client1/client2 working sets **1.717/1.808/1.816 GiB**, restart **1.722/1.796/1.795 GiB**. NullRHI has no rendered FPS or stutter measurement; it does not resolve the earlier New Editor Window PIE 14–17 FPS complaint. This host reports about 31.93 GiB installed RAM; the 16 GB target remains a budget, not a measured minimum-spec pass. Known uncooked HLOD, engine Toolsets Python/editor-widget startup and teardown warnings remain outside test events; final regression log has no warning/error/ensure/fatal lines.
+
+Changed areas: Persistence/PFWorldSaveData, PFWorldSaveFormat, PFWorldPersistence, PFLocalPlayer; player-save adapter; GameMode/controller lifecycle; resource/creature/spawner/pickup snapshot helpers; built-in Json/JsonUtilities module dependencies; DefaultEngine.ini LocalPlayer class; plugin adapters/live tests and native world tests; documentation. No unrelated Unreal assets, external art, rendering settings, new gameplay system or MCP server changed.
+
+Remaining: clean-working-set build and scoped commit/push; then M7 manual route/overnight and M8 manual persistence playtest. Production account authentication, globally rollback-atomic restoration, save migration, cooked streaming/HLOD and packaged-server certification are outside this verified development scenario. See PERSISTENCE_M8.md and PLAYTEST.md.
+
+## Historical checkpoints
+
 # Milestone 7 — in progress 2026-09-30
 
 ## 2026-10-08 current-state documentation and M8 ownership preparation

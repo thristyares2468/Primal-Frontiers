@@ -32,11 +32,34 @@
 #include "Survival/PFInteraction.h"
 #include "GameFramework/PlayerInput.h"
 #include "Settings/PFGameUserSettings.h"
+#include "Persistence/PFLocalPlayer.h"
+#include "Persistence/PFWorldPersistence.h"
 
 APFSurvivalPlayerController::APFSurvivalPlayerController()
 {
     SurvivalHUDClass = UPFSurvivalHUD::StaticClass();
     Building=CreateDefaultSubobject<UPFBuildingComponent>(TEXT("Building"));
+}
+
+void APFSurvivalPlayerController::ClientRememberReconnectCredential_Implementation(FGuid Credential)
+{
+    if (!IsLocalController() || !GetLocalPlayer()) { return; }
+    if (!UPFLocalPlayer::RememberCredential(GetWorld(), Credential))
+    {
+        UE_LOG(LogPFSurvival, Warning, TEXT("[PrimalPersistence] Local reconnect profile could not be saved; credential omitted from log"));
+    }
+    else { UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Local reconnect profile saved; credential omitted from log")); }
+}
+
+void APFSurvivalPlayerController::Destroyed()
+{
+    // Engine PlayerController::Destroyed removes the pawn before GameMode::Logout.
+    // Capture a departing player's real state while the pawn still exists.
+    if (HasAuthority() && GetWorld() && !GetWorld()->bIsTearingDown)
+    {
+        if (auto* Persistence = GetWorld()->GetSubsystem<UPFWorldPersistence>()) { Persistence->Logout(this); }
+    }
+    Super::Destroyed();
 }
 
 void APFSurvivalPlayerController::BeginPlay()

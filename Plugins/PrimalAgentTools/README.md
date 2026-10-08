@@ -4,6 +4,10 @@ UE 5.8.2 C++ developer plugin. A non-Shipping runtime module owns command regist
 
 See [DEVELOPER_COMMANDS.md](DEVELOPER_COMMANDS.md) for the current commands, integration blockers and multiplayer verification. Milestone 2 adds real hunger/thirst/exposure and recovery adapters; [SURVIVAL_M2.md](../../Docs/SURVIVAL_M2.md) describes their gameplay and test contracts. All tooling commands remain excluded from Shipping.
 
+## M8 persistence adapters
+
+PF.SaveWorld [slot] and PF.LoadWorld [slot] call real server-only world-save APIs (default Survival); PF.TestPersistence validates a read-only record round-trip. These commands never save editor assets or forward client requests. Slots use 1–64 ASCII letters/digits/underscore. Opt-in PF.Persistence.Live exercises a disposable NullRHI create/save/load and separate restart/reconnect, for one/two clients. PF.Help and all commands remain non-Shipping. See [persistence contract](../../Docs/PERSISTENCE_M8.md) and DEVELOPER_COMMANDS.md for flags/evidence and pending manual gates.
+
 ## Enable and use
 
 Milestone 5 adds `PF.TestBuildingPlacement` for runtime structure integrity and `PF.ResetBuildings` for scoped, empty M5 test structures. See [building contract](../../Docs/BUILDING_M5.md) for placement, ownership, storage and test limits. These commands remain excluded from Shipping.
@@ -53,7 +57,7 @@ Prefixes are case sensitive and require a nonempty suffix. Names use the same 64
 - Data Validation runs installed native/Blueprint validators and `IsDataValid`. Assets with no applicable validator are not proof of validity. Loading may compile derived data or update in-memory state; this plugin never saves those assets.
 - Reference checks use **saved package dependencies**. Transient-package dependencies are reported as a distinct warning, not a missing disk file. Checks do not fully validate object/subobject paths within existing packages, unsaved edits, native script imports, or paths built dynamically at runtime. Pair them with asset validation, map checks, and gameplay/network tests.
 - Screenshot success proves pixel readback and PNG creation, not image comparison, visual correctness, network correctness, or a performance benchmark.
-- This version does not add gameplay, replication, persistence, or a server target.
+- Core gameplay/replication/persistence belong to the game module. This plugin supplies non-Shipping adapters and tests. The project has a Server target; the installed Launcher engine rejects its packaged build.
 
 ## Shipping exclusion
 

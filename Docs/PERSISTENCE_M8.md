@@ -1,4 +1,73 @@
-# Milestone 8 — persistence foundation
+# Milestone 8 — persistence and multiplayer
+
+## Current development contract
+
+UPFWorldPersistence is a server-only WorldSubsystem. V1 contains value records/catalog IDs, never arbitrary actor classes. Approved maps: L_PrimalFrontier_OpenWorld, L_M7SurvivalArena and L_Automation. Bounded to 32 player identities, 128 structures, 128 resources, eight creatures, 32 spawners and 128 pickups; JSON payload at most 4 MiB. Player/batch codec is bounded and checksummed. Unknown versions/catalogs, invalid vitals/transforms, duplicate IDs, cyclic/missing/cross-owner/wrong-kind building supports and mismatched authored map layouts are refused. Roofs use wall/door support. Map-content changes require a migration.
+
+Records preserve public player IDs separately from private reconnect credentials; player vitals/location/item batches; structure owner/support/health/door/storage; resource depletion and remaining respawn; creature identity/health/home/corpse duration; spawner resident/enabled/timer; pickups and world time. Food uses remaining lifetime minus offline UTC age, removing expired batches. Other world timers pause offline. Crafting is cancelled on restore. No learned/progression state exists yet. Creature AI transient targets/path state are not serialized.
+
+Restoration stages hidden actors and validates records/player ground/capsule before replacing runtime objects and inventories. Repeated load replaces rather than appends. Pending/failed player restores block empty default-player capture. This is bounded development orchestration, **not globally rollback-atomic restoration across multiplayer callbacks** or universal power-loss protection.
+
+PFSaveFileStore publishes verified checksummed A/B generations at Saved/Persistence/<slot>.a.pfs and .b.pfs. The active generation survives an inactive-file write failure. Read explicitly reports backup recovery; writes refuse to overwrite existing corrupt evidence. No silent repair/delete. Slot: 1–64 ASCII letters/digits/underscore, no paths or hyphens. Saved files are ignored by Git. Keep a separate backup before deliberate corruption experiments.
+
+PFSurvivalGameMode loads on startup before accepting joins with -PFSaveSlot=<slot> -PFLoadSave; deferred PostLogin restores after the engine attaches the connection. PlayerController::Destroyed captures departure before pawn removal. A configured active slot is saved on client logout. **Manual PF.SaveWorld is required before standalone/server exit; no timed autosave is added.** Connected players absent from a selected loaded save are refused: restart/load before joining.
+
+PFLocalPlayer stores a private GUID capability under Identity_<profile>_<endpoint hash>, using A/B file APIs. -PFIdentityProfile defaults Local (maximum 16 valid slot characters). Reconnect must use the same profile, host spelling and port; aliases create distinct profiles. Server-assigned public ownership IDs are not credentials. Unknown credentials are replaced only in a fresh unsaved world; malformed/duplicate-connected credentials and unknown credentials after loading are refused. This is trusted local/LAN development identity, **not production account authentication**. Profiles/world files and engine login URLs can contain private credentials: do not commit, paste or upload them.
+
+PF.SaveWorld [slot] / PF.LoadWorld [slot] default Survival and run only in an authoritative game/PIE world. They never save an editor map or forward a client request. PF.TestPersistence performs read-only Capture/Encode/Decode/Re-encode validation; it is not disk/restart certification. PF.Help reports their current backend. Runtime tooling remains excluded from Shipping; game persistence has no reverse dependency on the plugin. Built-in Json/JsonUtilities are the only new module dependencies.
+
+## 2026-10-08 M8 world persistence and reconnect verification
+
+**M8 implementation and automated verification advanced; milestone acceptance is still pending.** M7's sustained manual open-world route/overnight result and M8's rendered gather/craft/build/storage/save/close/restart/reconnect playtest remain unverified. The user authorized independent M8 work while deferring M7. No M9 work starts from this checkpoint.
+
+Implemented bounded V1 whole-world records, server-only save/load, startup restoration and development reconnect identities. Saves include player vitals/location/inventory, structure health/support/ownership/storage/door state, authored resource depletion/respawn, creature identities/health/home/corpse timers, spawner residents and pickups, plus world time. Food ages offline; expired batches are omitted; repeated restoration replaces inventories. A failed player restoration cannot overwrite the saved player with an empty default spawn. Login/restore uses a deferred PostLogin step; disconnect captures the pawn before destruction. Commands PF.SaveWorld [slot], PF.LoadWorld [slot] and read-only PF.TestPersistence now call real APIs and reject clients. No map/assets were saved or changed.
+
+Builds: PrimalFrontierEditor **passed (6.33 s)**; PrimalFrontier Development **passed (69.65 s)**, no compiler warnings. Installed engine reports **5.8.3**, not the originally requested 5.8.2. PrimalFrontierServer was **blocked before compilation (0.73 s)**: "Server targets are not currently supported from this engine distribution." The existing Server target is retained; uncooked Editor -server is the tested dedicated-server route. A post-commit working-set build is still pending.
+
+Final regression: **26 passed, 0 failed, 0 test warnings**, engine exit 0. Report: Saved/AutomationReports/M8FinalRegression/index.json; log: Saved/Logs/PFM8FinalRegression.log. Exact Success tests:
+
+- PF.Building.PlacementAndStorage
+- PF.Crafting.Gathering
+- PF.Crafting.Transactions
+- PF.Creatures.Lifecycle
+- PF.Input.Gamepad
+- PF.Interaction.TargetAndPickup
+- PF.Inventory.Transactions
+- PF.Inventory.WorldTransfers
+- PF.Persistence.CorruptPlayerData
+- PF.Persistence.FileGenerations
+- PF.Persistence.PlayerRoundTrip
+- PF.Persistence.PlayerValidation
+- PF.Persistence.ServerPlayerAdapter
+- PF.Persistence.WorldRecords
+- PF.Persistence.WorldRuntime
+- PF.PrimalAgentTools.CommandArguments
+- PF.PrimalAgentTools.MissingSystemsAreBlocked
+- PF.PrimalAgentTools.TeleportAndRuntimeReset
+- PF.Settings.Preferences
+- PF.Survival.Component
+- PF.Survival.Environment
+- PF.Survival.Lifecycle
+- PF.Survival.Needs
+- PF.World.Clock
+- PF.World.OpenWorldAsset
+- PF.World.Resources
+
+Focused prerequisites also passed: M8WorldFixture (WorldRecords and WorldRuntime: 2); M8WorldHookRegression (12); M8DisconnectVerified (WorldRuntime: 1). Actual one-client Create/Restart produced four passing PF.Persistence.Live reports: M8CreateOneVerifiedServer, M8CreateOneVerifiedClient, M8RestartOneVerifiedServer, M8RestartOneVerifiedClient. Actual two-client Create/Restart produced six passing PF.Persistence.Live reports: M8CreateTwoVerifiedServer, M8CreateTwoVerifiedClient1, M8CreateTwoVerifiedClient2, M8RestartTwoVerifiedServer, M8RestartTwoVerifiedClient1, M8RestartTwoVerifiedClient2. All ten have zero failures/test warnings and engine exits 0, under Saved/AutomationReports/<name>/index.json; matching logs are Saved/Logs/PF<name>.log.
+
+Live tests use L_PrimalFrontier_OpenWorld, separate uncooked dedicated server and one/two clients with NullRHI. They perform real gathering, timed tool craft, foundation/storage placement, file save/load, client authority refusals and replicated owner/vitals/items/time. A separate server restart restores the crafted tool, health, storage, ownership and a fibre marker changed after the manual save and captured on disconnect. Fixture teleports and time overrides are **not manual traversal/overnight evidence**.
+
+Preserved failures: first world fixture build lacked the pickup deadline argument (fixed; two tests then passed). Original M8RestartOneServer failed five assertions; client failed with timeout/network aftermath (2 errors/39 warnings). Credential RPC ran before the engine attached the client connection; moving it to deferred PostLogin and capturing departure before pawn destruction fixed the fresh verified runs. Initial M8CreateTwoServer/Client1/Client2 each timed out at a test prerequisite: the test filtered stone nodes to a region containing only one, but required two. Removed that test-only filter; no map change; rebuilt and all six fresh create/restart reports passed. Older failed reports remain evidence. Engine exit 0 alone is not a test verdict.
+
+Final regression sampled working/private memory **2.896/2.769 GiB**. Two-client create sampled server/client1/client2 working sets **1.717/1.808/1.816 GiB**, restart **1.722/1.796/1.795 GiB**. NullRHI has no rendered FPS or stutter measurement; it does not resolve the earlier New Editor Window PIE 14–17 FPS complaint. This host reports about 31.93 GiB installed RAM; the 16 GB target remains a budget, not a measured minimum-spec pass. Known uncooked HLOD, engine Toolsets Python/editor-widget startup and teardown warnings remain outside test events; final regression log has no warning/error/ensure/fatal lines.
+
+Changed areas: Persistence/PFWorldSaveData, PFWorldSaveFormat, PFWorldPersistence, PFLocalPlayer; player-save adapter; GameMode/controller lifecycle; resource/creature/spawner/pickup snapshot helpers; built-in Json/JsonUtilities module dependencies; DefaultEngine.ini LocalPlayer class; plugin adapters/live tests and native world tests; documentation. No unrelated Unreal assets, external art, rendering settings, new gameplay system or MCP server changed.
+
+Remaining: clean-working-set build and scoped commit/push; then M7 manual route/overnight and M8 manual persistence playtest. Production account authentication, globally rollback-atomic restoration, save migration, cooked streaming/HLOD and packaged-server certification are outside this verified development scenario. See PERSISTENCE_M8.md and PLAYTEST.md.
+
+## Historical foundation checkpoints
+
+The entries below preserve earlier results/failures. Statements that world integration or commands were pending describe their original checkpoint and are superseded by the current contract above.
 
 ## Stable structure ownership and current-state checkpoint (October 8)
 

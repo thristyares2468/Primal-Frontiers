@@ -12,7 +12,7 @@
 
 namespace
 {
-    bool Ready(APFSurvivalPlayerController* PC, FString& Error)
+    bool PersistencePlayerReady(APFSurvivalPlayerController* PC, FString& Error)
     {
         if (!IsInGameThread() || !IsValid(PC) || !PC->HasAuthority() || !PC->GetWorld()->IsGameWorld() ||
             !PC->GetPlayerState<APFInventoryPlayerState>() || !Cast<APFSurvivorCharacter>(PC->GetPawn()) ||
@@ -22,7 +22,7 @@ namespace
         }
         return true;
     }
-    FPFPlayerSaveLimits Limits(APFSurvivalPlayerController* PC)
+    FPFPlayerSaveLimits PlayerPersistenceLimits(APFSurvivalPlayerController* PC)
     {
         FPFPlayerSaveLimits Result;
         Result.Slots = PC->GetInventory()->SlotLimit; Result.Weight = PC->GetInventory()->WeightLimit;
@@ -45,27 +45,27 @@ TArray<FPFSavedItemStack> FPFPlayerSaveAdapter::CaptureInventory(const UPFInvent
 
 bool FPFPlayerSaveAdapter::Capture(APFSurvivalPlayerController* PC, FPFPlayerSaveData& Out, FString& Error)
 {
-    if (!Ready(PC, Error)) { return false; }
+    if (!PersistencePlayerReady(PC, Error)) { return false; }
     FPFPlayerSaveData Data;
     Data.PlayerId = PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId;
     Data.Location = PC->GetPawn()->GetActorLocation(); Data.Rotation = PC->GetControlRotation().GetNormalized();
     const auto V = CastChecked<APFSurvivorCharacter>(PC->GetPawn())->Survival->GetVitals();
     Data.Health = V.Health; Data.Stamina = V.Stamina; Data.Hunger = V.Hunger; Data.Thirst = V.Thirst;
     Data.Inventory = CaptureInventory(*PC->GetInventory());
-    if (!FPFPlayerSaveFormat::Validate(Data, *PC->GetInventory()->Catalog, Limits(PC), Error)) { return false; }
+    if (!FPFPlayerSaveFormat::Validate(Data, *PC->GetInventory()->Catalog, PlayerPersistenceLimits(PC), Error)) { return false; }
     Out = MoveTemp(Data); return true;
 }
 
 bool FPFPlayerSaveAdapter::CanRestore(APFSurvivalPlayerController* PC, const FPFPlayerSaveData& Data,
     double Age, FString& Error)
 {
-    if (!Ready(PC, Error)) { return false; }
+    if (!PersistencePlayerReady(PC, Error)) { return false; }
     auto* Pawn = CastChecked<APFSurvivorCharacter>(PC->GetPawn());
     if (Pawn->Survival->IsDead() || Data.PlayerId != PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId)
     {
         Error = TEXT("Player identity mismatch or current pawn awaits respawn"); return false;
     }
-    if (!FPFPlayerSaveFormat::Validate(Data, *PC->GetInventory()->Catalog, Limits(PC), Error)) { return false; }
+    if (!FPFPlayerSaveFormat::Validate(Data, *PC->GetInventory()->Catalog, PlayerPersistenceLimits(PC), Error)) { return false; }
     TArray<FPFItemStack> Proposed;
     if (!PC->GetInventory()->PreparePersistence(Data.Inventory, Age, Proposed, Error)) { return false; }
     FCollisionQueryParams Params(SCENE_QUERY_STAT(PFSaveSpawn), false, Pawn);

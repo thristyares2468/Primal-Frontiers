@@ -8,6 +8,7 @@
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
+#include "Persistence/PFWorldPersistence.h"
 #include "GameFramework/PlayerStart.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
@@ -18,6 +19,48 @@ APFSurvivalGameMode::APFSurvivalGameMode()
     DefaultPawnClass = APFSurvivorCharacter::StaticClass();
     PlayerControllerClass = APFSurvivalPlayerController::StaticClass();
     PlayerStateClass = APFInventoryPlayerState::StaticClass();
+}
+
+void APFSurvivalGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+    Super::InitGame(MapName, Options, ErrorMessage);
+    GetWorld()->GetSubsystem<UPFWorldPersistence>()->ConfigureStartup();
+}
+
+void APFSurvivalGameMode::StartPlay()
+{
+    Super::StartPlay(); // Actors/catalogs/components must finish BeginPlay before restoration.
+    GetWorld()->GetSubsystem<UPFWorldPersistence>()->ApplyStartup();
+}
+
+void APFSurvivalGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+    Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+    if (ErrorMessage.IsEmpty()) { GetWorld()->GetSubsystem<UPFWorldPersistence>()->CheckLogin(Options, ErrorMessage); }
+}
+
+FString APFSurvivalGameMode::InitNewPlayer(APlayerController* PC, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal)
+{
+    FString Error = Super::InitNewPlayer(PC, UniqueId, Options, Portal);
+    auto* SurvivorPC = Cast<APFSurvivalPlayerController>(PC);
+    auto* Persistence = GetWorld()->GetSubsystem<UPFWorldPersistence>();
+    if (Error.IsEmpty() && !Persistence->CheckLogin(Options, Error)) { return Error; }
+    if (Error.IsEmpty() && SurvivorPC) { Persistence->Login(SurvivorPC, Options); }
+    return Error;
+}
+
+void APFSurvivalGameMode::PostLogin(APlayerController* PC)
+{
+    Super::PostLogin(PC);
+    const TWeakObjectPtr<APFSurvivalPlayerController> WeakPC(Cast<APFSurvivalPlayerController>(PC));
+    GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this, WeakPC]
+    {
+        if (WeakPC.IsValid() && !GetWorld()->GetSubsystem<UPFWorldPersistence>()->RestorePlayer(WeakPC.Get()))
+        {
+            WeakPC->ClientReturnToMainMenuWithTextReason(FText::FromString(TEXT("Saved player restoration failed; previous record preserved. Check server log.")));
+            WeakPC->Destroy();
+        }
+    }));
 }
 
 void APFSurvivalGameMode::RestartPlayer(AController* Controller)

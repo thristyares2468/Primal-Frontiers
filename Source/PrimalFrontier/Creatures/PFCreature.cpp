@@ -56,6 +56,7 @@ void APFCreature::BeginPlay()
         const auto* D=Definition();
         if(!D){UE_LOG(LogPFSurvival,Error,TEXT("[PrimalCreatures] Invalid definition %s"),*CreatureId.ToString());Destroy();return;}
         Health=D->Health;
+        if (!PersistentId.IsValid()) { PersistentId=FGuid::NewGuid(); }
         bHostile=D->bHostile;
         Home=GetActorLocation();
         GetCharacterMovement()->MaxWalkSpeed=D->Speed;
@@ -221,6 +222,24 @@ void APFCreature::Tick(float DeltaSeconds)
             }
         }
     }
+}
+
+bool APFCreature::RestorePersistence(float SavedHealth, FVector SavedHome, float RemainingCorpse)
+{
+    const auto* D = Definition();
+    if (!HasAuthority() || !D || !FMath::IsFinite(SavedHealth) || SavedHealth < 0 || SavedHealth > D->Health ||
+        SavedHome.ContainsNaN() || !FMath::IsFinite(RemainingCorpse) || RemainingCorpse < 0 || RemainingCorpse > 12) { return false; }
+    Health = SavedHealth; Home = SavedHome; Target = nullptr; AttackAt = 0; NextAttack = 0; LastSeen = 0;
+    if (auto* AI = Cast<AAIController>(GetController())) { AI->StopMovement(); }
+    NextDecision = GetWorld()->GetTimeSeconds() + 2;
+    SetState(IsDead() ? TAG_PF_CreatureDead : TAG_PF_Idle);
+    if (IsDead())
+    {
+        // Do not call Die(): its loot was saved separately and must never be generated twice.
+        GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        GetCharacterMovement()->DisableMovement(); SetLifeSpan(FMath::Max(0.1f, RemainingCorpse));
+    }
+    ForceNetUpdate(); return true;
 }
 
 float APFCreature::TakeDamage(float Amount,const FDamageEvent& Event,AController* EventInstigator,AActor* Causer)

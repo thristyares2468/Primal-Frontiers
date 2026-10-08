@@ -1,4 +1,14 @@
-\# Architecture and Design Decisions
+# Architecture and Design Decisions
+
+## 2026-10-08 — Bounded world saves and development reconnect
+
+Use a game-owned WorldSubsystem with built-in Json/JsonUtilities and catalog-only V1 records for the small greybox world. Validate the whole record before restoration; stage actors and replace inventories, never append saved contents. Preserve stable structure/player identities and reject invalid ownership/support graphs. Keep PrimalAgentTools as a non-Shipping adapter, with no reverse gameplay dependency.
+
+Retain checksummed A/B generations, explicit backup recovery and refusal to overwrite corrupt evidence. Save manually before exit; capture a departing client before pawn teardown and checkpoint only a configured active slot. Defer credential delivery/player restoration until PostLogin's next tick, after Unreal attaches the connection. A failed restoration must not overwrite its saved player with a default spawn.
+
+Reconnect uses a separate private GUID capability in a profile keyed by endpoint; public PlayerState GUIDs only represent ownership. This is trusted LAN development identity, not production authentication. Do not export credentials, profiles or complete login URLs. Production accounts/transport protection and save migration need later design. Food ages offline; other timers pause; crafting is cancelled. No global rollback-atomic/power-loss guarantee is claimed.
+
+Use one client before two; NullRHI create/restart checks now pass for both. Installed Launcher engine blocks packaged Server targets, so record uncooked dedicated-server evidence separately. Manual/rendered M7/M8 gates remain unverified despite 26 passing regressions and ten passing live process reports.
 
 ## 2026-10-08 — Maintained state summary and stable structure-owner key
 

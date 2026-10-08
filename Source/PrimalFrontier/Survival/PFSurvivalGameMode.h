@@ -22,6 +22,13 @@ class PRIMALFRONTIER_API APFSurvivalGameMode : public AGameModeBase
 public:
     APFSurvivalGameMode();
 
+    virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+    virtual void StartPlay() override;
+    virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
+    virtual FString InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId,
+        const FString& Options, const FString& Portal = TEXT("")) override;
+    virtual void PostLogin(APlayerController* NewPlayer) override;
+
     /** Seconds between death and automatic respawn (minimum 0.1). */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Survival", meta=(ClampMin="0.1")) float RespawnDelay = 3.f;
 

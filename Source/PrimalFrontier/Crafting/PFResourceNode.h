@@ -44,6 +44,7 @@ public:
     bool Gather(APawn* Pawn);
     /** True if ResourceId resolves to a valid definition. */
     bool IsConfigurationValid() const;
+    bool RestorePersistence(int32 Hits, double RemainingRespawn);
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

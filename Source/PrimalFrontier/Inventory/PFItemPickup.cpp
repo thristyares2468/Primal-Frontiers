@@ -24,13 +24,13 @@ APFItemPickup::APFItemPickup()
     Label->SetRelativeLocation(FVector(0,0,90)); Label->SetRelativeRotation(FRotator(0,180,0)); Label->SetWorldSize(30);
 }
 
-void APFItemPickup::Initialize(FName Id,int32 Count,double Deadline)
+void APFItemPickup::Initialize(FName Id,int32 Count,double Deadline,FGuid SavedStackId)
 {
     // Only valid between SpawnActorDeferred and FinishSpawning (before BeginPlay).
     if(HasAuthority() && !HasActorBegunPlay())
     {
         bInitialized=true;
-        Contents.StackId=FGuid::NewGuid();
+        Contents.StackId=SavedStackId.IsValid()?SavedStackId:FGuid::NewGuid();
         Contents.ItemId=Id;
         Contents.Quantity=Count;
         Contents.ExpiresAt=Deadline;

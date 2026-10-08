@@ -51,6 +51,8 @@
 #include "Creatures/PFCreature.h"
 #include "Creatures/PFCreatureSpawner.h"
 #include "World/PFWorldClock.h"
+#include "Persistence/PFWorldPersistence.h"
+#include "Persistence/PFSaveFileStore.h"
 
 namespace PF::AgentTools
 {
@@ -97,9 +99,9 @@ const TArray<FCommandSpec>& CommandSpecs()
         // World (M7) and movement (foundation).
         {TEXT("PF.SetTimeOfDay"), TEXT("Hour: 0 through 23; server-only set on the map's unique world clock."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.Teleport"), TEXT("X Y Z [PlayerId]: authority-only character teleport; collision, floor, 1km bounds; one player unless ID given."), TEXT(""), 3, 4, false, true},
-        // Persistence: deliberately unavailable until a save system exists.
-        {TEXT("PF.SaveWorld"), TEXT("Request gameplay save (unavailable); never saves editor maps."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
-        {TEXT("PF.LoadWorld"), TEXT("Request gameplay load (unavailable)."), TEXT("No gameplay persistence API exists."), 0, 0, false, true},
+        // Persistence (M8). Local server console only; never saves editor maps.
+        {TEXT("PF.SaveWorld"), TEXT("[slot] Server: save bounded gameplay state under Saved/Persistence (default Survival)."), TEXT(""), 0, 1, false, true},
+        {TEXT("PF.LoadWorld"), TEXT("[slot] Server: restore validated gameplay state on the same map (default Survival)."), TEXT(""), 0, 1, false, true},
         // Gathering/crafting (M4) and building (M5).
         {TEXT("PF.TestGathering"), TEXT("Server: validate loaded resource definitions and node state; no harvesting."), TEXT(""), 0, 0},
         {TEXT("PF.TestCrafting"), TEXT("Server: validate player recipe catalogs and queue state; no item grants."), TEXT(""), 0, 0},
@@ -109,8 +111,8 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.ResetBuildings"), TEXT("Server: remove sole player's empty runtime structures only in L_M5Building; no refund or map save."), TEXT(""), 0, 0, false, true},
         {TEXT("PF.TestCreatureAI"), TEXT("Server: inspect creature definitions, health, state and AI controllers; functional navigation tested separately.")},
         // Acceptance scenarios that do not exist yet.
-        {TEXT("PF.TestMultiplayerReplication"), TEXT("Validate survival replication (unavailable)."), TEXT("No survival replication acceptance scenario exists; transport alone is not a pass.")},
-        {TEXT("PF.TestPersistence"), TEXT("Validate persistence round trip (unavailable)."), TEXT("No gameplay persistence API exists.")},
+        {TEXT("PF.TestMultiplayerReplication"), TEXT("Coordinated console replication check (unavailable)."), TEXT("Console coordinator is not implemented. Run opt-in PF.Survival.Live or PF.Persistence.Live in separate server/client processes; transport alone is not a pass.")},
+        {TEXT("PF.TestPersistence"), TEXT("Server: capture and validate an in-memory world codec round trip; no disk writes or restoration.")},
         // Aliases.
         {TEXT("PF.ResetAutomation"), TEXT("Alias of PF.ResetTestWorld."), TEXT(""), 0, 0, true, true},
         {TEXT("PF.CaptureScreenshot"), TEXT("[label] Alias of PF.CaptureTestScreenshot."), TEXT(""), 0, 1, true},
@@ -136,6 +138,8 @@ static bool Number(const FString& Text, double& Out)
 FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 {
     if (A.Num() < S.MinArgs || A.Num() > S.MaxArgs) { return TEXT("Wrong argument count. Usage: ") + S.Name + TEXT(" ") + S.Help; }
+    if ((S.Name == TEXT("PF.SaveWorld") || S.Name == TEXT("PF.LoadWorld")) && !A.IsEmpty() && !FPFSaveFileStore::ValidSlot(A[0]))
+    { return TEXT("Save slot requires 1-64 ASCII letters, digits or underscores; paths are refused."); }
     if (S.Name == TEXT("PF.GiveItem") || S.Name == TEXT("PF.RemoveItem"))
     {
         int64 Quantity = 0;
@@ -459,6 +463,28 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
         // Editor commands only run in the editor world (not PIE or game processes).
         if (EditorCommand && (!World || World->WorldType == EWorldType::Editor)) { R = EditorCommand(Name, Args, World); }
         else { R.bNotImplemented = true; R.Add(TEXT("Info"), TEXT("NOT IMPLEMENTED"), FString(), TEXT("Requires editor backend outside PIE. Runtime gameplay reset/screenshot adapter is unavailable.")); }
+    }
+    else if (Name == TEXT("PF.SaveWorld") || Name == TEXT("PF.LoadWorld") || Name == TEXT("PF.TestPersistence"))
+    {
+        if (!World || !World->IsGameWorld() || World->GetNetMode() == NM_Client || !World->GetAuthGameMode())
+        { Fail(R, TEXT("NotAuthority"), TEXT("Requires a server gameplay world; no save/load RPC exists.")); }
+        else
+        {
+            auto* Persistence = World->GetSubsystem<UPFWorldPersistence>(); FString Why;
+            const FString Slot = Args.IsEmpty() ? TEXT("Survival") : Args[0]; bool Passed = false;
+            if (Name == TEXT("PF.SaveWorld")) { Passed = Persistence->Save(Slot, Why); }
+            else if (Name == TEXT("PF.LoadWorld")) { Passed = Persistence->Load(Slot, Why); }
+            else
+            {
+                FPFWorldSaveData Data, Decoded; TArray<uint8> Bytes, Reencoded;
+                Passed = Persistence->Capture(Data, Why) && Persistence->Encode(Data, Bytes, Why) &&
+                    Persistence->Decode(Bytes, Decoded, Why) && Persistence->Encode(Decoded, Reencoded, Why) && Bytes == Reencoded;
+                if (!Passed && Why.IsEmpty()) { Why = TEXT("World codec round trip changed data"); }
+            }
+            if (!Passed) { Fail(R, TEXT("PersistenceRejected"), Why); }
+            else { R.Add(TEXT("Info"), TEXT("PersistenceValidated"), Name == TEXT("PF.TestPersistence") ? FString() : Slot,
+                Name == TEXT("PF.TestPersistence") ? TEXT("Captured and round-tripped current records only; restart/reconnect/playtesting is separate.") : TEXT("Server gameplay save/load completed; no editor asset was saved.")); }
+        }
     }
     else if (Name == TEXT("PF.SetHealth") || Name == TEXT("PF.SetStamina") || Name == TEXT("PF.Damage") || Name == TEXT("PF.Kill") || Name == TEXT("PF.Respawn") ||
         Name == TEXT("PF.SetHunger") || Name == TEXT("PF.SetThirst") || Name == TEXT("PF.SetExposure") || Name == TEXT("PF.RecoverNeeds"))

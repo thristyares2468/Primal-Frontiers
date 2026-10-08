@@ -37,6 +37,8 @@ public:
     static APFCreature* Spawn(UWorld* World, FName Id, FVector Location, UPFCreatureCatalog* DefinitionCatalog=nullptr);
     /** Number of creature actors in World, living or dead. */
     static int32 Count(UWorld* World);
+    double PersistenceRespawnRemaining() const;
+    void RestorePersistence(APFCreature* Creature, double Remaining, bool bEnabled);
 
 protected:
     /** Clients disable ticking; first spawn attempt happens 2 s after start. */

@@ -31,7 +31,7 @@ public:
     UPROPERTY(EditAnywhere,BlueprintReadOnly) int32 Quantity=5;
 
     /** Server, before FinishSpawning only: set contents with an existing deadline. */
-    void Initialize(FName Id,int32 Count,double Deadline);
+    void Initialize(FName Id,int32 Count,double Deadline,FGuid SavedStackId=FGuid());
 
     /** Server: move the whole stack into Pawn's bag if alive, within 2.5 m, in clear view
      *  and the bag has room. On failure the pickup stays in the world. */

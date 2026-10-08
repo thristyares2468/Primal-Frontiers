@@ -1,6 +1,6 @@
 # Playing and testing Primal Frontier
 
-Updated 2026-10-08. The integrated regression level is **L_M7SurvivalArena**; **L_PrimalFrontier_OpenWorld** is the new World Partition development candidate. Latest Editor build, 19-test regression and one-/two-client NullRHI checks pass. Settings were checked in rendered play. Prior interaction/hazard/day-night evidence is in MILESTONES.md; sustained manual walking and overnight survival are still pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
+Updated 2026-10-08. The integrated regression level is **L_M7SurvivalArena**; **L_PrimalFrontier_OpenWorld** is the new World Partition development candidate. Latest Editor build, 26-test M8 regression and one-/two-client NullRHI checks pass. Settings were checked in rendered play. Prior interaction/hazard/day-night evidence is in MILESTONES.md; sustained manual walking and overnight survival are still pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
 
 ## Open the game
 
@@ -8,7 +8,7 @@ The latest world extension adds primitive woodland, rocky ground, a roofed ruin,
 
 1. Open `C:\UnrealProjects\PrimalFrontier\PrimalFrontier.uproject`.
 2. In the Content Drawer, browse **Content > PrimalFrontier > Maps**.
-3. Double-click **L_M7SurvivalArena**. The template `Lvl_FirstPerson` is not the survival test map.
+3. Double-click **L_PrimalFrontier_OpenWorld** for current open-world/M8 acceptance; **L_M7SurvivalArena** remains the small integration fixture. The template `Lvl_FirstPerson` is not the survival test map.
 4. In the Play dropdown choose **one player**, **Standalone** net mode, and **Selected Viewport**. Press **F11** for immersive view. This avoids the observed slow New Editor Window presentation path; the stationary sample averaged 107.81 FPS at 2560x1392 with 75% render scale.
 5. Click Play, then click the game view. Move with WASD, look with the mouse and jump with Space.
 
@@ -18,7 +18,19 @@ The latest world extension adds primitive woodland, rocky ground, a roofed ruin,
 
 If modules need rebuilding, close the Editor and build **PrimalFrontierEditor / Development Editor / Win64** in Visual Studio. Reflected C++ changes need a full restart rather than Live Coding.
 
-**World/inventory changes currently disappear when the session ends. M8 persistence is not implemented.**
+**M8 development persistence is implemented and passes NullRHI automation, but its rendered/manual full-loop playtest is pending. Unsaved changes can still disappear at exit: save explicitly.**
+
+For a repeatable standalone save/restart, launch a Development editor game process on the same map/slot. PowerShell:
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe' 'C:\UnrealProjects\PrimalFrontier\PrimalFrontier.uproject' /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld -game -PFSaveSlot=ManualSurvival
+```
+
+Gather, craft, build and store an item using the controls below. Open the game console and enter **PF.SaveWorld ManualSurvival**. Check for a passed [PrimalAgentTools] result before quitting. Restart with the same command **plus -PFLoadSave**. Compare vitals, inventory, position, structures, ownership and storage. Food ages while closed; expired food should disappear. There is no automatic standalone/server-exit save or timed autosave. A client disconnect checkpoints a configured active server slot; do not rely on that to replace explicit saving before server shutdown.
+
+On multiplayer, PF.SaveWorld/PF.LoadWorld run in the **server console**, not a client. Load at server startup before clients join; use the same host spelling, port and -PFIdentityProfile on reconnect. Private profiles and world files live under Saved/Persistence and must stay out of Git/shares. Corrupt generations are refused for overwrite, with explicit backup recovery on reads; archive separate copies before investigating a failure, never silently delete or replace them.
+
+This step follows the still-pending M7 route/overnight gate. NullRHI tests do not certify these manual controls or visual/performance acceptance. See [PERSISTENCE_M8.md](PERSISTENCE_M8.md).
 
 ## Keyboard controls
 
@@ -132,4 +144,4 @@ Evidence lives under `C:\UnrealProjects\PrimalFrontier\Saved`: `Logs`, `Automati
 
 A useful bug report includes map, solo/client/server, steps, expected versus actual result, displayed message/count, keyboard/controller, approximate time, screenshot and matching log. Exclude credentials/unrelated logs.
 
-Limits: placeholder visuals/UI, small arena, no tech tree, third person, completed saves/reconnect persistence, final art or large-world streaming. Verification status is in `MILESTONES.md`.
+Limits: placeholder visuals/UI, small arena, no tech tree, third person, production authentication, save migration, final art or production-scale world. Verification status is in `MILESTONES.md`.

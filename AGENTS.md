@@ -62,6 +62,7 @@ combat, crafting, construction, and creature logic in C++.
 * Explain new dependencies and plugins before adding them.
 * Prefer reversible migrations.
 * Update architecture and decision documents when changing a major system.
+* When the user says continue, first inspect Trello for the next eligible task and reconcile it with Docs/CURRENT_STATE.md and Docs/MILESTONES.md. At the start of every project task, correct stale status and keep the bounded active task in Doing. Immediately after completing a task, update its Trello evidence/status before starting another task. Do not mark manual/unverified gates Done; preserve unrelated cards, deadlines and assignments. Follow Docs/TRELLO_SYNC.md.
 * After every meaningful change and build/test result, update Docs/CURRENT_STATE.md with the current game state, completed work, verification gaps and next development step. Do not present implemented but untested work as passed.
 
 

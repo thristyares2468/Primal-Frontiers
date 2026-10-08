@@ -1,6 +1,6 @@
 # Roadmap and open-world direction
 
-Updated 2026-10-06. [FULL_PROJECT_ROADMAP.md](FULL_PROJECT_ROADMAP.md) preserves the user's full M0-M25 roadmap. Its milestone numbers are the current delivery sequence; the older thematic progression list at the bottom of MILESTONES.md is historical design context.
+Updated 2026-10-08. [FULL_PROJECT_ROADMAP.md](FULL_PROJECT_ROADMAP.md) preserves the user's full M0-M25 roadmap. Its milestone numbers are the current delivery sequence; the older thematic progression list at the bottom of MILESTONES.md is historical design context.
 
 Primal Frontier is an open-world first-person survival game. The intended world is a connected, freely explored space with resource, settlement, danger and discovery areas, not a sequence of disconnected challenge rooms. M1-M6 maps remain isolated regression fixtures. M7 brings those mechanics together in one continuous map, `L_M7SurvivalArena`, without loading screens between its zones.
 
@@ -9,7 +9,7 @@ The retained 60 x 70 m map is a small integration prototype. The October 8 follo
 ## Current execution boundary
 
 - M7 remains in progress until sustained walking, the complete survival route and overnight play pass. Fixture teleports and navigation assertions are partial evidence only.
-- On October 8 the user deferred the unpassed M7 manual gate and then authorized continuing until an immediate user action is needed. Continue M8 incrementally: player codec, server adapter and safe-file tests now exist; whole-world saves, restart/reconnect and multiplayer duplication checks remain. Do not mark M7 complete or certify the complete playable loop without its missing evidence.
+- On October 8 the user deferred the unpassed M7 manual gate and then authorized continuing until an immediate user action is needed. M8 whole-world saves, server lifecycle/commands and development reconnect now pass 26 focused regressions plus ten one-/two-client NullRHI create/restart process reports. Remaining: rendered/manual persistence acceptance and packaged Server setup (installed engine rejects Server targets). Keep M7/M8 Doing in Trello; do not mark M7 complete or certify the complete playable loop without its missing evidence.
 - Stop after M8 for this development pass. The supplied later milestones are a plan, not evidence of completion or permission to skip gates.
 
 ## Future adaptation request (October 8)

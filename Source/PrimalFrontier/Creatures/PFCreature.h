@@ -35,6 +35,8 @@ class PRIMALFRONTIER_API APFCreature : public ACharacter
 
 public:
     APFCreature();
+    UPROPERTY() FGuid PersistentId;
+    bool RestorePersistence(float SavedHealth, FVector SavedHome, float RemainingCorpse);
 
     /** Definition to use when spawned (copied to DefinitionId on the server at BeginPlay). */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FName CreatureId=TEXT("Creature_Forager");
