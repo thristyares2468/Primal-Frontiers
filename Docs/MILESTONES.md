@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M11–M13 independent controls/reconnect/research UI planning
+
+UI_CONTROLS_PLAN.md audits fixed survival BindKey versus Enhanced Input movement, native placeholder HUDs/settings and reconnect log-only/profile behavior. Defines read-only controls first, one-context action semantics, accepted/refused server feedback, future remapping/reflow, sanitized save/reconnect failures and original research/adaptation views tied to future C++ backends. Source/link/whitespace consistency only; no widget/input/settings/source/asset/save changes or new build/test/performance claim. Bounded AI plan Done, full M11–M13 remain planned; M7/M8 manual and physical-device/provenance gates remain open.
+
 ## 2026-10-08 M8 corpse collision and loot restoration fix
 
 PF.Persistence.CorpseLootRestore found a real staged-activation bug: all four restored corpses had collision enabled, although loot uniqueness/deadlines held. Initial Automation_M8CorpseLoot_20261008_045111161_0e920d38: 0 passed/1 failed, four errors/zero warnings; engine exit 0, verdict runner exit 1. Retained failure; fixed only dead RestorePersistence to apply built-in NoCollision profile instead of an owner-effective SetCollisionEnabled call. No loot-generation/schema/assets change.

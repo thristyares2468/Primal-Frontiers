@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Later October 8 HUD & UI planning: selected the existing Controls/reconnect/research card whose next action was planning; explicitly renamed it Plan controls, reconnect feedback and research interfaces — M11–M13, moved Doing, audited source and completed UI_CONTROLS_PLAN.md, then immediately Done. Parent M11–M13 remain To Do; current manual UI/controller gates remain Personal. No members/dates changed or actual widgets/input/settings implemented. Corpse fix pushed 6761ad3; bounded document plan has its own scoped commit.
+
 Later October 8 M8 corpse task: AI Programming test subtask exposed four real collision failures during repeated load; renamed it Preserve corpse collision and unique loot on load and kept Doing. Applied the built-in profile fix, passed the failed retry, alive/dead two-test regression and Editor/Game builds; recorded retained failure, exact successes/memory/logs and immediately moved the bounded fix Done. Full M7/M8 manual gates remain Doing; no members/dates or unrelated assets changed.
 
 Later October 8 M18 task: bounded AI Programming compatibility-plan subtask Doing → Done after checking current contracts and documenting migration/backup/time/fixture gates. Parent M18 stays To Do, with its preceding acceptance dependencies preserved. No migration was implemented; M7/M8 manual gates remain open. Rejected-load checkpoint pushed a2e6548; plan gets its own scoped Sol-attributed commit.

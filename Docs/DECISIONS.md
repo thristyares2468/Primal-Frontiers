@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Controls and reconnect UI follow real authority/state
+
+UI_CONTROLS_PLAN.md proposes read-only controls/help before remapping, binding descriptions tied to actual handlers, one action per overlay context and server-accepted transaction feedback. Keep local preferences separate from world state; show sanitized reconnect/profile/save failures without exposing capability data or offering client repair. Future research/adaptation views require their C++ backend before presentation can claim unlocks/effects. This is a document contract, not UI/gameplay implementation.
+
 ## 2026-10-08 — Preserve stored corpse collision through staging
 
 SetCollisionEnabled compares effective body collision including the actor override; a staged disabled actor can make a dead capsule's NoCollision request short-circuit without changing its stored mode. Applying the built-in NoCollision profile in dead creature restoration updates that mode before activation. Keep living creature behavior and loot restoration unchanged. Four initial failure assertions, the successful corpse retry, living/dead WorldRuntime regression and Editor/Game builds verify this narrow runtime fix; manual/live rendering remains separate.
