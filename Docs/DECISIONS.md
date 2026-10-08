@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Inventory selection follows stack identity
+
+Keep local selection as an existing stack GUID and resolve its current row/freshness at action time. Expiry/removal/replication/load must not silently select a replacement; require an explicit navigation input and show its actual name/quantity. Preserve first-use selection/deposit behavior. Server APIs still validate GUID ownership, life, quantity, capacity and deadlines; UI selection grants nothing and does not enter save data. Native bound-input tests and isolated rendered expiry/reselection verify this fix.
+
 ## 2026-10-08 — Registered bindings drive read-only controls help
 
 M11 help records descriptions beside real legacy key registration and reads movement/view/jump from the current public Enhanced Input mapping view. Keep UI local/read-only; eventual remapping must change both binding routes. Explicit device pages avoid stealing focus. Pause owns/removes child modals; help Back returns to Pause without resuming or forwarding gameplay keys. Content-size the pause background for wrapped text. Automated Slate input/screenshots complement physical-device/human acceptance. Latest user authorization makes Personal tests nonblocking for independent implementation; their results remain unverified.

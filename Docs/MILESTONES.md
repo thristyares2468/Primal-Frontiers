@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M11 stable inventory selection
+
+Reproduced7 failed assertions: expiring selected food made G drop replacement wood, row shifts lost identity and replacements inherited numeric selection. Stable stack GUID now follows row changes, preserves split source and refuses actions when absent/expired until explicit keyboard/controller reselection. HUD has no clamp fallback; local feedback names the new selection; deposits use the same stable ID. No server API, save schema, assets or dependencies changed.
+
+Final Editor PASSED6.84 s; Development Game PASSED15.16 s, no warnings. Unchanged failed test replay PASSED1/1; related native regression PASSED4/4; final focused PF.Input.InventorySelection PASSED1/1. Final rendered PF.UI.InventorySelectionLive PASSED1/1 at720p/1440p; four PNGs inspected. All successful engine/report verdicts0; test warnings/errors0; native raw logs clean. Retained original7-assertion failure and UBT cached new-file discovery issue, fixed with supported -NoUBTMakefiles. Known rendered raw widget/HLOD/Python startup messages remain, no crash/ensure/fatal. [INVENTORY_SELECTION_M11.md](INVENTORY_SELECTION_M11.md) lists exact evidence/memory/times. This adds one native test (intended selection34; no full34 combined rerun). Bounded Trello task https://trello.com/c/zayO7Wip; full M11 and Personal acceptance remain open/nonblocking.
+
 ## 2026-10-08 M11 registered-binding controls/help
 
 Latest user authorization permits independent implementation while Personal tests remain nonblocking but UNVERIFIED. Implemented P → Controls & help, keyboard/controller contextual pages from actual registered bindings and current public Enhanced Input view, pickup/food/save/pause guidance, safe Back focus, child modal cleanup and content-sized pause background. No assets/plugins/server mutations/remapping. Full M11 remains incomplete.

@@ -269,18 +269,48 @@ void APFSurvivalPlayerController::ToggleInventory()
         bInventoryOpen=!bInventoryOpen;
         if(bInventoryOpen)
         {
+            InitializeInventorySelection();
             bCraftingOpen=false;
             Building->bBuildMode=false;
         }
     }
 }
 
-void APFSurvivalPlayerController::InventoryNext()
+int32 APFSurvivalPlayerController::GetSelectedInventoryIndex() const
 {
-    if(bInventoryOpen){if(const auto* I=GetInventory()){SelectedInventoryIndex=FMath::Min(SelectedInventoryIndex+1,I->GetStacks().Num()-1);}}
+    const auto* I=GetInventory();if(!I || !SelectedInventoryStack.IsValid()){return INDEX_NONE;}
+    const double Now=UPFInventoryComponent::ServerTime(GetWorld());
+    return I->GetStacks().IndexOfByPredicate([&](const auto& S){return S.StackId==SelectedInventoryStack && (S.ExpiresAt<=0 || S.ExpiresAt>Now);});
 }
 
-void APFSurvivalPlayerController::InventoryPrevious(){if(bInventoryOpen){SelectedInventoryIndex=FMath::Max(0,SelectedInventoryIndex-1);}}
+void APFSurvivalPlayerController::InitializeInventorySelection()
+{
+    if(bInventorySelectionInitialized){return;}
+    const auto* I=GetInventory();if(!I){return;}
+    const double Now=UPFInventoryComponent::ServerTime(GetWorld());
+    for(const auto& S:I->GetStacks())
+    {
+        if(S.ExpiresAt<=0 || S.ExpiresAt>Now){SelectedInventoryStack=S.StackId;bInventorySelectionInitialized=true;break;}
+    }
+}
+
+void APFSurvivalPlayerController::MoveInventorySelection(int32 Direction)
+{
+    if(!bInventoryOpen || bPauseMenuOpen){return;}
+    const auto* I=GetInventory();if(!I){return;}
+    TArray<int32> Available;
+    const double Now=UPFInventoryComponent::ServerTime(GetWorld());
+    for(int32 N=0;N<I->GetStacks().Num();++N){const auto& S=I->GetStacks()[N];if(S.ExpiresAt<=0 || S.ExpiresAt>Now){Available.Add(N);}}
+    if(Available.IsEmpty()){return;}
+    const int32 Position=Available.IndexOfByKey(GetSelectedInventoryIndex());
+    const int32 Next=Position==INDEX_NONE?(Direction>0?0:Available.Num()-1):FMath::Clamp(Position+Direction,0,Available.Num()-1);
+    SelectedInventoryStack=I->GetStacks()[Available[Next]].StackId;bInventorySelectionInitialized=true;
+    const auto& Stack=I->GetStacks()[Available[Next]];
+    const auto* Definition=I->Definition(Stack.ItemId);
+    ClientInventoryFeedback_Implementation(FString::Printf(TEXT("Selected %s x%d"),Definition?*Definition->DisplayName.ToString():*Stack.ItemId.ToString(),Stack.Quantity));
+}
+void APFSurvivalPlayerController::InventoryNext(){MoveInventorySelection(1);}
+void APFSurvivalPlayerController::InventoryPrevious(){MoveInventorySelection(-1);}
 void APFSurvivalPlayerController::InventorySplit(){SendInventoryAction(PFInventoryAction::Split);}
 void APFSurvivalPlayerController::InventoryDrop(){SendInventoryAction(PFInventoryAction::Drop);}
 void APFSurvivalPlayerController::InventoryConsume(){SendInventoryAction(PFInventoryAction::Consume);}
@@ -288,9 +318,15 @@ void APFSurvivalPlayerController::InventoryConsume(){SendInventoryAction(PFInven
 void APFSurvivalPlayerController::SendInventoryAction(uint8 Action)
 {
     const auto* I=GetInventory();
-    if(bPauseMenuOpen || !bInventoryOpen || !I || I->GetStacks().IsEmpty()){return;}
-    SelectedInventoryIndex=FMath::Clamp(SelectedInventoryIndex,0,I->GetStacks().Num()-1);
-    const auto S=I->GetStacks()[SelectedInventoryIndex];
+    if(bPauseMenuOpen || !bInventoryOpen || !I){return;}
+    const int32 Selected=GetSelectedInventoryIndex();
+    if(!I->GetStacks().IsValidIndex(Selected))
+    {
+        // Local presentation only; no RPC or fallback to a different stack.
+        ClientInventoryFeedback_Implementation(TEXT("Select a current stack with Up/Down or D-pad; the previous stack expired or was removed."));
+        return;
+    }
+    const auto S=I->GetStacks()[Selected];
     // Only the stable stack GUID travels; the server looks it up in *its own* copy.
     ServerInventoryAction(S.StackId,Action,Action==PFInventoryAction::Split ? S.Quantity/2 : 1);
 }
@@ -419,7 +455,11 @@ void APFSurvivalPlayerController::DamageBuilding(){if(Building->bBuildMode){Buil
 void APFSurvivalPlayerController::StoreItem()
 {
     auto* I=GetInventory();
-    if(Building->bBuildMode && I && I->GetStacks().IsValidIndex(SelectedInventoryIndex)){Building->ServerTransfer(true,I->GetStacks()[SelectedInventoryIndex].StackId,1);}
+    if(!Building->bBuildMode || !I){return;}
+    InitializeInventorySelection(); // Preserve first-use deposit behavior; never replaces a lost choice.
+    const int32 Selected=GetSelectedInventoryIndex();
+    if(I->GetStacks().IsValidIndex(Selected)){Building->ServerTransfer(true,I->GetStacks()[Selected].StackId,1);}
+    else{ClientInventoryFeedback_Implementation(TEXT("Select a current stack in inventory before storing."));}
 }
 
 // Withdraw one item from the first stack in the open storage box.

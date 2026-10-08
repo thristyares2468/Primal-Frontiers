@@ -79,7 +79,8 @@ public:
 
     // ---- Inventory ----
     bool IsInventoryOpen() const {return bInventoryOpen;}
-    int32 GetSelectedInventoryIndex() const {return SelectedInventoryIndex;}
+    /** Current row of selected stable ID, or INDEX_NONE if absent/expired. Never chooses a replacement. */
+    int32 GetSelectedInventoryIndex() const;
     const FString& GetInventoryMessage() const {return InventoryMessage;}
     // Only operations on the owning player's existing stack IDs. No item-grant RPC.
     /** Action codes (PFInventoryAction in PFRequestCodes.h): 0 = split Quantity off, 1 = drop Quantity, 2 = eat one (Quantity must be 1). */
@@ -141,7 +142,10 @@ private:
 
     // ---- Inventory input ----
     bool bInventoryOpen=false;
-    int32 SelectedInventoryIndex=0;
+    FGuid SelectedInventoryStack;
+    bool bInventorySelectionInitialized=false;
+    void InitializeInventorySelection();
+    void MoveInventorySelection(int32 Direction);
     FString InventoryMessage;     // last feedback from the server (any system, not just inventory)
     UPROPERTY() TObjectPtr<UPFInventoryHUD> InventoryHUD;
     void ToggleInventory();

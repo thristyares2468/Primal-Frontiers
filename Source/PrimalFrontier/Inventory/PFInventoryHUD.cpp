@@ -43,7 +43,8 @@ void UPFInventoryHUD::NativeTick(const FGeometry& Geometry,float Delta)
     FString Lines=FString::Printf(TEXT("INVENTORY   %d/%d slots   %.1f/%.1f kg\nTab / View close | Up/Down select\nKeys: X split | G drop | Q eat/drink\nPad: D-left split | D-right drop | X eat/drink\n\n"),I->GetStacks().Num(),I->SlotLimit,I->GetWeight(),I->WeightLimit);
 
     // One row per stack: ">" marks the selection; perishables show seconds remaining.
-    const int32 Selected=FMath::Clamp(PC->GetSelectedInventoryIndex(),0,I->GetStacks().Num()-1);
+    const int32 Selected=PC->GetSelectedInventoryIndex();
+    if(Selected==INDEX_NONE && !I->GetStacks().IsEmpty()){Lines+=TEXT("No selected stack - use Up/Down or D-pad.\nExpired/removed stacks never select another item.\n\n");}
     int32 Index=0;
     for(const auto& S:I->GetStacks())
     {
