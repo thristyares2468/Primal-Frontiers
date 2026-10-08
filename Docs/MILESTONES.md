@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M15–M16 independent readiness audit
+
+NETWORK_PROFILING_READINESS.md audits actual request routes/cooldowns, reliable-queue gaps, owner-only inventories/public IDs versus private development credentials, spawn/save/scan caps and installed Server build limitation. Defines bounded lag/loss/conservation/reconnect tests and separate single-rendered-client profiling before optimizing. Source/document consistency only; no gameplay, auth service, settings, assets, engine installation, new build/test/FPS improvement or M15/M16 acceptance. Bounded Trello planning task complete; parent milestones and M7/M8 manual gates remain open.
+
 ## 2026-10-08 M8 dead-player load and respawn conservation
 
 Added test-only PF.Persistence.DeadPlayerRespawn: real dead-state file save/load invokes automatic PlayerStart respawn, retains one PlayerState/inventory and stable five-wood batch, removes unsaved stone once, creates no duplicate pawn/drop, refuses repeated load during pending respawn, then saves/restores the living generation. Three actual respawn cycles passed. Editor build passed 6.20 s without compiler warnings; focused Automation_M8DeadPlayer_20261008_053248356_7725d18a passed 1/1, engine/runner 0, no test/raw-log warning/error/ensure/fatal. Run 16.10 s, sampled working/private 2.979/2.816 GiB. This focused addition follows the separate 30-test/ten-live-report checkpoint; that full checkpoint was not rerun after this test-only addition. No runtime/source behavior, assets, schema or settings changed; manual gates remain open.

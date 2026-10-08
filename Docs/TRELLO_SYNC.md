@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Later October 8 M15–M16 planning: selected the future Programming hardening/optimization task, added a bounded AI readiness-audit subtask Doing, and checked live source/installed engine diagnostics. Completed NETWORK_PROFILING_READINESS.md and immediately moved only the bounded plan Done. Parent M15/M16 and implementation task remain To Do; no members/dates or manual acceptance changed. Dead-player test pushed 03cd042; plan gets a scoped co-authored commit.
+
 Later October 8 dead-player conservation task: added bounded AI Programming native test for the remaining M8 death/save/respawn integration gap. Editor build and focused real-file test passed first run; no runtime fix needed. Immediately record stable identity/batch conservation, safe pending-respawn refusal, zero warnings/errors and exact report/memory, then move Done. It adds evidence without closing parent manual gates.
 
 Later October 8 post-fix checkpoint: reopened the existing bounded M8 automated create/restart Testing card after real corpse/doorway fixes, preserving earlier evidence. Two opt-in editor setup warnings made the overbroad selection fail the strict verdict; retained and corrected only selection. Thirty native tests and ten fresh one-/two-client create/restart reports passed with actual process/report checks and memory/log review. Updated the card immediately and returned it Done. Full M7/M8 manual gates and packaged Server limitation remain; no unrelated cards/members/dates/assets changed.
