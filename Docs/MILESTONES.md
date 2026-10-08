@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 one-client lag/loss create and restart
+
+Existing PF.Persistence.Live scenario passed all four server/client Create/Restart reports with session-only PktLag=75 / PktLoss=1 on both sides; applied settings confirmed in every engine log. M8Lag1_20261008_061744_29d940 reports each 1/1, engine/report exits 0, zero test warnings/errors/ensure/fatal. Maximum sampled process working/private 1.805/1.780 GiB; phase totals 52.21/38.91 s. Known raw editor-widget/HLOD warnings and installed Toolsets Python traces remain, no other warning/error categories. [M8_NETWORK_DIAGNOSTICS.md](M8_NETWORK_DIAGNOSTICS.md) records exact names and limitations. No source/assets/project settings or new build claim; no measured RTT/loss rate, race/flood/soak/rendering or manual acceptance claim. One-client bounded Trello task Done, two-client profile scope separate.
+
 ## 2026-10-08 M15–M16 independent readiness audit
 
 NETWORK_PROFILING_READINESS.md audits actual request routes/cooldowns, reliable-queue gaps, owner-only inventories/public IDs versus private development credentials, spawn/save/scan caps and installed Server build limitation. Defines bounded lag/loss/conservation/reconnect tests and separate single-rendered-client profiling before optimizing. Source/document consistency only; no gameplay, auth service, settings, assets, engine installation, new build/test/FPS improvement or M15/M16 acceptance. Bounded Trello planning task complete; parent milestones and M7/M8 manual gates remain open.
