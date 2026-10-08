@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 active-craft persistence conservation
+
+Final oracle requires a newer on-disk departure generation and loads that checkpoint before reconnect. Final Editor rebuild passed 5.67 s without compiler warnings, PFM8ActiveCraftEditorBuildFinal.log. Initial passing report Automation_M8ActiveCraft_20261008_082121046_26634b4a retained; final strengthened report is listed below. No failed test or runtime fix occurred.
+
+Test-only PF.Persistence.ActiveCraftCancellation passed two real-file save/load cycles while crafting is active, old-deadline ticking without abandoned output, exact ingredient IDs/quantities/deadlines, new post-load single completion and actual controller departure/reconnect with an idle replacement job. Save alone retains the live job; load cancels it and replaces inventory. Existing behavior passed, no runtime/schema/assets fix or new feature. Editor22.37 s without compiler warnings; Automation_M8CraftFinal_20261008_082409203_d54be484 1/1, zero failed/test warnings/errors, engine/runner0, reviewed raw log zero warnings/errors/ensure/fatal. Duration16.54 s, sampled working/private2.968/2.842 GiB. Report/index/run-summary under Saved/AutomationReports/<name>, matching PF log in Saved/Logs. Current native selection33 not collectively rerun. Bounded [Trello task](https://trello.com/c/TRHWwe9f) immediately Done; full M7/M8 Personal gates remain open.
+
 ## 2026-10-08 M8 offline food persistence regression
 
 Test-only `PF.Persistence.OfflineFoodAging` passed real-file UTC aging without world ticks in a small native fixture: expired food removal in player inventory, storage and pickups; surviving batch/quantity preservation; permanent items; repeated loads without renewal or duplication; and public reconnect restoration from an older player capture time despite a newer world-file timestamp. Final checks explicitly require the original storage identity. No existing runtime defect was found, no assets/schema/settings changed, and this does not replace separate-process multiplayer or manual rendered acceptance.
