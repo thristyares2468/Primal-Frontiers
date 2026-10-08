@@ -8,6 +8,16 @@ Unknown Worlds' official [Adaptive Measures patch notes](https://unknownworlds.c
 
 Useful inference: discovery can reward environmental capability as well as equipment, while limited passive slots create choices. Each player's capability must be checked independently, including join-in-progress and restored saves. The official notes do not establish a complete current upgrade roster or all underlying formulas; do not invent those details or treat community speculation as verified design.
 
+## Two related progression systems requested October 8
+
+The user supplied the community references [Adaptations](https://wiki.subnautica.com/sn2/Adaptations) and [Biomods](https://wiki.subnautica.com/sn2/Biomods). Both pages were restricted by the research tool during this check. Their supplied descriptions are reference material, not an independently verified current roster. The supplied examples include pressure tolerance, digestion, heat tolerance and a special vision ability, plus default movement/navigation/oxygen modifiers. Unreleased abilities and exact balance are unknown.
+
+For Primal Frontier, distinguish lasting **adaptations** from optional **equipped biological modifiers**. Adaptations would be player-specific research unlocks that broaden a bounded environmental capability after exploring and resolving an original ecosystem challenge. Optional modifiers would use limited active/passive slots, with equipment changed at a crafted research station. Active modifiers require deliberate input and server-validated stamina/material costs and cooldowns; passive modifiers apply only when their conditions are met. A lasting unlock does not mean every optional effect is always equipped.
+
+Original candidate equivalents are heat acclimation, digestive efficiency with meaningful food/water tradeoffs, a short exertion burst and a limited nearby-resource sense. These are proposals for land survival, not copies of the reference game's roster. Do not adopt its named organisms, stations, challenges, abilities, visuals or story. Avoid passive free nutrition or default upgrades that bypass the existing gathering/cooking/spoilage loop. Any starter modifier must be explicitly designed and tested rather than inheriting the reference game's defaults.
+
+Schedule both systems after core persistence/progression is stable, provisionally M12 with M13 discovery integration. Persist adaptation unlocks separately from equipped active/passive IDs, and migrate the player-save version with tests. Active actions are transient and must never replay on load. No adaptation or modifier gameplay is added to M8.
+
 ## Proposed Primal Frontier loop
 
 Explore an ecosystem -> observe or safely collect an original biological sample -> study it at a crafted field-research station -> spend research/materials -> select a bounded adaptation profile -> test it against a specific environmental challenge. Discovery rewards exploration and knowledge, rather than repeatedly standing in danger or killing the same creature. Ordinary crafting/technology unlocks remain a separate progression path.

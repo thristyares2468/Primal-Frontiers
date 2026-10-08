@@ -62,6 +62,7 @@ combat, crafting, construction, and creature logic in C++.
 * Explain new dependencies and plugins before adding them.
 * Prefer reversible migrations.
 * Update architecture and decision documents when changing a major system.
+* After every meaningful change and build/test result, update Docs/CURRENT_STATE.md with the current game state, completed work, verification gaps and next development step. Do not present implemented but untested work as passed.
 
 
 ## Camera and player presentation
