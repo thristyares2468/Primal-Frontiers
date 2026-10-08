@@ -43,6 +43,12 @@ FString SettingsCaption(UPFSettingsMenu* Menu,const TCHAR* Prefix)
     });
     return Found;
 }
+FString SettingsConfigDestination()
+{
+    // UE5.8 known INI globals are cache keys, not filesystem paths.
+    const auto* Branch=GConfig?GConfig->FindBranch(FName(TEXT("GameUserSettings")),GGameUserSettingsIni):nullptr;
+    return Branch?Branch->IniPath:FString();
+}
 class FSettingsCancelExercise final : public IAutomationLatentCommand
 {
 public:
@@ -65,8 +71,9 @@ public:
             Before=Live->Preferences;BeforeQuality=Live->ScalabilityQuality;Resolution=Live->GetScreenResolution();Mode=Live->GetFullscreenMode();
             FPS=Live->GetFrameRateLimit();bVSync=Live->IsVSyncEnabled();
             Blur=IConsoleManager::Get().FindConsoleVariable(TEXT("r.MotionBlurQuality"))->GetInt();
-            bConfigExisted=IFileManager::Get().FileExists(*GGameUserSettingsIni);
-            if(bConfigExisted && !FFileHelper::LoadFileToString(ConfigBefore,*GGameUserSettingsIni)){Test->AddError(TEXT("Unable to read existing config for preservation check"));return true;}
+            ConfigFilename=SettingsConfigDestination();
+            bConfigExisted=IFileManager::Get().FileExists(*ConfigFilename);
+            if(bConfigExisted && !FFileHelper::LoadFileToString(ConfigBefore,*ConfigFilename)){Test->AddError(TEXT("Unable to read existing config for preservation check"));return true;}
             if(!Test->TestTrue(TEXT("Fixture seeds real inventory for UI input conservation"),PC->GetInventory()->Grant(TEXT("Item_Wood"),3))){return true;}
             Wood=PC->GetInventory()->Count(TEXT("Item_Wood"));
             PC->SetPauseMenuOpen(true);Pause=FindSettingsWidget<UPFPauseMenu>(PC->GetWorld());
@@ -130,9 +137,9 @@ public:
             if(Menu.IsValid()){Test->TestFalse(TEXT("Closing Pause also removes Settings modal"),Menu->IsInViewport());}
             Test->TestFalse(TEXT("Resume restores movement"),PC->IsMoveInputIgnored());CheckLive();
             Test->TestEqual(TEXT("Settings input conserves seeded inventory"),PC->GetInventory()->Count(TEXT("Item_Wood")),Wood);
-            FString After;const bool bExists=IFileManager::Get().FileExists(*GGameUserSettingsIni);
+            FString After;const bool bExists=IFileManager::Get().FileExists(*ConfigFilename);
             Test->TestEqual(TEXT("Config file existence unchanged"),bExists,bConfigExisted);
-            if(bExists){Test->TestTrue(TEXT("Read final config"),FFileHelper::LoadFileToString(After,*GGameUserSettingsIni));Test->TestTrue(TEXT("Cancel/defaults never write user's config"),After==ConfigBefore);}
+            if(bExists){Test->TestTrue(TEXT("Read final config"),FFileHelper::LoadFileToString(After,*ConfigFilename));Test->TestTrue(TEXT("Cancel/defaults never write fixture config"),After==ConfigBefore);}
             Test->AddInfo(TEXT("[PrimalSettings] Four actual category drafts, Defaults, pad/keyboard Cancel, focus, teardown and config preservation verified; no Apply/display/audio acceptance claimed."));
             return true;
         }
@@ -161,7 +168,7 @@ private:
             }
         });
     }
-    FAutomationTestBase* Test;FString Directory,Shot,ConfigBefore;FPFLocalPreferences Before;Scalability::FQualityLevels BeforeQuality;
+    FAutomationTestBase* Test;FString Directory,Shot,ConfigBefore,ConfigFilename;FPFLocalPreferences Before;Scalability::FQualityLevels BeforeQuality;
     FIntPoint Resolution;EWindowMode::Type Mode=EWindowMode::Windowed;float FPS=0;bool bVSync=false,bConfigExisted=false;
     int32 Phase=0,Wood=0,Blur=0;double Started=FPlatformTime::Seconds(),Until=0;
     TWeakObjectPtr<APFSurvivalPlayerController> PC;TWeakObjectPtr<UPFPauseMenu> Pause;TWeakObjectPtr<UPFSettingsMenu> Menu;
@@ -175,6 +182,11 @@ bool FPFSettingsCancelLiveTest::RunTest(const FString&)
         Label.IsEmpty() || Label.Len()>48 || !Profile.StartsWith(TEXT("UI")) || Profile.Len()!=14)
     {AddError(TEXT("Use isolated rendered RunControlsAutomation.ps1 -TestCase Settings with unique profile/evidence"));return false;}
     for(TCHAR C:Label+Profile){if(!FChar::IsAlnum(C) && C!=TEXT('_')){AddError(TEXT("Invalid profile/evidence label"));return false;}}
+    const FString SettingsTarget=FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("AutomationReports")/Label/TEXT("GameUserSettings.ini"));
+    const FString Destination=SettingsConfigDestination();
+    if(!TestTrue(TEXT("Real engine settings destination is this disposable run, never personal config"),
+        !Destination.IsEmpty() && FPaths::IsSamePath(FPaths::ConvertRelativePathToFull(Destination),SettingsTarget)))
+    {AddError(TEXT("RunControlsAutomation must supply its unique GameUserSettingsINI destination"));return false;}
     const FString Directory=FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("AutomationReports/ControlsUI")/Label);
     if(IFileManager::Get().DirectoryExists(*Directory)){AddError(TEXT("Refusing reused settings evidence directory"));return false;}
     IFileManager::Get().MakeDirectory(*Directory,true);ADD_LATENT_AUTOMATION_COMMAND(FSettingsCancelExercise(this,Directory));return true;

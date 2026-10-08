@@ -11,8 +11,18 @@ $projectRoot=Split-Path -Parent $PSScriptRoot
 $exe='C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe'
 if(Get-Process UnrealEditor* -ErrorAction SilentlyContinue){throw 'Close the existing Unreal process before this isolated UI test.'}
 if(!(Test-Path -LiteralPath $exe)){throw 'Unreal Editor executable unavailable.'}
+function Get-PersonalSettingsSnapshot {
+    $configRoot=Join-Path $projectRoot 'Saved\Config'
+    if(Test-Path -LiteralPath $configRoot){
+        Get-ChildItem -LiteralPath $configRoot -Recurse -File |
+            Where-Object {$_.Name -in @('GameUserSettings.ini','Scalability.ini')} |
+            Sort-Object FullName | ForEach-Object {$_.FullName+':'+(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
+    }
+}
+$personalSettingsBefore=@(Get-PersonalSettingsSnapshot)
 $run='M11'+$TestCase+$Resolution+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
 $report=Join-Path $projectRoot ('Saved\AutomationReports\'+$run)
+$settingsTarget=Join-Path $report 'GameUserSettings.ini'
 $log=Join-Path $projectRoot ('Saved\Logs\'+$run+'.log')
 $width=if($Resolution -eq '720'){1280}else{2560}
 $height=if($Resolution -eq '720'){720}else{1440}
@@ -25,6 +35,8 @@ $profileArgument=' -PFIdentityProfile=UI'+[Guid]::NewGuid().ToString('N').Substr
 $shadowCommands=if($LowShadowDiagnostic){'r.Shadow.Virtual.ResolutionLodBiasDirectional 1,r.Shadow.Virtual.ResolutionLodBiasDirectionalMoving 1,'}else{''}
 $arguments='"{0}" /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld -game -windowed -ForceRes -ResX={1} -ResY={2} -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig -PFRunControlsUITest -PFControlsEvidence={3} -PFHUDScale={7} -ExecCmds="t.MaxFPS 0,r.VSync 0,{8}Automation RunTests {6}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{4}" -abslog="{5}"' -f (Join-Path $projectRoot 'PrimalFrontier.uproject'),$width,$height,$run,$report,$log,$filter,([string]$HUDScale),$shadowCommands
 $arguments+=$profileArgument
+# Supported FConfigCacheIni::GetDestIniFilename override: only this run owns the destination.
+$arguments+=' -GameUserSettingsINI="'+$settingsTarget+'"'
 $process=$null;$working=0L;$private=0L;$timedOut=$false;$watch=[Diagnostics.Stopwatch]::StartNew()
 try {
     $process=Start-Process -FilePath $exe -ArgumentList $arguments -WorkingDirectory $projectRoot -WindowStyle Hidden -PassThru
@@ -38,12 +50,15 @@ try {
     $code=if($timedOut){-1}else{$process.ExitCode}
     $inspection=& (Join-Path $PSScriptRoot 'RunNativeAutomation.ps1') -ExistingReport (Join-Path $report 'index.json') -RecordedProcessExitCode $code
     $verdictCode=$LASTEXITCODE
-    $diagnostic=[ordered]@{Run=$run;Resolution="$width x $height";HUDScale=$HUDScale;LowShadowDiagnostic=[bool]$LowShadowDiagnostic;Rendered=$true;RequestedUncapped=$true;TimedOut=$timedOut;EngineExitCode=$code;VerdictExitCode=$verdictCode;Seconds=[Math]::Round($watch.Elapsed.TotalSeconds,2);SampledPeakWorkingGiB=[Math]::Round($working/1GB,3);SampledPeakPrivateGiB=[Math]::Round($private/1GB,3);Report=$report;Log=$log;Screenshots=(Join-Path $projectRoot ('Saved\AutomationReports\ControlsUI\'+$run));Verdict=($inspection -join "`n" | ConvertFrom-Json)}
+    $personalSettingsAfter=@(Get-PersonalSettingsSnapshot)
+    $personalSettingsUnchanged=($personalSettingsBefore -join "`n") -ceq ($personalSettingsAfter -join "`n")
+    $runnerCode=if($personalSettingsUnchanged){$verdictCode}else{1}
+    $diagnostic=[ordered]@{Run=$run;Resolution="$width x $height";HUDScale=$HUDScale;LowShadowDiagnostic=[bool]$LowShadowDiagnostic;Rendered=$true;RequestedUncapped=$true;TimedOut=$timedOut;EngineExitCode=$code;VerdictExitCode=$verdictCode;RunnerExitCode=$runnerCode;SettingsTarget=$settingsTarget;DefaultConfigFileCount=$personalSettingsBefore.Count;DefaultConfigsUnchanged=$personalSettingsUnchanged;Seconds=[Math]::Round($watch.Elapsed.TotalSeconds,2);SampledPeakWorkingGiB=[Math]::Round($working/1GB,3);SampledPeakPrivateGiB=[Math]::Round($private/1GB,3);Report=$report;Log=$log;Screenshots=(Join-Path $projectRoot ('Saved\AutomationReports\ControlsUI\'+$run));Verdict=($inspection -join "`n" | ConvertFrom-Json)}
     # The runner owns its generated diagnostics; retain failures rather than overwrite artifacts.
     New-Item -ItemType Directory -Path $report -Force | Out-Null
     $diagnostic | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $report 'run-summary.json') -Encoding UTF8
     $diagnostic | ConvertTo-Json -Depth 8
-    exit $verdictCode
+    exit $runnerCode
 } finally {
     if($null -ne $process -and !$process.HasExited){Stop-Process -Id $process.Id -ErrorAction SilentlyContinue}
 }
