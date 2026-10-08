@@ -14,6 +14,8 @@ The retained 60 x 70 m map is a small integration prototype. The October 8 follo
 
 ## Future adaptation request (October 8)
 
+Independent M12/M13 planning is complete in [PROGRESSION_PLAN.md](PROGRESSION_PLAN.md): XP/point economy, baseline access, original unlock graph, respec/co-op/challenges, adaptation/loadout and future authority/save/test gates. This is a completed subtask only; full M12/M13 remain planned, with no new gameplay or passed acceptance.
+
 The user requested a Subnautica 2-inspired adaptation system, with independent research and modifications appropriate to Primal Frontier. [ADAPTATION_DIRECTION.md](ADAPTATION_DIRECTION.md) records primary-source observations, an original land-survival proposal and server/save/test requirements. Candidate window: M12 progression with M13 ecology integration. No implementation is added to M8; refresh research before that future milestone.
 
 ## Asset handling

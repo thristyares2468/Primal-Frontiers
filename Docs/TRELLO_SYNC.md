@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October 8 progression planning checkpoint: selected the live Programming M12/M13 planning card, moved it Doing, then completed only its document contract in PROGRESSION_PLAN.md. Full M12/M13 stay To Do; M7/M8 manual gates stay Doing. No members/dates changed. Next eligible independent task is the Sound & Audio feedback plan, not art/gameplay integration.
+
 ## Every continue/task
 
 1. Read current Trello cards and Docs/CURRENT_STATE.md / MILESTONES.md before selecting work. On continue, select the next eligible bounded task from Trello, respecting milestone acceptance and the current authorized scope. The user's October 8 follow-up permits independent planning/audit tasks while M7/M8 manual acceptance waits; it does not make those gates passed.

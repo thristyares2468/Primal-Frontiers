@@ -42,7 +42,7 @@ For preservation, evolve the representation to remaining freshness plus last ser
 
 Cooking consumes validated fresh inputs and creates the recipe's output with its defined lifetime. Ingredients continue aging while queued; validate again at completion, and cancellation cannot refresh returned ingredients. Expired input cannot produce edible output.
 
-M8 must persist freshness with versioned save data and authoritative world time. Proposed policy: decay continues while the server runs, including disconnected players; it pauses while the whole server is stopped. A reconnect or server restart resumes saved remaining freshness, never a full lifetime. Offline real-time decay is a separate future policy, not currently implemented.
+M8 now persists remaining freshness in versioned player/world data and subtracts elapsed offline UTC age on restore; expired batches are omitted. Food therefore ages while the server is stopped as well as while running. Reconnect/restart never grants a full lifetime. This implemented policy supersedes the earlier proposal to pause spoilage offline; other world timers pause. See [PERSISTENCE_M8.md](PERSISTENCE_M8.md) for verified scope and remaining manual acceptance.
 
 ## Milestone placement and tests
 

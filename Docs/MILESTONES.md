@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M12/M13 independent progression planning
+
+Completed the bounded Trello planning task in PROGRESSION_PLAN.md, with XP sources/caps, a provisional ten-level economy (2,700 XP, 27 earned points; 20 points across six proposed unlocks), prerequisites, respec/co-op/discovery policy, separate adaptation/loadout rules and authority/save migration/test requirements. Existing portable food processing/basic construction remains baseline knowledge. The proposal is original and data-driven; no new gameplay, catalog assets, dependencies or save-format changes. Corrected the food document's outdated offline policy to match M8.
+
+Verification is document/source consistency against current C++ catalog defaults and M8 save records, not automated gameplay or a playtest. No C++ changed, so no new Editor build is required or claimed. Latest gameplay evidence remains M8FinalRegression and the recorded live reports. M12/M13 implementation and acceptance remain To Do; M7/M8 manual gates remain open. Changed docs: PROGRESSION_PLAN.md, TECH_TREE_DIRECTION.md, ADAPTATION_DIRECTION.md, FOOD_AND_PRESERVATION.md and the state/milestone/decision/roadmap/Trello records.
+
 ## 2026-10-08 M9 independent asset-pipeline planning and read-only audit
 
 The user authorized continuing eligible independent tasks without further prompts. M7/M8 manual acceptance remains pending; this is a planning/audit checkpoint, **not a full M9 acceptance or first-art gameplay pass**. Added Scripts/AuditExistingAssets.py using supported Unreal Asset Registry APIs, with unique generated output; it never loads/saves asset objects. No import, asset move/rename, redirector fix, world change, rendering setting or gameplay source changed.

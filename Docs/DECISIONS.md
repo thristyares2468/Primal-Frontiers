@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Original progression planning without gating baseline survival
+
+PROGRESSION_PLAN.md is a provisional future M12/M13 contract, not implementation. Preserve baseline gathering/tool/cooking/drying/shelter access. Separate ordinary XP/technology knowledge, unique challenge discoveries, lasting adaptations and equipped biological modifiers. Player-specific authority/owner-only progression must not confer environmental access to a less-progressed co-op partner. Respec cannot replay rewards or refresh food; future V1 migration starts at baseline rather than awarding XP retroactively.
+
+Use the existing catalog/PlayerState/transaction boundaries for the later implementation; no new ability framework, plugin or current save-version change. Gate gameplay and measured balance behind preceding acceptance. Independent documentation is allowed while M7/M8 manual gates wait. Correct the food-policy documentation to reflect actual M8 offline aging rather than its superseded pause proposal.
+
 ## 2026-10-08 — Metadata-first intake while manual gates wait
 
 Use a read-only Asset Registry/package-size inventory before candidate integration. Do not load heavy models/textures, move legacy packs or fix redirectors during intake. Registry metadata/disk footprint is screening evidence, not runtime memory, compatibility or provenance approval. Document proposed small material/texture/LOD/collision budgets and replace placeholders through reversible presentation references while preserving gameplay IDs/authority. ASSET_PIPELINE_M9.md records the process; no new runtime dependency or asset operation is introduced.

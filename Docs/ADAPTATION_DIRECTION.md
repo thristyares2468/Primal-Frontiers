@@ -1,6 +1,6 @@
 # Adaptation system — research and original design direction
 
-Requested October 8, 2026. Planning only: no adaptation gameplay is implemented in M8. Candidate implementation window is M12 progression, with M13 ecology supplying discovery sources. Revisit after greybox persistence, the environmental model and progression foundations are verified. The current development pass still ends at M8.
+Requested October 8, 2026. Planning only: no adaptation gameplay is implemented in M8. Candidate implementation window is M12 progression, with M13 ecology supplying discovery sources. Revisit after greybox persistence, the environmental model and progression foundations are verified. The user's later continuation permits independent planning while manual gates wait; [PROGRESSION_PLAN.md](PROGRESSION_PLAN.md) now specifies the bounded candidate economy, loadout and acceptance contract. It does not start M12/M13 implementation.
 
 ## Verified reference observations
 
