@@ -4,6 +4,7 @@
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/CollisionProfile.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/Controller.h"
 #include "EngineUtils.h"
@@ -75,7 +76,8 @@ void APFBuildPiece::OnRepShape()
     for(const auto& M:Shapes)
     {
         M->SetVisibility(false);
-        M->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        // Update the stored profile even while persistence staging disables the actor.
+        M->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
     }
     // Set(part, size in cm, local position): cube meshes are 100 cm, hence Size/100.
     auto Set=[&](int32 N,FVector Size,FVector Position)
@@ -83,7 +85,8 @@ void APFBuildPiece::OnRepShape()
         Shapes[N]->SetRelativeLocation(Position);
         Shapes[N]->SetRelativeScale3D(Size/100);
         Shapes[N]->SetVisibility(true);
-        Shapes[N]->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        // Restore responses as well as the mode when a hidden part becomes visible.
+        Shapes[N]->SetCollisionProfileName(TEXT("BlockAll"));
     };
     if(Kind==EPFBuildKind::Door)
     {

@@ -416,4 +416,88 @@ bool FPFWorldCorpseLootTest::RunTest(const FString&)
     AddInfo(TEXT("[PrimalPersistence] Real corpse/drop save and repeated load checked: stable IDs, no renewed food life, no loot replay after removing the drop"));
     return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFWorldStructureCollisionTest, "PF.Persistence.StructureCollisionRestore",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FPFWorldStructureCollisionTest::RunTest(const FString&)
+{
+    AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"), EAutomationExpectedMessageFlags::Contains, 0);
+    FTestWorldWrapper Fixture;
+    if (!Fixture.CreateTestWorld(EWorldType::Game)) { return false; }
+    UWorld* W = Fixture.GetTestWorld();
+    W->GetOutermost()->Rename(*(TEXT("/Temp/PFStructureCollision/") + FGuid::NewGuid().ToString(EGuidFormats::Digits) + TEXT("/L_Automation")),
+        nullptr, REN_DontCreateRedirectors | REN_NonTransactional);
+    W->SetGameMode(FURL(nullptr, TEXT("/Engine/Maps/Entry?game=/Script/PrimalFrontier.PFSurvivalGameMode"), TRAVEL_Absolute));
+    auto* Floor = W->SpawnActor<AActor>(); auto* Box = NewObject<UBoxComponent>(Floor); Floor->SetRootComponent(Box);
+    Box->SetBoxExtent(FVector(4000, 4000, 25)); Box->SetCollisionProfileName(TEXT("BlockAll")); Box->RegisterComponent();
+    Floor->SetActorLocation(FVector(0, 0, -25));
+    W->SpawnActor<APlayerStart>(FVector(-500, 0, 120), FRotator::ZeroRotator);
+    W->SpawnActor<APFWorldClock>();
+    if (!Fixture.BeginPlayInTestWorld()) { return false; }
+    auto* PC = W->SpawnActor<APFSurvivalPlayerController>(); W->GetAuthGameMode<APFSurvivalGameMode>()->RestartPlayer(PC);
+    auto* Persistence = W->GetSubsystem<UPFWorldPersistence>(); FString Error;
+    if (!TestNotNull(TEXT("Structure save subsystem"), Persistence) || !TestTrue(TEXT("Fixture pawn"), PC->GetPawn() != nullptr)) { return false; }
+    Persistence->Login(PC, TEXT(""));
+    auto* Buildings = NewObject<UPFBuildingCatalog>();
+    auto SpawnPiece = [&](FName Id, FVector At, APFBuildPiece* Support)
+    {
+        const FTransform T(At); auto* Piece = W->SpawnActorDeferred<APFBuildPiece>(APFBuildPiece::StaticClass(), T);
+        Piece->Initialize(*Buildings->Find(Id), PC->PlayerState, Support); Piece->FinishSpawning(T); return Piece;
+    };
+    auto* Base = SpawnPiece(TEXT("Build_Foundation"), FVector(600, 0, 15), nullptr);
+    auto* Door = SpawnPiece(TEXT("Build_Door"), FVector(600, 0, 180), Base);
+    const FGuid BaseId = Base->PersistentId, DoorId = Door->PersistentId;
+    if (!TestTrue(TEXT("Owner opens fixture door"), Door->ToggleDoor(PC->PlayerState))) { return false; }
+    auto GapBlocked = [&](APFBuildPiece* AtDoor, float Y)
+    {
+        FHitResult Hit; const FVector Center = AtDoor->GetActorLocation() + FVector(0, Y, -25);
+        return W->LineTraceSingleByChannel(Hit, Center - FVector(80, 0, 0), Center + FVector(80, 0, 0), ECC_Visibility);
+    };
+    auto AboveFoundationBlocked = [&](APFBuildPiece* AtBase, APFBuildPiece* IgnoreDoor)
+    {
+        FHitResult Hit; FCollisionQueryParams Params(SCENE_QUERY_STAT(PFRestoredFoundation), false, IgnoreDoor);
+        const FVector Center = AtBase->GetActorLocation();
+        return W->LineTraceSingleByChannel(Hit, Center + FVector(0, 0, 70), Center + FVector(0, 0, 40), ECC_Visibility, Params);
+    };
+    auto PlayerCapsuleBlocked = [&](APFBuildPiece* AtDoor)
+    {
+        FHitResult Hit; const FVector Center = AtDoor->GetActorLocation() + FVector(0, 0, -25);
+        const auto* Capsule = CastChecked<APFSurvivorCharacter>(PC->GetPawn())->GetCapsuleComponent();
+        FCollisionQueryParams Params(SCENE_QUERY_STAT(PFRestoredDoorPassage), false, PC->GetPawn());
+        return W->SweepSingleByChannel(Hit, Center - FVector(80, 0, 0), Center + FVector(80, 0, 0), FQuat::Identity,
+            ECC_Pawn, FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight()), Params);
+    };
+    if (!TestFalse(TEXT("Baseline open doorway is clear"), GapBlocked(Door, 0)) ||
+        !TestFalse(TEXT("Baseline above thin foundation is clear"), AboveFoundationBlocked(Base, Door))) { return false; }
+    TestTrue(TEXT("Baseline frame stays solid"), GapBlocked(Door, 130));
+    if (!TestFalse(TEXT("Baseline player capsule fits doorway"), PlayerCapsuleBlocked(Door))) { return false; }
+    const FString Slot = TEXT("AutomationShape_") + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    ON_SCOPE_EXIT
+    {
+        Persistence->ActiveSlot.Reset();
+        for (bool B : {false, true}) { IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot, B)); }
+    };
+    if (!TestTrue(TEXT("Save actual open-door world"), Persistence->Save(Slot, Error))) { AddError(Error); return false; }
+    for (int32 Repeat = 0; Repeat < 2; ++Repeat)
+    {
+        if (!TestTrue(TEXT("Load actual structure world"), Persistence->Load(Slot, Error))) { AddError(Error); return false; }
+        Base = nullptr; Door = nullptr;
+        for (TActorIterator<APFBuildPiece> It(W); It; ++It)
+        { if (It->PersistentId == BaseId) { Base = *It; } if (It->PersistentId == DoorId) { Door = *It; } }
+        if (!TestNotNull(TEXT("Restored foundation"), Base) || !TestNotNull(TEXT("Restored door"), Door)) { return false; }
+        TestTrue(TEXT("Saved open state and ownership restored"), Door->bDoorOpen && Door->IsOwnedBy(PC->PlayerState));
+        TestFalse(TEXT("Restored open doorway is clear immediately"), GapBlocked(Door, 0));
+        TestFalse(TEXT("Player capsule crosses restored open doorway"), PlayerCapsuleBlocked(Door));
+        TestFalse(TEXT("Restored hidden cubes do not block above platform"), AboveFoundationBlocked(Base, Door));
+        TestTrue(TEXT("Restored door frame stays solid"), GapBlocked(Door, 130));
+        TestTrue(TEXT("Owner closes restored door"), Door->ToggleDoor(PC->PlayerState));
+        TestTrue(TEXT("Closed restored door blocks doorway"), GapBlocked(Door, 0));
+        TestTrue(TEXT("Closed restored door blocks player capsule"), PlayerCapsuleBlocked(Door));
+        TestTrue(TEXT("Owner reopens restored door"), Door->ToggleDoor(PC->PlayerState));
+        TestFalse(TEXT("Reopened restored doorway becomes clear"), GapBlocked(Door, 0));
+        TestFalse(TEXT("Reopened door clears player capsule"), PlayerCapsuleBlocked(Door));
+    }
+    Fixture.ForwardErrorMessages(this);
+    AddInfo(TEXT("[PrimalPersistence] Real structure save/load traces checked: open gap, solid frame/closed panel, no hidden platform blockers and owner toggles"));
+    return true;
+}
 #endif

@@ -248,3 +248,6 @@ Use component/lifecycle automation, an opt-in live replication test, and a manua
 # 2026-09-28 — Native first-person aim marker
 
 The M4 rendered playtest exposed an offset external crosshair overlay. Add a small centered native HUD marker so the player can aim the server-derived gathering trace reliably. This is presentation only; trace reach and server validation remain unchanged. The repeated forage/cooking/drying playtest passed with this marker. Portable cooking/drying remains the M4 scope; placeable stations, equipment durability and technology unlocks are future work.
+## 2026-10-08 — Stored shape profiles during world restoration
+
+Apply built-in NoCollision profiles to hidden building shapes and restore BlockAll profiles/responses to selected visible shapes. SetCollisionEnabled can query effective owner collision and skip the stored body update while persistence staging disables an actor. Changing profiles avoids activating hidden geometry when staging ends, and restores closed panels after toggling. Preserve constructor collision policy, authoritative ownership and the existing save format. Actual traces/capsule sweeps across repeat loads verify this narrow fix; rendered route acceptance remains separate.

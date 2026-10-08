@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 restored doorway and hidden-shape collision
+
+PF.Persistence.StructureCollisionRestore reproduced four blockers after actual file load: the open door panel and hidden foundation cubes regained collision when disabled staging ended. Retained failed report Automation_M8StructureCollision_20261008_050854512_9d16a5ed (engine 0, runner 1). Fixed only PFBuildPiece shape profiles: NoCollision hidden, BlockAll visible/responses. Repeat loads now preserve clear open/reopened actual player-capsule passage, closed-panel blocking, solid door frames, above-platform clearance and ownership.
+
+Editor fixed build 18.50 s and Development Game 25.26 s passed without compiler warnings. Focused replay 1/1; final Automation_M8ShapeRegression_20261008_051403173_bebb7464 passed PF.Building.PlacementAndStorage, PF.Persistence.StructureCollisionRestore and PF.Persistence.WorldRuntime (3/3), zero test/raw-log warnings/errors/ensure/fatal, engine/runner exits 0. Sampled working/private 2.998/2.861 GiB, 15.82 s, NullRHI. Report/index/run-summary and matching PF log under Saved. Initial test-only compile guard failure 2.28 s retained and corrected. No assets/maps/schema/rendering changed. Trello bounded fix Done; M7/M8 manual acceptance remains open.
+
 ## 2026-10-08 M11–M13 independent controls/reconnect/research UI planning
 
 UI_CONTROLS_PLAN.md audits fixed survival BindKey versus Enhanced Input movement, native placeholder HUDs/settings and reconnect log-only/profile behavior. Defines read-only controls first, one-context action semantics, accepted/refused server feedback, future remapping/reflow, sanitized save/reconnect failures and original research/adaptation views tied to future C++ backends. Source/link/whitespace consistency only; no widget/input/settings/source/asset/save changes or new build/test/performance claim. Bounded AI plan Done, full M11–M13 remain planned; M7/M8 manual and physical-device/provenance gates remain open.

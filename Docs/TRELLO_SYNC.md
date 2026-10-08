@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Later October 8 structure collision task: AI Programming subtask Doing reproduced four real post-load doorway/foundation blockers. Applied stored NoCollision/BlockAll profile fix, passed focused replay, three related native tests and Editor/Game builds. Immediately record exact retained failure/success/build/memory evidence and move this bounded fix Done; parent M7/M8 remain Personal Doing. No unrelated cards, members, deadlines, assets or manual acceptance changed.
+
 Later October 8 HUD & UI planning: selected the existing Controls/reconnect/research card whose next action was planning; explicitly renamed it Plan controls, reconnect feedback and research interfaces — M11–M13, moved Doing, audited source and completed UI_CONTROLS_PLAN.md, then immediately Done. Parent M11–M13 remain To Do; current manual UI/controller gates remain Personal. No members/dates changed or actual widgets/input/settings implemented. Corpse fix pushed 6761ad3; bounded document plan has its own scoped commit.
 
 Later October 8 M8 corpse task: AI Programming test subtask exposed four real collision failures during repeated load; renamed it Preserve corpse collision and unique loot on load and kept Doing. Applied the built-in profile fix, passed the failed retry, alive/dead two-test regression and Editor/Game builds; recorded retained failure, exact successes/memory/logs and immediately moved the bounded fix Done. Full M7/M8 manual gates remain Doing; no members/dates or unrelated assets changed.
