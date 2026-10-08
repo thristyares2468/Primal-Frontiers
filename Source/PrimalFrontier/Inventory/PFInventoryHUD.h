@@ -19,10 +19,14 @@ class PRIMALFRONTIER_API UPFInventoryHUD : public UUserWidget
 
 protected:
     virtual void NativeOnInitialized() override;
-    /** Rebuild the text every frame while the bag is open; collapse otherwise. */
+    /** Refresh open presentation at 10 Hz; input/authority live in the controller. */
     virtual void NativeTick(const FGeometry& Geometry,float Delta) override;
 
 private:
     UPROPERTY() TObjectPtr<UTextBlock> Text;
+    UPROPERTY() TObjectPtr<UTextBlock> Heading;
+    UPROPERTY() TObjectPtr<UTextBlock> Result;
     UPROPERTY() TObjectPtr<UBorder> Panel;
+    float Refresh=0;
+    bool bWasOpen=false;
 };

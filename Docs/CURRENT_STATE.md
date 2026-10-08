@@ -1,6 +1,8 @@
 # Primal Frontier — current state
 
-Updated October 8, 2026. This is the current handoff, not a chronological test log. Update it after meaningful changes and build/test results. Detailed history: [MILESTONES.md](MILESTONES.md) and [preserved October 8 snapshot](CURRENT_STATE_HISTORY_2026-10-08.md).
+Updated October 9, 2026. This is the current handoff, not a chronological test log. Update it after meaningful changes and build/test results. Detailed history: [MILESTONES.md](MILESTONES.md) and [preserved October 8 snapshot](CURRENT_STATE_HISTORY_2026-10-08.md).
+
+**Latest checkpoint — M11 review and full-bag readability passed within automated scope.** Reviewed source/input/authority, retained overlay/survival reports and stale Trello claims. Fixed the demonstrated inventory height/scaling gap with a four-row selection window, separate feedback footer and10Hz refresh. Editor24.88s and Game31.52s passed without compiler warnings. Native inventory/input3/3 and rendered inventory1/1 each at720p/1440p maximum scale1.5 passed. Eight screenshots inspected. Exact retained failures, logs, report paths and limits: [M11_REVIEW.md](M11_REVIEW.md). No assets, authority, networking or save schema changed. Trello: https://trello.com/c/h1bRvrVr.
 
 ## Current game
 
@@ -16,7 +18,7 @@ The current open-world development map is **L_PrimalFrontier_OpenWorld**: a 400 
 | M7 — greybox world | Implemented; automation/streaming evidence passed; **manual acceptance unverified** | Sustained walking between zones and overnight survival on the open-world map |
 | M8 — persistence/multiplayer | Implemented; bounded native/live checks passed; **manual acceptance unverified** | Rendered gather/craft/build/store/save/close/restart/reconnect; packaged Server setup remains blocked |
 | M9 — asset pipeline | Independent inventory/intake audit completed; approval open | Exact local source/version/license mapping before candidate integration |
-| M11 — UI/UX | Controls/help and stable inventory selection PASSED Editor/Game + native + rendered720p/1440p | Survival feedback also verified at720p/diagnostic1440p; normal1440p VSM-budget fix passed; overlay readability next; full UI acceptance open |
+| M11 — UI/UX | Controls/help, stable selection, survival feedback, crafting/building and full-bag readability have bounded passing evidence | Hands-on first-person UI usability and multiplayer presentation acceptance remain unverified; no full milestone pass |
 | M10, M12–M25 | Future plans; no gameplay/art milestone accepted | Independent slices now authorized; retain asset provenance and technical dependencies |
 
 **Completed independent slice: M11 Controls & help through Pause.** Editor final PASSED6.31 s; Development Game PASSED41.75 s, no compiler warnings. PF.Input.Gamepad and PF.Settings.Preferences PASSED2/2 (Automation_M11Controls_20261008_090734672_36578953;16.07 s; working/private2.920/2.782 GiB). Final rendered PF.UI.ControlsLive PASSED1/1 each at720p/1440p: M11Controls720_20261008_091400974_9c4f8bcf (32.61 s;3.079/4.090 GiB) and M11Controls1440_20261008_091446844_c3fb51c8 (37.27 s;3.166/4.367 GiB). Test warnings/errors0, engine/strict verdict0. Six final screenshots inspected. [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md) gives exact evidence/commands. No assets/remapping added. Stable inventory selection is completed below. Latest authorization makes Personal playtests nonblocking but UNVERIFIED; no manual pass assumed.
@@ -38,6 +40,8 @@ Then complete the [Personal M8 rendered persistence loop](https://trello.com/c/U
 The latest user request expands independent continuation to implementation; it supersedes the earlier planning-only boundary. Keep asset rights/compatibility checks and actual build/test failures as technical dependencies. Trello is checked first on every continuation; titles use (AI)/(Personal), active bounded work stays Doing, and completed evidence is updated immediately. [TRELLO_SYNC.md](TRELLO_SYNC.md) governs synchronization.
 
 ## Previous M8 prerequisite checkpoint
+
+**Next required action for M11 acceptance:** play `L_PrimalFrontier_OpenWorld` in Selected Viewport + F11. Gather an item (E), inspect/select it in the bag (Tab, Up/Down), open crafting/building (C/B), then pause and open Settings/Controls (P). Report whether the overlays, feedback and vitals remain readable while moving, plus observed FPS. This short usability gate requires the player's observation; programmatically dispatched bindings and screenshots cannot substitute for it. [Personal UI card](https://trello.com/c/iH8I2Qfc). Per the latest request, stop at this mandatory hands-on gate. M7 overnight/M8 rendered persistence remain separately unverified; no assumed pass or M12 implementation.
 
 Source/test commits **27b7ef6** (offline food) and **7869ccd** (active crafting) were pushed normally with **Codex GPT-6.1 Sol** coauthor attribution. Local and remote master equal 7869ccde48283395b0ad457ca1f8065a229e6e2c, rechecked for this documentation task. Generated reports/logs/saves are not committed. The other chat's untracked TRELLO_BOARD_PLAN.md and TRELLO_SETUP_PROMPT.md remain untouched.
 

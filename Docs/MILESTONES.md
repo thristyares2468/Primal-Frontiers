@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-09 M11 review and full-bag readability
+
+Reviewed previous M11 source/contracts and retained final overlay/survival reports, corrected stale Trello/evidence claims, and reproduced ignored inventory HUD scaling and overflowing text allocation. Shared right-side panel/four-row selection window/fixed footer/10Hz refresh preserves stable GUID and server authority. Editor24.88s/Game31.52s passed without compiler warnings; native inventory/input3/3 and real rendered inventory720p/1440p maximum scale1.5 each1/1 passed. Eight final PNGs inspected. Exact retained failure, report/log paths, startup warnings, memory and limitations: [M11_REVIEW.md](M11_REVIEW.md). Full M11 remains unaccepted; next mandatory gate is the Personal first-person usability playtest. Stop there per latest request; M7/M8 manual gates remain unverified.
+
 ## 2026-10-08 M11 crafting/building action overlays
 
 Moved crafting and building presentation to the right side of the first-person view, added HUD-scale-aware wrapped text, bounded storage rows, 10 Hz refresh and separate server-result footers. Native 3/3 and rendered 720p/1440p maximum-scale checks passed after two retained layout failures were corrected. Editor/Game builds passed; screenshots were inspected. See [ACTION_OVERLAYS_M11.md](ACTION_OVERLAYS_M11.md). Full M11 and manual M7/M8 gates remain open.

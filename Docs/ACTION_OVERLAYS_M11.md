@@ -13,4 +13,6 @@ Crafting keeps the server-owned job state and latest refusal/acceptance/cancella
 
 The isolated rendered logs retain the known engine startup categories (24 widget/HLOD warnings and 14 StateTree/Python lines), with no ensure, fatal or crash. `t.MaxFPS 0` and `r.VSync 0` were requested and confirmed; these short UI scenarios do not establish sustained traversal FPS.
 
+Review October 9: retained final run summaries rechecked (engine/strict zero). `craft_busy.png` verifies a running job and busy refusal; this rendered test does not verify completed crafted output or valid building placement. Native transactions cover those backend paths separately. The first Editor build failed with missing item-definition include/C2027 and a float/int assertion ambiguity/C2666; the corrected retry passed. Initial maximum-scale720p had two text-height failures (`M11Overlays720_20261008_102148812_16faff07`); initial1440p had one storage text-height failure (`M11Overlays1440_20261008_102450615_91ecc3dd`). Compact ingredient/remainder text corrected the retained layout failures before the final passing runs. This evidence covers current greybox catalog text, not arbitrary localized/custom catalogs.
+
 Manual M7/M8 traversal, overnight survival, full rendered persistence and physical-controller checks remain unverified.

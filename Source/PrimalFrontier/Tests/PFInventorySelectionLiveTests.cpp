@@ -2,6 +2,13 @@
 #if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFItemCatalog.h"
+#include "Inventory/PFInventoryHUD.h"
+#include "Settings/PFGameUserSettings.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/TextBlock.h"
+#include "Components/Border.h"
 #include "Components/InputComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -19,6 +26,7 @@ class FSelectionUIExercise final : public IAutomationLatentCommand
 {
 public:
     FSelectionUIExercise(FAutomationTestBase* T,FString D):Test(T),Directory(MoveTemp(D)){}
+    ~FSelectionUIExercise(){if(bChanged && UPFGameUserSettings::Get()){UPFGameUserSettings::Get()->Preferences.HUDScale=OriginalScale;}}
     bool Update() override
     {
         const double Now=FPlatformTime::Seconds();if(Now-Started>45){Test->AddError(TEXT("Inventory UI timeout"));return true;}
@@ -32,6 +40,9 @@ public:
             }
             if(!PC.IsValid()){return false;}
             if(!PC->HasAuthority() || !PC->GetInventory()->GetStacks().IsEmpty()){Test->AddError(TEXT("Requires isolated fresh standalone player; refusing existing inventory"));return true;}
+            if(auto* S=UPFGameUserSettings::Get()){OriginalScale=S->Preferences.HUDScale;float Scale=1;FParse::Value(FCommandLine::Get(),TEXT("PFHUDScale="),Scale);S->Preferences.HUDScale=FMath::Clamp(Scale,0.75f,1.5f);bChanged=true;}
+            TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFInventoryHUD::StaticClass(),false);
+            if(Widgets.Num()!=1){Test->AddError(TEXT("Missing actual inventory widget"));return true;}HUD=Widgets[0];
             auto* I=PC->GetInventory();
             Test->TestTrue(TEXT("Create short-lived actual food"),I->AddExisting(TEXT("Item_Food"),1,UPFInventoryComponent::ServerTime(PC->GetWorld())+0.25));
             Test->TestTrue(TEXT("Create permanent actual wood"),I->Grant(TEXT("Item_Wood"),5));
@@ -59,18 +70,91 @@ public:
             Until=Now+1;Phase=4;return false;
         }
         if(Phase==4){Shot=Directory/TEXT("reselected_stack.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+2;Phase=5;return false;}
-        if(IFileManager::Get().FileSize(*Shot)<=0){return false;}
-        Test->AddInfo(TEXT("[PrimalUI] Reselection screenshot: ")+Shot);
+        if(Phase==5)
+        {
+            if(IFileManager::Get().FileSize(*Shot)<=0){return false;}
+            Test->AddInfo(TEXT("[PrimalUI] Reselection screenshot: ")+Shot);
+            auto* I=PC->GetInventory();
+            for(int32 N=0;N<7;++N){Test->TestTrue(TEXT("Fill bag with distinct real food batches"),I->AddExisting(TEXT("Item_Food"),1,UPFInventoryComponent::ServerTime(PC->GetWorld())+300+N));}
+            Test->TestEqual(TEXT("Default bag filled"),I->GetStacks().Num(),8);
+            Until=Now+0.4;Phase=6;return false;
+        }
+        if(Phase==6)
+        {
+            CheckReadability();Shot=Directory/TEXT("full_bag_first.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+1;Phase=7;return false;
+        }
+        if(Phase==7)
+        {
+            if(IFileManager::Get().FileSize(*Shot)<=0){return false;}
+            Test->AddInfo(TEXT("[PrimalUI] Full bag screenshot: ")+Shot);
+            for(int32 N=0;N<7;++N){Press(EKeys::Gamepad_DPad_Down);}
+            Test->TestEqual(TEXT("Bound navigation reaches final stack"),PC->GetSelectedInventoryIndex(),7);
+            LastId=PC->GetInventory()->GetStacks().Last().StackId;
+            Until=Now+0.4;Phase=8;return false;
+        }
+        if(Phase==8)
+        {
+            CheckReadability();CheckSelectedVisible();
+            Shot=Directory/TEXT("full_bag_last.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+1;Phase=9;return false;
+        }
+        if(Phase==9)
+        {
+            if(IFileManager::Get().FileSize(*Shot)<=0){return false;}
+            Test->AddInfo(TEXT("[PrimalUI] Final row screenshot: ")+Shot);
+            Test->TestTrue(TEXT("Remove earlier row through authority API"),PC->GetInventory()->Remove(PC->GetInventory()->GetStacks()[0].StackId,5));
+            const int32 Selected=PC->GetSelectedInventoryIndex();Test->TestTrue(TEXT("Selection remains valid after reorder"),PC->GetInventory()->GetStacks().IsValidIndex(Selected));
+            if(PC->GetInventory()->GetStacks().IsValidIndex(Selected)){Test->TestEqual(TEXT("Selection follows stable identity after reorder"),PC->GetInventory()->GetStacks()[Selected].StackId,LastId);}
+            Until=Now+0.4;Phase=10;return false;
+        }
+        CheckReadability();CheckSelectedVisible();
         Press(EKeys::Tab);Test->TestFalse(TEXT("Inventory closes normally"),PC->IsInventoryOpen());
-        Test->AddInfo(TEXT("[PrimalUI] Real world expiry and bound input paths rendered. No hardware/manual acceptance claimed."));return true;
+        Test->AddInfo(TEXT("[PrimalUI] Real expiry, full bag, stable selection and rendered bounds checked. No hardware/manual acceptance claimed."));return true;
     }
 private:
+    void CheckSelectedVisible()
+    {
+        const auto* I=PC->GetInventory();const int32 Selected=PC->GetSelectedInventoryIndex();
+        if(!I->GetStacks().IsValidIndex(Selected)){Test->AddError(TEXT("Missing selected stack"));return;}
+        const auto& S=I->GetStacks()[Selected];const auto* D=I->Definition(S.ItemId);
+        const FString Name=D?D->DisplayName.ToString():S.ItemId.ToString();
+        const int32 Seconds=FMath::CeilToInt(S.ExpiresAt-UPFInventoryComponent::ServerTime(PC->GetWorld()));
+        TArray<FString> Lines;AllText().ParseIntoArrayLines(Lines);bool bFound=false;
+        for(const auto& Line:Lines)
+        {if(Line.StartsWith(TEXT(">")) && Line.Contains(Name) && (Line.Contains(FString::Printf(TEXT("[%ds fresh]"),Seconds)) || Line.Contains(FString::Printf(TEXT("[%ds fresh]"),Seconds+1)))){bFound=true;}}
+        Test->TestTrue(TEXT("Actual selected batch freshness row is visible"),bFound);
+    }
+    FString AllText() const
+    {
+        FString Out;TArray<UWidget*> Widgets;HUD->WidgetTree->GetAllWidgets(Widgets);
+        for(auto* W:Widgets){if(auto* T=Cast<UTextBlock>(W)){Out+=T->GetText().ToString()+TEXT("\n");}}return Out;
+    }
+    void CheckReadability()
+    {
+        TArray<UWidget*> Widgets;HUD->WidgetTree->GetAllWidgets(Widgets);
+        const FGeometry Root=HUD->GetCachedGeometry();bool bBody=false;
+        for(auto* W:Widgets)
+        {
+            if(auto* T=Cast<UTextBlock>(W))
+            {
+                Test->TestTrue(TEXT("Inventory text fits allocated height"),T->GetDesiredSize().Y<=T->GetCachedGeometry().GetLocalSize().Y+1);
+                if(T->GetText().ToString().Contains(TEXT("fresh")))
+                {bBody=true;Test->TestEqual(TEXT("Inventory rows respect HUD scaling"),T->GetFont().Size,float(FMath::RoundToInt(22*UPFGameUserSettings::Get()->Preferences.HUDScale)));}
+            }
+            if(Cast<UBorder>(W))
+            {
+                const auto G=W->GetCachedGeometry();const auto TL=Root.AbsoluteToLocal(G.LocalToAbsolute(FVector2D::ZeroVector)),BR=Root.AbsoluteToLocal(G.LocalToAbsolute(G.GetLocalSize()));
+                Test->TestTrue(TEXT("Inventory panel fits right side without covering aim"),TL.X>Root.GetLocalSize().X*0.55 && TL.Y>=0 && BR.X<Root.GetLocalSize().X && BR.Y<Root.GetLocalSize().Y);
+            }
+        }
+        Test->TestTrue(TEXT("Actual food freshness rendered"),bBody);
+    }
     void Press(FKey Key)
     {
         for(const auto& B:PC->InputComponent->KeyBindings){if(B.Chord.Key==Key && B.KeyEvent==IE_Pressed){B.KeyDelegate.Execute(Key);return;}}
         Test->AddError(TEXT("Missing inventory binding ")+Key.ToString());
     }
     FAutomationTestBase* Test;FString Directory,Shot;TWeakObjectPtr<APFSurvivalPlayerController> PC;
+    TWeakObjectPtr<UUserWidget> HUD;FGuid LastId;float OriginalScale=1;bool bChanged=false;
     int32 Phase=0;double Started=FPlatformTime::Seconds(),Until=0;
 };
 }

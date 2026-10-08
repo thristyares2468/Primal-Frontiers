@@ -4,27 +4,18 @@
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Survival/PFSurvivalPlayerController.h"
-#include "Blueprint/WidgetTree.h"
-#include "Components/CanvasPanel.h"
-#include "Components/CanvasPanelSlot.h"
+#include "UI/PFReadOnlyOverlay.h"
+#include "Settings/PFGameUserSettings.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
 
 void UPFInventoryHUD::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
-    // 640x540 dark panel anchored to the top-right corner with one wrapped text block.
-    auto* Canvas=WidgetTree->ConstructWidget<UCanvasPanel>(); WidgetTree->RootWidget=Canvas;
-    Panel=WidgetTree->ConstructWidget<UBorder>(); auto* Placement=Canvas->AddChildToCanvas(Panel);
-    Placement->SetAnchors(FAnchors(1,0)); Placement->SetAlignment(FVector2D(1,0));
-    Placement->SetPosition(FVector2D(-20,20)); Placement->SetSize(FVector2D(640,540));
-    Panel->SetBrushColor(FLinearColor(0.02f,0.02f,0.02f,0.9f)); Panel->SetPadding(FMargin(12));
-    Text=WidgetTree->ConstructWidget<UTextBlock>();
-    FSlateFontInfo Font=Text->GetFont();
-    Font.Size=22;
-    Text->SetFont(Font);
-    Text->SetAutoWrapText(true);
-    Panel->SetContent(Text);
+    UBorder* P;UTextBlock* H;UTextBlock* B;UTextBlock* R;
+    PFReadOnlyOverlay::Build(WidgetTree,TEXT("PF_InventoryPanel"),P,H,B,R);
+    Panel=P;Heading=H;Text=B;Result=R;
+    Panel->SetVisibility(ESlateVisibility::Collapsed);
     SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
@@ -32,28 +23,43 @@ void UPFInventoryHUD::NativeTick(const FGeometry& Geometry,float Delta)
 {
     Super::NativeTick(Geometry,Delta);
     const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
-    if(!PC){return;}
-    Panel->SetVisibility(PC->IsInventoryOpen() ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
-    if(!PC->IsInventoryOpen()){return;}
+    const bool bOpen=PC && PC->IsInventoryOpen() && !PC->IsPauseMenuOpen();
+    Panel->SetVisibility(bOpen?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);
+    Refresh+=Delta;
+    if(!bOpen){bWasOpen=false;return;}
+    if(bWasOpen && Refresh<0.1f){return;}
+    bWasOpen=true;Refresh=0;
+    const auto* Settings=UPFGameUserSettings::Get();
+    PFReadOnlyOverlay::SetScale(Heading,Text,Result,Settings?Settings->Preferences.HUDScale:1);
     // The inventory replicates with the PlayerState; it can be briefly missing after joining.
     const auto* I=PC->GetInventory();
-    if(!I){Text->SetText(FText::FromString(TEXT("Waiting for inventory...")));return;}
+    if(!I){Heading->SetText(FText::FromString(TEXT("INVENTORY")));Text->SetText(FText::FromString(TEXT("Waiting for inventory...")));Result->SetText(FText::GetEmpty());return;}
 
     // Header with capacity and controls.
-    FString Lines=FString::Printf(TEXT("INVENTORY   %d/%d slots   %.1f/%.1f kg\nTab / View close | Up/Down select\nKeys: X split | G drop | Q eat/drink\nPad: D-left split | D-right drop | X eat/drink\n\n"),I->GetStacks().Num(),I->SlotLimit,I->GetWeight(),I->WeightLimit);
+    FString Header=FString::Printf(TEXT("INVENTORY %d/%d slots | %.1f/%.1f kg"),I->GetStacks().Num(),I->SlotLimit,I->GetWeight(),I->WeightLimit);
+    if(!Settings || Settings->Preferences.bControlHints){Header+=TEXT("\nTab / View close | Up/Down select\nX / D-left split | G / D-right drop\nQ / pad X eat/drink");}
+    Heading->SetText(FText::FromString(Header));
 
     // One row per stack: ">" marks the selection; perishables show seconds remaining.
     const int32 Selected=PC->GetSelectedInventoryIndex();
-    if(Selected==INDEX_NONE && !I->GetStacks().IsEmpty()){Lines+=TEXT("No selected stack - use Up/Down or D-pad.\nExpired/removed stacks never select another item.\n\n");}
-    int32 Index=0;
-    for(const auto& S:I->GetStacks())
+    const auto& Stacks=I->GetStacks();
+    // Window follows the resolved GUID selection; it never picks a replacement stack.
+    constexpr int32 VisibleRows=4;
+    const int32 Start=Selected==INDEX_NONE?0:FMath::Clamp(Selected-VisibleRows+1,0,FMath::Max(0,Stacks.Num()-VisibleRows));
+    const int32 End=FMath::Min(Start+VisibleRows,Stacks.Num());
+    FString Lines=Stacks.IsEmpty()?TEXT("Empty - find world pickups (E)."):
+        FString::Printf(TEXT("Rows %d-%d of %d\n"),Start+1,End,Stacks.Num());
+    for(int32 Index=Start;Index<End;++Index)
     {
+        const auto& S=Stacks[Index];
         const auto* D=I->Definition(S.ItemId);
         const FString Name=D ? D->DisplayName.ToString() : S.ItemId.ToString();
         const FString Fresh=S.ExpiresAt>0 ? FString::Printf(TEXT(" [%ds fresh]"),FMath::Max(0,FMath::CeilToInt(S.ExpiresAt-UPFInventoryComponent::ServerTime(GetWorld())))) : TEXT("");
-        Lines+=FString::Printf(TEXT("%s %s x%d%s\n"),Index++==Selected ? TEXT(">") : TEXT(" "),*Name,S.Quantity,*Fresh);
+        Lines+=FString::Printf(TEXT("%s %d. %s x%d%s\n"),Index==Selected ? TEXT(">") : TEXT(" "),Index+1,*Name,S.Quantity,*Fresh);
     }
-    if(I->GetStacks().IsEmpty()){Lines+=TEXT("Empty - find world pickups and press E\n");}
-    Lines+=TEXT("\n")+PC->GetInventoryMessage();
-    Text->SetText(FText::FromString(Lines));
+    Text->SetText(FText::FromString(Lines.TrimEnd()));
+    FString Feedback=PC->GetInventoryMessage();
+    if(Selected==INDEX_NONE && !Stacks.IsEmpty()){Feedback=TEXT("No selection - Up/Down or D-pad.\nExpired/removed stacks never reselect.");}
+    else if(!Feedback.IsEmpty()){Feedback=TEXT("Last: ")+Feedback;}
+    Result->SetText(FText::FromString(Feedback));
 }

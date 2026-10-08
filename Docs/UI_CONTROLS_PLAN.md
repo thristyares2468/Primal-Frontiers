@@ -40,6 +40,8 @@ Reflow rather than only enlarge fonts. Future tests cover 1280x720 and 2560x1440
 
 ## Reconnect and save feedback contract
 
+October9 M11 review/readability checkpoint: full bag now uses the scaled right-side four-row window and separate feedback footer. Craft/build and survival checkpoints were also reviewed. Exact fresh evidence and remaining manual gate: [M11_REVIEW.md](M11_REVIEW.md). The following reconnect/research contracts remain future scope; no new connection screen/backend is implied.
+
 | State | Player-facing message / allowed action |
 | --- | --- |
 | Connecting | Show endpoint display name and wait/cancel; no private capability or full login URL. |

@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Inventory display windows follow stable selection
+
+Keep the authoritative bag and GUID selection unchanged. Present four rows around the resolved selected index, expose the visible range, and use existing navigation to reach omitted stacks. Missing selection stays explicit after expiry; never choose a replacement for visual convenience. Reuse the scaled read-only overlay with separate feedback and10Hz refresh. Current greybox eight-slot/maximum-scale720p/1440p evidence does not certify arbitrary custom text or manual multiplayer usability.
+
 ## 2026-10-08 — Low/medium VSM quality matches the existing budget
 
 Project scalability reduces stationary/moving directional shadow resolution at low/medium instead of increasing the inherited512-page pool. Higher tiers remain engine-defined and settings keep the player's chosen tier. Actual group switching/restoration and two normal1440p rendered replays verify the bounded overflow fix; do not infer a general performance gain without matching traversal measurements. Do not force unrelated groups in a focused fixture when explicit game settings intentionally override blur/DOF.

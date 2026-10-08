@@ -112,7 +112,7 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
     }
     if(InteractionLabel)
     {
-        const bool bActionOverlay=PC && (PC->IsCraftingOpen() || (PC->Building && PC->Building->bBuildMode));
+        const bool bActionOverlay=PC && (PC->IsInventoryOpen() || PC->IsCraftingOpen() || (PC->Building && PC->Building->bBuildMode));
         auto* Placement=Cast<UCanvasPanelSlot>(InteractionLabel->Slot);
         if(Placement)
         {

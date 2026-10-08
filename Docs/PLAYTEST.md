@@ -38,6 +38,8 @@ This step follows the still-pending M7 route/overnight gate. NullRHI tests do no
 
 ## Keyboard controls
 
+M11 bag readability: only four rows are visible at once. The displayed row range changes as Up/Down or D-pad selection reaches later stacks; all eight default slots remain available. After an expired/removed selection, choose a current row explicitly. The footer shows the latest feedback; HUD scaling affects the bag, crafting/building and vitals. See [M11_REVIEW.md](M11_REVIEW.md) for the pending hands-on UI gate.
+
 | Situation | Controls |
 | --- | --- |
 | Movement | WASD, mouse, Space jump |

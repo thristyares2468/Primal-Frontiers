@@ -32,6 +32,8 @@ Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed
 
 ## Every continue/task
 
+October9 M11 review: checked live HUD board/M11 parent first, created one bounded AI review/full-bag task Doing, reproduced height/scaling failures, then recorded final Editor/Game, native3/3, rendered720p/1440p1/1, eight inspected PNGs and limits before moving https://trello.com/c/h1bRvrVr Done. Corrected stale survival shadow-fix note and overlay commit/evidence scope. Parent M11 now Personal Doing for mandatory human usability; existing building/storage/pause/settings Personal card extended with M11 action, preserving historical gate/link. Latest request stops at required human playtest; no next milestone started or manual pass assumed. No unrelated deadlines/members/cards changed.
+
 1. Read current Trello cards and Docs/CURRENT_STATE.md / MILESTONES.md before selecting work. On continue, select the next eligible bounded task from Trello within the latest authorized scope. The user's latest October 8 follow-up permits independent implementation while Personal tests wait; deferred tests remain unverified and nonblocking, not passed.
 2. Reconcile stale cards with actual source/log/report evidence. Move the active bounded task to Doing; describe dependencies, scope, next action and evidence. Do not infer a manual pass from automation or generic Done cards.
 3. Immediately when a task completes, update its existing card with changed areas, exact build/test verdicts, report paths, warnings and remaining limits, then move that task Done. Update it before beginning another task. A narrow test can be Done while its parent milestone remains Doing.
