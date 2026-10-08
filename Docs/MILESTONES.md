@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M11 survival HUD feedback
+
+Added independent urgent needs/health/exposure warnings, short observed same-pawn damage text, availability/cleared vitals and aim/prompts during death/missing possession, reset on pawn replacement and Blueprint status hook. No server APIs/assets/save changes. Editor final6.05s and Game27.09s passed without compiler warnings. Native survival4/4 passed; final normal720p maximum text scale1/1 passed. Normal1440p strict check failed twice on one VSM pool warning (no HUD assertion failures); optional session-only low-shadow diagnostic1440p1/1 passed. Ten final PNGs inspected. [SURVIVAL_FEEDBACK_M11.md](SURVIVAL_FEEDBACK_M11.md) records all reports, memory and retained failures; normal1440p renderer remains a separate next fix. This slice adds no native-selection test, only opt-in rendered PF.UI.SurvivalFeedbackLive. Full M11/manual gates remain open/nonblocking/unverified; bounded Trello https://trello.com/c/z43ZUagT.
+
 ## 2026-10-08 M11 stable inventory selection
 
 Reproduced7 failed assertions: expiring selected food made G drop replacement wood, row shifts lost identity and replacements inherited numeric selection. Stable stack GUID now follows row changes, preserves split source and refuses actions when absent/expired until explicit keyboard/controller reselection. HUD has no clamp fallback; local feedback names the new selection; deposits use the same stable ID. No server API, save schema, assets or dependencies changed.

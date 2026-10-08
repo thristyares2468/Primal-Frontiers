@@ -12,6 +12,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/SizeBox.h"
 #include "GameFramework/Pawn.h"
 #include "Settings/PFGameUserSettings.h"
 
@@ -24,7 +25,7 @@ void UPFSurvivalHUD::NativeOnInitialized()
     WidgetTree->RootWidget = Canvas;
 
     // Centred aim marker (M4): makes the server-derived interaction ray aimable.
-    AimMarker=WidgetTree->ConstructWidget<UTextBlock>();
+    AimMarker=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PF_AimMarker"));
     AimMarker->SetText(FText::FromString(TEXT("+")));
     AimMarker->SetShadowColorAndOpacity(FLinearColor::Black);
     AimMarker->SetShadowOffset(FVector2D(1,1));
@@ -35,7 +36,7 @@ void UPFSurvivalHUD::NativeOnInitialized()
     AimPlacement->SetPosition(FVector2D::ZeroVector);
 
     // Interaction prompt + latest server feedback, below the crosshair (M7).
-    InteractionLabel=WidgetTree->ConstructWidget<UTextBlock>();
+    InteractionLabel=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PF_InteractionLabel"));
     InteractionLabel->SetAutoWrapText(true);
     InteractionLabel->SetJustification(ETextJustify::Center);
     InteractionLabel->SetShadowColorAndOpacity(FLinearColor::Black);
@@ -50,24 +51,36 @@ void UPFSurvivalHUD::NativeOnInitialized()
 
     // Vitals panel, bottom-left.
     UVerticalBox* Panel = WidgetTree->ConstructWidget<UVerticalBox>();
-    UCanvasPanelSlot* PanelSlot = Canvas->AddChildToCanvas(Panel);
+    USizeBox* Bounds = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("PF_VitalsBounds"));
+    Bounds->SetWidthOverride(480); Bounds->AddChild(Panel);
+    UCanvasPanelSlot* PanelSlot = Canvas->AddChildToCanvas(Bounds);
     PanelSlot->SetAnchors(FAnchors(0.f, 1.f));
     PanelSlot->SetAlignment(FVector2D(0.f, 1.f));
     PanelSlot->SetPosition(FVector2D(32.f, -32.f));
     PanelSlot->SetSize(FVector2D(440.f, 215.f));
     PanelSlot->SetAutoSize(true);
-    HealthLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(HealthLabel);
-    HealthBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(HealthBar);
+    HealthLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PF_HealthLabel")); Panel->AddChild(HealthLabel);
+    HealthBar = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("PF_HealthBar")); Panel->AddChild(HealthBar);
     HealthBar->SetFillColorAndOpacity(FLinearColor(0.8f, 0.15f, 0.1f));
-    StaminaLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(StaminaLabel);
+    StaminaLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PF_StaminaLabel")); Panel->AddChild(StaminaLabel);
     StaminaBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(StaminaBar);
     StaminaBar->SetFillColorAndOpacity(FLinearColor(0.2f, 0.8f, 0.35f));
-    NeedsLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(NeedsLabel);
+    NeedsLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PF_NeedsLabel")); Panel->AddChild(NeedsLabel);
+    NeedsLabel->SetAutoWrapText(true);
     HungerBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(HungerBar);
     HungerBar->SetFillColorAndOpacity(FLinearColor(0.8f,0.65f,0.25f));
     ThirstBar = WidgetTree->ConstructWidget<UProgressBar>(); Panel->AddChild(ThirstBar);
     ThirstBar->SetFillColorAndOpacity(FLinearColor(0.2f,0.55f,0.9f));
-    StateLabel = WidgetTree->ConstructWidget<UTextBlock>(); Panel->AddChild(StateLabel);
+    StateLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PF_StateLabel")); Panel->AddChild(StateLabel);
+
+    StateLabel->SetAutoWrapText(true);
+    StateLabel->SetShadowColorAndOpacity(FLinearColor::Black);
+    StateLabel->SetShadowOffset(FVector2D(1,1));
+    DamageLabel=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PF_DamageLabel"));
+    DamageLabel->SetColorAndOpacity(FLinearColor(1.f,0.65f,0.4f));
+    DamageLabel->SetShadowColorAndOpacity(FLinearColor::Black);
+    DamageLabel->SetShadowOffset(FVector2D(1,1));
+    Panel->AddChild(DamageLabel);
 
     // Purely visual: never steal mouse clicks from gameplay.
     SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -76,49 +89,71 @@ void UPFSurvivalHUD::NativeOnInitialized()
 void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
 {
     Super::NativeTick(Geometry, DeltaTime);
-
-    // Prompt text involves traces, so rebuild it at 10 Hz rather than every frame.
     InteractionRefresh+=DeltaTime;
     if(InteractionRefresh<0.1f){return;}
     InteractionRefresh=0;
-    if(const auto* Settings=UPFGameUserSettings::Get())
+    const auto* Settings=UPFGameUserSettings::Get();
+    for(auto* Label:{HealthLabel.Get(),StaminaLabel.Get(),NeedsLabel.Get(),StateLabel.Get(),DamageLabel.Get(),InteractionLabel.Get()})
     {
-        const auto& P=Settings->Preferences;
-        for(auto* Label:{HealthLabel.Get(),StaminaLabel.Get(),NeedsLabel.Get(),StateLabel.Get(),InteractionLabel.Get()})
-        {
-            if(Label){auto Font=Label->GetFont();const int32 Size=FMath::RoundToInt(22*P.HUDScale);if(Font.Size!=Size){Font.Size=Size;Label->SetFont(Font);}}
-        }
-        if(AimMarker){AimMarker->SetVisibility(P.bCrosshair?ESlateVisibility::HitTestInvisible:ESlateVisibility::Hidden);auto Font=AimMarker->GetFont();const int32 Size=FMath::RoundToInt(24*P.CrosshairScale);if(Font.Size!=Size){Font.Size=Size;AimMarker->SetFont(Font);}}
+        if(Label){auto Font=Label->GetFont();const int32 Size=FMath::RoundToInt(22*(Settings?Settings->Preferences.HUDScale:1.f));if(Font.Size!=Size){Font.Size=Size;Label->SetFont(Font);}}
     }
-    if(InteractionLabel)
+    const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
+    const APawn* Pawn=GetOwningPlayerPawn();
+    const auto* Survival=Pawn?Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>():nullptr;
+    const bool bAvailable=Survival!=nullptr;
+    const bool bDead=bAvailable && Survival->IsDead();
+    const bool bCanAim=bAvailable && !bDead && PC && !PC->IsPauseMenuOpen();
+    if(AimMarker)
     {
-        InteractionRefresh=0;
-        if(const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer()))
-        {
-            InteractionLabel->SetText(FText::FromString(PC->IsPauseMenuOpen()?FString():PC->InteractionPrompt()+TEXT("\n")+PC->RecentInteractionMessage()));
-        }
+        AimMarker->SetVisibility(bCanAim && (!Settings || Settings->Preferences.bCrosshair)?ESlateVisibility::HitTestInvisible:ESlateVisibility::Hidden);
+        auto Font=AimMarker->GetFont();const int32 Size=FMath::RoundToInt(24*(Settings?Settings->Preferences.CrosshairScale:1.f));
+        if(Font.Size!=Size){Font.Size=Size;AimMarker->SetFont(Font);}
+    }
+    if(InteractionLabel){InteractionLabel->SetText(bCanAim?FText::FromString(PC->InteractionPrompt()+TEXT("\n")+PC->RecentInteractionMessage()):FText::GetEmpty());}
+
+    if(!bAvailable)
+    {
+        ObservedPawn.Reset();PreviousHealth=0;DamageUntil=0;DamageText=FText::GetEmpty();
+        if(HealthLabel){HealthLabel->SetText(FText::FromString(TEXT("HEALTH --")));}
+        if(StaminaLabel){StaminaLabel->SetText(FText::FromString(TEXT("STAMINA --")));}
+        if(NeedsLabel){NeedsLabel->SetText(FText::FromString(TEXT("FOOD -- | WATER -- | EXPOSURE --")));}
+        for(auto* Bar:{HealthBar.Get(),StaminaBar.Get(),HungerBar.Get(),ThirstBar.Get()}){if(Bar){Bar->SetPercent(0);}}
+        const FText Waiting=FText::FromString(TEXT("Waiting for survivor..."));
+        if(StateLabel){StateLabel->SetText(Waiting);StateLabel->SetVisibility(ESlateVisibility::HitTestInvisible);}
+        if(DamageLabel){DamageLabel->SetText(DamageText);DamageLabel->SetVisibility(ESlateVisibility::Collapsed);}
+        PresentVitals(0,0,0,0,false);PresentNeeds(0,0,0);PresentStatus(false,Waiting,DamageText);return;
     }
 
-    // The pawn changes on respawn, so look the survival component up every frame.
-    const APawn* Pawn = GetOwningPlayerPawn();
-    const UPFPlayerSurvivalComponent* Survival = Pawn ? Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>() : nullptr;
-    if (!Survival) { if (StateLabel) { StateLabel->SetText(FText::FromString(TEXT("Waiting for survivor..."))); } return; }
-    const FPFPlayerVitals V = Survival->GetVitals();
-    if (HealthLabel)
+    const FPFPlayerVitals V=Survival->GetVitals();
+    const double Now=GetWorld()->GetRealTimeSeconds();
+    // A new pawn's first snapshot is a baseline, never damage from the old pawn.
+    if(ObservedPawn.Get()!=Pawn){ObservedPawn=const_cast<APawn*>(Pawn);DamageUntil=0;DamageText=FText::GetEmpty();}
+    else if(!bDead && V.Health<PreviousHealth-0.01f)
+    {DamageText=FText::FromString(FString::Printf(TEXT("DAMAGE -%.2f health"),PreviousHealth-V.Health));DamageUntil=Now+1.5;}
+    PreviousHealth=V.Health;
+    if(bDead || Now>=DamageUntil){DamageText=FText::GetEmpty();}
+    if(DamageLabel){DamageLabel->SetText(DamageText);DamageLabel->SetVisibility(DamageText.IsEmpty()?ESlateVisibility::Collapsed:ESlateVisibility::HitTestInvisible);}
+    if(HealthLabel){HealthLabel->SetText(FText::FromString(FString::Printf(TEXT("HEALTH   %.0f / %.0f"),V.Health,V.MaxHealth)));}
+    if(StaminaLabel){StaminaLabel->SetText(FText::FromString(FString::Printf(TEXT("STAMINA   %.0f / %.0f"),V.Stamina,V.MaxStamina)));}
+    if(NeedsLabel){NeedsLabel->SetText(FText::FromString(FString::Printf(TEXT("FOOD %.0f | WATER %.0f | EXPOSURE %.0f%%"),V.Hunger,V.Thirst,V.Exposure*100)));}
+    if(HealthBar){HealthBar->SetPercent(V.Health/FMath::Max(1.f,V.MaxHealth));}
+    if(StaminaBar){StaminaBar->SetPercent(V.Stamina/FMath::Max(1.f,V.MaxStamina));}
+    if(HungerBar){HungerBar->SetPercent(V.Hunger/100.f);}if(ThirstBar){ThirstBar->SetPercent(V.Thirst/100.f);}
+    TArray<FString> Warnings;
+    if(bDead){Warnings.Add(TEXT("You died - waiting for server respawn..."));}
+    else
     {
-        HealthLabel->SetText(FText::FromString(FString::Printf(TEXT("HEALTH   %.0f / %.0f"), V.Health, V.MaxHealth)));
-        StaminaLabel->SetText(FText::FromString(FString::Printf(TEXT("STAMINA   %.0f / %.0f"), V.Stamina, V.MaxStamina)));
-        HealthBar->SetPercent(V.Health / FMath::Max(1.f, V.MaxHealth));
-        StaminaBar->SetPercent(V.Stamina / FMath::Max(1.f, V.MaxStamina));
-        NeedsLabel->SetText(FText::FromString(FString::Printf(TEXT("FOOD %.0f | WATER %.0f | EXPOSURE %.0f%%"),V.Hunger,V.Thirst,V.Exposure*100)));
-        HungerBar->SetPercent(V.Hunger/100.f);
-        ThirstBar->SetPercent(V.Thirst/100.f);
-        // Most urgent condition first; otherwise a short controls reminder.
-        StateLabel->SetText(FText::FromString(Survival->IsDead() ? TEXT("You died - respawning...") :
-            (V.Hunger <= 0 || V.Thirst <= 0 ? TEXT("STARVING / DEHYDRATED - gather food or water!") :
-            (V.Exposure > 0 ? TEXT("DANGER - leave exposure zone!") : (UPFGameUserSettings::Get() && !UPFGameUserSettings::Get()->Preferences.bControlHints?TEXT(""):TEXT("WASD | E Interact | Tab Bag | C Craft | B Build | P Menu"))))));
+        if(V.Health<=V.MaxHealth*0.25f){Warnings.Add(TEXT("CRITICAL HEALTH"));}
+        if(V.Hunger<=0){Warnings.Add(TEXT("STARVING - eat fresh food"));}
+        else if(V.Hunger<=25){Warnings.Add(TEXT("LOW FOOD - find food"));}
+        if(V.Thirst<=0){Warnings.Add(TEXT("DEHYDRATED - drink safe water"));}
+        else if(V.Thirst<=25){Warnings.Add(TEXT("LOW WATER - find water"));}
+        if(V.Exposure>0){Warnings.Add(TEXT("EXPOSURE - leave hazard"));}
+        if(Warnings.IsEmpty() && (!Settings || Settings->Preferences.bControlHints))
+        {Warnings.Add(TEXT("P / Menu: Controls & help"));}
     }
-    // Blueprint presentation hooks (no-ops unless a BP child implements them).
-    PresentVitals(V.Health, V.MaxHealth, V.Stamina, V.MaxStamina, Survival->IsDead());
-    PresentNeeds(V.Hunger,V.Thirst,V.Exposure);
+    const FText Status=FText::FromString(FString::Join(Warnings,TEXT("\n")));
+    if(StateLabel){StateLabel->SetText(Status);StateLabel->SetVisibility(Status.IsEmpty()?ESlateVisibility::Collapsed:ESlateVisibility::HitTestInvisible);}
+    PresentVitals(V.Health,V.MaxHealth,V.Stamina,V.MaxStamina,bDead);
+    PresentNeeds(V.Hunger,V.Thirst,V.Exposure);PresentStatus(true,Status,DamageText);
 }

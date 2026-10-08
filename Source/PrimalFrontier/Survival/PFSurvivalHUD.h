@@ -14,6 +14,7 @@
 #include "PFSurvivalHUD.generated.h"
 class UTextBlock;
 class UProgressBar;
+class APawn;
 
 UCLASS()
 class PRIMALFRONTIER_API UPFSurvivalHUD : public UUserWidget
@@ -25,6 +26,9 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category="Survival|UI") void PresentVitals(float Health, float MaxHealth, float Stamina, float MaxStamina, bool bDead);
     /** Refreshed at 10 Hz with food/water (0..100) and exposure (0..1). */
     UFUNCTION(BlueprintImplementableEvent, Category="Survival|UI") void PresentNeeds(float Hunger, float Thirst, float Exposure);
+    /** Availability is false during missing possession; damage is an observed health drop,
+     *  not a prediction or a damage-source/direction claim. Empty damage means no cue. */
+    UFUNCTION(BlueprintImplementableEvent, Category="Survival|UI") void PresentStatus(bool bAvailable, const FText& Status, const FText& Damage);
 
 protected:
     /** Build the placeholder layout unless a Blueprint child already has one. */
@@ -39,6 +43,11 @@ private:
     UPROPERTY(Transient) TObjectPtr<UTextBlock> HealthLabel;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> StaminaLabel;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> StateLabel;
+    UPROPERTY(Transient) TObjectPtr<UTextBlock> DamageLabel;
+    TWeakObjectPtr<APawn> ObservedPawn;
+    float PreviousHealth=0;
+    double DamageUntil=0;
+    FText DamageText;
     UPROPERTY(Transient) TObjectPtr<UProgressBar> HealthBar;
     UPROPERTY(Transient) TObjectPtr<UProgressBar> StaminaBar;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> NeedsLabel;
