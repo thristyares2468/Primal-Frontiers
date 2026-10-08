@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Preserve stored corpse collision through staging
+
+SetCollisionEnabled compares effective body collision including the actor override; a staged disabled actor can make a dead capsule's NoCollision request short-circuit without changing its stored mode. Applying the built-in NoCollision profile in dead creature restoration updates that mode before activation. Keep living creature behavior and loot restoration unchanged. Four initial failure assertions, the successful corpse retry, living/dead WorldRuntime regression and Editor/Game builds verify this narrow runtime fix; manual/live rendering remains separate.
+
 ## 2026-10-08 — Explicit layered save compatibility plan
 
 SAVE_COMPATIBILITY_PLAN.md proposes bounded known-edge value-record migrations, separate verified original backups beyond A/B rotation, explicit item/layout policies and unchanged food-age/identity anchors. Keep file/world/player/profile versions distinct; unknown future schemas and unmapped content refuse rather than guess or drop data. Synthetic frozen fixtures establish compatibility before any live publication. This is document planning only; no schema/runtime migration or full M18 acceptance.

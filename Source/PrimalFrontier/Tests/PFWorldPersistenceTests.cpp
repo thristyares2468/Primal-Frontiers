@@ -28,6 +28,8 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/DamageEvents.h"
 #include "GameFramework/PlayerStart.h"
 #include "Tests/AutomationCommon.h"
 
@@ -166,7 +168,11 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
             TestEqual(TEXT("Storage stable batch ID"), It->Storage->GetStacks()[0].StackId, StorageBatchId);
         }
         for (TActorIterator<APFItemPickup> It(W); It; ++It) { ++PickupCount; TestEqual(TEXT("Dropped batch ID preserved"), It->GetContents().StackId, PickupId); }
-        for (TActorIterator<APFCreature> It(W); It; ++It) { ++CreatureCount; TestEqual(TEXT("Creature ID preserved"), It->PersistentId, CreatureId); }
+        for (TActorIterator<APFCreature> It(W); It; ++It)
+        {
+            ++CreatureCount; TestEqual(TEXT("Creature ID preserved"), It->PersistentId, CreatureId);
+            TestTrue(TEXT("Living creature retains collision"), !It->IsDead() && It->GetCapsuleComponent()->GetCollisionEnabled() != ECollisionEnabled::NoCollision);
+        }
         TestEqual(TEXT("No duplicate structures"), PieceCount, 2); TestEqual(TEXT("No duplicate pickups"), PickupCount, 1);
         TestEqual(TEXT("No duplicate creatures"), CreatureCount, 1);
         TestTrue(TEXT("Spawner rebound to restored resident"), IsValid(SpawnPoint->Resident) && SpawnPoint->Resident->PersistentId == CreatureId);
@@ -340,6 +346,74 @@ bool FPFWorldRejectedLoadTest::RunTest(const FString&)
     TestTrue(TEXT("Valid saving remains available after refusals"), Persistence->Save(ActiveSlot, Error));
     Fixture.ForwardErrorMessages(this);
     AddInfo(TEXT("[PrimalPersistence] Rejected real-file version/map/layout/unsafe-ground loads checked against running player, inventory, structures/storage/owner, resource, clock and active generation"));
+    return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFWorldCorpseLootTest, "PF.Persistence.CorpseLootRestore",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FPFWorldCorpseLootTest::RunTest(const FString&)
+{
+    FTestWorldWrapper Fixture;
+    if (!Fixture.CreateTestWorld(EWorldType::Game)) { return false; }
+    UWorld* W = Fixture.GetTestWorld();
+    W->GetOutermost()->Rename(*(TEXT("/Temp/PFCorpseLoot/") + FGuid::NewGuid().ToString(EGuidFormats::Digits) + TEXT("/L_Automation")),
+        nullptr, REN_DontCreateRedirectors | REN_NonTransactional);
+    W->SetGameMode(FURL(nullptr, TEXT("/Engine/Maps/Entry?game=/Script/PrimalFrontier.PFSurvivalGameMode"), TRAVEL_Absolute));
+    W->SpawnActor<APFWorldClock>();
+    if (!Fixture.BeginPlayInTestWorld()) { return false; }
+    auto* Persistence = W->GetSubsystem<UPFWorldPersistence>();
+    auto* Original = W->SpawnActor<APFCreature>(FVector(1000, 0, 100), FRotator::ZeroRotator);
+    if (!TestNotNull(TEXT("Corpse save subsystem"), Persistence) || !TestNotNull(TEXT("Forager fixture"), Original)) { return false; }
+    const FGuid CreatureId = Original->PersistentId;
+    TestTrue(TEXT("Real authoritative lethal damage"), Original->TakeDamage(1000, FDamageEvent(), nullptr, nullptr) > 0);
+    FPFWorldSaveData Baseline; FString Error;
+    if (!TestTrue(TEXT("Capture corpse and loot"), Persistence->Capture(Baseline, Error))) { AddError(Error); return false; }
+    if (!TestEqual(TEXT("One saved corpse"), Baseline.Creatures.Num(), 1) ||
+        !TestEqual(TEXT("One saved loot pickup"), Baseline.Pickups.Num(), 1)) { return false; }
+    FGuid LootId; int32 LootQuantity = 0; double LootDeadline = 0;
+    for (TActorIterator<APFItemPickup> It(W); It; ++It)
+    { LootId = It->GetContents().StackId; LootQuantity = It->GetContents().Quantity; LootDeadline = It->GetContents().ExpiresAt; }
+    TestTrue(TEXT("Loot starts with a finite expiration"), LootDeadline > UPFInventoryComponent::ServerTime(W));
+    const FString Slot = TEXT("AutomationCorpse_") + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    ON_SCOPE_EXIT
+    {
+        Persistence->ActiveSlot.Reset();
+        for (bool B : {false, true}) { IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot, B)); }
+    };
+    if (!TestTrue(TEXT("Save real corpse slot"), Persistence->Save(Slot, Error))) { AddError(Error); return false; }
+    for (bool bLootRemoved : {false, true})
+    {
+        if (bLootRemoved)
+        {
+            // Model an already removed/expired world drop; do not invent a player transfer.
+            for (TActorIterator<APFItemPickup> It(W); It; ++It) { It->Destroy(); }
+            if (!TestTrue(TEXT("Save corpse without its previous drop"), Persistence->Save(Slot, Error))) { AddError(Error); return false; }
+        }
+        for (int32 Repeat = 0; Repeat < 2; ++Repeat)
+        {
+            if (!TestTrue(TEXT("Load corpse slot repeatedly"), Persistence->Load(Slot, Error))) { AddError(Error); return false; }
+            int32 CorpseCount = 0, PickupCount = 0;
+            for (TActorIterator<APFCreature> It(W); It; ++It)
+            {
+                ++CorpseCount;
+                TestEqual(TEXT("Stable corpse identity"), It->PersistentId, CreatureId);
+                TestTrue(TEXT("Restored corpse remains dead"), It->IsDead() && It->State.ToString() == TEXT("Creature.State.Dead"));
+                TestEqual(TEXT("Corpse collision stays off"), It->GetCapsuleComponent()->GetCollisionEnabled(), ECollisionEnabled::NoCollision);
+                TestTrue(TEXT("Corpse has a bounded removal timer"), It->GetLifeSpan() > 0 && It->GetLifeSpan() <= 12);
+                TestEqual(TEXT("Further corpse damage has no effect"), It->TakeDamage(1000, FDamageEvent(), nullptr, nullptr), 0.f);
+            }
+            for (TActorIterator<APFItemPickup> It(W); It; ++It)
+            {
+                ++PickupCount;
+                TestEqual(TEXT("Loot batch identity retained"), It->GetContents().StackId, LootId);
+                TestEqual(TEXT("Loot quantity retained once"), It->GetContents().Quantity, LootQuantity);
+                TestTrue(TEXT("Restoration never renews loot lifetime"), It->GetContents().ExpiresAt <= LootDeadline + 0.001);
+            }
+            TestEqual(TEXT("Exactly one corpse"), CorpseCount, 1);
+            TestEqual(TEXT("No replayed or duplicated death loot"), PickupCount, bLootRemoved ? 0 : 1);
+        }
+    }
+    Fixture.ForwardErrorMessages(this);
+    AddInfo(TEXT("[PrimalPersistence] Real corpse/drop save and repeated load checked: stable IDs, no renewed food life, no loot replay after removing the drop"));
     return true;
 }
 #endif

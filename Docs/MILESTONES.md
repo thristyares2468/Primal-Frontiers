@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 corpse collision and loot restoration fix
+
+PF.Persistence.CorpseLootRestore found a real staged-activation bug: all four restored corpses had collision enabled, although loot uniqueness/deadlines held. Initial Automation_M8CorpseLoot_20261008_045111161_0e920d38: 0 passed/1 failed, four errors/zero warnings; engine exit 0, verdict runner exit 1. Retained failure; fixed only dead RestorePersistence to apply built-in NoCollision profile instead of an owner-effective SetCollisionEnabled call. No loot-generation/schema/assets change.
+
+Editor fixed build passed 22.13 s, final test-assertion build 5.99 s, Development Game 30.15 s; no compiler warnings. Focused fixed retry 1/1. Final Automation_M8CorpseRegression_20261008_045603207_88c1206e: PF.Persistence.CorpseLootRestore and PF.Persistence.WorldRuntime both Success, 0 errors/warnings, engine/runner exits 0 and clean raw log. Dead collision off, live collision retained, stable actor/drop IDs, no renewed food life and no loot replay after prior drop removal; unique files cleaned. 16.05 s, sampled working/private 2.933/2.776 GiB. Evidence: Saved/AutomationReports/<name>/index.json and run-summary.json; Saved/Logs/PF<name>.log; PFM8CorpseLootEditorBuild{Fixed,Final}.log; PFM8CorpseLootGameBuild.log. Trello bounded fix Done; M7/M8 manual and packaged Server gates still open. No new multiplayer/rendered/FPS pass claimed.
+
 ## 2026-10-08 M18 independent compatibility planning
 
 SAVE_COMPATIBILITY_PLAN.md checks current file/world/player/profile contracts and defines deliberate version edges, catalog/layout/ownership/missing-data rules, separate verified backups before A/B rotation, offline-food time anchors and synthetic fixture/native/live/manual gates. Document/source consistency only; no migration/schema/runtime/save/asset/settings change or new build/test/performance claim. Latest gameplay evidence is the focused M8 rejected-load test, not M18 acceptance. Bounded AI plan task Done; full M18 To Do, preceding manual/provenance gates open.

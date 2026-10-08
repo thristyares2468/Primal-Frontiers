@@ -14,6 +14,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
+#include "Engine/CollisionProfile.h"
 #include "Engine/DamageEvents.h"
 #include "NativeGameplayTags.h"
 #include "Net/UnrealNetwork.h"
@@ -236,7 +237,10 @@ bool APFCreature::RestorePersistence(float SavedHealth, FVector SavedHome, float
     if (IsDead())
     {
         // Do not call Die(): its loot was saved separately and must never be generated twice.
-        GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        // Staging disables the actor. SetCollisionEnabled can then see effective
+        // NoCollision and skip updating the body's stored mode. Set the profile
+        // explicitly so later actor activation cannot restore corpse collision.
+        GetCapsuleComponent()->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
         GetCharacterMovement()->DisableMovement(); SetLifeSpan(FMath::Max(0.1f, RemainingCorpse));
     }
     ForceNetUpdate(); return true;
