@@ -32,6 +32,15 @@ Inspection is restricted to project-local `Saved/AutomationReports/.../index.jso
 
 ## October 8 verification
 
+For the combined M8 native checkpoint, use these two selections. They cover the original 26 native tests plus the four new persistence safety/collision cases (30 distinct tests). Splitting stays within the runner's 200-character filter bound:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunNativeAutomation.ps1 -TestFilter PF.Building+PF.Crafting+PF.Creatures+PF.Input+PF.Interaction+PF.Inventory+PF.Persistence+PF.Settings+PF.Survival+PF.World -Label M8Native
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunNativeAutomation.ps1 -TestFilter PF.PrimalAgentTools.CommandArguments+PF.PrimalAgentTools.MissingSystemsAreBlocked+PF.PrimalAgentTools.TeleportAndRuntimeReset -Label M8Commands
+```
+
+Do not select the whole PF.PrimalAgentTools prefix for this checkpoint. Its editor ScenarioIdempotence needs an isolated L_Automation and explicit PFRunScenarioTests opt-in; ViewportCapture needs a rendered editor and PFRunViewportTest. Without these prerequisites they produce setup warnings, not executed scenario/screenshot coverage. The strict runner correctly refuses that warned selection even when the engine labels the records Success. Preserve the report; do not suppress warnings or alter the fixture to claim a pass.
+
 - Retained `M8StartupFailureReproduced_1791432857773`: engine exit 0, one failed test/12 assertions; runner exit **1**. Retained `M8StartupFailureVerified_1791432964361`: one clean pass; runner exit **0**.
 - Fresh runner launch `Automation_M8ReportGate_20261008_042918633_adb3d3f7` passed `PF.Persistence.StartupFailurePreservesSave`: **1 passed, 0 failed, 0 test warnings**, engine/runner exits 0. Raw log severity counts zero. Sampled working/private **2.999/2.856 GiB**, 18.16 seconds.
 - Actual unmatched selection `PF.Verification.NoSuchTest`, run `Automation_M8EmptyReportGate_20261008_043016202_b207d390`: engine exit 0, **no index.json**, runner exit **1**. Log reports “No automation tests matched”; 1 error/0 warnings/0 fatal/ensure. Sampled working/private **2.964/2.886 GiB**, 16.27 seconds. This intentional diagnostic failure is retained; it is not a gameplay regression.

@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 combined post-fix checkpoint
+
+Source 31dce6b: Editor/Game incremental checks up to date, passed 1.13/1.11 s with no compilation actions/warnings. Native gameplay/persistence selection passed 27 and runtime command selection passed 3: all original 26 plus four new persistence cases, 30 distinct passes, no test/raw-log warnings/errors/ensure/fatal. Exact names and reports: [M8_POST_FIX_VERIFICATION.md](M8_POST_FIX_VERIFICATION.md). Initial overbroad selection correctly failed strict verdict on two opt-in editor setup warnings (engine 0/runner 1); retained, no code/warning suppression.
+
+Fresh one-client Create/Restart and two-client Create/Restart passed all ten PF.Persistence.Live process reports, engine/report exits 0, no test warnings/errors or gameplay error/ensure/fatal. Client 2 passed both phases. Two-client working sets create 1.714/1.812/1.814 GiB, restart 1.717/1.796/1.798 GiB. Known live startup logs contain 24 warnings and 14 installed-engine Python traceback lines per process, documented separately. NullRHI has no rendered FPS/stutter proof; packaged Server remains blocked. Trello bounded verification complete; M7/M8 manual gates remain open. No source/assets/settings changed for this checkpoint.
+
 ## 2026-10-08 M8 restored doorway and hidden-shape collision
 
 PF.Persistence.StructureCollisionRestore reproduced four blockers after actual file load: the open door panel and hidden foundation cubes regained collision when disabled staging ended. Retained failed report Automation_M8StructureCollision_20261008_050854512_9d16a5ed (engine 0, runner 1). Fixed only PFBuildPiece shape profiles: NoCollision hidden, BlockAll visible/responses. Repeat loads now preserve clear open/reopened actual player-capsule passage, closed-panel blocking, solid door frames, above-platform clearance and ownership.
