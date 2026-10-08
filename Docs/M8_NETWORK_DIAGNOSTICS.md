@@ -66,3 +66,29 @@ Fresh isolated AutomationM8RPC saves/profiles, localhost port 17986, same open-w
 All ten raw logs retain only the known 24 widget/HLOD warning lines and 14 installed Toolsets Python error lines each. No other warning/error categories. Reports were inspected independently of engine exit codes; all owned processes finished. Peak individual sampled working/private memory was 1.812/1.783 GiB. Elapsed values include phase/report inspection, not frame timing.
 
 This proves one malformed quantity is rejected over a real owning-client connection before and after restart. It does not establish flood/race resistance, arbitrary invalid packets, inventory privacy after reconnect, Internet hosting, rendered FPS/stutter or the 16 GB minimum. M7/M8 manual and packaged-server gates remain open.
+## Owner-only inventory and storage after reconnect
+
+Extended only the opt-in live test. At the end of each real client phase, every other connected PlayerState must have an inventory component with zero received stacks. The client's own tool/Fibre batches must already have replicated. Storage must carry a valid public ownership key belonging to a connected player; its ownership query must agree with that key. The owner must receive the one saved wood item; foreign clients must receive zero storage stacks. The one-client prerequisite explicitly requires the owner branch. The phase inspector requires exactly one owner-client role and Players-1 foreign-client roles; no private credentials or identities are printed.
+
+Initial ten privacy reports passed: M8Privacy1_20261008_064018_ad34c7 and M8Privacy2_20261008_064244_9050bb with CreateServer/Client(s), RestartServer/Client(s) suffixes. Review found the test could classify a box with missing ownership metadata as foreign and skip the owner assertion. These earlier reports are retained but do not replace the strengthened acceptance evidence below. This was a test-oracle improvement, not a demonstrated gameplay fault.
+
+Initial Editor/Game builds passed 7.00/15.39 s. Strengthened Editor/Game builds passed **6.22/14.85 s**, zero compiler warnings: Saved/Logs/PFM8PrivacyStrictEditorBuild.log and PFM8PrivacyStrictGameBuild.log.
+
+One-client strengthened prerequisite passed first, then two-client strengthened replay, Create plus separate-process Restart. Every final process report passed **PF.Persistence.Live 1/1**, engine/report exits 0, zero test warnings/errors/timeout/ensure/fatal. Client 1 logged owner=1/foreign=0 in both phases; Client 2 logged owner=0/foreign=1 and otherPlayers=1 in both two-client phases. Thus the owner and foreign branches both actually ran. Both real clients checked the other's private bag remains empty. Existing invalid-RPC refusal/conservation assertions also remained active. Client 2 did not crash.
+
+Fresh isolated AutomationM8PrivacyStrict saves/profiles; localhost port 17988; same open-world map/test/queue-empty exit; NullRHI and engine-confirmed session-only PktLag=75/PktLoss=1. Reports Saved/AutomationReports/<run>/index.json; logs Saved/Logs/PF<run>.log.
+
+| Run | Working GiB | Private GiB | Phase elapsed s |
+| --- | --- | --- | --- |
+| M8PrivacyStrict1_20261008_064647_07c8b1CreateServer | 1.717 | 1.612 | 51.36 |
+| M8PrivacyStrict1_20261008_064647_07c8b1CreateClient1 | 1.807 | 1.764 | 51.82 |
+| M8PrivacyStrict1_20261008_064647_07c8b1RestartServer | 1.715 | 1.616 | 39.74 |
+| M8PrivacyStrict1_20261008_064647_07c8b1RestartClient1 | 1.791 | 1.78 | 40.13 |
+| M8PrivacyStrict2_20261008_064917_66439cCreateServer | 1.715 | 1.625 | 50.95 |
+| M8PrivacyStrict2_20261008_064917_66439cCreateClient1 | 1.813 | 1.784 | 51.37 |
+| M8PrivacyStrict2_20261008_064917_66439cCreateClient2 | 1.811 | 1.774 | 51.76 |
+| M8PrivacyStrict2_20261008_064917_66439cRestartServer | 1.719 | 1.628 | 39.36 |
+| M8PrivacyStrict2_20261008_064917_66439cRestartClient1 | 1.802 | 1.789 | 39.8 |
+| M8PrivacyStrict2_20261008_064917_66439cRestartClient2 | 1.794 | 1.72 | 40.22 |
+
+All final raw logs retain only the same 24 widget/HLOD warnings and 14 installed Python error lines each, no other warning/error categories. All owned processes finished; individual sampled working/private peaks1.813/1.789GiB. No rendered FPS/stutter/VRAM or 16GB-minimum certification. This verifies private property routing in the tested create/reconnect scenario, not transport encryption, production authentication, all ownership transfers, floods or arbitrary network profiles. No gameplay/network rules, assets or settings changed. M7/M8 manual and packaged Server gates remain open.

@@ -99,6 +99,37 @@ public:
                 Test->TestEqual(TEXT("Rejected network request preserves crafted tool"), PC->GetInventory()->Count(TEXT("Item_Tool")), 1);
                 Test->TestEqual(TEXT("Rejected network request preserves player health"), V->GetVitals().Health, 65.f);
                 Test->TestEqual(TEXT("Rejected network request preserves structures"), Buildings, 2);
+                int32 OtherPlayers = 0, StoragePieces = 0, OwnedStorage = 0;
+                const auto* OwnState = PC->GetPlayerState<APFInventoryPlayerState>();
+                for (APlayerState* State : W->GetGameState()->PlayerArray)
+                {
+                    const auto* Other = Cast<APFInventoryPlayerState>(State);
+                    if (!Other || Other == OwnState) { continue; }
+                    ++OtherPlayers;
+                    const auto* Bag = Other->FindComponentByClass<UPFInventoryComponent>();
+                    if (Test->TestTrue(TEXT("Remote player inventory component exists"), Bag != nullptr))
+                    { Test->TestEqual(TEXT("Remote private inventory never reaches this client"), Bag->GetStacks().Num(), 0); }
+                }
+                Test->TestEqual(TEXT("Privacy check includes every other connected player"), OtherPlayers, Expected - 1);
+                for (TActorIterator<APFBuildPiece> It(W); It; ++It)
+                {
+                    if (It->Kind != EPFBuildKind::Storage) { continue; }
+                    ++StoragePieces;
+                    Test->TestTrue(TEXT("Storage public ownership key is valid"), It->PersistentOwnerId.IsValid());
+                    Test->TestTrue(TEXT("Storage owner is one of the connected public identities"),
+                        W->GetGameState()->PlayerArray.ContainsByPredicate([&](const auto& State)
+                        { const auto* S = Cast<APFInventoryPlayerState>(State); return S && S->PersistentPlayerId == It->PersistentOwnerId; }));
+                    const bool bOwnsStorage = It->PersistentOwnerId == OwnState->PersistentPlayerId;
+                    Test->TestEqual(TEXT("Storage ownership query matches the public identity"), It->IsOwnedBy(OwnState), bOwnsStorage);
+                    if (bOwnsStorage)
+                    { ++OwnedStorage; Test->TestEqual(TEXT("Owned storage contents replicate after load/reconnect"), It->Storage->Count(TEXT("Item_Wood")), 1); }
+                    else
+                    { Test->TestEqual(TEXT("Foreign storage contents never reach this client"), It->Storage->GetStacks().Num(), 0); }
+                }
+                Test->TestEqual(TEXT("Privacy check inspected restored storage"), StoragePieces, 1);
+                if (Expected == 1) { Test->TestEqual(TEXT("One-client prerequisite checks the owner branch"), OwnedStorage, 1); }
+                Test->AddInfo(FString::Printf(TEXT("[PrimalAgentTools] Storage privacy role owner=%d foreign=%d otherPlayers=%d"), OwnedStorage, StoragePieces - OwnedStorage, OtherPlayers));
+                Test->AddInfo(TEXT("[PrimalAgentTools] Owner/foreign bag and storage privacy assertions inspected after load/reconnect"));
                 Test->AddInfo(TEXT("[PrimalAgentTools] Negative-quantity Split crossed real client/server RPC; inventory conservation assertions inspected"));
                 PF::AgentTools::ExecuteCommand(TEXT("PF.ExportTestReport"), {TEXT("M8PersistenceClient")}, W);
                 Advance(99); return false;
