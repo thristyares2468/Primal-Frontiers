@@ -1,6 +1,6 @@
 # M8 network diagnostics — October 8, 2026
 
-Existing PF.Persistence.Live scenario, current compiled Editor code including the test-only DeadPlayerRespawn addition. No new C++ behavior, project/engine settings, assets, map or authentication service changed. This diagnostic extends the no-emulation baseline in M8_POST_FIX_VERIFICATION.md; it is not a rendered/manual milestone gate or a new M15 hardening system.
+Existing PF.Persistence.Live scenario. The initial lag/loss runs below used the compiled Editor code including the test-only DeadPlayerRespawn addition; the final section extends only the live test to exercise an actual invalid client RPC. No gameplay behavior, project/engine settings, assets, map or authentication service changed. These diagnostics extend the no-emulation baseline in M8_POST_FIX_VERIFICATION.md; they are not rendered/manual milestone gates or a new M15 hardening system.
 
 ## One-client modest lag/loss
 
@@ -39,3 +39,30 @@ After the one-client prerequisite, repeated the same profile/map/test/exit/port 
 | M8Lag2_20261008_062152_3aa7a6RestartClient2 | 1.794 | 1.722 | 40.73 |
 
 All six raw logs retain the same 24 editor-widget/HLOD warnings and 14 installed-engine Toolsets Python error lines, with no other warning/error categories. All owned processes finished and no user Editor session was closed. Bounded two-client Trello task complete; no additional source/assets/settings or build change. Profile parameters are session-only and do not establish measured RTT/loss, a soak, reliable-queue limits, client-request races or rendered stability. Broader tests are described in NETWORK_PROFILING_READINESS.md.
+
+## Actual invalid client inventory RPC
+
+Extended only the opt-in `PFPersistenceLiveTests.cpp` fixture: each owning client calls the generated `ServerInventoryAction` RPC once with an existing tool stack, Split action and quantity -1. This does not invoke `_Implementation` locally. An empty initial feedback value prevents a stale refusal from falsely acknowledging the probe. The client requires the server's reliable refusal within 10 seconds, waits another second for property delivery, then checks exact batch IDs, item IDs, quantities and freshness deadlines, slot count, tool, health and structure conservation. The existing post-save Fibre marker must also arrive before the snapshot. No production authority/cooldown code changed.
+
+Editor build passed 22.36 s and Development Game build passed 28.26 s, zero compiler warnings: Saved/Logs/PFM8InvalidRPCEditorBuild.log and PFM8InvalidRPCGameBuild.log. Test remains non-Shipping and opt-in.
+
+One-client Create/Restart passed first, then two-client Create/Restart. All ten process reports passed **PF.Persistence.Live 1/1**, engine/report exits 0, zero test warnings/errors/timeout/ensure/fatal. Every server log records exactly one `Request action=0 quantity=-1 accepted=0` per connected client; every client report includes the fresh refusal acknowledgement and passes conservation checks. Client 2 did not crash.
+
+Fresh isolated AutomationM8RPC saves/profiles, localhost port 17986, same open-world map/automation command/queue-empty exit, NullRHI and session-only PktLag=75/PktLoss=1. Each engine log confirms both network settings. Reports: Saved/AutomationReports/<run>/index.json; logs: Saved/Logs/PF<run>.log.
+
+| Run | Working GiB | Private GiB | Phase elapsed s |
+| --- | --- | --- | --- |
+| M8RPC1_20261008_063219_5cade8CreateServer | 1.712 | 1.604 | 51.32 |
+| M8RPC1_20261008_063219_5cade8CreateClient1 | 1.812 | 1.774 | 51.78 |
+| M8RPC1_20261008_063219_5cade8RestartServer | 1.715 | 1.618 | 39.78 |
+| M8RPC1_20261008_063219_5cade8RestartClient1 | 1.795 | 1.716 | 40.18 |
+| M8RPC2_20261008_063412_47b0f8CreateServer | 1.715 | 1.613 | 51.08 |
+| M8RPC2_20261008_063412_47b0f8CreateClient1 | 1.812 | 1.764 | 51.5 |
+| M8RPC2_20261008_063412_47b0f8CreateClient2 | 1.812 | 1.783 | 51.93 |
+| M8RPC2_20261008_063412_47b0f8RestartServer | 1.714 | 1.617 | 41.12 |
+| M8RPC2_20261008_063412_47b0f8RestartClient1 | 1.795 | 1.766 | 41.61 |
+| M8RPC2_20261008_063412_47b0f8RestartClient2 | 1.792 | 1.779 | 42.11 |
+
+All ten raw logs retain only the known 24 widget/HLOD warning lines and 14 installed Toolsets Python error lines each. No other warning/error categories. Reports were inspected independently of engine exit codes; all owned processes finished. Peak individual sampled working/private memory was 1.812/1.783 GiB. Elapsed values include phase/report inspection, not frame timing.
+
+This proves one malformed quantity is rejected over a real owning-client connection before and after restart. It does not establish flood/race resistance, arbitrary invalid packets, inventory privacy after reconnect, Internet hosting, rendered FPS/stutter or the 16 GB minimum. M7/M8 manual and packaged-server gates remain open.

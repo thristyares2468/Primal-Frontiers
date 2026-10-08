@@ -683,3 +683,5 @@ Stopped after the build failure without expanding implementation. Next step: clo
 
 \- \[ ] Optional PvP evaluation
 
+
+October 8 M8 authority diagnostic: actual invalid inventory RPC test-only extension compiled Editor/Game (22.36/28.26 s), then ten one-/two-client Create/Restart PF.Persistence.Live process reports passed under session-only PktLag=75/PktLoss=1. Fresh server refusal and exact owner inventory batch/freshness conservation checked; Client 2 did not crash. Evidence, report names/memory and retained engine startup warnings: M8_NETWORK_DIAGNOSTICS.md, Actual invalid client inventory RPC. Manual M7/M8, rendering/performance, packaged Server and broader future hardening remain open.
