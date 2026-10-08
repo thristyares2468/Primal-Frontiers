@@ -15,6 +15,7 @@
 #include "Components/SizeBox.h"
 #include "GameFramework/Pawn.h"
 #include "Settings/PFGameUserSettings.h"
+#include "Building/PFBuildingComponent.h"
 
 void UPFSurvivalHUD::NativeOnInitialized()
 {
@@ -109,7 +110,21 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
         auto Font=AimMarker->GetFont();const int32 Size=FMath::RoundToInt(24*(Settings?Settings->Preferences.CrosshairScale:1.f));
         if(Font.Size!=Size){Font.Size=Size;AimMarker->SetFont(Font);}
     }
-    if(InteractionLabel){InteractionLabel->SetText(bCanAim?FText::FromString(PC->InteractionPrompt()+TEXT("\n")+PC->RecentInteractionMessage()):FText::GetEmpty());}
+    if(InteractionLabel)
+    {
+        const bool bActionOverlay=PC && (PC->IsCraftingOpen() || (PC->Building && PC->Building->bBuildMode));
+        auto* Placement=Cast<UCanvasPanelSlot>(InteractionLabel->Slot);
+        if(Placement)
+        {
+            Placement->SetAnchors(bActionOverlay?FAnchors(0.285f,0.24f):FAnchors(0.5f,0.62f));
+            Placement->SetSize(bActionOverlay?Geometry.GetLocalSize()*FVector2D(0.49f,0.26f):FVector2D(800,140));
+        }
+        // Craft request feedback already has its own footer. Do not leave it under
+        // another panel after changing mode; pickup/gather feedback remains visible.
+        FString Message=bCanAim?PC->RecentInteractionMessage():FString();
+        if(bActionOverlay && Message.StartsWith(TEXT("Craft "))){Message.Empty();}
+        InteractionLabel->SetText(bCanAim?FText::FromString(PC->InteractionPrompt()+TEXT("\n")+Message):FText::GetEmpty());
+    }
 
     if(!bAvailable)
     {

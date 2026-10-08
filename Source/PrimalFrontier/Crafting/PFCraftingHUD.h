@@ -1,6 +1,6 @@
 // PFCraftingHUD.h
 //
-// Placeholder crafting overlay (C / gamepad Y), top-left of the screen. Read-only:
+// Placeholder crafting overlay (C / gamepad Y), beside the first-person view. Read-only:
 // lists the three greybox recipes with have/need counts per ingredient, the time
 // left on the active job and the last crafting feedback. Hotkeys are handled by
 // APFSurvivalPlayerController.
@@ -19,10 +19,14 @@ class PRIMALFRONTIER_API UPFCraftingHUD : public UUserWidget
 
 protected:
     virtual void NativeOnInitialized() override;
-    /** Rebuild the text every frame while crafting is open; collapse otherwise. */
+    /** Refresh at 10 Hz while open; collapse immediately when closed. */
     virtual void NativeTick(const FGeometry& Geometry,float Delta) override;
 
 private:
     UPROPERTY() TObjectPtr<UBorder> Panel;
     UPROPERTY() TObjectPtr<UTextBlock> Text;
+    UPROPERTY() TObjectPtr<UTextBlock> Heading;
+    UPROPERTY() TObjectPtr<UTextBlock> Result;
+    float Refresh=0;
+    bool bWasOpen=false;
 };

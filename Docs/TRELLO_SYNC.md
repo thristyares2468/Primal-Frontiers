@@ -1,6 +1,6 @@
 # Trello task workflow
 
-Latest October 8 authorization: continue independent implementation while the user's tests are deferred. Personal M7/M8/controller observations are nonblocking for development but remain UNVERIFIED. Never assume or report a manual pass. This supersedes earlier planning-only continuation notes below. M11 registered-binding controls/help is the active bounded HUD & UI task; art provenance and real technical failures remain dependencies.
+Latest October 8 authorization: continue independent implementation while the user's tests are deferred. Personal M7/M8/controller observations are nonblocking for development but remain UNVERIFIED. Never assume or report a manual pass. This supersedes earlier planning-only continuation notes below. The current bounded AI task is recorded in CURRENT_STATE.md and the corresponding live Trello Doing card; completed evidence is moved Done immediately. Art provenance and real technical failures remain dependencies.
 
 Later October 8 two-client diagnostic: completed/pushed one-client task 8b62612 first, then selected separate AI M8 two-client lag/loss scope Doing. All six Create/Restart reports/settings/log categories/memory reviewed; immediately moved that bounded task Done. Manual parent gates remain Doing and broader hardening remains planned. No members/dates or unrelated cards changed.
 

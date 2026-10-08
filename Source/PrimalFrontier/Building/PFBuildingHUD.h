@@ -1,6 +1,6 @@
 // PFBuildingHUD.h
 //
-// Placeholder build overlay (B / gamepad RB), top-left of the screen. Read-only:
+// Placeholder build overlay (B / gamepad RB), beside the first-person view. Read-only:
 // controls, selected piece/cost/rotation, preview validity, the aimed-at piece's
 // health, open storage contents (with freshness) and the latest server result.
 //
@@ -18,10 +18,14 @@ class PRIMALFRONTIER_API UPFBuildingHUD : public UUserWidget
 
 protected:
     virtual void NativeOnInitialized() override;
-    /** Rebuild the text every frame while build mode is on; collapse otherwise. */
+    /** Refresh at 10 Hz while open; collapse immediately when closed. */
     virtual void NativeTick(const FGeometry& Geometry,float Delta) override;
 
 private:
     UPROPERTY() TObjectPtr<UBorder> Panel;
     UPROPERTY() TObjectPtr<UTextBlock> Text;
+    UPROPERTY() TObjectPtr<UTextBlock> Heading;
+    UPROPERTY() TObjectPtr<UTextBlock> Result;
+    float Refresh=0;
+    bool bWasOpen=false;
 };

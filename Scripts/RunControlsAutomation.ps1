@@ -1,7 +1,7 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [switch]$LowShadowDiagnostic,
       [ValidateRange(60,600)][int]$TimeoutSeconds=180)
@@ -16,7 +16,7 @@ $report=Join-Path $projectRoot ('Saved\AutomationReports\'+$run)
 $log=Join-Path $projectRoot ('Saved\Logs\'+$run+'.log')
 $width=if($Resolution -eq '720'){1280}else{2560}
 $height=if($Resolution -eq '720'){720}else{1440}
-$filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'}}
+$filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'} 'Overlays'{'PF.UI.ActionOverlaysLive'}}
 # Explicit optional renderer diagnostic: halve directional shadow resolution,
 # keep the existing page budget, do not persist settings or mute warnings.
 $shadowCommands=if($LowShadowDiagnostic){'r.Shadow.Virtual.ResolutionLodBiasDirectional 1,r.Shadow.Virtual.ResolutionLodBiasDirectionalMoving 1,'}else{''}

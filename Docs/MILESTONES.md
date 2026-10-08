@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M11 crafting/building action overlays
+
+Moved crafting and building presentation to the right side of the first-person view, added HUD-scale-aware wrapped text, bounded storage rows, 10 Hz refresh and separate server-result footers. Native 3/3 and rendered 720p/1440p maximum-scale checks passed after two retained layout failures were corrected. Editor/Game builds passed; screenshots were inspected. See [ACTION_OVERLAYS_M11.md](ACTION_OVERLAYS_M11.md). Full M11 and manual M7/M8 gates remain open.
+
 ## 2026-10-08 M11/M16 low/medium VSM budget prerequisite
 
 Supported DefaultScalability.ini directional bias1 at tiers0/1 reduces shadow resolution/demand without increasing the512-page pool, changing selected quality or modifying assets. Editor19.12/4.71s and Game25.05s passed. Native Preferences/ShadowBudget2/2 clean; actual tier switching verifies high-tier inheritance/session restoration. First overbroad all-group fixture failed strict check on10blur/DOF priority warnings; retained and narrowed to shadow callback. Two normal1440p survival feedback runs PASSED1/1 at scales1/1.5 with no diagnostic override, no VSM overflow and no test warnings/errors. Ten PNGs inspected. [SHADOW_BUDGET_M11.md](SHADOW_BUDGET_M11.md) has exact reports/logs/memory and remaining startup categories. Adds one native test (intended35; no combined35 rerun). Bounded Trello https://trello.com/c/LMulR1lr; no sustained FPS/full M16/manual acceptance claim.
