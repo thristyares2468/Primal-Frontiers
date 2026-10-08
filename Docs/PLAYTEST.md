@@ -1,6 +1,6 @@
 # Playing and testing Primal Frontier
 
-Updated 2026-10-08. The integrated regression level is **L_M7SurvivalArena**; **L_PrimalFrontier_OpenWorld** is the new World Partition development candidate. Latest Editor build, 26-test M8 regression and one-/two-client NullRHI checks pass. Settings were checked in rendered play. Prior interaction/hazard/day-night evidence is in MILESTONES.md; sustained manual walking and overnight survival are still pending. **L_M6Creatures** is the previously verified creature level. The installed engine reports **5.8.3**, despite the original 5.8.2 requirement.
+Updated 2026-10-08. Use **L_PrimalFrontier_OpenWorld** for current open-world/M8 manual acceptance; **L_M7SurvivalArena** remains the small integration regression map. Latest Editor build passed. Historical combined 30 native tests and subsequent separate dead-player/food/craft tests passed; the current selection of 33 has not been rerun together. One-/two-client NullRHI checks passed within their recorded scope. Settings were checked in rendered play; sustained walking, overnight survival and rendered full-loop persistence remain unverified. Exact current evidence and next action: [CURRENT_STATE.md](CURRENT_STATE.md). **L_M6Creatures** is the earlier creature fixture. Installed engine reports **5.8.3**, despite the requested 5.8.2 baseline.
 
 ## Open the game
 

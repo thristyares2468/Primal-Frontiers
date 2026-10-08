@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 current-state handoff reconciliation
+
+Documentation/status task only: rechecked retained final food/crafting report summaries (each 1/1, engine/runner0, zero warnings/errors/ensure/fatal), final Editor build logs (6.12/5.67 s, no compiler warnings), and source/remote equality at7869ccd. Replaced accumulated CURRENT_STATE chronology with an authoritative snapshot and preserved the entire prior document in CURRENT_STATE_HISTORY_2026-10-08.md. Corrected stale 26/30/31/32-count presentation in current guide/roadmap/Trello without rewriting historical reports: current intended selection33, combined30 plus three separate focused passes, no full33 rerun. Clarified Personal M7 route/overnight and M8 rendered persistence actions/why they require human evidence. No new build/test process, gameplay/assets/source/settings, manual acceptance or milestone completion; local document links/whitespace/evidence checked. Bounded task https://trello.com/c/EG6SOrl5; preceding gates remain open.
+
 ## 2026-10-08 M8 active-craft persistence conservation
 
 Final oracle requires a newer on-disk departure generation and loads that checkpoint before reconnect. Final Editor rebuild passed 5.67 s without compiler warnings, PFM8ActiveCraftEditorBuildFinal.log. Initial passing report Automation_M8ActiveCraft_20261008_082121046_26634b4a retained; final strengthened report is listed below. No failed test or runtime fix occurred.
