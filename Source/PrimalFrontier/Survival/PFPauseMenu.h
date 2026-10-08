@@ -23,6 +23,8 @@ class PRIMALFRONTIER_API UPFPauseMenu : public UUserWidget
 public:
     /** Reset selection/confirmation and update the paused-vs-multiplayer description. Call when opening. */
     void Refresh();
+    /** Read-only local profile feedback; does not reset navigation or close child menus. */
+    void UpdateReconnectFeedback();
     void CloseChildMenus();
     FReply HandleNavigation(FKey Key,bool bRepeat=false);
 
@@ -35,6 +37,7 @@ protected:
 
 private:
     UPROPERTY() TObjectPtr<UTextBlock> Description;
+    UPROPERTY() TObjectPtr<UTextBlock> ReconnectFeedback;
     UPROPERTY() TObjectPtr<UTextBlock> QuitLabel;
     UPROPERTY() TObjectPtr<UButton> ResumeButton;
     UPROPERTY() TObjectPtr<UButton> QuitButton;

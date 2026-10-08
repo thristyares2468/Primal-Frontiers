@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Local reconnect credential feedback is a separate UI outcome
+
+Record Unknown/Saved/Failed only after the existing local profile write returns. Expose read-only Blueprint status/text and update Pause's label without refreshing navigation or modal focus. Credential storage success never implies world state is saved or the server has restored a player. Never include capabilities/login URLs in feedback. Rendered fixtures use separate unique profiles; an expected invalid-payload rejection cannot stand in for disk-full or production identity testing.
+
 ## 2026-10-09 — Inventory display windows follow stable selection
 
 Keep the authoritative bag and GUID selection unchanged. Present four rows around the resolved selected index, expose the visible range, and use existing navigation to reach omitted stacks. Missing selection stays explicit after expiry; never choose a replacement for visual convenience. Reuse the scaled read-only overlay with separate feedback and10Hz refresh. Current greybox eight-slot/maximum-scale720p/1440p evidence does not certify arbitrary custom text or manual multiplayer usability.

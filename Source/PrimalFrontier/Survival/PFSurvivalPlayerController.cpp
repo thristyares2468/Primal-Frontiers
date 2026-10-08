@@ -49,9 +49,25 @@ void APFSurvivalPlayerController::ClientRememberReconnectCredential_Implementati
     if (!IsLocalController() || !GetLocalPlayer()) { return; }
     if (!UPFLocalPlayer::RememberCredential(GetWorld(), Credential))
     {
+        LocalReconnectStatus=EPFLocalReconnectStatus::Failed;
         UE_LOG(LogPFSurvival, Warning, TEXT("[PrimalPersistence] Local reconnect profile could not be saved; credential omitted from log"));
     }
-    else { UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Local reconnect profile saved; credential omitted from log")); }
+    else
+    {
+        LocalReconnectStatus=EPFLocalReconnectStatus::Saved;
+        UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Local reconnect profile saved; credential omitted from log"));
+    }
+    // Update presentation without resetting focus, navigation or quit confirmation.
+    if(PauseMenu){PauseMenu->UpdateReconnectFeedback();}
+}
+
+FText APFSurvivalPlayerController::GetLocalReconnectStatusText() const
+{
+    if(LocalReconnectStatus==EPFLocalReconnectStatus::Saved)
+    {return NSLOCTEXT("PrimalUI","ReconnectProfileSaved","Reconnect details saved on this device.\nThis does not save world state.");}
+    if(LocalReconnectStatus==EPFLocalReconnectStatus::Failed)
+    {return NSLOCTEXT("PrimalUI","ReconnectProfileFailed","Reconnect details could not be saved on this device.\nLater reconnect may fail. This does not save world state.");}
+    return FText::GetEmpty();
 }
 
 void APFSurvivalPlayerController::Destroyed()

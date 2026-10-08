@@ -1,7 +1,7 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival','Overlays')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [switch]$LowShadowDiagnostic,
       [ValidateRange(60,600)][int]$TimeoutSeconds=180)
@@ -16,11 +16,14 @@ $report=Join-Path $projectRoot ('Saved\AutomationReports\'+$run)
 $log=Join-Path $projectRoot ('Saved\Logs\'+$run+'.log')
 $width=if($Resolution -eq '720'){1280}else{2560}
 $height=if($Resolution -eq '720'){720}else{1440}
-$filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'} 'Overlays'{'PF.UI.ActionOverlaysLive'}}
+$filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'} 'Overlays'{'PF.UI.ActionOverlaysLive'} 'Reconnect'{'PF.UI.ReconnectProfileLive'}}
+# Only the credential fixture writes an identity profile; isolate it from the user's Local profile.
+$profileArgument=if($TestCase -eq 'Reconnect'){' -PFIdentityProfile=UI'+[Guid]::NewGuid().ToString('N').Substring(0,12)}else{''}
 # Explicit optional renderer diagnostic: halve directional shadow resolution,
 # keep the existing page budget, do not persist settings or mute warnings.
 $shadowCommands=if($LowShadowDiagnostic){'r.Shadow.Virtual.ResolutionLodBiasDirectional 1,r.Shadow.Virtual.ResolutionLodBiasDirectionalMoving 1,'}else{''}
 $arguments='"{0}" /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld -game -windowed -ForceRes -ResX={1} -ResY={2} -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig -PFRunControlsUITest -PFControlsEvidence={3} -PFHUDScale={7} -ExecCmds="t.MaxFPS 0,r.VSync 0,{8}Automation RunTests {6}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{4}" -abslog="{5}"' -f (Join-Path $projectRoot 'PrimalFrontier.uproject'),$width,$height,$run,$report,$log,$filter,([string]$HUDScale),$shadowCommands
+$arguments+=$profileArgument
 $process=$null;$working=0L;$private=0L;$timedOut=$false;$watch=[Diagnostics.Stopwatch]::StartNew()
 try {
     $process=Start-Process -FilePath $exe -ArgumentList $arguments -WorkingDirectory $projectRoot -WindowStyle Hidden -PassThru

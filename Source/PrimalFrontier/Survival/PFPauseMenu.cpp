@@ -59,6 +59,10 @@ void UPFPauseMenu::NativeOnInitialized()
     Rows->AddChild(Text(TEXT("PRIMAL FRONTIER"),34));
     Description=Text(TEXT(""),24);
     Rows->AddChild(Description);
+    ReconnectFeedback=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),TEXT("PF_ReconnectFeedback"));
+    auto FeedbackFont=ReconnectFeedback->GetFont();FeedbackFont.Size=22;ReconnectFeedback->SetFont(FeedbackFont);
+    ReconnectFeedback->SetAutoWrapText(true);
+    Rows->AddChild(ReconnectFeedback);
     ResumeButton=WidgetTree->ConstructWidget<UButton>();
     ResumeButton->SetContent(Text(TEXT("Resume"),30));
     Rows->AddChild(ResumeButton);
@@ -88,6 +92,17 @@ void UPFPauseMenu::Refresh()
     UpdateSelection();
     QuitLabel->SetText(FText::FromString(TEXT("End session")));
     Description->SetText(FText::FromString(GetWorld()->GetNetMode()==NM_Standalone?TEXT("Paused\nSave explicitly before ending the session.\n"):TEXT("Multiplayer continues while this menu is open.\nSave explicitly; ending does not autosave.\n")));
+    UpdateReconnectFeedback();
+}
+
+void UPFPauseMenu::UpdateReconnectFeedback()
+{
+    if(!ReconnectFeedback){return;}
+    const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
+    const FText Status=PC?PC->GetLocalReconnectStatusText():FText::GetEmpty();
+    ReconnectFeedback->SetText(Status);
+    ReconnectFeedback->SetVisibility(Status.IsEmpty()?ESlateVisibility::Collapsed:ESlateVisibility::HitTestInvisible);
+    ReconnectFeedback->SetColorAndOpacity(PC && PC->GetLocalReconnectStatus()==EPFLocalReconnectStatus::Failed?FLinearColor(1,0.8f,0.3f):FLinearColor::White);
 }
 
 void UPFPauseMenu::Resume(){if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetPauseMenuOpen(false);}}

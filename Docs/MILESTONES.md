@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-09 M11 local reconnect-profile outcome
+
+Implemented read-only typed local profile Saved/Failed feedback in Pause, with explicit separation from world-save success, private credential omission and focus/quit-state preservation. Editor/Game and final network-fixture builds passed without compiler warnings; native Gamepad/FileGenerations2/2 and rendered profile fixture1/1 each720p/1440p passed. Six PNGs inspected. Real one-client create/restart4/4 and two-client75ms/1% lag/loss6/6 passed including actual RPC outcome/profile reads. Exact evidence/memory/logs and intentional invalid-payload failure limitation: [RECONNECT_FEEDBACK_M11.md](RECONNECT_FEEDBACK_M11.md). No assets/save schema/server gameplay changes. Full M11/M7/M8 human acceptance remains unverified; independent work continues under the latest authorization.
+
 ## 2026-10-09 M11 consolidated native regression checkpoint
 
 Current source `df648eb` passed all35 intended native regressions in two sequential NullRHI batches (32 gameplay/settings +3 runtime command tests). Exact manifest reconciliation found35 unique records and no missing/extra test. Engine/runner exits0, raw/test warnings/errors/ensure0. Editor up-to-date check passed1.14s with no compile actions; sampled peaks2.920/2.761GiB and3.064/2.947GiB. Exact reports, names and scope: [NATIVE_CHECKPOINT_M11.md](NATIVE_CHECKPOINT_M11.md). No source/assets change, new multiplayer/rendered result or full milestone acceptance. Mandatory Personal M11 usability remains next.

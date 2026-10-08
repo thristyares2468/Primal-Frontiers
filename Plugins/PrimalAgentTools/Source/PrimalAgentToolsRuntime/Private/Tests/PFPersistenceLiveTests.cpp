@@ -19,6 +19,7 @@
 #include "Misc/Parse.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Engine/LocalPlayer.h"
 #include "EngineUtils.h"
 #include "GameFramework/GameStateBase.h"
 #include "HAL/IConsoleManager.h"
@@ -99,6 +100,10 @@ public:
                 Test->TestEqual(TEXT("Rejected network request preserves crafted tool"), PC->GetInventory()->Count(TEXT("Item_Tool")), 1);
                 Test->TestEqual(TEXT("Rejected network request preserves player health"), V->GetVitals().Health, 65.f);
                 Test->TestEqual(TEXT("Rejected network request preserves structures"), Buildings, 2);
+                Test->TestTrue(TEXT("Real server credential RPC reports local profile saved"),
+                    PC->GetLocalReconnectStatus()==EPFLocalReconnectStatus::Saved);
+                Test->TestTrue(TEXT("Real client reconnect profile is readable without exposing credential"),
+                    PC->GetLocalPlayer() && PC->GetLocalPlayer()->GetGameLoginOptions().StartsWith(TEXT("PFReconnect=")));
                 int32 OtherPlayers = 0, StoragePieces = 0, OwnedStorage = 0;
                 const auto* OwnState = PC->GetPlayerState<APFInventoryPlayerState>();
                 for (APlayerState* State : W->GetGameState()->PlayerArray)

@@ -31,6 +31,10 @@ class UPFBuildingComponent;
 class UPFBuildingHUD;
 class UPFPauseMenu;
 
+/** Local credential write outcome only; never a server/world restoration verdict. */
+UENUM(BlueprintType)
+enum class EPFLocalReconnectStatus : uint8 { Unknown, Saved, Failed };
+
 UCLASS()
 class PRIMALFRONTIER_API APFSurvivalPlayerController : public APrimalFrontierPlayerController
 {
@@ -41,6 +45,8 @@ public:
     APFSurvivalPlayerController();
     /** Server-issued LAN development credential; never used as public ownership ID. */
     UFUNCTION(Client, Reliable) void ClientRememberReconnectCredential(FGuid Credential);
+    UFUNCTION(BlueprintPure, Category="Survival|UI") EPFLocalReconnectStatus GetLocalReconnectStatus() const {return LocalReconnectStatus;}
+    UFUNCTION(BlueprintPure, Category="Survival|UI") FText GetLocalReconnectStatusText() const;
 
     /** Building mode state, placement preview and building RPCs (lives on the controller). */
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly) TObjectPtr<UPFBuildingComponent> Building;
@@ -95,6 +101,7 @@ protected:
     UFUNCTION(Server, Reliable) void ServerInteract();
 
 private:
+    UPROPERTY(Transient) EPFLocalReconnectStatus LocalReconnectStatus=EPFLocalReconnectStatus::Unknown;
     void BindControl(FKey Key,void (APFSurvivalPlayerController::*Handler)(),const TCHAR* Context,const TCHAR* Action,bool bWhenPaused=false);
     TArray<FPFControlHint> RegisteredControlHints;
     // ---- Gamepad routing (PFGamepadInput.cpp) ----
