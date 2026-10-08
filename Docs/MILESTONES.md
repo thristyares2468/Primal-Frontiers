@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 offline food persistence regression
+
+Test-only `PF.Persistence.OfflineFoodAging` passed real-file UTC aging without world ticks in a small native fixture: expired food removal in player inventory, storage and pickups; surviving batch/quantity preservation; permanent items; repeated loads without renewal or duplication; and public reconnect restoration from an older player capture time despite a newer world-file timestamp. Final checks explicitly require the original storage identity. No existing runtime defect was found, no assets/schema/settings changed, and this does not replace separate-process multiplayer or manual rendered acceptance.
+
+Editor initial/final builds passed 16.90/6.12 s without compiler warnings. Initial focused report passed and retained. Final Automation_M8FoodFinal_20261008_081451534_924b2032 passed 1/1, zero failures/test warnings/errors, engine/runner exits 0, reviewed raw log zero warnings/errors/ensure/fatal. Run 19.67 s, sampled working/private 2.995/2.955 GiB. Reports/run-summary in Saved/AutomationReports/<name>; matching PF log in Saved/Logs. Current combined native selection has 32 tests but was not rerun; historical 30-test checkpoint and separate dead-player/food passes remain distinct. Bounded [Trello task](https://trello.com/c/TG9qxxnq) moved Done immediately; full M7/M8 Personal gates remain open.
+
 ## 2026-10-08 M8 two-client lag/loss create and restart
 
 Following the passed one-client prerequisite, existing PF.Persistence.Live passed all six M8Lag2_20261008_062152_3aa7a6 server/client Create/Restart reports under engine-confirmed session-only PktLag=75/PktLoss=1. Each 1/1, engine/report 0, zero test warnings/errors/timeout/ensure/fatal; Client 2 passed both phases. Two-client working sets create 1.723/1.814/1.801 GiB, restart 1.716/1.791/1.794 GiB. Known raw log categories unchanged, no other warnings/errors. Exact paths/private-memory/limits: [M8_NETWORK_DIAGNOSTICS.md](M8_NETWORK_DIAGNOSTICS.md). No source/assets/settings/new build or rendered/manual/M15 acceptance claim. Bounded Trello task complete; M7/M8 Personal gates remain open.

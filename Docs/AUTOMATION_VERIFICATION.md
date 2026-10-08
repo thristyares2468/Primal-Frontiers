@@ -32,6 +32,14 @@ Inspection is restricted to project-local `Saved/AutomationReports/.../index.jso
 
 ## October 8 verification
 
+Current native selection contains 32 distinct tests after the focused DeadPlayerRespawn and OfflineFoodAging additions. Each new test passed separately; the earlier combined 30-test checkpoint remains historical, not a rerun of all 32. Focused food verification:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunNativeAutomation.ps1 -TestFilter PF.Persistence.OfflineFoodAging -Label M8Food -TimeoutSeconds 120
+```
+
+Latest exact food report/build/memory/log evidence and scope: [PERSISTENCE_M8.md](PERSISTENCE_M8.md). Fixture waits 3.2 wall-clock seconds with no world ticks to exercise actual file UTC age. It does not launch a separate client/server or certify manual/rendered gameplay.
+
 For the combined M8 native checkpoint, use these two selections. They covered the original 26 native tests plus four persistence safety/collision cases at 31dce6b (30 distinct tests). The subsequent DeadPlayerRespawn addition increases current selection to 31; it passed a separate focused run, not a repeated full suite. Splitting stays within the runner's 200-character filter bound:
 
 ```powershell
