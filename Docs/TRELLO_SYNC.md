@@ -32,6 +32,8 @@ Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed
 
 ## Every continue/task
 
+October9 test-guide contract: descriptions begin with exact existing level package path or NONE, launch/net mode, one Start here action, numbered inputs/expected outcomes, pass/refusal criteria and evidence. Docs/TRELLO_TEST_GUIDES.md holds G1–G7; copy the relevant guide into each card so it is usable without another document. Related Personal cards may cite one observed session. Future maps/controls require naming once implemented; no invented fixture or assumed pass. Guide update task https://trello.com/c/FgcQHCoI is separate from active server setup acknowledgment. Preserve prior evidence below the current guide, members/dates/list status and numbered priorities.
+
 October9 settings Cancel check: https://trello.com/c/WwM89qzB Doing → Done after Editor/Game,Preferences and two rendered SettingsCancelLive runs passed; eight PNGs/logs inspected. Exact limits in SETTINGS_CANCEL_M11.md: no Apply/display/max-scale/audio certification. Personal cards unchanged. Next eligible M11 task is server-owned restoration acknowledgment,not a declaration of full UI acceptance.
 
 October9 UI-runner isolation: https://trello.com/c/rCmZYZFy Doing → Done after the launcher supplied unique profiles for every rendered case and actual ControlsLive passed1/1. Before/after read-only hashes verified both existing default Local files unchanged; no profile content/recovery edited. Three PNGs and known raw severity categories reviewed; no C++ build was needed. Next independent bounded task is settings draft/cancel/focus.
