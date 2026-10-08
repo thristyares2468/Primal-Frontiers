@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-08 — Gate native automation on structured outcomes
+
+Unreal exit 0 occurred after a real twelve-assertion failure and an unmatched selection. Native verification therefore checks nonempty clean report records/counts, actual engine exit and fatal/ensure logs, instead of exit alone. Keep raw-log review and manual/live/rendered gates explicit. Use bounded hidden NullRHI processes, unique evidence and only owned-process cleanup; never close a user's Editor or upload identity/save data. Scripts/RunNativeAutomation.ps1 adds no plugin/dependency or gameplay/settings change.
+
 ## 2026-10-08 — Never publish the default world after a failed startup restore
 
 Latch startup restoration failure through Capture/Save as well as login. Generic file-checksum validity is insufficient: a future semantic version or changed authored layout can fail world restoration while still being a readable file generation. Refuse publication with a specific diagnose/restart reason instead of making default state the newest save. Keep files, output records and schema unchanged; recovery is deliberate, not a silent overwrite. A test-first failure, successful focused/native regressions and normal one-client create/restart establish the narrow fix; rendered/manual gates remain separate.

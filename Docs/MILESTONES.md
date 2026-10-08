@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-08 M8 native automation verdict tooling
+
+Added Scripts/RunNativeAutomation.ps1 with unique report/log/summary output, bounded owned-process timeout and sampled memory. Reject failed/missing/empty/incomplete/warned reports regardless of Unreal exit 0; reject unsafe inputs and a second Editor. Retained real failure/success inspection returned runner exits 1/0. Fresh Automation_M8ReportGate_20261008_042918633_adb3d3f7 passed StartupFailurePreservesSave 1/1, engine/runner exits 0, no test/raw-log warnings/errors/ensure/fatal; 2.999/2.856 GiB working/private, 18.16 s.
+
+Intentional unmatched selection Automation_M8EmptyReportGate_20261008_043016202_b207d390: no index.json, Unreal exit 0, runner correctly failed with exit 1; one expected no-tests-match log error; 2.964/2.886 GiB, 16.27 s. Parser, null-count/duplicate-ID/nonzero-exit rejection, missing/outside-report/unsafe-filter checks passed. See AUTOMATION_VERIFICATION.md for invocation and limitations. No C++ changed or repeated build claimed. Bounded Trello tooling task Done; manual M7/M8 gates remain open.
+
 ## 2026-10-08 M8 startup restoration save-safety fix
 
 Source review and PF.Persistence.StartupFailurePreservesSave reproduced a real gap: after unsupported payload or authored-layout startup failure, login refused but capture/save published a newer empty/default-world generation. Initial report M8StartupFailureReproduced_1791432857773: 0 passed/1 failed, 12 assertion errors, engine exit 0. Preserved failure evidence; disposable generated test slots only.
