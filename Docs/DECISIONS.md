@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Recipe availability is a fresh-batch advisory
+
+Existing recipe shortcut cards query validated catalog definitions and count only nonexpired replicated batches at synchronized server time. The UI must not prune inventory, queue work, promise output-space approval or turn ingredients-present into an action success. Busy/wait/cancel and missing data are explicit; existing component/RPC feedback remains the authoritative result. Three bounded native UMG cards share the texture-free theme, scale at10Hz and preserve current controls. General catalog navigation/selection and expanded outputs are separate work. RECIPE_DETAILS_M11.md records build/native/rendered evidence and remaining manual gates.
+
 ## 2026-10-09 — Inventory details are catalog/batch queries
 
 Keep the original input/RPC authority and stable stack GUIDs. A read-only presentation model derives item category, unit/batch weight, quantity/limit, expiry and per-portion effects from validated definitions plus synchronized server time. Availability is not a server action acknowledgment: missing/expired data is explicit and real recovery remains capped/validated by existing gameplay. Native UMG inset reuses the original texture-free palette, maintains four rows/10Hz and leaves first-person aim/vitals clear; no icon loading, data/schema migration or new dependencies. Narrow build/native/rendered evidence: INVENTORY_DETAILS_M11.md. Full human acceptance remains separate.

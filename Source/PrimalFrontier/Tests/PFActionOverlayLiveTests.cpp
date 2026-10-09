@@ -53,6 +53,8 @@ public:
         {
             Test->TestTrue(TEXT("Real missing ingredients refusal"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Result")).Contains(TEXT("Refused: insufficient")));
             Test->TestEqual(TEXT("Rejected job stays idle"),PC->GetCrafting()->ActiveRecipe,NAME_None);
+            Test->TestTrue(TEXT("Tool card has catalog output and missing fresh ingredients"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Body")).Contains(TEXT("Makes 1 Stone gathering tool")) && Label(Craft.Get(),TEXT("PF_CraftingPanel_Body")).Contains(TEXT("Missing fresh ingredients")));
+            Test->TestTrue(TEXT("Cook and dry have actual distinct output cards"),Label(Craft.Get(),TEXT("PF_Recipe1_Body")).Contains(TEXT("Makes 1 Cooked food")) && Label(Craft.Get(),TEXT("PF_Recipe2_Body")).Contains(TEXT("Makes 1 Dried food")));
             CheckLayout(Craft.Get(),TEXT("PF_CraftingPanel"));Capture(TEXT("craft_refused"));Wait(Now,0.5,2);return false;
         }
         if(Phase==2)
@@ -72,6 +74,7 @@ public:
         {
             Test->TestTrue(TEXT("Busy request refusal remains visible alongside running job"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Result")).Contains(TEXT("Craft refused")));
             Test->TestEqual(TEXT("Busy request cannot grant output"),PC->GetInventory()->Count(TEXT("Item_Tool")),0);
+            Test->TestTrue(TEXT("Running card never advertises immediate availability"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Body")).Contains(TEXT("Job running - wait or cancel")));
             CheckLayout(Craft.Get(),TEXT("PF_CraftingPanel"));Capture(TEXT("craft_busy"));Wait(Now,0.5,5);return false;
         }
         if(Phase==5)
@@ -80,6 +83,7 @@ public:
         {
             Test->TestTrue(TEXT("Server cancellation visible"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Result")).Contains(TEXT("Cancelled")));
             Test->TestEqual(TEXT("Cancellation retains wood"),PC->GetInventory()->Count(TEXT("Item_Wood")),3);
+            Test->TestTrue(TEXT("Cancellation returns ingredients-present advisory, not success"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Body")).Contains(TEXT("Ingredients present; server validates")));
             Capture(TEXT("craft_cancelled"));Wait(Now,0.5,7);return false;
         }
         if(Phase==7)
@@ -141,7 +145,17 @@ private:
         for(const TCHAR* Suffix:{TEXT("_Heading"),TEXT("_Body"),TEXT("_Result")})
         {auto* T=Cast<UTextBlock>(Widget->WidgetTree->FindWidget(FName(*(FString(Name)+Suffix))));Test->TestTrue(FString(TEXT("Text fits allocated row "))+Suffix,T && T->GetDesiredSize().Y<=T->GetCachedGeometry().GetLocalSize().Y+1);}
         auto* Body=Cast<UTextBlock>(Widget->WidgetTree->FindWidget(FName(*(FString(Name)+TEXT("_Body")))));
-        Test->TestEqual(TEXT("Action text honors HUD scale"),Body->GetFont().Size,float(FMath::RoundToInt(22*UPFGameUserSettings::Get()->Preferences.HUDScale)));
+        const bool bRecipes=Widget->IsA<UPFCraftingHUD>();
+        Test->TestEqual(TEXT("Action text honors HUD scale"),Body->GetFont().Size,float(FMath::RoundToInt((bRecipes?16:22)*UPFGameUserSettings::Get()->Preferences.HUDScale)));
+        if(bRecipes)
+        {
+            TArray<UWidget*> Widgets;Widget->WidgetTree->GetAllWidgets(Widgets);
+            for(auto* Child:Widgets){if(auto* T=Cast<UTextBlock>(Child))
+            {
+                const auto Geometry=T->GetCachedGeometry();const auto Bottom=Root.AbsoluteToLocal(Geometry.LocalToAbsolute(Geometry.GetLocalSize()));
+                Test->TestTrue(FString(TEXT("Recipe text fits screen: "))+T->GetName(),Bottom.Y<Size.Y && T->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);
+            }}
+        }
     }
     void Press(FKey Key){for(const auto& B:PC->InputComponent->KeyBindings){if(B.Chord.Key==Key && B.KeyEvent==IE_Pressed){B.KeyDelegate.Execute(Key);return;}}Test->AddError(TEXT("Missing action binding ")+Key.ToString());}
     void Wait(double Now,double Seconds,int32 Next){Until=Now+Seconds;Phase=Next;}

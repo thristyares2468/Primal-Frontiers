@@ -1,6 +1,6 @@
 // PFCraftingHUD.h
 //
-// Placeholder crafting overlay (C / gamepad Y), beside the first-person view. Read-only:
+// Themed crafting overlay (C / gamepad Y), beside the first-person view. Read-only:
 // lists the three greybox recipes with have/need counts per ingredient, the time
 // left on the active job and the last crafting feedback. Hotkeys are handled by
 // APFSurvivalPlayerController.
@@ -24,7 +24,8 @@ protected:
 
 private:
     UPROPERTY() TObjectPtr<UBorder> Panel;
-    UPROPERTY() TObjectPtr<UTextBlock> Text;
+    UPROPERTY() TArray<TObjectPtr<UTextBlock>> RecipeTitles;
+    UPROPERTY() TArray<TObjectPtr<UTextBlock>> RecipeBodies;
     UPROPERTY() TObjectPtr<UTextBlock> Heading;
     UPROPERTY() TObjectPtr<UTextBlock> Result;
     float Refresh=0;
