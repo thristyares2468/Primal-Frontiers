@@ -32,6 +32,7 @@ UPFItemCatalog::UPFItemCatalog()
     // The primitive gathering tool: carrying one doubles gathering speed and raises melee damage.
     Add(TEXT("Item_Tool"),TEXT("Stone gathering tool"),2.f,TAG_PF_Tool);
     Items.Last().StackLimit=1;
+    Items.Last().GatheringHits=2;Items.Last().MeleeDamage=35;
 
     // Processed food (M4 recipes): more nutrition and longer shelf life than raw food.
     Add(TEXT("Item_CookedFood"),TEXT("Cooked food"),0.2f,TAG_PF_Food);
@@ -43,6 +44,11 @@ UPFItemCatalog::UPFItemCatalog()
     Add(TEXT("Item_Fibre"),TEXT("Plant fibre"),0.1f,TAG_PF_Resource);
     Add(TEXT("Item_Water"),TEXT("Water portion (placeholder)"),0.5f,TAG_PF_Resource);
     Items.Last().StackLimit=10;Items.Last().WaterRecovery=35;
+
+    // M12: existing plant fibre becomes a useful intermediate, then a better tool.
+    Add(TEXT("Item_Cord"),TEXT("Fibre cord"),0.15f,TAG_PF_Resource);
+    Add(TEXT("Item_BoundTool"),TEXT("Bound stone tool"),2.5f,TAG_PF_Tool);
+    Items.Last().StackLimit=1;Items.Last().GatheringHits=3;Items.Last().MeleeDamage=45;
 }
 
 const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
@@ -55,7 +61,9 @@ const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
         if (Result || Id.IsNone() || !D.Category.IsValid() || D.StackLimit<1 || D.StackLimit>1000 ||
             !FMath::IsFinite(D.Weight) || D.Weight<=0 || !FMath::IsFinite(D.ShelfLifeSeconds) || D.ShelfLifeSeconds<0 || D.ShelfLifeSeconds>86400 ||
             !FMath::IsFinite(D.FoodRecovery) || D.FoodRecovery<0 || D.FoodRecovery>100 ||
-            !FMath::IsFinite(D.WaterRecovery) || D.WaterRecovery<0 || D.WaterRecovery>100) { return nullptr; }
+            !FMath::IsFinite(D.WaterRecovery) || D.WaterRecovery<0 || D.WaterRecovery>100 ||
+            D.GatheringHits<0 || D.GatheringHits>8 || !FMath::IsFinite(D.MeleeDamage) || D.MeleeDamage<0 || D.MeleeDamage>100 ||
+            (!D.Category.MatchesTag(TAG_PF_Tool) && (D.GatheringHits!=0 || D.MeleeDamage!=0))) { return nullptr; }
         Result=&D;
     }
     return Result;

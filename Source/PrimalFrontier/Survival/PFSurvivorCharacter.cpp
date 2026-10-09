@@ -78,7 +78,7 @@ void APFSurvivorCharacter::Tick(float DeltaSeconds)
     if(HasAuthority())
     {
         const auto* I=GetPlayerState()?GetPlayerState()->FindComponentByClass<UPFInventoryComponent>():nullptr;
-        const bool Equipped=I && I->Count(TEXT("Item_Tool"))>0 && !Survival->IsDead();
+        const bool Equipped=I && I->GatheringHits()>1 && !Survival->IsDead();
         if(bHasGatheringTool!=Equipped)
         {
             bHasGatheringTool=Equipped;

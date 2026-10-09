@@ -521,11 +521,11 @@ void APFSurvivalPlayerController::ServerAttackCreature_Implementation()
     GetPawn()->GetActorEyesViewPoint(Eye,Look);
     FHitResult Hit;
     if(!GetWorld()->LineTraceSingleByChannel(Hit,Eye,Eye+Look.Vector()*250,ECC_Visibility,FCollisionQueryParams(SCENE_QUERY_STAT(PFCreatureAttack),false,GetPawn()))){return;}
-    // Each swing costs 5 stamina; the gathering tool raises damage from 20 to 35.
+    // Each swing costs 5 stamina; owned validated catalog tools select the damage tier.
     auto* Creature=Cast<APFCreature>(Hit.GetActor());
     if(!Creature || Creature->IsDead() || !V->SpendStamina(5)){return;}
     const auto* I=GetInventory();
-    const float Amount=I && I->Count(TEXT("Item_Tool"))>0?35.f:20.f;
+    const float Amount=I?I->MeleeDamage():20.f;
     const bool HitCreature=Creature->TakeDamage(Amount,FDamageEvent(),this,GetPawn())>0;
     ClientInventoryFeedback(HitCreature?TEXT("Creature hit"):TEXT("Attack refused"));
 }

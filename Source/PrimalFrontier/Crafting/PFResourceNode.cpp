@@ -105,8 +105,8 @@ bool APFResourceNode::Gather(APawn* Pawn)
     // Derive reach and aim from the possessed pawn. Clients never supply a target, yield or damage.
     if(PFInteraction::FindTarget(Pawn)!=this){return false;}
     I->PruneExpired();
-    // Tool = 2 hits per action (never more than remain); bare hands = 1.
-    const int32 Damage=FMath::Min(HitsRemaining,I->Count(TEXT("Item_Tool"))>0?2:1);
+    // Tool tiers improve actions, never the node's finite total yield.
+    const int32 Damage=FMath::Min(HitsRemaining,I->GatheringHits());
     // Grant first: if the bag is full the node keeps its hits.
     if(!I->Grant(D->YieldItem,D->YieldPerHit*Damage)){return false;}
     HitsRemaining-=Damage;

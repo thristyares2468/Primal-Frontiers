@@ -41,11 +41,16 @@ int32 UPFItemPicture::NativePaint(const FPaintArgs& Args,const FGeometry& G,cons
         FSlateDrawElement::MakeLines(Draw,Layer,G.ToPaintGeometry(),Points,ESlateDrawEffect::None,Color*Style.GetColorAndOpacityTint(),true,Width*Side);
     };
     Box({0,0},{1,1},PFUITheme::Inset,0.12f);
-    if(ItemId==TEXT("Item_Tool"))
+    if(ItemId==TEXT("Item_Tool") || ItemId==TEXT("Item_BoundTool"))
     {
         Line({{0.28,0.82},{0.68,0.21}},FLinearColor(0.53f,0.32f,0.14f,1),0.11f);
         Line({{0.23,0.25},{0.57,0.16},{0.81,0.37},{0.86,0.59}},FLinearColor(0.66f,0.72f,0.72f,1),0.16f);
         Line({{0.52,0.19},{0.69,0.31}},PFUITheme::Text,0.04f);
+        if(ItemId==TEXT("Item_BoundTool")){Line({{0.52,0.27},{0.69,0.36},{0.49,0.32},{0.65,0.41}},PFUITheme::Accent,0.04f);}
+    }
+    else if(ItemId==TEXT("Item_Cord"))
+    {
+        Line({{0.74,0.76},{0.28,0.76},{0.18,0.54},{0.27,0.26},{0.68,0.23},{0.82,0.49},{0.72,0.66},{0.36,0.64},{0.32,0.43},{0.64,0.39}},FLinearColor(0.72f,0.60f,0.30f,1),0.07f);
     }
     else if(ItemId==TEXT("Item_CookedFood"))
     {

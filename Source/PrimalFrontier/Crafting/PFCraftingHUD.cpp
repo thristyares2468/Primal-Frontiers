@@ -113,6 +113,7 @@ void UPFCraftingHUD::RefreshMenu()
         if(Output->ShelfLifeSeconds>0){Stats+=FString::Printf(TEXT("Shelf life when made: %.0f min\n"),Output->ShelfLifeSeconds/60);}
         else{Stats+=TEXT("Does not expire\n");}
         if(Output->FoodRecovery>0 || Output->WaterRecovery>0){Stats+=FString::Printf(TEXT("Per portion: +%.0f food | +%.0f water\n"),Output->FoodRecovery,Output->WaterRecovery);}
+        if(Output->GatheringHits>0 || Output->MeleeDamage>0){Stats+=FString::Printf(TEXT("Tool: %d gather hits | %.0f melee damage\n"),Output->GatheringHits,Output->MeleeDamage);}
         Stats+=TEXT("Greybox item preview");
     }
     ItemStats->SetText(FText::FromString(Stats));

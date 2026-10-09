@@ -3,7 +3,7 @@
 // A gatherable placeholder node in the world (wood pile, stone outcrop, forage
 // patch). Pressing E while aiming at it asks the server to gather. Each node has
 // a finite number of hits; when depleted it hides and refills after its respawn
-// time. Carrying the gathering tool spends two hits per action (faster), but the
+// time. Valid owned tool tiers spend more hits per action (faster), but the
 // total yield per node stays the same.
 //
 // The server validates reach/aim (via PFInteraction::FindTarget), life state,

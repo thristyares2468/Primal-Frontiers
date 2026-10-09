@@ -27,6 +27,8 @@ class PRIMALFRONTIER_API APFSurvivorCharacter : public APrimalFrontierCharacter
     GENERATED_BODY()
 
 public:
+    /** Public presentation state; inventory and damage authority remain server-owned. */
+    UFUNCTION(BlueprintPure,Category="Presentation") bool HasGatheringTool() const {return bHasGatheringTool;}
     APFSurvivorCharacter();
 
     /** Authoritative vitals. Recreated with each respawned pawn. */

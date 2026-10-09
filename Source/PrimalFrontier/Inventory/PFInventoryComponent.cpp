@@ -77,6 +77,19 @@ double UPFInventoryComponent::ServerTime(const UWorld* World)
 
 const FPFItemDefinition* UPFInventoryComponent::Definition(FName Id) const { return Catalog ? Catalog->Find(Id) : nullptr; }
 
+int32 UPFInventoryComponent::GatheringHits() const
+{
+    int32 Best=1;const double Now=ServerTime(GetWorld());
+    for(const auto& S:Stacks){if(S.Quantity>0 && (S.ExpiresAt==0 || S.ExpiresAt>Now)){if(const auto* D=Definition(S.ItemId)){Best=FMath::Max(Best,D->GatheringHits);}}}
+    return Best;
+}
+float UPFInventoryComponent::MeleeDamage() const
+{
+    float Best=20;const double Now=ServerTime(GetWorld());
+    for(const auto& S:Stacks){if(S.Quantity>0 && (S.ExpiresAt==0 || S.ExpiresAt>Now)){if(const auto* D=Definition(S.ItemId)){Best=FMath::Max(Best,D->MeleeDamage);}}}
+    return Best;
+}
+
 float UPFInventoryComponent::GetWeight() const
 {
     double Total=0;

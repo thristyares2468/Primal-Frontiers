@@ -69,6 +69,9 @@ public:
     float GetWeight() const;
     /** Total quantity of Id across all stacks. */
     int32 Count(FName Id) const;
+    /** Best valid still-fresh owned tool benefit; defaults to bare hands (1 hit/20 damage). */
+    int32 GatheringHits() const;
+    float MeleeDamage() const;
 
     // ---- Server-only mutations (all atomic) ----
 

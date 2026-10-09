@@ -3,6 +3,7 @@
 param(
     [ValidateSet(1, 2)][int]$Players = 1,
     [switch]$SimulateLagLoss,
+    [switch]$ToolProgression,
     [ValidateRange(1024, 65535)][int]$Port = 17989,
     [ValidateRange(30, 600)][int]$TimeoutSeconds = 210,
     [string]$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8',
@@ -50,7 +51,9 @@ try {
     }
 
     $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff') + '_' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
-    $prefix = 'M8Live' + $Players + '_' + $stamp
+    $prefix = $(if($ToolProgression){'M12ToolLive'}else{'M8Live'}) + $Players + '_' + $stamp
+    $testFilter = if($ToolProgression){'PF.Crafting.ToolProgressionLive'}else{'PF.Persistence.Live'}
+    $testFlag = if($ToolProgression){'-PFRunToolProgressionTests'}else{'-PFRunPersistenceLiveTests'}
     $slot = 'Automation' + $prefix
     # Profiles are private local test state. Same aliases and endpoint survive both phases.
     $profile = 'PF' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
@@ -85,7 +88,7 @@ try {
                 $mode = if ($i -eq 0) { '-server -game -port=' + $Port } else { '-game -PFIdentityProfile=' + $profile + $i }
                 $load = if ($phase -eq 'Restart') { '-PFLoadSave' } else { '' }
                 $network = if ($SimulateLagLoss) { '-PktLag=75 -PktLoss=1' } else { '-PktLag=0 -PktLoss=0' }
-                $arguments = '"{0}" {1} {2} -nullrhi -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig {3} -PFRunPersistenceLiveTests -PFExpectedPlayers={4} -PFSaveSlot={5} {6} -ExecCmds="Automation RunTests PF.Persistence.Live" -TestExit="Automation Test Queue Empty" -ReportExportPath="{7}" -abslog="{8}"' -f $projectFile, $url, $mode, $network, $Players, $slot, $load, $report, $log
+                $arguments = '"{0}" {1} {2} -nullrhi -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig {3} {9} -PFExpectedPlayers={4} -PFSaveSlot={5} {6} -ExecCmds="Automation RunTests {10}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{7}" -abslog="{8}"' -f $projectFile, $url, $mode, $network, $Players, $slot, $load, $report, $log, $testFlag, $testFilter
                 $process = Start-Process -FilePath $editor -ArgumentList $arguments -WorkingDirectory $root -WindowStyle Hidden -PassThru
                 $run = [pscustomobject]@{ Name = $name; Role = $role; Process = $process; Report = $report; Log = $log; Working = 0L; Private = 0L }
                 $runs += $run
@@ -149,7 +152,8 @@ try {
                         $text -match 'Owner/foreign bag and storage privacy assertions inspected after load/reconnect' -and
                         ($ownerRole -xor $foreignRole)
                     }
-                    $exactTest = $verdict.TestCount -eq 1 -and @($verdict.Tests | Where-Object { $_.Name -eq 'PF.Persistence.Live' }).Count -eq 1
+                    if($ToolProgression){$contract=if($run.Role -eq 'Server'){$text -match $(if($phase -eq 'Restart'){'Tool restart server restored every owner'}else{'Tool server conservation and save verified'})}else{$text -match $(if($phase -eq 'Restart'){'Tool restart client identity, tier and privacy verified'}else{'Tool owned RPC loop, finite yield and privacy verified'})}}
+                    $exactTest = $verdict.TestCount -eq 1 -and @($verdict.Tests | Where-Object { $_.Name -eq $testFilter }).Count -eq 1
                     $entry = [ordered]@{
                         Run = $run.Name; Role = $run.Role; Passed = ($reportExit -eq 0 -and $verdict.Passed -and $exactTest -and $fatal -eq 0 -and $contract -and $networkApplied)
                         EngineExit = $run.Process.ExitCode; ReportVerdictExit = $reportExit
@@ -172,8 +176,8 @@ try {
             $summary | ConvertTo-Json -Depth 9 | Set-Content -LiteralPath (Join-Path $summaryDirectory 'run-summary.json') -Encoding UTF8
         }
         $allPassed = $phaseRecord.Processes.Count -eq ($Players + 1) -and @($phaseRecord.Processes | Where-Object { -not $_.Passed }).Count -eq 0
-        $rolesCovered = @($phaseRecord.Processes | Where-Object { $_.StorageOwnerRole }).Count -eq 1 -and
-            @($phaseRecord.Processes | Where-Object { $_.StorageForeignRole }).Count -eq ($Players - 1)
+        $rolesCovered = $ToolProgression -or (@($phaseRecord.Processes | Where-Object { $_.StorageOwnerRole }).Count -eq 1 -and
+            @($phaseRecord.Processes | Where-Object { $_.StorageForeignRole }).Count -eq ($Players - 1))
         if ($phaseRecord.CleanupFailures.Count -or -not $allPassed -or -not $rolesCovered) { throw 'Live report, cleanup or RPC/privacy/profile evidence failed' }
         $phaseRecord.Passed = $true
     }

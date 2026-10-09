@@ -8,6 +8,8 @@ Building/storage now shares the original theme: selected piece/preview/storage c
 
 ## Open the game
 
+M12 tool loop: gather4plant fibre at an existing labelled fibre patch (E), then C → Twist fibre cord → Enter/Craft selected. Four seconds later one cord exists. One Stone gathering tool + one cord +2wood become one Bound stone tool via the selected8-second recipe. Carrying it enables3gather hits/45melee damage using the existing first-person primitives; full-node yield remains finite. Browse appended recipes with Up/Down or the row buttons;1/2/3 remain baseline quick recipes. R cancels without consuming ingredients. [TOOL_TIERS_M12.md](TOOL_TIERS_M12.md) has the exact loop, server rules, automation and limits. This is no XP/armor/equipment-slot/durability implementation or human acceptance claim.
+
 **Normal solo play and saved worlds:** with Editor closed, use the command below without a map/save flag. Single player → Create new world (unused ID) or select an existing world → Load selected world. In gameplay **P → Save world**, require visible success, then End session → Confirm end session to return to the menu. In Single player, select a save, type a friendly name in the field below Refresh worlds and choose **Rename selected world**. Names can contain spaces; gameplay save IDs/files/ownership stay unchanged. Do not recreate an existing world to load it. [WORLD_MENU_M11.md](WORLD_MENU_M11.md) has the short guide/evidence; Trello guide G3 covers human replay after the reported M8 failure. Multiplayer menu is currently information only.
 
 ```powershell

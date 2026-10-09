@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Tool tiers change effort, not resource totals
+
+Make tool hit count and melee damage bounded validated item data, queried from the authoritative owned inventory rather than supplied by a client or cached after dropping. Best valid carried benefit per action preserves the existing automatic-tool behavior; explicit equipment slots/durability remain future work. Fibre cord plus the existing stone tool and wood produce a bound tool through the existing timed exact-batch conversion. The upgraded node action spends up to three remaining hits and inserts the corresponding finite yield, preserving depletion/regrowth/cooldown/capacity and total available resources. Existing attack trace/life/stamina/cooldown checks remain mandatory; replicated public held-tool presence does not expose private inventory. Stable IDs reuse V1 save validation without an asset/schema migration. No retroactive XP/unlocks or external assets. TOOL_TIERS_M12.md records native/rendered/network checks and retained fixture/build failures; full M12/human acceptance remains separate.
+
 ## 2026-10-09 — Building presentation keeps advisory and authority separate
 
 Reuse the texture-free PFUITheme for the existing read-only building/storage overlay. Separate control footer from the inset selected-piece/storage data and keep the last authoritative result outside the inset. The preview remains explicitly advisory; storage countdown is its existing server-time deadline, with no preservation implied. No placement/ownership/collision/transaction/input/save changes. Reduced body/result/control base fonts with the same user scale leave room for real storage/refusal text at720p and maximum HUDScale1.5; expanded existing rendered bounds checks and screenshot review prove the bounded layout. BUILDING_THEME_M11.md records evidence/limits; human acceptance remains separate.
