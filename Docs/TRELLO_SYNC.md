@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October10 earned route: fresh Programming/HUD/parent audit selected rQh7E4jL Doing after35e3673 publication. Native1/rendered1/Editor+Game passed;3PNG/rawbaseline/hash guards reviewed. Retain initial label preflight failure and prefix-only retry. Immediately update/move/readback technicalDone, parent/manual status unchanged, scoped Sol publication; next fresh audit for earned protection/default creature combat. No new Personal task.
+
 October10 crafting knowledge UI: fresh bounded F6kA9BvW and existing Personal G2/M11/parent cards read. Final native/rendered720p+1440p/build/artifact/log/hash gates passed; retained fixture failures described in KNOWLEDGE_MENU_M12.md. Immediately update/move/read back bounded technical Done; parentM12Doing and existing Personal priorities/members/deadlines/history preserved. Copy revised exact G2 learning guide into existing cards, without another assignment. Scoped Sol publication follows; fresh board audit precedes grant-free earned-upgrade verification.
 
 October10 recipe access: fresh bounded https://trello.com/c/KopaBAfa and parent read. Editor/Game/native4+legacy1/one-client4/two-client lag-loss6/rendered720p exact1 passed, raw baseline/4PNG/personal hash guards reviewed. Retain compiler/fixture failures in RECIPE_ACCESS_M12.md. Immediately evidenceupdate/move/readback only bounded task Done; parentM12Doing and Personal unchanged. ScopedSolpublication then fresh audit for optional knowledge purchase UI, with no human/fullmilestone claim.

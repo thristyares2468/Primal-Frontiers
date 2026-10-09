@@ -6,6 +6,8 @@
 #include "Inventory/PFInventoryPlayerState.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Crafting/PFCraftingComponent.h"
+#include "Crafting/PFResourceNode.h"
+#include "Survival/PFInteraction.h"
 #include "Survival/PFSurvivalGameMode.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFSurvivorCharacter.h"
@@ -74,5 +76,52 @@ bool FPFProgressionComponentTest::RunTest(const FString&)
     TestTrue(TEXT("Actual V1 existing bound tool remains usable but grants no learned recipe"),I->Count(TEXT("Item_BoundTool"))==1 && I->GatheringHits()==3 && !G->CanCraftRecipe(TEXT("Recipe_BoundTool"),Error));
     if(!TestTrue(TEXT("Explicit save publishes migrated V2"),Persistence->Save(Slot,Error) && Persistence->Load(Slot,Error))){AddError(Error);return false;}TestEqual(TEXT("Repeated migrated restore stays zero"),G->GetExperience(),0);
     Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Real craft success/dedupe/failure/grant refusal, private component authority, V2 repeated files, death/respawn and V1 zero defaults checked."));return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEarnedUpgradeTest,"PF.Progression.EarnedUpgrade",EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FPFEarnedUpgradeTest::RunTest(const FString&)
+{
+    AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"),EAutomationExpectedMessageFlags::Contains,0);
+    FTestWorldWrapper Fixture;if(!Fixture.CreateTestWorld(EWorldType::Game)){return false;}auto* W=Fixture.GetTestWorld();
+    W->SetGameMode(FURL(nullptr,TEXT("/Engine/Maps/Entry?game=/Script/PrimalFrontier.PFSurvivalGameMode"),TRAVEL_Absolute));
+    auto* Floor=W->SpawnActor<AActor>();auto* Box=NewObject<UBoxComponent>(Floor);Floor->SetRootComponent(Box);Box->SetBoxExtent(FVector(4000,4000,25));Box->SetCollisionProfileName(TEXT("BlockAll"));Box->RegisterComponent();Floor->SetActorLocation(FVector(0,0,-25));
+    W->SpawnActor<APlayerStart>(FVector(-500,0,120),FRotator::ZeroRotator);W->SpawnActor<APFWorldClock>();if(!Fixture.BeginPlayInTestWorld()){return false;}
+    auto* PC=W->SpawnActor<APFSurvivalPlayerController>();W->GetAuthGameMode<APFSurvivalGameMode>()->RestartPlayer(PC);
+    auto* PS=PC->GetPlayerState<APFInventoryPlayerState>();auto* P=Cast<APFSurvivorCharacter>(PC->GetPawn());if(!PS || !P){return false;}
+    auto* G=PS->Progression.Get();auto* I=PS->Inventory.Get();auto* C=PS->Crafting.Get();if(!G || !I || !C || !C->Catalog || !I->Catalog){return false;}
+    P->GetCharacterMovement()->DisableMovement();P->Survival->HungerDrainPerSecond=0;P->Survival->ThirstDrainPerSecond=0;PC->SetControlRotation(FRotator::ZeroRotator);
+    auto Advance=[&](int32 Ticks){for(int32 N=0;N<Ticks;++N){Fixture.TickTestWorld(0.1f);}};
+    TestTrue(TEXT("Earned route starts empty and zero"),I->GetStacks().IsEmpty() && G->GetExperience()==0 && G->GetRecord().Knowledge.IsEmpty());
+    FString Error;PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));TestTrue(TEXT("Premature owned purchase refuses without rewards"),G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) && G->GetExperience()==0 && G->GetRecord().Knowledge.IsEmpty());
+    TestFalse(TEXT("Optional craft initially locked"),C->Start(TEXT("Recipe_BoundTool"),P));
+    // Only real target gathering populates the bag. No Grant/Restore/XP seeds or shortened recipes.
+    auto Gather=[&](FName Resource,int32 Actions)
+    {
+        FVector Eye;FRotator Look;P->GetActorEyesViewPoint(Eye,Look);const FTransform At(FRotator::ZeroRotator,Eye+Look.Vector()*150);
+        auto* Node=W->SpawnActorDeferred<APFResourceNode>(APFResourceNode::StaticClass(),At,P,nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+        if(!Node){return false;}Node->ResourceId=Resource;Node->FinishSpawning(At);
+        ON_SCOPE_EXIT{Node->Destroy();};
+        for(int32 N=0;N<Actions;++N){Advance(6);if(!TestTrue(TEXT("Reach/aim selects real temporary node"),PFInteraction::FindTarget(P)==Node) || !TestTrue(TEXT("Normal gather accepts owned living pawn"),Node->Gather(P))){return false;}}
+        return true;
+    };
+    if(!Gather(TEXT("Node_Wood"),3) || !Gather(TEXT("Node_Wood"),3) || !Gather(TEXT("Node_Stone"),1) || !Gather(TEXT("Node_Food"),2) || !Gather(TEXT("Node_Fibre"),3) || !Gather(TEXT("Node_Fibre"),1)){return false;}
+    TestTrue(TEXT("Finite bare-hand gathering yields exact route inputs"),I->Count(TEXT("Item_Wood"))==12 && I->Count(TEXT("Item_Stone"))==2 && I->Count(TEXT("Item_Food"))==4 && I->Count(TEXT("Item_Fibre"))==8);
+    TestEqual(TEXT("Gathering does not invent craft rewards"),G->GetExperience(),0);
+    auto Craft=[&](FName Recipe,int32 ExpectedXP)
+    {
+        const auto* D=C->Catalog->Recipe(Recipe,I->Catalog);if(!D || !TestTrue(TEXT("Real recipe starts"),C->Start(Recipe,P))){return false;}
+        Advance(FMath::CeilToInt(D->Duration*10)+10);TestTrue(TEXT("Real duration completes successfully"),C->ActiveRecipe.IsNone() && C->Feedback==TEXT("Completed"));
+        return TestEqual(TEXT("Only actual distinct conversion rewards XP"),G->GetExperience(),ExpectedXP);
+    };
+    if(!Craft(TEXT("Recipe_Tool"),20) || !Craft(TEXT("Recipe_Cook"),40) || !Craft(TEXT("Recipe_Dry"),60) || !Craft(TEXT("Recipe_Cord"),80) || !Craft(TEXT("Recipe_Club"),100)){return false;}
+    TestTrue(TEXT("Five distinct earned crafts reach first knowledge boundary"),G->GetLevel()==2 && G->GetAvailablePoints()==3 && G->GetRecord().CreditedCrafts.Num()==5);
+    if(!Craft(TEXT("Recipe_Cord"),100)){return false;}TestEqual(TEXT("Repeat cord gives no duplicate credit"),G->GetRecord().CreditedCrafts.Num(),5);
+    TestFalse(TEXT("Owned points alone don't unlock optional conversion"),C->Start(TEXT("Recipe_BoundTool"),P));
+    PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));TestTrue(TEXT("Earned owned purchase costs exactly two"),G->GetAvailablePoints()==1 && G->GetRecord().Knowledge.Contains(TEXT("Tech_FieldTools")) && G->GetExperience()==100);
+    Advance(4);PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));TestTrue(TEXT("Already-known request preserves points and items"),G->GetAvailablePoints()==1 && G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) && I->Count(TEXT("Item_Tool"))==1);
+    if(!Craft(TEXT("Recipe_BoundTool"),120)){return false;}
+    TestTrue(TEXT("Single earned upgrade and exact full-route conservation"),I->Count(TEXT("Item_BoundTool"))==1 && I->Count(TEXT("Item_Tool"))==0 && I->Count(TEXT("Item_Cord"))==0 && I->Count(TEXT("Item_Wood"))==1 && I->Count(TEXT("Item_Stone"))==0 && I->Count(TEXT("Item_Fibre"))==0 && I->Count(TEXT("Item_Food"))==1 && I->Count(TEXT("Item_CookedFood"))==1 && I->Count(TEXT("Item_DriedFood"))==1 && I->Count(TEXT("Item_Club"))==1);
+    TestTrue(TEXT("Upgrade retains earned accounting and useful performance"),G->GetRecord().CreditedCrafts.Num()==6 && G->GetAvailablePoints()==1 && I->GatheringHits()==3);
+    if(!Gather(TEXT("Node_Fibre"),1)){return false;}TestTrue(TEXT("Earned upgraded tool takes finite three-hit yield without extra XP"),I->Count(TEXT("Item_Fibre"))==6 && G->GetExperience()==120);
+    Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Earned first upgrade: real bare-hand trace gathering, seven timed jobs/six unique credits,100XP purchase boundary,120XP final,exact2point cost and three-hit benefit; no item/XP grants."));return true;
 }
 #endif
