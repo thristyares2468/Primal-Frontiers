@@ -298,3 +298,7 @@ The M4 rendered playtest exposed an offset external crosshair overlay. Add a sma
 ## 2026-10-08 — Stored shape profiles during world restoration
 
 Apply built-in NoCollision profiles to hidden building shapes and restore BlockAll profiles/responses to selected visible shapes. SetCollisionEnabled can query effective owner collision and skip the stored body update while persistence staging disables an actor. Changing profiles avoids activating hidden geometry when staging ends, and restores closed panels after toggling. Preserve constructor collision policy, authoritative ownership and the existing save format. Actual traces/capsule sweeps across repeat loads verify this narrow fix; rendered route acceptance remains separate.
+
+## 2026-10-09 Centered crafting presentation (M11)
+
+Use a local UMG list/detail modal and original procedural Slate item pictures for placeholder catalog icons; optional soft textures load through supported UImage API. Recipes are validated catalog entries, not a fixed three-row UI. Selected crafting uses existing server RPC/batch transactions. Balance only the modal's movement/look ignores and restore game input/cursor on Close/Pause. World continues during crafting. Keep headless controllers free of invisible modal input locks. Actual Slate keyboard button tests substitute for unreliable background-pointer synthesis, explicitly leaving real mouse/device acceptance open. No new dependency/assets/save format. Full evidence CENTERED_CRAFTING_M11.md.

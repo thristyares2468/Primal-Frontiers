@@ -20,7 +20,7 @@ The older direct-map console workflow below is an advanced alternative; reusing 
 
 **Item details:** Tab then Up/Down shows the selected batch's category, quantity/limit, unit/batch weight, actual remaining freshness and per-portion food/water recovery. These are read-only values; the server still validates consumption and caps the recovery. Removed selection never displays another item's details. [INVENTORY_DETAILS_M11.md](INVENTORY_DETAILS_M11.md) records720p/1440p maximum-scale evidence.
 
-**Recipe cards:** C shows tool/cook/dry output, duration and fresh have/need ingredient counts in separate themed cards.1/2/3 still starts those existing recipes; R cancels. Ingredients-present is advisory; actual server result/progress stays below. Expired food does not count even before removal. [RECIPE_DETAILS_M11.md](RECIPE_DETAILS_M11.md) records the current card checks; there is no general recipe browser yet.
+**Crafting menu:** C opens the centered recipe browser with item pictures, output/time/fresh ingredient counts, weight, nutrition and shelf life. Click a row or use Up/Down (D-pad) to select; Enter or A/X crafts the selected recipe. Craft selected, Cancel job and Close buttons provide the same actions. Tab then Space activates a focused button.1/2/3 retain quick tool/cook/dry; R cancels. The world keeps running while movement/look are captured by the menu. Close C/Y/B, or P to Pause; movement/look return on close/resume. Ingredients-present is advisory, and expired food does not count. [CENTERED_CRAFTING_M11.md](CENTERED_CRAFTING_M11.md) records the bounded verification and mouse/hardware limitations.
 
 **Controls/help:** P → Controls & help. Left/Right or LB/RB selects keyboard/controller; Up/Down or D-pad scrolls; Esc/P/B/Menu returns to Pause. Bindings are read-only and derived from registered controls/current Enhanced Input mappings. Pause alone is safe in standalone; multiplayer continues. Save explicitly before ending. [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md) records automated rendered720p/1440p evidence; human/controller acceptance remains unverified and nonblocking for independent development.
 
@@ -63,7 +63,7 @@ M11 bag readability: only four rows are visible at once. The displayed row range
 | Combat | Left click with inventory/crafting/building closed |
 | Pause | P opens/resumes; Esc also works in a standalone game window |
 | Inventory | Tab open/close; Up/Down select; X split half; G drop one; Q consume one |
-| Crafting | C open/close; 1 tool; 2 cook; 3 dry; R cancel |
+| Crafting | C open/close; Up/Down select; Enter craft selected; 1 tool; 2 cook; 3 dry; R cancel; clickable row/action buttons |
 | Building | B open/close; N next; T rotate; left click place |
 | Owned structures | E door/storage; H demolish in build mode; J debug damage in build mode |
 | Storage | Select bag item, close bag, open build mode and storage with E; U stores one selected item, O takes one from first stored stack |
@@ -83,12 +83,12 @@ Xbox button names are used below: A bottom, B right, X left, Y top. Connect befo
 | Gather / pickup / door / storage | X with overlays closed or building open |
 | Attack / place | RT |
 | Inventory | View/Back open/close; D-pad Up/Down select; Left split; Right drop one; X consume |
-| Crafting | Y open/close; X tool; D-pad Up cook, Down dry, Left cancel |
+| Crafting | Y open/close; D-pad Up/Down select recipe; A/X craft selected; Left cancel; B close |
 | Building | RB open/close; D-pad Up next, Down rotate; RT place; LB demolish aimed owned piece |
 | Storage transfers | In building mode, D-pad Left stores selected bag item, Right takes first stored item |
 | Close gameplay overlays | B |
 
-Inventory, crafting and building overlays are mutually exclusive. A remains jump outside the pause menu. Console/debug structure damage use keyboard. Look sensitivity and inversion are in P → Settings → Game. Remapping, rumble and device glyphs are deferred. If sticks work but survival buttons do not, check the map and latest compiled module.
+Inventory, crafting and building overlays are mutually exclusive. A remains jump outside modal menus. Crafting captures movement/look but the world continues; Pause remains separate. Console/debug structure damage use keyboard. Look sensitivity and inversion are in P → Settings → Game. Remapping, rumble and device glyphs are deferred. If sticks work but survival buttons do not, check the map and latest compiled module.
 
 ## First ten minutes
 

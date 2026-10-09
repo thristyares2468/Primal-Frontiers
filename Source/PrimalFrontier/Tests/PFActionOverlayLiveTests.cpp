@@ -12,7 +12,10 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 #include "Components/InputComponent.h"
+#include "UI/PFItemPicture.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
@@ -51,6 +54,7 @@ public:
         if(!PC.IsValid() || !Craft.IsValid() || !Build.IsValid()){Test->AddError(TEXT("Lost action overlay fixture"));return true;}
         if(Phase==1)
         {
+            Test->TestTrue(TEXT("Craft menu owns cursor/focus and movement/look but does not pause world"),PC->bShowMouseCursor && Craft->HasKeyboardFocus() && PC->IsMoveInputIgnored() && PC->IsLookInputIgnored() && !PC->IsPaused());
             Test->TestTrue(TEXT("Real missing ingredients refusal"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Result")).Contains(TEXT("Refused: insufficient")));
             Test->TestEqual(TEXT("Rejected job stays idle"),PC->GetCrafting()->ActiveRecipe,NAME_None);
             Test->TestTrue(TEXT("Tool card has catalog output and missing fresh ingredients"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Body")).Contains(TEXT("Makes 1 Stone gathering tool")) && Label(Craft.Get(),TEXT("PF_CraftingPanel_Body")).Contains(TEXT("Missing fresh ingredients")));
@@ -89,13 +93,62 @@ public:
         if(Phase==7)
         {
             if(!CheckShot()){return false;}
+            SlatePress(EKeys::Down);Wait(Now,0.3,12);return false;
+        }
+        if(Phase==12)
+        {
+            auto* Menu=CastChecked<UPFCraftingHUD>(Craft.Get());
+            Test->TestEqual(TEXT("Slate browse selects cook without crafting"),Menu->GetSelectedRecipe(),FName(TEXT("Recipe_Cook")));
+            Test->TestEqual(TEXT("Browse cannot start a job"),PC->GetCrafting()->ActiveRecipe,NAME_None);
+            auto* Icon=Cast<UPFItemPicture>(Craft->WidgetTree->FindWidget(TEXT("PF_SelectedItemPicture")));
+            Test->TestTrue(TEXT("Selected picture matches cooked output"),Icon && Icon->GetItemId()==TEXT("Item_CookedFood") && Icon->GetCachedGeometry().GetLocalSize().X>0);
+            Test->TestTrue(TEXT("Selected detail has real food benefit/shelf life"),Label(Craft.Get(),TEXT("PF_CraftingDetail_Stats")).Contains(TEXT("+55 food")) && Label(Craft.Get(),TEXT("PF_CraftingDetail_Stats")).Contains(TEXT("15 min")));
+            CheckLayout(Craft.Get(),TEXT("PF_CraftingPanel"));Capture(TEXT("craft_food_selected"));Wait(Now,0.5,13);return false;
+        }
+        if(Phase==13)
+        {
+            if(!CheckShot()){return false;}
+            SlatePress(EKeys::P);Wait(Now,0.3,14);return false;
+        }
+        if(Phase==14)
+        {
+            Test->TestTrue(TEXT("Craft to Pause transfers focus/input without stale menu"),PC->IsPauseMenuOpen() && !PC->IsCraftingOpen() && PC->IsPaused() && PC->IsMoveInputIgnored());
+            SlatePress(EKeys::P);Wait(Now,0.3,15);return false;
+        }
+        if(Phase==15)
+        {
+            Test->TestFalse(TEXT("Resume balances movement/look ignore counters and cursor"),PC->IsPauseMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored() || PC->bShowMouseCursor);
+            Press(EKeys::C);Wait(Now,0.3,16);return false;
+        }
+        if(Phase==16)
+        {
+            // Background-window synthetic hover did not deliver clicks reliably.
+            // Exercise SButton activation with focus+Space, never broadcast OnClicked.
+            Activate(Craft->WidgetTree->FindWidget(TEXT("PF_Recipe2_Button")));Wait(Now,0.3,17);return false;
+        }
+        if(Phase==17)
+        {
+            Test->TestEqual(TEXT("Button row selects dry without crafting"),CastChecked<UPFCraftingHUD>(Craft.Get())->GetSelectedRecipe(),FName(TEXT("Recipe_Dry")));
+            Test->TestEqual(TEXT("Button selection cannot create output"),PC->GetInventory()->Count(TEXT("Item_DriedFood")),0);
+            Activate(Craft->WidgetTree->FindWidget(TEXT("PF_CraftSelected")));Wait(Now,0.4,18);return false;
+        }
+        if(Phase==18)
+        {
+            Test->TestTrue(TEXT("Button craft request reaches server and refuses missing food"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Result")).Contains(TEXT("Refused: insufficient")));
+            Test->TestEqual(TEXT("Button refused job stays idle"),PC->GetCrafting()->ActiveRecipe,NAME_None);
+            Test->TestEqual(TEXT("Button refusal preserves wood"),PC->GetInventory()->Count(TEXT("Item_Wood")),3);
+            Activate(Craft->WidgetTree->FindWidget(TEXT("PF_CloseCraft")));Wait(Now,0.3,19);return false;
+        }
+        if(Phase==19)
+        {
+            Test->TestFalse(TEXT("Button Close restores gameplay input and hides cursor"),PC->IsCraftingOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored() || PC->bShowMouseCursor);
             Press(EKeys::B);
             PC->Building->ServerPlace(NAME_None,0);Wait(Now,0.4,8);return false;
         }
         if(Phase==8)
         {
             auto* Panel=Craft->WidgetTree->FindWidget(TEXT("PF_CraftingPanel"));
-            Test->TestTrue(TEXT("Opening build collapses crafting"),Panel && Panel->GetVisibility()==ESlateVisibility::Collapsed);
+            Test->TestTrue(TEXT("Opening build collapses crafting"),Panel && !Craft->IsVisible());
             Test->TestTrue(TEXT("Invalid placement shows actual server result"),Label(Build.Get(),TEXT("PF_BuildingPanel_Result")).Contains(TEXT("Invalid piece or survivor")));
             Test->TestTrue(TEXT("Preview explicitly advisory"),Label(Build.Get(),TEXT("PF_BuildingPanel_Body")).Contains(TEXT("Preview (advisory)")));
             Test->TestEqual(TEXT("Invalid placement retains cost"),PC->GetInventory()->Count(TEXT("Item_Wood")),3);
@@ -135,17 +188,22 @@ private:
         const FGeometry Root=Widget->GetCachedGeometry();auto* Panel=Widget->WidgetTree->FindWidget(Name);
         const FGeometry G=Panel->GetCachedGeometry();
         const FVector2D TL=Root.AbsoluteToLocal(G.LocalToAbsolute(FVector2D::ZeroVector)),BR=Root.AbsoluteToLocal(G.LocalToAbsolute(G.GetLocalSize())),Size=Root.GetLocalSize();
-        Test->TestTrue(TEXT("Panel fits and leaves centre aim/right margin"),TL.X>Size.X*0.55 && TL.Y>=0 && BR.X<Size.X && BR.Y<Size.Y);
+        const bool bRecipes=Widget->IsA<UPFCraftingHUD>();
+        Test->TestTrue(TEXT("Panel fits viewport"),TL.X>=0 && TL.Y>=0 && BR.X<Size.X && BR.Y<Size.Y);
+        if(bRecipes){Test->TestTrue(TEXT("Crafting is a centered modal menu"),FMath::Abs((TL.X+BR.X)*0.5-Size.X*0.5)<2 && FMath::Abs((TL.Y+BR.Y)*0.5-Size.Y*0.5)<2);}
+        else
+        {
+        Test->TestTrue(TEXT("Build leaves centre aim/right margin"),TL.X>Size.X*0.55);
         auto* Vitals=PC->SurvivalHUD->WidgetTree->FindWidget(TEXT("PF_VitalsBounds"));const FGeometry V=Vitals->GetCachedGeometry();
         const FVector2D VBR=Root.AbsoluteToLocal(V.LocalToAbsolute(V.GetLocalSize()));
         Test->TestTrue(TEXT("Panel cannot cover left survival vitals"),VBR.X<TL.X);
         const FGeometry Prompt=PC->SurvivalHUD->WidgetTree->FindWidget(TEXT("PF_InteractionLabel"))->GetCachedGeometry();
         const FVector2D PromptBR=Root.AbsoluteToLocal(Prompt.LocalToAbsolute(Prompt.GetLocalSize()));
         Test->TestTrue(TEXT("Interaction prompt ends before action panel"),PromptBR.X<TL.X);
+        }
         for(const TCHAR* Suffix:{TEXT("_Heading"),TEXT("_Body"),TEXT("_Result")})
         {auto* T=Cast<UTextBlock>(Widget->WidgetTree->FindWidget(FName(*(FString(Name)+Suffix))));Test->TestTrue(FString(TEXT("Text fits allocated row "))+Suffix,T && T->GetDesiredSize().Y<=T->GetCachedGeometry().GetLocalSize().Y+1);}
         auto* Body=Cast<UTextBlock>(Widget->WidgetTree->FindWidget(FName(*(FString(Name)+TEXT("_Body")))));
-        const bool bRecipes=Widget->IsA<UPFCraftingHUD>();
         Test->TestEqual(TEXT("Action text honors HUD scale"),Body->GetFont().Size,float(FMath::RoundToInt((bRecipes?16:18)*UPFGameUserSettings::Get()->Preferences.HUDScale)));
         {
             TArray<UWidget*> Widgets;Widget->WidgetTree->GetAllWidgets(Widgets);
@@ -157,6 +215,13 @@ private:
         }
     }
     void Press(FKey Key){for(const auto& B:PC->InputComponent->KeyBindings){if(B.Chord.Key==Key && B.KeyEvent==IE_Pressed){B.KeyDelegate.Execute(Key);return;}}Test->AddError(TEXT("Missing action binding ")+Key.ToString());}
+    void SlatePress(FKey Key){auto& App=FSlateApplication::Get();App.ProcessKeyDownEvent(FKeyEvent(Key,FModifierKeysState(),0,false,0,0));App.ProcessKeyUpEvent(FKeyEvent(Key,FModifierKeysState(),0,false,0,0));}
+    void Activate(UWidget* Widget)
+    {
+        auto* Button=Cast<UButton>(Widget);if(!Button){Test->AddError(TEXT("Missing button target"));return;}
+        Button->SetKeyboardFocus();Test->TestTrue(TEXT("Actual button has Slate focus"),Button->HasKeyboardFocus());
+        SlatePress(EKeys::SpaceBar);
+    }
     void Wait(double Now,double Seconds,int32 Next){Until=Now+Seconds;Phase=Next;}
     void Capture(const TCHAR* Name){Shot=Directory/(FString(Name)+TEXT(".png"));FScreenshotRequest::RequestScreenshot(Shot,true,false);}
     bool CheckShot(){if(IFileManager::Get().FileSize(*Shot)<=0){return false;}Test->AddInfo(TEXT("[PrimalUI] Action overlay screenshot: ")+Shot);return true;}

@@ -87,6 +87,8 @@ public:
 
     // ---- Crafting ----
     bool IsCraftingOpen() const {return bCraftingOpen;}
+    /** Local modal UI, never pauses the world or starts a job. */
+    void SetCraftingMenuOpen(bool bOpen);
     /** Ask the server to start RecipeId or cancel the active job. */
     UFUNCTION(Server,Reliable) void ServerCraftAction(FName RecipeId,bool bCancel);
 
@@ -153,6 +155,7 @@ private:
 
     // ---- Crafting input ----
     bool bCraftingOpen=false;
+    bool bCraftingInputBlocked=false;
     UPROPERTY() TObjectPtr<UPFCraftingHUD> CraftingHUD;
     void ToggleCrafting();
     void CraftTool();

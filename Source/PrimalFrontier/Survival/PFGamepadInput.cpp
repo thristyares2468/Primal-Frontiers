@@ -14,10 +14,11 @@
 
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Building/PFBuildingComponent.h"
+#include "Crafting/PFCraftingHUD.h"
 #include "Components/InputComponent.h"
 #include "InputCoreTypes.h"
 
-// Movement, look and A/jump use the existing Enhanced Input template context.
+// Movement, look and A/jump outside modal menus use the existing template context.
 // These buttons share the keyboard paths and their server-validated RPCs.
 void APFSurvivalPlayerController::BindGamepadControls()
 {
@@ -25,10 +26,10 @@ void APFSurvivalPlayerController::BindGamepadControls()
     BindControl(EKeys::Gamepad_Special_Left,&APFSurvivalPlayerController::ToggleInventory,TEXT("General"),TEXT("View: open / close inventory"));
     BindControl(EKeys::Gamepad_FaceButton_Top,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Y: open / close crafting"));
     BindControl(EKeys::Gamepad_RightShoulder,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("RB: open / close building"));
-    BindControl(EKeys::Gamepad_FaceButton_Left,&APFSurvivalPlayerController::GamepadPrimary,TEXT("Contextual"),TEXT("X: inventory consume; crafting tool; otherwise interact"));
+    BindControl(EKeys::Gamepad_FaceButton_Left,&APFSurvivalPlayerController::GamepadPrimary,TEXT("Contextual"),TEXT("X: inventory consume; craft selected recipe; otherwise interact"));
     BindControl(EKeys::Gamepad_FaceButton_Right,&APFSurvivalPlayerController::GamepadBack,TEXT("General"),TEXT("B: close overlay / resume"));
-    BindControl(EKeys::Gamepad_DPad_Up,&APFSurvivalPlayerController::GamepadUp,TEXT("Contextual"),TEXT("Inventory previous; crafting cook; building next piece"));
-    BindControl(EKeys::Gamepad_DPad_Down,&APFSurvivalPlayerController::GamepadDown,TEXT("Contextual"),TEXT("Inventory next; crafting dry; building rotate"));
+    BindControl(EKeys::Gamepad_DPad_Up,&APFSurvivalPlayerController::GamepadUp,TEXT("Contextual"),TEXT("Inventory previous; crafting previous recipe; building next piece"));
+    BindControl(EKeys::Gamepad_DPad_Down,&APFSurvivalPlayerController::GamepadDown,TEXT("Contextual"),TEXT("Inventory next; crafting next recipe; building rotate"));
     BindControl(EKeys::Gamepad_DPad_Left,&APFSurvivalPlayerController::GamepadLeft,TEXT("Contextual"),TEXT("Inventory split; crafting cancel; building store one"));
     BindControl(EKeys::Gamepad_DPad_Right,&APFSurvivalPlayerController::GamepadRight,TEXT("Contextual"),TEXT("Inventory drop one; building take one"));
     BindControl(EKeys::Gamepad_RightTrigger,&APFSurvivalPlayerController::PlaceBuilding,TEXT("Building / world"),TEXT("RT: place preview; attack when overlays are closed"));
@@ -40,7 +41,7 @@ void APFSurvivalPlayerController::GamepadPrimary()
 {
     if(bPauseMenuOpen){return;}
     if(bInventoryOpen){InventoryConsume();}
-    else if(bCraftingOpen){CraftTool();}
+    else if(bCraftingOpen && CraftingHUD){CraftingHUD->CraftSelected();}
     else{Interact();}
 }
 
@@ -53,7 +54,7 @@ void APFSurvivalPlayerController::GamepadBack()
         return;
     }
     bInventoryOpen=false;
-    bCraftingOpen=false;
+    SetCraftingMenuOpen(false);
     Building->bBuildMode=false;
 }
 
@@ -62,7 +63,7 @@ void APFSurvivalPlayerController::GamepadUp()
 {
     if(bPauseMenuOpen){return;}
     if(bInventoryOpen){InventoryPrevious();}
-    else if(bCraftingOpen){CookFood();}
+    else if(bCraftingOpen && CraftingHUD){CraftingHUD->MoveSelection(-1);}
     else if(Building->bBuildMode){NextBuilding();}
 }
 
@@ -71,7 +72,7 @@ void APFSurvivalPlayerController::GamepadDown()
 {
     if(bPauseMenuOpen){return;}
     if(bInventoryOpen){InventoryNext();}
-    else if(bCraftingOpen){DryFood();}
+    else if(bCraftingOpen && CraftingHUD){CraftingHUD->MoveSelection(1);}
     else if(Building->bBuildMode){RotateBuilding();}
 }
 

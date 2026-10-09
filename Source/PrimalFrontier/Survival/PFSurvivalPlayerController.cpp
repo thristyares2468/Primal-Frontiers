@@ -113,7 +113,7 @@ void APFSurvivalPlayerController::BeginPlay()
         InventoryHUD=CreateWidget<UPFInventoryHUD>(this,UPFInventoryHUD::StaticClass());
         if(InventoryHUD){InventoryHUD->AddToPlayerScreen();}
         CraftingHUD=CreateWidget<UPFCraftingHUD>(this,UPFCraftingHUD::StaticClass());
-        if(CraftingHUD){CraftingHUD->AddToPlayerScreen();}
+        if(CraftingHUD){CraftingHUD->AddToPlayerScreen(50);}
         BuildingHUD=CreateWidget<UPFBuildingHUD>(this,UPFBuildingHUD::StaticClass());
         if(BuildingHUD){BuildingHUD->AddToPlayerScreen();}
         // Travel from the main menu must release its UI-only viewport input mode.
@@ -220,6 +220,7 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
         UE_LOG(LogPFSurvival,Warning,TEXT("[PrimalUI] Pause menu could not be added to the local viewport; gameplay was not paused"));
         return;
     }
+    if(bOpen){SetCraftingMenuOpen(false);}
     bPauseMenuOpen=bOpen;
     SetIgnoreMoveInput(bOpen);
     SetIgnoreLookInput(bOpen);
@@ -230,7 +231,6 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
     {
         // Close other overlays; only freeze the world when we are the only player.
         bInventoryOpen=false;
-        bCraftingOpen=false;
         Building->bBuildMode=false;
         bPausedWorld=GetNetMode()==NM_Standalone && SetPause(true);
         PauseMenu->Refresh();
@@ -332,7 +332,7 @@ void APFSurvivalPlayerController::ToggleInventory()
         if(bInventoryOpen)
         {
             InitializeInventorySelection();
-            bCraftingOpen=false;
+            SetCraftingMenuOpen(false);
             Building->bBuildMode=false;
         }
     }
@@ -430,11 +430,32 @@ UPFCraftingComponent* APFSurvivalPlayerController::GetCrafting() const
 void APFSurvivalPlayerController::ToggleCrafting()
 {
     if(bPauseMenuOpen){return;}
-    bCraftingOpen=!bCraftingOpen;
-    if(bCraftingOpen)
+    SetCraftingMenuOpen(!bCraftingOpen);
+}
+void APFSurvivalPlayerController::SetCraftingMenuOpen(bool bOpen)
+{
+    if((bOpen && bPauseMenuOpen) || bOpen==bCraftingOpen){return;}
+    bCraftingOpen=bOpen;
+    if(bOpen)
     {
         Building->bBuildMode=false;
         bInventoryOpen=false;
+    }
+    // Headless/native fixtures still exercise input state, without stealing input
+    // or freezing a controller that has no visible local-player widget.
+    if(!CraftingHUD || !GetLocalPlayer() || !CraftingHUD->IsInViewport()){return;}
+    CraftingHUD->SetVisibility(bOpen?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
+    if(bOpen)
+    {
+        CraftingHUD->RefreshMenu();SetIgnoreMoveInput(true);SetIgnoreLookInput(true);bCraftingInputBlocked=true;bShowMouseCursor=true;
+        if(PlayerInput){PlayerInput->FlushPressedKeys();}
+        FInputModeUIOnly Mode;Mode.SetWidgetToFocus(CraftingHUD->TakeWidget());Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);SetInputMode(Mode);CraftingHUD->SetKeyboardFocus();
+    }
+    else
+    {
+        if(bCraftingInputBlocked){SetIgnoreMoveInput(false);SetIgnoreLookInput(false);bCraftingInputBlocked=false;}
+        bShowMouseCursor=false;if(PlayerInput){PlayerInput->FlushPressedKeys();}
+        FInputModeGameOnly Mode;Mode.SetConsumeCaptureMouseDown(false);SetInputMode(Mode);
     }
 }
 
@@ -467,7 +488,7 @@ void APFSurvivalPlayerController::ToggleBuilding()
     Building->bBuildMode=!Building->bBuildMode;
     if(Building->bBuildMode)
     {
-        bCraftingOpen=false;
+        SetCraftingMenuOpen(false);
         bInventoryOpen=false;
     }
 }
