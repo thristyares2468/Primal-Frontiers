@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Separate bounded progression bytes precede live save changes
+
+Use explicit16KiB/version/length/CRC progression bytes and resolve known catalog names without interning disk strings. All outputs change only after full candidate validation. Legacy V1 player records first pass their existing decoder, then get zeroXP/empty ledgers; owned items are not proof of past events. No existing main save writer/format changes in this codec slice; next owner-bound world compatibility must preserve actual world records before component/event hooks. PROGRESSION_CODEC_M12.md records exact tests/builds and integration limits. CRC is corruption detection, not trusted-source authentication.
+
 ## 2026-10-09 — Derive progression points and validate complete native candidates first
 
 Before live XP or save extensions, introduce bounded native records/catalog transactions. Derive level/earned points from cumulativeXP and spent points from unique validated knowledge IDs; do not persist redundant point/level fields. First-craft identities dedupe even at cap. Knowledge prerequisite graphs are acyclic and affordable at declared level; baseline recipes cannot be gated. Pure methods are trusted-server building blocks, not proof of a successful event/network authority. No existing recipe access/save changes until explicit compatibility and real successful-event/server tests. PROGRESSION_RECORDS_M12.md records exact native scope, retained test alias crash and future integration gate.

@@ -1,5 +1,7 @@
 # Technical Architecture
 
+Progression now has a separate bounded native byte codec and validated V1 player default adapter. It is not called by existing world/player writers; their schema and runtime access remain unchanged. Known-name resolution/atomic output refusal and zero retrospective XP are tested. PROGRESSION_CODEC_M12.md defines the upcoming owner-bound world archive compatibility gate before player integration.
+
 M12 progression currently consists only of bounded native records/catalog and atomic validated transactions. XP/knowledge/credited-craft IDs have no owner component, RPC/event/UI hook or save integration yet. Levels/points are derived; baseline recipes remain unrestricted. PROGRESSION_RECORDS_M12.md defines the separate codec/V1 compatibility gate before authoritative PlayerState integration.
 
 M12 protection derives the best fresh validated carried guard from owner-only inventory. Server survivor damage recognizes actual creature causers; generic/needs/exposure bypass mitigation. Public health replication shows resulting damage; no protection cache, extra replicated modifier or save field. Existing timed recipe transaction and V1 stable-ID inventory restoration remain authority boundaries. PROTECTION_M12.md records25% nonstacking behavior, data bounds and exact verification; no armor slot/worn-mesh system implemented.

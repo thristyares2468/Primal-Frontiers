@@ -2,6 +2,16 @@
 
 Updated October9,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
 
+## Active bounded M12 progression codec
+
+**Codec technical gate PASSED:** Editor14.49s/final4.98s/Game21.83s clean,native5/5 clean. Exact evidence/source/replay/limits PROGRESSION_CODEC_M12.md. Trello evidence/Done/scoped Sol publication next; next independent scope is owner-bound world archive compatibility. No live XP/world migration/player/UI acceptance.
+
+Final Editor4.98s/native5/5 PASSED Automation_M12ProgressionCodec_20261009_105939642_27cbf1c8,16.23s,working/private2.913/2.798GiB,raw/test severity0/exits0. Separate envelope/atomic refusal/CRC/unknown IDs/V1 preserved vitals/batches/freshness/no retrospective XP passed. Game build next; no existing world/player writer or live progression hook changed.
+
+Codec initial Editor PASSED14.49s/no compiler warnings. Separate16KiB/version/length/CRC and known-name-only arrays implemented; legacy player decode delegates to V1 validator before zero-XP defaults. Added fixture precondition guards before final build/native tests; no live/world writer change.
+
+Records c17ea97 published/Sol/local-remote equality/clean verified. Fresh Programming/parentM12 audit selected separate bounded progression bytes and validated legacy-player defaults before live save/player integration. Trello Doing; implementation/build/tests pending. No existing save writer/private file/recipe access changes; legacy defaults grant zero XP, not retrospective rewards. Personal and full milestone gates remain open.
+
 ## Active bounded M12 progression-record foundation
 
 **Record foundation technical gate PASSED:** final Editor5.07s/Game22.88s clean, failed-test-only1/1 and final native4/4 clean. Exact scope/failure/evidence: PROGRESSION_RECORDS_M12.md. Pure records/data asset transactions only; no live XP/recipe restriction/UI/save extension. Retained first test-only TArray alias crash corrected. Trello evidence/Done/scoped Sol publication next; compatible codec is next bounded prerequisite.

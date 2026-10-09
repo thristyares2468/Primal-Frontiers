@@ -1,5 +1,7 @@
 # Original progression and biological upgrades — M12/M13 plan
 
+October9 codec checkpoint: PROGRESSION_CODEC_M12.md verifies separate bounded progression bytes and validated legacy V1 player zero-XP defaults. Main save writers remain unmodified/V1; no runtime rewards, world migration or UI. Owner-bound world compatibility and authoritative PlayerState/event integration are still required before playable progression.
+
 October9 native record checkpoint: PROGRESSION_RECORDS_M12.md introduces bounded XP/point derivation, one-shot craft IDs and optional Tech_FieldTools metadata/transactions with native tests. No live player component, event reward, recipe gate, UI or save field yet. Implemented32knowledge/128craft-record limits are deliberately narrower than the proposed future64 technology entries below. A bounded codec/V1 compatibility gate precedes all gameplay integration. The six-entry technology graph and remaining reward/respec/adaptation plans are still proposals.
 
 October9 protection checkpoint: one original woven guard adds25% nonstacking carried creature-hit reduction through server damage, leaving generic/needs/environmental damage untouched. Exact costs/native/rendered/one-/two-client restore evidence: PROTECTION_M12.md. Carried greybox protection is implemented; equipped armor slots, XP/technology/knowledge ledger, adaptations and the proposed save extensions below remain future work. Existing stable item IDs need no schema migration for gear.
