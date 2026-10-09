@@ -1,5 +1,27 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M12 earned protection/default combat — technical gate passed
+
+Grant-free earned tool route now extends to normally gathered/crafted WovenGuard, actual default Prowler Think windups8→6damage, real45damage/5stamina/cooldown melee and one3food loot batch recovered through normal interaction with original expiry/no corpse duplication. Final PF.Progression.EarnedCombatLive1/1 M12EarnedCombat720_20261009_210553405_6071cf4b passed118.98s,working/private3.185/5.174GiB;267personal saves/default settings unchanged. Native Protection+WeaponProgression2/2 passed16.27s,3.026/2.863GiB. Final Editor8.64s/Game15.51s clean; exact selection/exits/testseverity0/no timeout, all six final PNGs inspected. Raw rendered26warnings/14experimental Python lines equal prior baseline,0new/no fatalensure; native rawclean. Retained initial fixture compile failure and stronger selected-loot capture/replay in EARNED_COMBAT_M12.md. No production damage/yield/catalog/asset changes.
+
+Bounded https://trello.com/c/4TnyuMEm is technically complete; parentM12/Personal/controller/FPS/pacing stay open. Controlled target positions/movement/ticks do not certify navigation or human combat feel. Next independent scope needs a compatible bounded gather reward-window record before hooking another XP source; existing eight firstcrafts cap160XP belowlevel3. No M13 acceptance implied.
+
+Final selected-loot EarnedCombat1/1 PASSED M12EarnedCombat720_20261009_210553405_6071cf4b,118.98s,3.185/5.174GiB,exact selection/exits/testseverity0/no timeout;267personal saves/default settings unchanged. Final six PNG/rawbaseline review and Game rebuild now; prior initial capture remains historical.
+
+Loot-capture Editor8.64s PASSED/no compiler warnings PFM12EarnedCombatCaptureEditorBuild.log. Same guarded rendered720p replay running with actual selected-loot row/freshness assertions; no next objective before artifact gate.
+
+Initial EarnedCombat1/1 rawbaseline26warnings/14Pythonlines/0new/no fatalensure reviewed; Game14.62s clean. Six pictures inspected, loot screenshot only showed first inventory page. Strengthen fixture only to use real Down binding/select recovered3foodbatch, assert visible freshness/details and text fit before capture. Rebuild/repeat rendered before final publication; runtime unchanged.
+
+EarnedCombat rendered PF.Progression.EarnedCombatLive PASSED1/1 M12EarnedCombat720_20261009_210153376_610ac0e6,103.48s,3.102/5.289GiB; exact selection/exits/testseverity0/no timeout.266personal saves/default settings unchanged. Actual earned8→6damage,140XP,three45damage swings/5stamina,one3food pickup/original expiry passed. Six PNG/rawbaseline review and Game build pending; human combat feel/nav/fullM12 not inferred.
+
+EarnedCombat narrow native Protection+WeaponProgression PASSED2/2 Automation_M12EarnedCombat_20261009_210122567_d4dff96f,16.27s,working/private3.026/2.863GiB,checked selection/exits/raw-testseverity0/no fatalensure/timeout. Guarded720p earned combat now running; rendered/Game remain pending.
+
+EarnedCombat Editor retry PASSED6.88s/no compiler warnings (PFM12EarnedCombatRetryEditorBuild.log). Only fixture uses actual registered input delegates; runtime unchanged. Narrow native Protection/WeaponProgression then guarded rendered720p and Game build next; no combat route pass yet.
+
+EarnedCombat initial Editor FAILED3.04s/exit6: test C2248 private PlaceBuilding and C2027 incomplete FInputKeyParams. Fix only fixture to invoke existing registered LeftMouse/Tab KeyBindings delegates with supported InputComponent header, preserving runtime access/privacy and avoiding deprecated5.6inputparams. Retain PFM12EarnedCombatEditorBuild.log; rebuild/relevant native next, no scope expansion.
+
+Fresh boards/parent after13a3ae8 published/clean/remote-equal selected earned combat https://trello.com/c/4TnyuMEm Doing. Opt-in EarnedCombat extends real earned route with default8damage Prowler Think windups, normally gathered/crafted25percent guard, real45damage/5stamina/cooldown melee, one perishable loot batch/normal pickup/no corpse duplication. No health/damage/XP/item grants or production changes; fixture controls positions/movement/ticks,not navigation/human feel. Uncompiled/untested; Editor/narrow Protection+Weapon native/rendered720p/Game next. Parent/manual remainopen.
+
 ## 2026-10-10 M12 first earned upgrade — technical route passed
 
 From empty0XP, actual finite bare-hand gathering supplied12wood/2stone/4food/8fibre. Unmodified timed Tool/Cook/Dry/Cord/Club crafts earned100XP/level2/3points; second cord awarded noXP. Actual owned Learn spent2points once; timed BoundTool consumed exact inputs, total120XP/1point/six credited recipes. Earned tool gathered one finite three-hit node for6fibre without moreXP. No XP/item grants or Restore seeds. Native PF.Progression.EarnedUpgrade1/1 (Automation_M12EarnedUpgrade_20261009_204113838_1cf8a43c,16.27s,3.012/2.859GiB) and rendered PF.Progression.EarnedUpgradeLive1/1 (M12Earned720_20261009_204607678_64c9c734,83.58s,3.097/4.951GiB) passed exact selection/exits/test severity0; native rawclean,rendered26warnings/14experimentalPythonlines unchanged/0new/no fatalensure. Three screenshots inspected,265personal saves/default settings unchanged. Editor14.57s/Game22.93s clean. Retained first rendered preflight label-length failure; only runner prefix shortened and same test replayed. EARNED_UPGRADE_M12.md records exact route/replay/limits.

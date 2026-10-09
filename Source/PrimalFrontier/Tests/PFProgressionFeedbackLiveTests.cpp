@@ -4,6 +4,9 @@
 #include "Crafting/PFCraftingComponent.h"
 #include "Crafting/PFResourceNode.h"
 #include "Inventory/PFInventoryPlayerState.h"
+#include "Inventory/PFItemPickup.h"
+#include "Inventory/PFInventoryHUD.h"
+#include "Creatures/PFCreature.h"
 #include "Progression/PFProgressionComponent.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -14,9 +17,11 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/ScrollBox.h"
+#include "Components/InputComponent.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -216,11 +221,11 @@ namespace
 class FEarnedUpgradeExercise final : public IAutomationLatentCommand
 {
 public:
-    FEarnedUpgradeExercise(FAutomationTestBase* T,FString D):Test(T),Directory(MoveTemp(D)){}
-    ~FEarnedUpgradeExercise(){if(Node.IsValid()){Node->Destroy();}if(bScaleChanged && UPFGameUserSettings::Get()){UPFGameUserSettings::Get()->Preferences.HUDScale=OldScale;}}
+    FEarnedUpgradeExercise(FAutomationTestBase* T,FString D,bool Combat=false):Test(T),Directory(MoveTemp(D)),bCombat(Combat){}
+    ~FEarnedUpgradeExercise(){if(Node.IsValid()){Node->Destroy();}if(Creature.IsValid()){Creature->Destroy();}if(bScaleChanged && UPFGameUserSettings::Get()){UPFGameUserSettings::Get()->Preferences.HUDScale=OldScale;}}
     bool Update() override
     {
-        const double Now=FPlatformTime::Seconds();if(Now-Started>100){Test->AddError(FString::Printf(TEXT("[PrimalAgentTools] Earned upgrade timeout stage%d craft%d gather%d"),Stage,CraftIndex,GatherIndex));return true;}if(Now<Until){return false;}
+        const double Now=FPlatformTime::Seconds();if(Now-Started>(bCombat?130:100)){Test->AddError(FString::Printf(TEXT("[PrimalAgentTools] Earned upgrade timeout stage%d craft%d gather%d"),Stage,CraftIndex,GatherIndex));return true;}if(Now<Until){return false;}
         if(Stage==0)
         {
             for(const auto& X:GEngine->GetWorldContexts()){if(X.World() && X.World()->IsGameWorld()){auto* Candidate=Cast<APFSurvivalPlayerController>(X.World()->GetFirstPlayerController());if(Candidate && Candidate->GetLocalPlayer() && Candidate->GetPawn() && Candidate->GetCrafting() && Candidate->GetInventory()){PC=Candidate;break;}}}
@@ -282,8 +287,92 @@ public:
         }
         if(Stage==13)
         {
+            if(bCombat)
+            {
+                const FTransform At(FRotator::ZeroRotator,PC->GetPawn()->GetActorLocation()+FVector(100,0,20));Creature=PC->GetWorld()->SpawnActorDeferred<APFCreature>(APFCreature::StaticClass(),At,PC->GetPawn(),nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+                if(!Creature.IsValid()){Test->AddError(TEXT("Missing controlled combat creature"));return true;}Creature->CreatureId=TEXT("Creature_Prowler");Creature->FinishSpawning(At);Creature->SetActorTickEnabled(false);Creature->GetCharacterMovement()->DisableMovement();
+                if(!Test->TestTrue(TEXT("Loaded real Prowler defaults, no damage or health override"),Creature->Definition() && Creature->Definition()->Damage==8 && Creature->Health==100 && Creature->bHostile)){return true;}
+                Creature->Think();if(!Test->TestEqual(TEXT("Real visible attack windup starts"),Creature->State.ToString(),FString(TEXT("Creature.State.Attack")))){return true;}Wait(Now,.7,20);return false;
+            }
             for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned-route screenshot written"),IFileManager::Get().FileSize(*Path)>0);}
             Test->AddInfo(TEXT("[PrimalAgentTools] Rendered earned upgrade:13real bare-hand interactions,7timed jobs/6unique credits,100XP/3points→owned2point Learn→120XP/1point/one bound tool,actual three-hit gathering; no XP/item grants. Synthetic UI,not human route/controller/FPS acceptance."));return true;
+        }
+        auto* Needs=PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();
+        if(Stage==20)
+        {
+            const float Before=Needs->GetVitals().Health;Creature->Think();if(!Test->TestEqual(TEXT("Actual unprotected default windup lands eight damage"),Before-Needs->GetVitals().Health,8.f)){return true;}
+            Creature->SetActorLocation(PC->GetPawn()->GetActorLocation()+FVector(0,500,20));Wait(Now,.65,21);return false;
+        }
+        if(Stage==21)
+        {
+            if(!SpawnNode(TEXT("Node_Fibre"))){return true;}PC->Interact();if(!Test->TestTrue(TEXT("Earned tool supplies remaining guard fibre"),I->Count(TEXT("Item_Fibre"))==12 && Node->HitsRemaining==0)){return true;}Node->Destroy();Node.Reset();Wait(Now,.65,22);return false;
+        }
+        if(Stage==22)
+        {
+            if(!SpawnNode(TEXT("Node_Wood"))){return true;}PC->Interact();if(!Test->TestTrue(TEXT("Earned tool supplies guard wood without grants"),I->Count(TEXT("Item_Wood"))==7 && Node->HitsRemaining==0)){return true;}Node->Destroy();Node.Reset();
+            PC->SetCraftingMenuOpen(true);TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFCraftingHUD::StaticClass(),false);if(Widgets.Num()!=1){Test->AddError(TEXT("Missing real guard crafting menu"));return true;}Menu=CastChecked<UPFCraftingHUD>(Widgets[0]);Wait(Now,.6,23);return false;
+        }
+        if(Stage==23){Menu->SelectRecipe(TEXT("Recipe_Cord"));Menu->RefreshMenu();Menu->SetKeyboardFocus();Press(EKeys::Enter);if(!Test->TestEqual(TEXT("Repeated real cord job starts"),C->ActiveRecipe,FName(TEXT("Recipe_Cord")))){return true;}Wait(Now,.6,24);return false;}
+        if(Stage==24)
+        {
+            if(!C->ActiveRecipe.IsNone()){return false;}if(!Test->TestTrue(TEXT("Repeated cord consumes four fibre with noXP"),C->Feedback==TEXT("Completed") && I->Count(TEXT("Item_Fibre"))==8 && I->Count(TEXT("Item_Cord"))==1 && G->GetExperience()==120)){return true;}
+            Menu->SelectRecipe(TEXT("Recipe_WovenGuard"));Menu->RefreshMenu();Menu->SetKeyboardFocus();Press(EKeys::Enter);if(!Test->TestEqual(TEXT("Real guard job starts"),C->ActiveRecipe,FName(TEXT("Recipe_WovenGuard")))){return true;}Wait(Now,.6,25);return false;
+        }
+        if(Stage==25)
+        {
+            if(!C->ActiveRecipe.IsNone()){return false;}if(!Test->TestTrue(TEXT("Earned guard exact conversion and once-only20XP"),C->Feedback==TEXT("Completed") && I->Count(TEXT("Item_WovenGuard"))==1 && I->Count(TEXT("Item_Fibre"))==0 && I->Count(TEXT("Item_Cord"))==0 && I->Count(TEXT("Item_Wood"))==5 && I->CreatureHitReduction()==.25f && G->GetExperience()==140 && G->GetAvailablePoints()==1 && G->GetRecord().CreditedCrafts.Num()==7)){return true;}
+            Menu->RefreshMenu();Scroll(true);Wait(Now,.6,26);return false;
+        }
+        if(Stage==26){Scroll(true);Wait(Now,.6,27);return false;}
+        if(Stage==27){Bounds(TEXT("PF_CraftingProgression_Reward"));Shot(TEXT("earned_guard"));Wait(Now,.6,28);return false;}
+        if(Stage==28){Menu->SetKeyboardFocus();Press(EKeys::C);Creature->SetActorLocation(PC->GetPawn()->GetActorLocation()+FVector(100,0,20));Creature->Think();if(!Test->TestEqual(TEXT("Default cooldown elapsed and second windup starts"),Creature->State.ToString(),FString(TEXT("Creature.State.Attack")))){return true;}Wait(Now,.7,29);return false;}
+        if(Stage==29)
+        {
+            const float Before=Needs->GetVitals().Health;Creature->Think();if(!Test->TestEqual(TEXT("Actual default8damage with earned25percent guard loses six"),Before-Needs->GetVitals().Health,6.f)){return true;}Wait(Now,.4,30);return false;
+        }
+        if(Stage==30){Shot(TEXT("guarded_creature_hit"));Wait(Now,.6,31);return false;}
+        if(Stage==31)
+        {
+            const float Before=Creature->Health,Stamina=Needs->GetVitals().Stamina;Action(EKeys::LeftMouseButton);
+            if(!Test->TestTrue(TEXT("Actual first-person melee uses earned45damage and five stamina"),Creature->Health==FMath::Max(0.f,Before-45) && Stamina-Needs->GetVitals().Stamina==5)){return true;}
+            const float After=Creature->Health,AfterStamina=Needs->GetVitals().Stamina;Action(EKeys::LeftMouseButton);Test->TestTrue(TEXT("Immediate repeated swing refused by cooldown"),Creature->Health==After && Needs->GetVitals().Stamina==AfterStamina);
+            if(++Swing<3){Wait(Now,.65,31);return false;}if(!Test->TestTrue(TEXT("Three accepted earned-tool hits kill default100HP Prowler"),Creature->IsDead() && G->GetExperience()==140)){return true;}
+            int32 Count=0;for(TActorIterator<APFItemPickup> It(PC->GetWorld());It;++It){if(FVector::DistSquared(It->GetActorLocation(),Creature->GetActorLocation()-FVector(0,0,25))<1){Loot=*It;++Count;}}
+            if(!Test->TestTrue(TEXT("One default perishable creature loot batch"),Count==1 && Loot.IsValid() && Loot->GetContents().ItemId==TEXT("Item_Food") && Loot->GetContents().Quantity==3)){return true;}LootExpiry=Loot->GetContents().ExpiresAt;
+            FVector Eye;FRotator Look;PC->GetPawn()->GetActorEyesViewPoint(Eye,Look);PC->SetControlRotation((Loot->GetActorLocation()-Eye).Rotation());Wait(Now,.65,32);return false;
+        }
+        if(Stage==32)
+        {
+            if(!Test->TestTrue(TEXT("Normal view trace selects creature loot"),PFInteraction::FindTarget(PC->GetPawn())==Loot.Get())){return true;}PC->Interact();
+            if(!Test->TestTrue(TEXT("Normal pickup adds exactly three and keeps original expiry"),I->Count(TEXT("Item_Food"))==4 && I->GetStacks().ContainsByPredicate([&](const auto& S){return S.ItemId==TEXT("Item_Food") && S.Quantity==3 && S.ExpiresAt==LootExpiry;}) && !Loot.IsValid())){return true;}
+            Wait(Now,.65,33);return false;
+        }
+        if(Stage==33)
+        {
+            Action(EKeys::LeftMouseButton);PC->Interact();if(!Test->TestTrue(TEXT("Corpse attacks/repeated pickup create no loot orXP"),I->Count(TEXT("Item_Food"))==4 && G->GetExperience()==140 && Creature->IsDead())){return true;}
+            Action(EKeys::Tab);Wait(Now,.6,34);return false;
+        }
+        if(Stage==34)
+        {
+            if(!Test->TestTrue(TEXT("Bag opens after actual earned combat"),PC->IsInventoryOpen())){return true;}
+            const int32 LootIndex=I->GetStacks().IndexOfByPredicate([&](const auto& S){return S.ItemId==TEXT("Item_Food") && S.Quantity==3 && S.ExpiresAt==LootExpiry;});
+            if(!Test->TestTrue(TEXT("Recovered loot retains its distinct batch"),LootIndex!=INDEX_NONE)){return true;}
+            for(int32 N=0;N<I->GetStacks().Num() && PC->GetSelectedInventoryIndex()!=LootIndex;++N){Action(EKeys::Down);}
+            if(!Test->TestEqual(TEXT("Real inventory navigation selects recovered batch"),PC->GetSelectedInventoryIndex(),LootIndex)){return true;}Wait(Now,.6,36);return false;
+        }
+        if(Stage==36)
+        {
+            TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFInventoryHUD::StaticClass(),false);
+            if(!Test->TestEqual(TEXT("Actual loot inventory overlay"),Widgets.Num(),1)){return true;}auto* HUD=Widgets[0];
+            const auto* Body=Cast<UTextBlock>(HUD->WidgetTree->FindWidget(TEXT("PF_InventoryPanel_Body")));const auto* Detail=Cast<UTextBlock>(HUD->WidgetTree->FindWidget(TEXT("PF_InventoryDetailBody")));
+            if(!Test->TestTrue(TEXT("Recovered three-food freshness row and consumable detail visible"),Body && Body->GetText().ToString().Contains(TEXT("Found food x3 [")) && Detail && Detail->GetText().ToString().Contains(TEXT("+35 food / +10 water")))){return true;}
+            for(const auto* Label:{Body,Detail}){Test->TestTrue(TEXT("Loot text fits allocated height"),Label->GetDesiredSize().Y<=Label->GetCachedGeometry().GetLocalSize().Y+1);}
+            Shot(TEXT("earned_creature_loot"));Wait(Now,.6,35);return false;
+        }
+        if(Stage==35)
+        {
+            for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned combat screenshot written"),IFileManager::Get().FileSize(*Path)>0);}Action(EKeys::Tab);
+            Test->AddInfo(TEXT("[PrimalAgentTools] Earned guard/default Prowler: real8→6damage via Think windup,140XP/onepoint,45damage/5stamina normal melee kills in3accepted swings, one3food batch/normal pickup/original freshness/no corpse duplication. No grants or default damage override; controlled positions/ticks,not navigation/human combat feel."));return true;
         }
         return false;
     }
@@ -292,6 +381,7 @@ private:
     {FVector Eye;FRotator Look;PC->GetPawn()->GetActorEyesViewPoint(Eye,Look);const FTransform At(FRotator::ZeroRotator,Eye+Look.Vector()*150);Node=PC->GetWorld()->SpawnActorDeferred<APFResourceNode>(APFResourceNode::StaticClass(),At,PC->GetPawn(),nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);if(!Node.IsValid()){Test->AddError(TEXT("Unable to spawn disposable node"));return false;}Node->ResourceId=Resource;Node->FinishSpawning(At);return true;}
     UButton* Button(const TCHAR* Name){return CastChecked<UButton>(Menu->WidgetTree->FindWidget(Name));}
     FString Text(const TCHAR* Name){return CastChecked<UTextBlock>(Menu->WidgetTree->FindWidget(Name))->GetText().ToString();}
+    void Action(FKey Key){for(const auto& B:PC->InputComponent->KeyBindings){if(B.Chord.Key==Key && B.KeyEvent==IE_Pressed){B.KeyDelegate.Execute(Key);return;}}Test->AddError(TEXT("Missing actual action binding ")+Key.ToString());}
     void Press(FKey Key){auto& Slate=FSlateApplication::Get();Slate.ProcessKeyDownEvent(FKeyEvent(Key,FModifierKeysState(),0,false,0,0));Slate.ProcessKeyUpEvent(FKeyEvent(Key,FModifierKeysState(),0,false,0,0));}
     void Scroll(bool End){auto* W=Menu->WidgetTree->FindWidget(End?TEXT("PF_CraftingProgression_Reward"):TEXT("PF_KnowledgeRequirement"));for(auto* P=W->GetParent();P;P=P->GetParent()){if(auto* S=Cast<UScrollBox>(P)){if(End){S->ScrollToEnd();}else{S->ScrollToStart();}break;}}}
     void Bounds(const TCHAR* Name)
@@ -302,7 +392,8 @@ private:
     }
     void Shot(const TCHAR* Name){const FString Path=Directory/(FString(Name)+TEXT(".png"));Shots.Add(Path);FScreenshotRequest::RequestScreenshot(Path,true,false);}
     void Wait(double Now,double Seconds,int32 Next){Until=Now+Seconds;Stage=Next;}
-    FAutomationTestBase* Test;FString Directory;TArray<FString> Shots;TWeakObjectPtr<APFSurvivalPlayerController> PC;TWeakObjectPtr<UPFCraftingHUD> Menu;TWeakObjectPtr<UPFProgressionComponent> Progression;TWeakObjectPtr<APFResourceNode> Node;
+    FAutomationTestBase* Test;FString Directory;TArray<FString> Shots;TWeakObjectPtr<APFSurvivalPlayerController> PC;TWeakObjectPtr<UPFCraftingHUD> Menu;TWeakObjectPtr<UPFProgressionComponent> Progression;TWeakObjectPtr<APFResourceNode> Node;TWeakObjectPtr<APFCreature> Creature;TWeakObjectPtr<APFItemPickup> Loot;
+    bool bCombat=false;int32 Swing=0;double LootExpiry=0;
     double Started=FPlatformTime::Seconds(),Until=0;int32 Stage=0,GatherIndex=0,GatherAction=0,CraftIndex=0,BeforeOutput=0;float OldScale=1;bool bScaleChanged=false;
     const FName Resources[6]={TEXT("Node_Wood"),TEXT("Node_Wood"),TEXT("Node_Stone"),TEXT("Node_Food"),TEXT("Node_Fibre"),TEXT("Node_Fibre")};const int32 Actions[6]={3,3,1,2,3,1};
     const TCHAR* Recipes[7]={TEXT("Recipe_Tool"),TEXT("Recipe_Cook"),TEXT("Recipe_Dry"),TEXT("Recipe_Cord"),TEXT("Recipe_Club"),TEXT("Recipe_Cord"),TEXT("Recipe_BoundTool")};
@@ -317,5 +408,13 @@ bool FPFEarnedUpgradeLiveTest::RunTest(const FString&)
     for(TCHAR C:Label){if(!FChar::IsAlnum(C) && C!=TEXT('_')){AddError(TEXT("Invalid earned evidence label"));return false;}}
     const FString Directory=FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("AutomationReports/ControlsUI")/Label);if(IFileManager::Get().DirectoryExists(*Directory)){AddError(TEXT("Refusing reused earned evidence"));return false;}IFileManager::Get().MakeDirectory(*Directory,true);
     ADD_LATENT_AUTOMATION_COMMAND(FEarnedUpgradeExercise(this,Directory));return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEarnedCombatLiveTest,"PF.Progression.EarnedCombatLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::EngineFilter)
+bool FPFEarnedCombatLiveTest::RunTest(const FString&)
+{
+    if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunControlsUITest")) || !FParse::Param(FCommandLine::Get(),TEXT("PFRunEarnedCombatTest")) || FParse::Param(FCommandLine::Get(),TEXT("nullrhi"))){AddError(TEXT("Requires isolated rendered -game -PFRunControlsUITest -PFRunEarnedCombatTest"));return false;}
+    FString Label;FParse::Value(FCommandLine::Get(),TEXT("PFControlsEvidence="),Label);if(Label.IsEmpty() || Label.Len()>48){AddError(TEXT("Supply bounded earned combat evidence label"));return false;}for(TCHAR C:Label){if(!FChar::IsAlnum(C) && C!=TEXT('_')){AddError(TEXT("Invalid earned combat label"));return false;}}
+    const FString Directory=FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("AutomationReports/ControlsUI")/Label);if(IFileManager::Get().DirectoryExists(*Directory)){AddError(TEXT("Refusing reused earned combat evidence"));return false;}IFileManager::Get().MakeDirectory(*Directory,true);
+    ADD_LATENT_AUTOMATION_COMMAND(FEarnedUpgradeExercise(this,Directory,true));return true;
 }
 #endif
