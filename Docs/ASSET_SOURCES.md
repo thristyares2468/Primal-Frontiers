@@ -31,6 +31,9 @@ Compiled 2026-10-06 and reformatted for readability.
 
 > **Honesty note:** fab.com couldn't be opened from the machine that wrote this list. So the Fab entries' supported engine versions weren't read off the pages. They're marked from what kind of pack they are. The plain-file entries (Sketchfab, Poly Haven, Quaternius, Kenney, audio, icons) work in 5.8.3 regardless, because Unreal imports those formats directly.
 
+**Every asset here can be added straight into the Primal Frontier project.**
+On Fab, use the **Add to Project** button (or download the files and drag them into the Content Browser). Nothing on this list needs a separate project. Epic's full sample projects, which need **Create Project**, were removed; they're listed at the end of this file. If a Fab page only offers "Create Project", skip it.
+
 **Before you add anything**
 - Put imports under `Content/PrimalFrontier/` (project rule in `AGENTS.md`).
 - **Sketchfab:** only download models with a **Download** button and a **CC0 or CC-BY** license. Skip anything marked NonCommercial or NoDerivs, and anything ripped from other games (Jurassic Park, ARK, Turok…).
@@ -44,11 +47,11 @@ Compiled 2026-10-06 and reformatted for readability.
 
 | # | Asset | What it gives you | License | UE 5.8.3 |
 |---|---|---|---|---|
-| 1 | [Game Animation Sample](https://www.fab.com/listings/880e319a-a59e-4ed2-b268-b32dac7fa016) | 500+ movement animations for the full-body player | 🔵 Epic | ☑️ Probably |
+| 1 | [Mixamo](https://www.mixamo.com) | Thousands of humanoid animations (FBX) for the full-body player | Free with Adobe ID | ✅ Yes |
 | 2 | [Animal Variety Pack](https://www.fab.com/listings/2dd7964c-a601-4264-a53d-465dcae1644c) | Deer, wolf, fox, crow, fully animated | 🔵 Fab Free | ☑️ Probably |
-| 3 | [Open World Demo Collection](https://www.fab.com/listings/3262ab8f-f64a-4124-8efd-82cb19df6249) | Photoscanned trees, rocks, cliffs, grass | 🔵 Epic | ⚠️ Older |
+| 3 | Megascans free selection (search Fab: Megascans, Price: Free) | ~1500 photoscanned rocks, cliffs, ground, logs, plants | 🔵 Fab Free | ☑️ Probably |
 | 4 | [Megaplants – English Oak](https://www.fab.com/listings/83642c38-7661-4df1-8629-0422e1898d26) (and others below) | Realistic Nanite trees | 🔵 Fab Free | ☑️ Probably |
-| 5 | [Niagara Examples Pack](https://www.fab.com/listings/0e188eca-4e54-4fb2-a9ed-d8b8a565e600) | Fire, smoke, impacts, footsteps | 🔵 Epic | ☑️ Probably |
+| 5 | [Realistic Fire & Explosion Starter](https://www.fab.com/listings/2adf4e4e-5f1d-4543-9e8c-192fe3c9a8ed) | Campfires, torches, explosions | 🔵 Fab Free | ☑️ Probably |
 | 6 | [PBR Velociraptor (Animated)](https://sketchfab.com/3d-models/pbr-velociraptor-animated-8f1744af7b0847a2aabe3df90be802f0) | Realistic game-ready raptor | 🟡 CC-BY | ✅ Yes |
 | 7 | [Animated T-Rex](https://sketchfab.com/3d-models/animated-tyrannosaurus-rex-dinosaur-running-loop-38007d947ae74dea83988cb0b08ee053) | Run, roar, bite, idle, tail attack | 🟡 CC-BY | ✅ Yes |
 | 8 | [Poly Haven](https://polyhaven.com) | Photoreal rocks, logs, crates, textures, skies | 🟢 CC0 | ✅ Yes |
@@ -61,7 +64,6 @@ Compiled 2026-10-06 and reformatted for readability.
 
 | Asset | What it's for | License | UE 5.8.3 |
 |---|---|---|---|
-| [Game Animation Sample](https://www.fab.com/listings/880e319a-a59e-4ed2-b268-b32dac7fa016) | Movement for the full-body character other players see | 🔵 Epic | ☑️ Probably |
 | [Free Animation Pack](https://www.fab.com/listings/8de31c5d-93bc-4bd4-9606-ca789ce91b99) | 24 motion-capture animations | ⚪ Check | ☑️ Probably |
 | [Mixamo](https://www.mixamo.com) ([license FAQ](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html)) | Thousands of humanoid animations; retarget to the UE mannequin | Free with Adobe ID | ✅ Yes (FBX) |
 | [MetaHuman](https://dev.epicgames.com/documentation/metahuman/metahumans-on-fab) | Realistic survivor faces and bodies | Free under $1M/yr revenue | ✅ Built in |
@@ -73,7 +75,6 @@ Compiled 2026-10-06 and reformatted for readability.
 | Template arms already in `Content/FirstPerson` | The current first-person arms | Already in the project | ✅ Built in |
 | [Unreal Engine FPS Arms](https://sketchfab.com/3d-models/unreal-engine-fps-arms-for-first-person-shooters-3978de7e44404707a732d2745db8a5c7) | Mannequin arms, same skeleton | Check page | ✅ Yes |
 | [First Person Arms (DJMaesen)](https://sketchfab.com/3d-models/first-person-arms-e3c42c05b22944e5839deb8e003f0987) | Rigged low-poly arms | 🟡 CC-BY | ✅ Yes |
-| [Control Rig Samples + Mannequins](https://www.unrealengine.com/en-US/blog/free-control-rig-and-mannequin-asset-packs-now-available-for-real-time-animators) | Tools for making your own arm animations | 🔵 Epic | ⚠️ Older |
 
 ---
 
@@ -108,11 +109,7 @@ Compiled 2026-10-06 and reformatted for readability.
 
 | Asset | What it's for | License | UE 5.8.3 |
 |---|---|---|---|
-| [Open World Demo Collection](https://www.fab.com/listings/3262ab8f-f64a-4124-8efd-82cb19df6249) | 88 trees, bushes, stumps, rocks, cliffs | 🔵 Epic | ⚠️ Older |
-| [A Boy and His Kite](https://www.fab.com/listings/4d3e971c-7651-4965-b932-6f49efc5fc1a) | The full demo landscape (very old UE4 project) | 🔵 Epic | ⚠️ Older; may not open, so use the collection above instead |
 | [Spruce Forest (Project Nature)](https://www.fab.com/listings/f8044501-17a2-498f-b198-5f1bc71ee87a) | 15 spruce trees | 🔵 Fab Free | ☑️ Probably |
-| [Electric Dreams](https://www.fab.com/listings/d79688f5-29be-4fb2-a650-2d4a813f5306) | Dense forest, cliffs, procedural (PCG) setup | 🔵 Epic | ☑️ Probably |
-| [Project Titan](https://www.fab.com/listings/c05aac82-4c1a-4e42-96b3-be668dc40fca) | Huge open world with 10,000+ meshes to borrow | 🔵 Epic | ☑️ Probably |
 | [Modular Rural House & Pine Forest](https://www.fab.com/listings/a081748c-6a49-4ba4-9008-9b10fadf8f73) | Pine forest and a house | ⚪ Check | ☑️ Probably |
 | Megascans free selection ([FAQ](https://support.fab.com/s/article/Fab-Transition-FAQs?language=en_US)) | About 1500 free rocks, ground surfaces, logs, plants. On Fab, search Megascans with "Price: Free" | 🔵 Fab Free | ☑️ Probably |
 | [Free Stone Material Pack](https://www.fab.com/listings/c19914ba-fc5f-43b5-a52a-b7dd8d9466ac) | 6 stone materials, 4K | 🔵 Fab Free | ☑️ Probably |
@@ -143,8 +140,6 @@ Compiled 2026-10-06 and reformatted for readability.
 
 | Asset | What it's for | License | UE 5.8.3 |
 |---|---|---|---|
-| [Sun Temple](https://www.fab.com/listings/b5516e01-8511-4ff4-b658-a6efd6bc7c6f) | Ornate stone temple | 🔵 Epic | ⚠️ Older |
-| [Valley of the Ancient](https://www.fab.com/listings/0c19880e-21bd-42ba-8287-1caccc3951b1) | Canyon rock and a "dark world". Use the environment only; its characters belong to Epic | 🔵 Epic | ⚠️ Older (early UE5) |
 | [Fable X – Ancient Ruins](https://forums.unrealengine.com/t/fable-x-ancient-ruins-free-asset-pack-26-pieces-custom-rematerials/2431144) | 26 modular ruin pieces; swap the red stone for grey | ⚪ Check | ☑️ Probably |
 | [Ancient Temple Ruins](https://www.fab.com/listings/460311fc-fd70-4660-ac6f-1d5aac245f5c) | Only free if you claimed it before 13 Jan 2026 | ⚪ Check | ☑️ Probably |
 
@@ -158,8 +153,6 @@ Compiled 2026-10-06 and reformatted for readability.
 | Volcanic | Basalt, ash and lava textures from Poly Haven and ambientCG | 🟢 CC0 | ✅ Yes |
 | Frozen | [Fresh Windswept Snow](https://www.fab.com/listings/afd08895-296c-47bf-ad51-565672b4a515) | 🔵 Fab Free | ☑️ Probably |
 | Frozen | [ICE VOL1: A Frozen Place](https://www.fab.com/listings/21f20110-da6f-48a8-a0d1-572f313c9bf0) | ⚪ Check | ☑️ Probably |
-| Overgrown | Electric Dreams and Project Titan (section 3) | 🔵 Epic | ☑️ Probably |
-| Corrupted | Valley of the Ancient dark world (section 4) | 🔵 Epic | ⚠️ Older |
 | Crystal | No free option; see Gaps | – | – |
 
 ---
@@ -191,12 +184,11 @@ Compiled 2026-10-06 and reformatted for readability.
 
 | Asset | What it's for | License | UE 5.8.3 |
 |---|---|---|---|
-| [Niagara Examples Pack](https://www.fab.com/listings/0e188eca-4e54-4fb2-a9ed-d8b8a565e600) | 50+ effects: fire, smoke, sparks, hits | 🔵 Epic | ☑️ Probably |
 | [Realistic Fire & Explosion Starter](https://www.fab.com/listings/2adf4e4e-5f1d-4543-9e8c-192fe3c9a8ed) | Campfires and torches | 🔵 Fab Free | ☑️ Probably |
 
 ## 9. Sky, weather and time of day
 
-Use Unreal's built-in Sky Atmosphere, Volumetric Clouds, Height Fog, Sky Light and Directional Light (Window → Env. Light Mixer). That's ✅ built into 5.8.3 with nothing to download. Rain and snow can come from the Niagara Examples Pack.
+Use Unreal's built-in Sky Atmosphere, Volumetric Clouds, Height Fog, Sky Light and Directional Light (Window → Env. Light Mixer). That's ✅ built into 5.8.3 with nothing to download.
 
 ---
 
@@ -253,6 +245,19 @@ For Unreal, ask for **FBX** (meshes and animations) or **PNG** (2D art). Model a
 | 16 | Original music: main theme, exploration, combat, Frontier ambience | WAV |
 
 ---
+
+## 🚫 Removed: full sample projects
+
+These Epic samples are whole projects. Fab only lets you **Create Project** with them, so they can't be added directly. Their replacements are in the tables above.
+
+| Removed | Was used for | Use instead |
+|---|---|---|
+| Game Animation Sample | Player movement animations | Mixamo, Free Animation Pack |
+| Niagara Examples Pack | Fire, smoke, impacts | Realistic Fire & Explosion Starter |
+| A Boy and His Kite, Electric Dreams, Project Titan | Forest and open-world meshes | Megaplants, Megascans, Poly Haven |
+| Sun Temple, Valley of the Ancient | Ruins and dark-world rocks | Fable X Ancient Ruins, Megascans rocks |
+| Open World Demo Collection | Photoscanned trees, rocks, cliffs | Megascans free selection, Megaplants, Spruce Forest, Poly Haven (doesn't work in UE 5.8.3) |
+| Control Rig Samples | Making arm animations | Make arm animations with Higgsfield (Gap 4) or Mixamo |
 
 ## 📝 Credits (required for CC-BY assets)
 
