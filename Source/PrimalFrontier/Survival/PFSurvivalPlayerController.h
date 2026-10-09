@@ -91,6 +91,8 @@ public:
     void SetCraftingMenuOpen(bool bOpen);
     /** Ask the server to start RecipeId or cancel the active job. */
     UFUNCTION(Server,Reliable) void ServerCraftAction(FName RecipeId,bool bCancel);
+    /** Owned knowledge ID lookup only; server derives cost and validates current live PlayerState. */
+    UFUNCTION(Server,Reliable) void ServerLearnKnowledge(FName KnowledgeId);
 
     // ---- Combat ----
     /** Ask the server to attack whatever creature the survivor's own view trace hits. */

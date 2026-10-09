@@ -2,6 +2,22 @@
 
 Updated October10,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
 
+## Active bounded M12 knowledge request boundary
+
+**Knowledge request technical gate PASSED:** Editor14.96s (after source discovery), Development Game25.27s, corrected native3/3, one-client4/4 and two-client75ms/1%loss6/6 Create/Restart. Client2 passed without crash. All ten network logs match the prior24warning/14experimentalPython-error baseline; no new normalized severity or fatal/ensure. Exact evidence/replay: KNOWLEDGE_REQUESTS_M12.md. Server-owned purchase/owner privacy/duplicate refusal/new-process restoration verified; no UI button, recipe restriction, human acceptance or fullM12 completion. Immediately update bounded Trello evidence/Done, then scoped Sol publication. Next bounded tooling fix: native runner must reject an incomplete requested filter rather than accept only the registered subset.
+
+One-client KnowledgeLive Create/Restart4/4 PASSED M12KnowledgeLive1_20261009_193105070_949e2900,engine/strict0/test severity0/no fatalensure. Actual owningRPC2pointpurchase once,invalid/duplicate/directclient refusal,no items/XP creation and original identity/knowledge/points survive newserver. Trusted100XP explicitlyfixture. Working/private1.720–1.804/1.581–1.742GiB,raw24knownwarnings/14Pythonlines perprocess retained. Next2NullRHIclients75ms1%loss,then rawbaseline review/Gamebuild; no UI/effect/fullM12 claim.
+
+Correctly named native3/3 PASSED Automation_M12KnowledgeFinal_20261009_193008834_57fc89cb (16.20s,working/private2.929/2.786GiB,raw/test severity0/exits0): KnowledgeRequests,Component,Records. Own generated3solution changes only restored after diff inspection; source/assets/userwork retained. Actual opt-in KnowledgeLive now compiled; one NullRHIclient Create/Restart next. No purchaseUI/effect acceptance.
+
+New KnowledgeLive fixture was missing from the5.14s incremental source list; no network pass claimed. Supported UBT-ProjectFiles discovery9.12s then Editor14.96s PASSED,explicit PFKnowledgeLiveTests.cpp compiled. Generated solution changes from this regeneration are task-owned; inspect/restore those only before publication,not user source/assets. Next correctly named native Records/KnowledgeRequests/Component3testselection before liveoneclient. Test/filter discovery gap retained as tooling evidence.
+
+Native KnowledgeRequests/Component2/2 PASSED Automation_M12KnowledgeRequests_20261009_192526900_2e6624ce,16.32s,working/private2.911/2.783GiB,raw/test severity0/exits0. Requested Progression.Transactions was not registered (pure transactions belong to Progression.Records); do not claim it ran. Correctly named Records will be checked after actualnetwork fixture compile. New owned/alive/unknown/premature/cooldown/client/foreign/duplicate/no-item checks passed. Next opt-in oneclient/restart fixture; UI/effect still future.
+
+Editor20.08s PASSED/no compiler warnings Saved/Logs/PFM12KnowledgeRequestEditorBuild.log. Owned request/private feedback compiled; focused native request/component/transaction gates next before new actual network fixture. No UI/recipe effect/manualpass claimed.
+
+Feedback7477fb1 published/Sol/local-remoteequal/clean verified; TrelloDone/publicationcomment. Fresh Programming/parentM12 audit selected https://trello.com/c/LcIKwFdv Doing: server-owned knowledge-ID purchase request,authoritative live pawn/level/points/prereq/duplicate/cooldown checks,private feedback. No UI button/recipe restriction yet; spending stays explicitly unavailable in crafting until separate usefuleffect gate. Native and opt-in one/two-client fixture work/builds pending; trusted100XP seeds will be markedfixtures,not earned progression. No human/fullM12acceptance.
+
 ## Active bounded M12 progression feedback
 
 **Feedback technical gate PASSED:** Editor19.56s/Game24.94s clean,native3/3 and rendered720p/1440p1/1each,maxHUD1.5.8PNG/rawlogs/unchanged personal files reviewed; exact PROGRESSION_FEEDBACK_M12.md. No failures in this bounded step. Trello evidence/Done and scopedSolpublication next,then fresh nexttask audit. FullM12/human gates open; server optional knowledge spending/effect and broader rewards still future.

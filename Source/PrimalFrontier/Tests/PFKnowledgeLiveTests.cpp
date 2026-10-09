@@ -1,0 +1,145 @@
+// Disposable server/client request boundary, explicit trusted XP fixtures and actual restart.
+#if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
+#include "Progression/PFProgressionComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
+#include "Inventory/PFInventoryComponent.h"
+#include "Survival/PFSurvivalPlayerController.h"
+#include "Survival/PFSurvivorCharacter.h"
+#include "Survival/PFPlayerSurvivalComponent.h"
+#include "Persistence/PFWorldPersistence.h"
+#include "Persistence/PFSaveFileStore.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
+#include "EngineUtils.h"
+#include "Misc/AutomationTest.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+namespace
+{
+class FKnowledgeLiveExercise final : public IAutomationLatentCommand
+{
+public:
+    explicit FKnowledgeLiveExercise(FAutomationTestBase* T):Test(T)
+    {FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);FParse::Value(FCommandLine::Get(),TEXT("PFSaveSlot="),Slot);bRestore=FParse::Param(FCommandLine::Get(),TEXT("PFLoadSave"));}
+    bool Update() override
+    {
+        const double Now=FPlatformTime::Seconds();
+        if(Stage==99){return Now-Changed>(bClient?3:15);}
+        if(Now-Started>110){Test->AddError(FString::Printf(TEXT("[PrimalProgression] Knowledge live timeout stage=%d client=%d"),Stage,bClient));return true;}
+        UWorld* W=nullptr;for(const auto& Context:GEngine->GetWorldContexts()){if(Context.World() && Context.World()->IsGameWorld()){W=Context.World();break;}}if(!W){return false;}
+        bClient=W->GetNetMode()==NM_Client;
+        TArray<APFSurvivalPlayerController*> Players;
+        for(auto It=W->GetPlayerControllerIterator();It;++It){auto* PC=Cast<APFSurvivalPlayerController>(It->Get());if(PC && PC->GetPawn() && PC->GetInventory() && Progression(PC)){Players.Add(PC);}}
+        if(Players.Num()!=(bClient?1:Expected)){return false;}
+        Players.Sort([](const auto& A,const auto& B){return A.PlayerState->GetPlayerId()<B.PlayerState->GetPlayerId();});
+        auto* PC=Players[0];auto* G=Progression(PC);auto* I=PC->GetInventory();FString Error;
+        auto Next=[&](int32 N){Stage=N;Changed=Now;};
+        if(bRestore)
+        {
+            for(auto* P:Players){if(!Restored(P)){return false;}}
+            if(bClient)
+            {
+                if(PC->GetPlayerSetupStatus()!=EPFPlayerSetupStatus::Restored || !Privacy(W,PC)){return false;}
+                CheckState(PC);const FString Feedback=G->GetKnowledgeFeedback();
+                Test->TestFalse(TEXT("Restored client direct mutation refuses"),G->RequestKnowledge(TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
+                Test->TestEqual(TEXT("Client cannot forge restored feedback"),G->GetKnowledgeFeedback(),Feedback);
+                Test->TestFalse(TEXT("Client cannot save knowledge"),W->GetSubsystem<UPFWorldPersistence>()->Save(Slot,Error));
+                Test->AddInfo(TEXT("[PrimalProgression] Knowledge restart client identity,spent points,private records and refusal verified"));
+            }
+            else
+            {
+                for(auto* P:Players){CheckState(P);}FPFWorldSaveData Data;
+                Test->TestTrue(TEXT("Actual restored world capture"),W->GetSubsystem<UPFWorldPersistence>()->Capture(Data,Error));
+                Test->TestTrue(TEXT("Restored record validates"),W->GetSubsystem<UPFWorldPersistence>()->Validate(Data,Error));
+                Test->TestEqual(TEXT("All original players restored"),Data.Players.Num(),Expected);
+                Test->AddInfo(TEXT("[PrimalProgression] Knowledge restart server restored independent records"));
+            }
+            Next(99);return false;
+        }
+        if(!bClient)
+        {
+            if(Stage==0)
+            {
+                int32 Index=0;
+                for(auto* P:Players)
+                {
+                    if(!P->GetInventory()->GetStacks().IsEmpty() || Progression(P)->GetExperience()!=0){Test->AddError(TEXT("Refusing non-fresh knowledge fixture"));return true;}
+                    auto* Pawn=CastChecked<APFSurvivorCharacter>(P->GetPawn());Pawn->GetCharacterMovement()->DisableMovement();Pawn->SetActorLocation(FVector(-1200,Index*400,100));
+                    Pawn->Survival->HungerDrainPerSecond=0;Pawn->Survival->ThirstDrainPerSecond=0;
+                    Test->TestTrue(TEXT("Trusted identity role marker,not reward"),P->GetInventory()->Grant(TEXT("Item_Stone"),++Index));
+                    FPFProgressionRecord Seed;Seed.Experience=100;Test->TestTrue(TEXT("Explicit trusted100XP fixture,not earned pacing"),Progression(P)->Restore(Seed,Error));
+                }
+                Test->AddInfo(TEXT("[PrimalProgression] Seeded explicit100XP fixtures for purchase boundary,not an earned gameplay claim"));Next(1);return false;
+            }
+            if(Stage==1)
+            {
+                for(auto* P:Players){auto* PG=Progression(P);if(!Restored(P) || !PG->GetKnowledgeFeedback().StartsWith(TEXT("Refused:"))){return false;}}
+                for(auto* P:Players){CheckState(P);}Test->TestTrue(TEXT("Actual isolated knowledge save"),W->GetSubsystem<UPFWorldPersistence>()->Save(Slot,Error));if(!Error.IsEmpty()){Test->AddError(Error);}
+                Test->AddInfo(TEXT("[PrimalProgression] Knowledge server exact owned purchase,private record and save verified"));Next(99);return false;
+            }
+        }
+        else
+        {
+            if(Stage==0)
+            {
+                if(G->GetExperience()!=100 || (I->Count(TEXT("Item_Stone"))!=1 && I->Count(TEXT("Item_Stone"))!=2)){return false;}
+                Test->TestEqual(TEXT("Fresh seeded three points"),G->GetAvailablePoints(),3);Test->TestTrue(TEXT("No knowledge granted withXP"),G->GetRecord().Knowledge.IsEmpty());
+                Test->TestFalse(TEXT("Client cannot directly spend points"),G->RequestKnowledge(TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
+                Test->TestTrue(TEXT("Client cannot forge request feedback"),G->GetKnowledgeFeedback().IsEmpty());
+                PC->ServerLearnKnowledge(TEXT("Tech_Unknown"));Next(1);return false;
+            }
+            if(Stage==1 && Now-Changed>.7)
+            {
+                if(!G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:"))){return false;}
+                Test->TestTrue(TEXT("Invalid owned RPC leaves record and inventory"),G->GetRecord().Knowledge.IsEmpty() && G->GetExperience()==100 && I->Count(TEXT("Item_Stone"))>=1);
+                if(I->Count(TEXT("Item_Stone"))==1){PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));Next(2);}
+                else{Next(4);}return false;
+            }
+            if(Stage==2 && Now-Changed>.7)
+            {
+                if(G->GetRecord().Knowledge.Num()!=1){return false;}CheckState(PC);PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));Next(3);return false;
+            }
+            if(Stage==3 && Now-Changed>.7)
+            {if(!G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:"))){return false;}Next(4);return false;}
+            if(Stage==4)
+            {
+                if(!Privacy(W,PC)){return false;}CheckState(PC);
+                Test->AddInfo(TEXT("[PrimalProgression] Knowledge owned RPC,deduplicated spending,independent privacy and client refusal verified"));Next(99);return false;
+            }
+        }
+        return false;
+    }
+private:
+    UPFProgressionComponent* Progression(APFSurvivalPlayerController* P){auto* PS=P->GetPlayerState<APFInventoryPlayerState>();return PS?PS->Progression.Get():nullptr;}
+    bool Restored(APFSurvivalPlayerController* P)
+    {
+        auto* G=Progression(P);const int32 Marker=P->GetInventory()->Count(TEXT("Item_Stone"));
+        return G && G->GetExperience()==100 && ((Marker==1 && G->GetRecord().Knowledge==TArray<FName>{FName(TEXT("Tech_FieldTools"))}) || (Marker==2 && G->GetRecord().Knowledge.IsEmpty()));
+    }
+    void CheckState(APFSurvivalPlayerController* P)
+    {
+        auto* G=Progression(P);const int32 Marker=P->GetInventory()->Count(TEXT("Item_Stone"));
+        Test->TestEqual(TEXT("Purchase never changes XP"),G->GetExperience(),100);Test->TestEqual(TEXT("Derived point spending exact per owner"),G->GetAvailablePoints(),Marker==1?1:3);
+        Test->TestTrue(TEXT("Correct independent knowledge"),Marker==1?G->GetRecord().Knowledge==TArray<FName>{FName(TEXT("Tech_FieldTools"))}:G->GetRecord().Knowledge.IsEmpty());
+        Test->TestTrue(TEXT("No crafting credit or free items"),G->GetRecord().CreditedCrafts.IsEmpty() && P->GetInventory()->GetStacks().Num()==1 && (Marker==1 || Marker==2));
+    }
+    bool Privacy(UWorld* W,APFSurvivalPlayerController* PC)
+    {
+        int32 Others=0;
+        for(TActorIterator<APFInventoryPlayerState> It(W);It;++It){if(*It!=PC->PlayerState){++Others;auto* G=It->Progression.Get();if(!G){return false;}Test->TestTrue(TEXT("Foreign XP,knowledge,credit and feedback private"),G->GetExperience()==0 && G->GetRecord().Knowledge.IsEmpty() && G->GetRecord().CreditedCrafts.IsEmpty() && G->GetKnowledgeFeedback().IsEmpty());}}
+        return Others==Expected-1;
+    }
+    FAutomationTestBase* Test;FString Slot;double Started=FPlatformTime::Seconds(),Changed=0;int32 Stage=0,Expected=1;bool bRestore=false,bClient=false;
+};
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFKnowledgeLiveTest,"PF.Progression.KnowledgeLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)
+bool FPFKnowledgeLiveTest::RunTest(const FString&)
+{
+    FString Slot;int32 Expected=0;FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);
+    if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunKnowledgeTests")) || !FParse::Param(FCommandLine::Get(),TEXT("nullrhi")) || (Expected!=1 && Expected!=2) ||
+        !FParse::Value(FCommandLine::Get(),TEXT("PFSaveSlot="),Slot) || !Slot.StartsWith(TEXT("AutomationM12Knowledge")) || !FPFSaveFileStore::ValidSlot(Slot))
+    {AddError(TEXT("Requires isolated NullRHI -PFRunKnowledgeTests -PFExpectedPlayers=1|2 -PFSaveSlot=AutomationM12Knowledge..."));return false;}
+    ADD_LATENT_AUTOMATION_COMMAND(FKnowledgeLiveExercise(this));return true;
+}
+#endif

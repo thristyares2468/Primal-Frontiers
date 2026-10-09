@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October10 knowledge request: fresh bounded https://trello.com/c/LcIKwFdv/parent read; Editor/Game/native3/one-client4/two-client lag-loss6 technical gate passed, all ten rawlogs0new known baseline. Record exact KNOWLEDGE_REQUESTS_M12.md evidence and immediately move/readback only bounded request Done; parentM12Doing, Personal gates unchanged. Scoped Sol publication follows. Next fresh audit selects incomplete native-filter runner verdict hardening before optional knowledge UI/useful recipe effect.
+
 October10 completed feedback technical gate: Game24.94s clean,Editor/native3/rendered720p/1440p passed. https://trello.com/c/mKHbaAu0 evidence updated/moved/read backDone; parentM12Doing and existing PersonalG2 guides updated without additional assignment/humanpass. Scoped Solcommit/push next; inspectfreshboards before optional knowledge spending task.
 
 October10 feedback task: private progression3a76cc7 pushed/local-remoteequalclean,publicationcomment recorded. Fresh Programming/HUD audit selected https://trello.com/c/mKHbaAu0 Doing for read-only owner XP and selectedfirstcraft feedback. Editor/native3/rendered720p/1440p gates pass,8PNG/rawknownbaseline/personalguards inspected; Game remains pending. On pass immediately update evidence/Done before scoped Solpublication; retain M12 parentDoing/Personalunverified and update existingG2 descriptions without extra assignment.

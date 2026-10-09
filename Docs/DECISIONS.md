@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Verify owned knowledge request before access/UI
+
+Accept only a lookup ID through the owned controller; validate authoritative live pawn/PlayerState/catalogs,level/prerequisites/price/duplicate and cooldown using server state. Commit candidate only after complete validation; never grant XP/items or accept target/price/amount fields. Private feedback explicitly keeps recipe integration pending. Preserve existing recipes/legacy gear while verifying request/persistence independently; adding purchase controls or a useful restriction needs a separate real gameplay/UI gate. Native/network tests explicitly seed100XP and disclose that this is boundary verification rather than earned-level pacing. KNOWLEDGE_REQUESTS_M12.md has current evidence/limits.
+
 ## 2026-10-09 — Publish private player progression with real craft transactions
 
 Use a no-tick owner-only component on the persistent PlayerState. Prepare a validated first-craft candidate before inventory conversion; commit 20 XP/recipe ID only after actual success, never on grants/cancellation/failed output. Runtime capture now emits owner-bound world V2; strict V1 reads supply zero defaults and preserve existing items/ownership/freshness without retrospective reward. Publish in-memory roster records and version atomically on disconnect, even before the first manual save. PLAYER_PROGRESSION_M12.md retains the actual mixed-version reconnect failure and successful correction. No XP RPC/purchase UI/recipe restriction or other earning source yet.

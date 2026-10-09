@@ -5,6 +5,7 @@
 class UPFCraftingComponent;
 class UPFCraftingCatalog;
 class UPFItemCatalog;
+class APawn;
 
 /** PlayerState lifetime; trusted server persistence and completed-craft hook only. No grant RPC. */
 UCLASS(ClassGroup=(PrimalFrontier))
@@ -20,9 +21,14 @@ public:
     bool Capture(FPFProgressionRecord& Out,FString& Error) const;
     bool CanRestore(const FPFProgressionRecord& Candidate,FString& Error) const;
     bool Restore(const FPFProgressionRecord& Candidate,FString& Error);
+    /** Owning live pawn only. Server catalog sets price/level; client never supplies XP or target. */
+    bool RequestKnowledge(FName Knowledge,APawn* Pawn,FString& Error);
+    UFUNCTION(BlueprintPure,Category="Progression") FString GetKnowledgeFeedback() const {return KnowledgeFeedback;}
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 private:
     UPROPERTY(Replicated) FPFProgressionRecord Record;
+    UPROPERTY(Replicated) FString KnowledgeFeedback;
+    double NextKnowledgeRequestTime=0;
     bool Authority(const UPFCraftingCatalog*& Crafting,const UPFItemCatalog*& Items,FString& Error) const;
     // Only the actual timed crafting transaction can prepare/commit a first-craft award.
     friend class UPFCraftingComponent;

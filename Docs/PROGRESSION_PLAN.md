@@ -1,5 +1,9 @@
 # Original progression and biological upgrades — M12/M13 plan
 
+Final October10 request technical gate: native3/3, one-client4/4, two-client75ms/1%loss6/6 restart, Editor/Game passed. KNOWLEDGE_REQUESTS_M12.md retains discovery/filter gaps and reviewed raw baseline. Owner knowledge purchase/replication/persistence is verified; useful recipe access and purchase UI remain unimplemented. FullM12/M13/human acceptance stays open; incomplete native-filter verdict is a small tooling prerequisite for further gates.
+
+October10 purchase-boundary checkpoint: KNOWLEDGE_REQUESTS_M12.md adds ownedID-only RPC/server life/relationship/cooldown/catalog point checks and private feedback. Native and one-client restart passed; remaining2client/Game gates recorded there. Existing records persist purchases, but recipe metadata remainsnon-gating and UI stillhasno purchase button. Do not present this as playable technology access; usefuleffect/UI and broader rewards stillneedtheir own gates.
+
 October10 read-only feedback checkpoint: PROGRESSION_FEEDBACK_M12.md documents actual owner XP/level/points and selected first-craft reward states in centered crafting. Native3/3 and rendered720p/1440p passed; Game completion recorded there. Spending explicitly unavailable; no purchaseRPC or recipe restriction. This supersedes earlier statements that XP has no UI. Full progression pacing,technology access and M13 remain incomplete/future.
 
 October9 player integration checkpoint: PLAYER_PROGRESSION_M12.md implements owner-private PlayerState records, actual successful first-craft20XP/dedupe and V2 runtime save/restore with V1zero defaults. Native and one-client restart gates passed; remaining live/build gates are recorded there. This supersedes the temporary archive-onlyV2refusal below. No purchaseUI/recipe restriction or gathering/building/discovery reward yet; eight existing recipes alone earn at most160XP, so full progression pacing/ten levels remain incomplete.

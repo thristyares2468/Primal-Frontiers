@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-10 M12 owned knowledge purchase request boundary
+
+Owned-controller ID-only RPC validates authority/world/current living pawn/private PlayerState and complete catalog transaction;0.25active-server-second cooldown, candidate commit, owner-private feedback. No client amount/price/target, XP/item grant, UI purchase or recipe restriction. Editor20.08s then source-discovery14.96s and Game25.27s clean. Initial native2/2 omitted unregistered Progression.Transactions; corrected actual KnowledgeRequests/Component/Records3/3 passed Automation_M12KnowledgeFinal_20261009_193008834_57fc89cb,16.20s,2.929/2.786GiB,raw/test severity/exits0. Supported UBT discovery fixed missing new live source; only task-owned regenerated solutions restored after diff review. Actual PF.Progression.KnowledgeLive one-client4/4 M12KnowledgeLive1_20261009_193105070_949e2900, two-client75ms1%loss6/6 M12KnowledgeLive2_20261009_193235730_e1579ecf Create/Restart passed, all exits/test severity0/no crash/timeout/fatalensure. One learner100XP/onepoint/oneknowledge vs other100XP/threepoints/none survives newserver; trusted100XP/stone markers are fixtures, not earned pacing. Working/private ranges1.720–1.804/1.581–1.742GiB(one) and1.721–1.807/1.568–1.749GiB(two). All10rawlogs24knownwarnings/14Pythonlines,0new normalized severity against prior baseline. Exact source, logs/reports, replay and limits KNOWLEDGE_REQUESTS_M12.md; https://trello.com/c/LcIKwFdv. FullM12/Personal/FPS/16GB/rendered purchase/effect acceptance remains open. Next fix incomplete native-filter verdict before optional unlock UI/effect.
+
 ## 2026-10-10 M12 readable private progression feedback
 
 Final Development Game24.94s PASSED/no compiler warnings (Saved/Logs/PFM12ProgressionFeedbackGameBuild.log); completes bounded technical gate below. No failed test/build,assets or personal setting changes. FullM12/manual acceptance remains open.
