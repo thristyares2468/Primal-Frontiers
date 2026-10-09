@@ -1,5 +1,12 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-09 Requested local Editor Medium preset after menu completion
+
+After publishing menu/save/Rename6571bc6, ran supported Editor Scalability1/Scalability/CLOSE_SLATE_MAINFRAME in a single NullRHI editor process. Normal exit0 and actual GEditorSettingsIni disk readback show all11quality groups1 (Medium), resolutionquality71. Profile: C:/Users/jackh/AppData/Local/UnrealEngine/5.8/Saved/Config/WindowsEditor/EditorSettings.ini. Actual GameUserSettings hashes unchanged; no tracked assets/maps/source/project settings modified or raw generated INI editing. Machine preferences remain out of Git. No C++ build required; no rendered preview/FPS acceptance.
+
+Exact evidence: Saved/AutomationReports/EditorMediumRetry_20261009_033618504_9a8391f0/run-summary.json; Saved/Logs/EditorMediumRetry_20261009_033618504_9a8391f0.log.16.11s,working/private2.903/2.718GiB,zero raw warning/error/ensure/fatal. First EditorMedium_20261009_033149122_40c1f47f FAILED timeout150.39s,engine-1,3.001/2.935GiB because generic Quit did not exit Slate Editor/flush settings; only owned process stopped, game preferences unchanged. Installed EditorServer/MainFrame supported close path resolved this on retry. [AI Trello task](https://trello.com/c/vfPfBayv) immediately updated/read back Done. Broader manual gates remain open.
+
+
 ## 2026-10-09 M8/M11 Pause Save, explicit world menu and safe Rename
 
 Completed bounded native menu/UI slice: original theme, Single player New/Load/Refresh/Rename, Main Settings, confirmed return to menu and host-local Pause Save. Uses existing /Engine/Maps/Entry and L_PrimalFrontier_OpenWorld without asset changes. Multiplayer menu remains informational; no host/join/browser claim. Rename persists a friendly label separately from stable gameplay IDs/files; invalid/duplicate names and corrupt metadata are refused without overwrite. Reproduced/fixed standalone sole-owner reopen rejection while preserving network credential checks. User-reported Save reset remains a failed manual gate; conservation tests did not reproduce it and timed resource respawns in the retained log do not fully explain the observation.
