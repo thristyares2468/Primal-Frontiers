@@ -1,0 +1,41 @@
+# Crafting knowledge controls — M11/M12
+
+October10,2026. Optional BoundTool recipe details show Field tool knowledge, level2, cost2 points and actual available points. Learn is disabled until the owner record meets level/points/prerequisites and the pawn is alive. Already-learned state cannot be bought twice. Mouse/Slate button or K/D-right sends only Tech_FieldTools through the existing owned ServerLearnKnowledge RPC. The server independently checks authority/life/cooldown/catalog/record and exact cost; UI never changes points or items optimistically. Craft button/Enter remain unavailable until the read-only validated owner recipe query allows it; server start/completion still enforce access. Knowledge result is the actual owner feedback. Baseline recipes remain accessible; no grants, art, schema or asset changes.
+
+Selected knowledge controls live inside the detail scroll panel; text grows with HUD scale and remains scrollable. XP/points summary no longer says spending unavailable. Shared Pause help describes K/D-right. First-craft/cancel/repeat/cap feedback remains conditional. No physical-controller, earned pacing, human acceptance or sustainedFPS claims from synthetic rendered keys. Legacy gear is retained without fabricated XP.
+
+## Technical verification
+
+Editor18.11s passed clean Saved/Logs/PFM12LearnUIEditorBuild.log. Exact native3/3 Automation_M12LearnUI_20261009_201658010_4f68fa70: PF.UI.ProgressionDetails, PF.Progression.RecipeAccess, PF.Progression.KnowledgeRequests.16.60s,working/private2.958/2.807GiB,engine/strict0,checkedselection/raw-testseverity0/no fatalensure/timeout. View tests cover level/remaining points/prerequisites/learned/missing/corrupt records and no mutation. Existing backend actual one-/two-client restart evidence RECIPE_ACCESS_M12.md; transport/authority code unchanged in this UI task.
+
+Final rendered and Game gates passed below. Trello https://trello.com/c/F6kA9BvW is a bounded technical task; parent M12/manual gates stay open.
+
+Initial rendered720 M11Progression720_20261009_201738237_86d6e731 and1440 M11Progression1440_20261009_201914038_a5a67bb1 each passed exact1/1/selection/exits0/testseverity0,50.01/49.71s,working/private3.146/5.382 and3.266/5.153GiB;257/258personal saves/default config unchanged. Review of the720 locked PNG showed next Tool selection instead of locked BoundTool: deferred screenshot raced immediate selection. Artifact gate therefore incomplete despite clean interaction reports. Fix only fixture waits before changing selected/available/learned states; retain initial runs and replay final two resolutions. Game initial24.67s clean (PFM12LearnUIGameBuild.log). Singular point text fixed; final build/native presentation replay also required.
+
+## AI replay
+
+Second artifact review: corrected720 M11Progression720_20261009_202131802_269b9545 (51.17s,3.051/5.233GiB,259saves/config unchanged) and1440 M11Progression1440_20261009_202242481_887f7eb1 (50.94s,3.249/5.406GiB,260saves/config unchanged) each exact1/1/selection/exits/test0. All16PNG reviewed; locked states now correct, but1440 completion reward bottom line fell below inner scroll clip. Strengthened fixture to check examined-detail bounds within scroll viewport and ScrollToEnd for final reward capture; production layout unchanged, final two-resolution replay required. Raw26warnings/14experimentalPythonlines perprocess,0new normalized severity/no fatalensure versus Protection1440. Do not treat prior viewport-only bounds as proof that this captured final text is fully visible.
+
+No opened level needed for native pure view and temporary Game fixtures. Start here: close competing Unreal instances, build Editor, run Scripts/RunNativeAutomation.ps1 -TestFilter 'PF.UI.ProgressionDetails+PF.Progression.RecipeAccess+PF.Progression.KnowledgeRequests' -Label M12LearnUI. Require exact three clean tests/checked selection and exits0.
+
+Rendered level /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld, one isolated -game Standalone, disposable profile/settings. Run Scripts/RunControlsAutomation.ps1 -TestCase Progression -Resolution 720 -HUDScale 1.5, then1440 after pass. Exact PF.UI.ProgressionFeedbackLive; real Slate locked keys, Learn button, exact2point spend, learned8s BoundTool conversion; cancel/first/repeat reward, cap, actual close/pause. Level100XP/cap seeds are explicitly trusted UI boundaries, not earned progression proof. Actual generated reports must have exact selected test, no warnings/errors; screenshots reviewed, viewport/text bounds, personal saves/default config hash guard, unique raw baseline/memory/exits. Runner now forwards ExpectedFilter rather than accepting any returned clean test. Keep generated private saves local.
+
+The existing Personal G2 guide now includes learning controls and the expected grant-free level2 route; this does not mark human acceptance passed. Installed engine5.8.3/requested5.8.2; host31.93GiB/minimum16GB unverified; packagedServerunsupportedinstalleddistribution. Human M8/M11 and fullM12 acceptance remain open. Next separate bounded objective: demonstrate earned level2 route and resource/creature balance rather than fabricate XP or assume manual pass.
+
+## Final gate and retained failure
+
+Stronger1440 capture M11Progression1440_20261009_202655203_1d865256 failed one inner-scroll text assertion (engine0/strict1,50.89s,3.249/5.430GiB,262personal saves/default config unchanged). ScrollToEnd had used the previous wrapped-content height. Only the fixture repeats end scroll after a layout wait and adds named geometry/offset diagnostics. No production layout or clipping waiver. Failed-only1440 replay passed below; earlier deferred-selection/capture runs remain retained.
+
+| Final check | Evidence | Outcome |
+|---|---|---|
+| Native exact3 | Automation_M12LearnUI_20261009_201658010_4f68fa70 |3/3,16.60s,2.958/2.807GiB,engine/strict0/raw-test severity0 |
+| Singular formatter replay | Automation_M12LearnUICapture_20261009_202047274_1e484145 | PF.UI.ProgressionDetails1/1,16.20s,2.969/2.818GiB,clean |
+| Rendered720p/HUD1.5 | M11Progression720_20261009_202548863_c2621be5 | PF.UI.ProgressionFeedbackLive1/1,51.42s,3.092/4.865GiB,261personal saves/config unchanged |
+| Failed-only1440p/HUD1.5 | M11Progression1440_20261009_202924469_43e8661f | PF.UI.ProgressionFeedbackLive1/1,51.37s,3.259/5.374GiB,263personal saves/config unchanged |
+| Final Editor/Game | Saved/Logs/PFM12LearnUIScrollRetryEditorBuild.log; PFM12LearnUIScrollRetryGameBuild.log |6.26/14.28s,Succeeded,no compiler warnings |
+
+Both final rendered reports explicitly check exact selection; engine/strict/runner0, test warnings/errors0,no timeout. Unique raw logs Saved/Logs/<run>.log each have26warnings and14 experimental Python error lines; normalized severity matches M12Protection1440_20261009_103335442_3f0bea5f baseline,0new/no fatalensure. Existing EditorDataStorage/WorldPartition class and Scalability priority warnings plus missing experimental Python test-tool classes are retained. Ordinary PrimalFrontier.log remained stale04:53UTC; unique task logs reviewed instead.
+
+Reports: Saved/AutomationReports/<run>/run-summary.json and index.json. Final four knowledge PNGs per resolution (eight total) viewed under Saved/AutomationReports/ControlsUI/<run>/{knowledge_level_locked,knowledge_available,knowledge_learned,learned_craft_complete}.png. Correct locked selection, actual2point spend/disabled repeat, actual8s bound craft120XP/remaining1point and fully visible wrapped reward verified. All earlier16 state-corrected screenshots had also been reviewed; clipped1440 final image is not final acceptance.
+
+One rendered process at a time; uncapped/VSync0 requested, no sustained walkingFPS/hitch, physical controller,16GB minimum or human acceptance inferred. Existing backend actual one-/two-client authority/privacy/restart gates are in RECIPE_ACCESS_M12.md; production transport unchanged in this task. Next bounded task verifies earned first upgrade without XP/item grants. No assets/private saves/default settings edited.

@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Knowledge availability is a read-only view of server transactions
+
+Describe selected recipe learning by validating a copy of the owner record against the complete catalog. Show explicit level/point/prerequisite refusals and already-learned state; never mutate XP/items in the menu. Real Learn button/K/D-right sends only the owned knowledge ID. Server feedback and later replicated record control the displayed outcome and Craft availability. Keep growing details inside the existing scroll panel. Screenshot fixtures wait for deferred captures/layout and measure the examined text inside that panel; do not weaken clipping assertions or change production layout to satisfy a stale capture. KNOWLEDGE_MENU_M12.md records native and real Slate-rendered gates. Synthetic input and trusted boundary XP are not human controller or earned pacing acceptance.
+
 ## 2026-10-10 — Gate optional recipes without removing legacy gear
 
 Use the validated knowledge catalog mapping and private owner record to authorize optional crafting both at start and before conversion. Treat client read-only availability as presentation, never authority. Keep ordinary survival recipes and existing carried tools usable, including V1 zero-default saves; knowledge controls future optional crafts, not ownership of previously created items. Do not retroactively award or rewrite private saves. Tier-mechanics fixtures explicitly seed XP/learn via the real server request; separate access tests prove locked refusal/conservation and restart. Purchase UI remains its own rendered gate. RECIPE_ACCESS_M12.md.

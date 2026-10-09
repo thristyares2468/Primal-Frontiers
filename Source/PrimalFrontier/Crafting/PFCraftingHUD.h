@@ -45,7 +45,7 @@ class PRIMALFRONTIER_API UPFCraftingHUD : public UUserWidget
 public:
     /** Shared by the actual modal footer and Pause help; these are UI-only controls. */
     static const TCHAR* NavigationHelp()
-    {return TEXT("PgUp/PgDn / LB/RB: category | Arrows / D-pad: recipe | Enter / A / X: craft\nR / D-left: cancel | C / Y / B / Esc: close | 1/2/3: visible quick craft | P / Menu: pause. World keeps running.");}
+    {return TEXT("PgUp/PgDn / LB/RB: category | Up/Down / D-pad: recipe | Enter / A / X: craft\nK / D-right: learn | R / D-left: cancel | C / Y / B / Esc: close | P / Menu: pause. World keeps running.");}
     void RefreshMenu();
     void SelectRecipe(FName Id);
     void MoveSelection(int32 Direction);
@@ -55,6 +55,7 @@ public:
     const TArray<FName>& GetVisibleRecipeIds() const {return RecipeIds;}
     FName GetSelectedRecipe() const {return SelectedRecipe;}
     UFUNCTION() void CraftSelected();
+    UFUNCTION() void LearnSelected();
     UFUNCTION() void CancelCraft();
     UFUNCTION() void CloseMenu();
 protected:
@@ -77,6 +78,9 @@ private:
     UPROPERTY() TObjectPtr<UTextBlock> Heading;
     UPROPERTY() TObjectPtr<UTextBlock> ProgressionSummary;
     UPROPERTY() TObjectPtr<UTextBlock> ProgressionReward;
+    UPROPERTY() TObjectPtr<UTextBlock> KnowledgeRequirement;
+    UPROPERTY() TObjectPtr<UTextBlock> LearnLabel;
+    UPROPERTY() TObjectPtr<UButton> LearnButton;
     UPROPERTY() TObjectPtr<UTextBlock> DetailTitle;
     UPROPERTY() TObjectPtr<UTextBlock> DetailBody;
     UPROPERTY() TObjectPtr<UTextBlock> ItemStats;
@@ -90,6 +94,7 @@ private:
     TArray<FGameplayTag> CategoryIds;
     FGameplayTag CategoryFilter;
     FName SelectedRecipe;
+    FName SelectedKnowledge;
     bool bInitialChoiceMade=false;
     float Refresh=0;
 };

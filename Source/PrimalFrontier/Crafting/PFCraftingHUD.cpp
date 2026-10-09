@@ -17,6 +17,9 @@
 #include "UI/PFRecipeDetails.h"
 #include "UI/PFProgressionDetails.h"
 #include "Progression/PFProgressionComponent.h"
+#include "Progression/PFProgressionCatalog.h"
+#include "Survival/PFPlayerSurvivalComponent.h"
+#include "GameFramework/Pawn.h"
 #include "Inventory/PFInventoryPlayerState.h"
 #include "UI/PFItemPicture.h"
 #include "Settings/PFGameUserSettings.h"
@@ -55,6 +58,12 @@ void UPFCraftingHUD::NativeOnInitialized()
     Columns->AddChildToHorizontalBox(DetailPanel)->SetSize(DetailWidth);
     auto* DetailScroll=WidgetTree->ConstructWidget<UScrollBox>();DetailPanel->SetContent(DetailScroll);
     auto* Details=WidgetTree->ConstructWidget<UVerticalBox>();DetailScroll->AddChild(Details);
+    KnowledgeRequirement=Label(TEXT("PF_KnowledgeRequirement"),PFUITheme::Accent);
+    Details->AddChildToVerticalBox(KnowledgeRequirement)->SetPadding(FMargin(0,0,0,8));
+    LearnButton=WidgetTree->ConstructWidget<UPFRecipeChoiceButton>(UPFRecipeChoiceButton::StaticClass(),TEXT("PF_LearnKnowledge"));
+    LearnButton->SetStyle(PFUITheme::NavigationButton(false));LearnButton->OnClicked.AddDynamic(this,&UPFCraftingHUD::LearnSelected);
+    LearnLabel=Label(TEXT("PF_LearnKnowledge_Label"),PFUITheme::Text);LearnButton->SetContent(LearnLabel);
+    Details->AddChildToVerticalBox(LearnButton)->SetPadding(FMargin(0,0,0,10));
     auto* PictureSize=WidgetTree->ConstructWidget<USizeBox>();PictureSize->SetWidthOverride(108);PictureSize->SetHeightOverride(108);
     Picture=CreateWidget<UPFItemPicture>(GetOwningPlayer(),UPFItemPicture::StaticClass(),TEXT("PF_SelectedItemPicture"));PictureSize->SetContent(Picture);Details->AddChildToVerticalBox(PictureSize)->SetHorizontalAlignment(HAlign_Center);
     DetailTitle=Label(TEXT("PF_CraftingDetail_Title"),PFUITheme::Text);Details->AddChildToVerticalBox(DetailTitle)->SetPadding(FMargin(0,8,0,8));
@@ -121,6 +130,7 @@ void UPFCraftingHUD::RefreshMenu()
     auto Font=[&](UTextBlock* T,int32 Size){auto F=T->GetFont();F.Size=FMath::RoundToInt(Size*Scale);if(T->GetFont().Size!=F.Size){T->SetFont(F);}};
     Font(Heading,20);Font(DetailTitle,18);Font(DetailBody,16);Font(ItemStats,14);Font(Result,14);Font(Hints,12);for(auto T:ButtonLabels){Font(T.Get(),16);}
     Font(ProgressionSummary,14);Font(ProgressionReward,14);
+    Font(KnowledgeRequirement,14);Font(LearnLabel,14);
     for(int32 N=0;N<CategoryIds.Num();++N){Font(CategoryTitles[N],14);CategoryButtons[N]->SetStyle(PFUITheme::NavigationButton(CategoryFilter==CategoryIds[N]));}
     for(int32 N=0;N<RecipeIds.Num();++N)
     {
@@ -134,8 +144,21 @@ void UPFCraftingHUD::RefreshMenu()
     const auto ProgressionView=PFProgressionDetails::Describe(Progression?&Progression->GetRecord():nullptr,
         Progression?Progression->GetAvailablePoints():INDEX_NONE,D?D->Id:NAME_None);
     ProgressionSummary->SetText(ProgressionView.Summary);ProgressionReward->SetText(ProgressionView.RecipeReward);
+    const auto* KnowledgeCatalog=GetDefault<UPFProgressionCatalog>();const FPFKnowledgeDefinition* Knowledge=nullptr;
+    if(D){for(const auto& Entry:KnowledgeCatalog->Knowledge){if(Entry.Recipes.Contains(D->Id)){Knowledge=&Entry;break;}}}
+    SelectedKnowledge=Knowledge?Knowledge->Id:NAME_None;
+    const auto KnowledgeView=PFProgressionDetails::DescribeKnowledge(Progression?&Progression->GetRecord():nullptr,Knowledge,
+        KnowledgeCatalog,C?C->Catalog.Get():nullptr,I?I->Catalog.Get():nullptr);
+    const auto* Needs=PC && PC->GetPawn()?PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>():nullptr;
+    const bool bAlive=Needs && !Needs->IsDead();
+    KnowledgeRequirement->SetVisibility(Knowledge?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
+    KnowledgeRequirement->SetText(KnowledgeView.Requirement);LearnLabel->SetText(KnowledgeView.Button);
+    LearnButton->SetVisibility(Knowledge?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
+    LearnButton->SetIsEnabled(KnowledgeView.bCanLearn && bAlive);
+    FString AccessError;const bool bAccess=D && (Progression?Progression->CanCraftRecipe(D->Id,AccessError):Knowledge==nullptr);
     const auto View=PFRecipeDetails::Describe(D,I,UPFInventoryComponent::ServerTime(GetWorld()),C && !C->ActiveRecipe.IsNone());
     DetailTitle->SetText(View.Title);DetailBody->SetText(View.Body);
+    if(D && !bAccess){DetailBody->SetText(FText::FromString(AccessError+TEXT("\n")+View.Body.ToString()));}
     if(SelectedRecipe.IsNone() && !RecipeIds.IsEmpty())
     {
         DetailTitle->SetText(FText::FromString(TEXT("CHOOSE A RECIPE")));
@@ -158,8 +181,9 @@ void UPFCraftingHUD::RefreshMenu()
     ItemStats->SetText(FText::FromString(Stats));
     FString Status=C?(C->ActiveRecipe.IsNone()?TEXT("Job: idle"):FString::Printf(TEXT("Job: %.1fs remaining"),FMath::Max(0.0,C->FinishAt-UPFInventoryComponent::ServerTime(GetWorld())))):TEXT("Waiting for server crafting state");
     if(C){Status+=TEXT(" | ")+(C->Feedback.IsEmpty()?FString(TEXT("No server result yet")):C->Feedback);}
+    if(Progression && !Progression->GetKnowledgeFeedback().IsEmpty()){Status+=TEXT("\nKnowledge: ")+Progression->GetKnowledgeFeedback();}
     if(PC && PC->GetInventoryMessage().StartsWith(TEXT("Craft "))){Status+=TEXT("\nLast request: ")+PC->GetInventoryMessage();}
-    Result->SetText(FText::FromString(Status));CraftButton->SetIsEnabled(D!=nullptr);CancelButton->SetIsEnabled(C && !C->ActiveRecipe.IsNone());
+    Result->SetText(FText::FromString(Status));CraftButton->SetIsEnabled(bAccess && bAlive);CancelButton->SetIsEnabled(C && !C->ActiveRecipe.IsNone());
     Hints->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?NavigationHelp():TEXT("The world keeps running.")));
 }
 void UPFCraftingHUD::SelectRecipe(FName Id)
@@ -174,7 +198,9 @@ void UPFCraftingHUD::SelectCategory(FGameplayTag Tag)
 void UPFCraftingHUD::MoveCategory(int32 Direction)
 {RefreshMenu();if(!CategoryIds.IsEmpty()){const int32 Index=CategoryIds.IndexOfByKey(CategoryFilter);SelectCategory(CategoryIds[(FMath::Max(0,Index)+Direction+CategoryIds.Num())%CategoryIds.Num()]);}}
 void UPFCraftingHUD::CraftSelected()
-{if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){if(PC->IsCraftingOpen() && !PC->IsPauseMenuOpen()){RefreshMenu();if(!SelectedRecipe.IsNone()){PC->ServerCraftAction(SelectedRecipe,false);}}}}
+{if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){if(PC->IsCraftingOpen() && !PC->IsPauseMenuOpen()){RefreshMenu();if(!SelectedRecipe.IsNone() && CraftButton->GetIsEnabled()){PC->ServerCraftAction(SelectedRecipe,false);}}}}
+void UPFCraftingHUD::LearnSelected()
+{if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){if(PC->IsCraftingOpen() && !PC->IsPauseMenuOpen()){RefreshMenu();if(!SelectedKnowledge.IsNone() && LearnButton->GetIsEnabled()){PC->ServerLearnKnowledge(SelectedKnowledge);}}}}
 void UPFCraftingHUD::CancelCraft()
 {if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){if(PC->IsCraftingOpen() && !PC->IsPauseMenuOpen()){PC->ServerCraftAction(NAME_None,true);}}}
 void UPFCraftingHUD::CloseMenu(){if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetCraftingMenuOpen(false);}}
@@ -192,6 +218,7 @@ FReply UPFCraftingHUD::NativeOnPreviewKeyDown(const FGeometry&,const FKeyEvent& 
         else if(K==EKeys::C || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Top || K==EKeys::Gamepad_FaceButton_Right){CloseMenu();}
         else if(K==EKeys::P || K==EKeys::Gamepad_Special_Right){PC->SetPauseMenuOpen(true);}
         else if(K==EKeys::R || K==EKeys::Gamepad_DPad_Left){CancelCraft();}
+        else if(K==EKeys::K || K==EKeys::Gamepad_DPad_Right){LearnSelected();}
         else if(K==EKeys::Enter || K==EKeys::Gamepad_FaceButton_Bottom || K==EKeys::Gamepad_FaceButton_Left){CraftSelected();}
         else if(K==EKeys::One || K==EKeys::Two || K==EKeys::Three)
         {

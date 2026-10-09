@@ -78,7 +78,7 @@ try {
     }
     $process.WaitForExit()
     $code=if($timedOut){-1}else{$process.ExitCode}
-    $inspection=& (Join-Path $PSScriptRoot 'RunNativeAutomation.ps1') -ExistingReport (Join-Path $report 'index.json') -RecordedProcessExitCode $code
+    $inspection=& (Join-Path $PSScriptRoot 'RunNativeAutomation.ps1') -ExistingReport (Join-Path $report 'index.json') -RecordedProcessExitCode $code -ExpectedFilter $filter
     $verdictCode=$LASTEXITCODE
     $personalSettingsAfter=@(Get-PersonalSettingsSnapshot)
     $personalSettingsUnchanged=($personalSettingsBefore -join "`n") -ceq ($personalSettingsAfter -join "`n")
