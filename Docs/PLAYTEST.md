@@ -4,6 +4,8 @@ Updated 2026-10-09. Use **L_PrimalFrontier_OpenWorld** for current open-world/M8
 
 For numbered steps copied into Trello, use [TRELLO_TEST_GUIDES.md](TRELLO_TEST_GUIDES.md). G1 is route/overnight, G2 UI/storage/settings, G3 rendered save/restart, G4 physical controller, G5 distribution, G6 source details (no level), G7 listening. Related cards may cite one actual session rather than ask for repeat playtests. A guide is not a passed test.
 
+Building/storage now shares the original theme: selected piece/preview/storage countdown in an inset, separate last server result, controls below. Existing B/N/T/Click/E/U/O behavior and no-preservation storage remain unchanged. Use the same G2 building/storage checks; [BUILDING_THEME_M11.md](BUILDING_THEME_M11.md) records exact bounded automated/screenshot evidence. No full human shelter/storage acceptance inferred.
+
 ## Open the game
 
 **Normal solo play and saved worlds:** with Editor closed, use the command below without a map/save flag. Single player → Create new world (unused ID) or select an existing world → Load selected world. In gameplay **P → Save world**, require visible success, then End session → Confirm end session to return to the menu. In Single player, select a save, type a friendly name in the field below Refresh worlds and choose **Rename selected world**. Names can contain spaces; gameplay save IDs/files/ownership stay unchanged. Do not recreate an existing world to load it. [WORLD_MENU_M11.md](WORLD_MENU_M11.md) has the short guide/evidence; Trello guide G3 covers human replay after the reported M8 failure. Multiplayer menu is currently information only.

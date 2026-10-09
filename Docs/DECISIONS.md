@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Building presentation keeps advisory and authority separate
+
+Reuse the texture-free PFUITheme for the existing read-only building/storage overlay. Separate control footer from the inset selected-piece/storage data and keep the last authoritative result outside the inset. The preview remains explicitly advisory; storage countdown is its existing server-time deadline, with no preservation implied. No placement/ownership/collision/transaction/input/save changes. Reduced body/result/control base fonts with the same user scale leave room for real storage/refusal text at720p and maximum HUDScale1.5; expanded existing rendered bounds checks and screenshot review prove the bounded layout. BUILDING_THEME_M11.md records evidence/limits; human acceptance remains separate.
+
 ## 2026-10-09 — Recipe availability is a fresh-batch advisory
 
 Existing recipe shortcut cards query validated catalog definitions and count only nonexpired replicated batches at synchronized server time. The UI must not prune inventory, queue work, promise output-space approval or turn ingredients-present into an action success. Busy/wait/cancel and missing data are explicit; existing component/RPC feedback remains the authoritative result. Three bounded native UMG cards share the texture-free theme, scale at10Hz and preserve current controls. General catalog navigation/selection and expanded outputs are separate work. RECIPE_DETAILS_M11.md records build/native/rendered evidence and remaining manual gates.

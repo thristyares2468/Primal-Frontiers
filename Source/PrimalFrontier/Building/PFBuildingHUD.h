@@ -26,6 +26,7 @@ private:
     UPROPERTY() TObjectPtr<UTextBlock> Text;
     UPROPERTY() TObjectPtr<UTextBlock> Heading;
     UPROPERTY() TObjectPtr<UTextBlock> Result;
+    UPROPERTY() TObjectPtr<UTextBlock> Controls;
     float Refresh=0;
     bool bWasOpen=false;
 };

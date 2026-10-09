@@ -146,14 +146,13 @@ private:
         {auto* T=Cast<UTextBlock>(Widget->WidgetTree->FindWidget(FName(*(FString(Name)+Suffix))));Test->TestTrue(FString(TEXT("Text fits allocated row "))+Suffix,T && T->GetDesiredSize().Y<=T->GetCachedGeometry().GetLocalSize().Y+1);}
         auto* Body=Cast<UTextBlock>(Widget->WidgetTree->FindWidget(FName(*(FString(Name)+TEXT("_Body")))));
         const bool bRecipes=Widget->IsA<UPFCraftingHUD>();
-        Test->TestEqual(TEXT("Action text honors HUD scale"),Body->GetFont().Size,float(FMath::RoundToInt((bRecipes?16:22)*UPFGameUserSettings::Get()->Preferences.HUDScale)));
-        if(bRecipes)
+        Test->TestEqual(TEXT("Action text honors HUD scale"),Body->GetFont().Size,float(FMath::RoundToInt((bRecipes?16:18)*UPFGameUserSettings::Get()->Preferences.HUDScale)));
         {
             TArray<UWidget*> Widgets;Widget->WidgetTree->GetAllWidgets(Widgets);
             for(auto* Child:Widgets){if(auto* T=Cast<UTextBlock>(Child))
             {
                 const auto Geometry=T->GetCachedGeometry();const auto Bottom=Root.AbsoluteToLocal(Geometry.LocalToAbsolute(Geometry.GetLocalSize()));
-                Test->TestTrue(FString(TEXT("Recipe text fits screen: "))+T->GetName(),Bottom.Y<Size.Y && T->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);
+                Test->TestTrue(FString(TEXT("Action text fits screen: "))+T->GetName(),Bottom.Y<Size.Y && T->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);
             }}
         }
     }

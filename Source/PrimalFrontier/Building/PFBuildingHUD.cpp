@@ -11,7 +11,10 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
 #include "UI/PFReadOnlyOverlay.h"
+#include "UI/PFUITheme.h"
 #include "Settings/PFGameUserSettings.h"
 
 void UPFBuildingHUD::NativeOnInitialized()
@@ -20,6 +23,14 @@ void UPFBuildingHUD::NativeOnInitialized()
     UBorder* P;UTextBlock* H;UTextBlock* Body;UTextBlock* R;
     PFReadOnlyOverlay::Build(WidgetTree,TEXT("PF_BuildingPanel"),P,H,Body,R);
     Panel=P;Heading=H;Text=Body;Result=R;
+    Panel->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Surface,10.f,PFUITheme::Inset,1.f));Panel->SetBrushColor(FLinearColor::White);
+    Heading->SetColorAndOpacity(PFUITheme::Accent);Text->SetColorAndOpacity(PFUITheme::Text);Result->SetColorAndOpacity(PFUITheme::Warning);
+    auto* Column=CastChecked<UVerticalBox>(Panel->GetContent());Column->RemoveChild(Body);Column->RemoveChild(R);
+    auto* Details=WidgetTree->ConstructWidget<UBorder>();Details->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Inset,8.f));Details->SetPadding(FMargin(12));Details->SetContent(Body);
+    Column->AddChildToVerticalBox(Details)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+    Column->AddChildToVerticalBox(R)->SetPadding(FMargin(0,10,0,10));
+    Controls=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),TEXT("PF_BuildingPanel_Controls"));Controls->SetAutoWrapText(true);Controls->SetColorAndOpacity(PFUITheme::Muted);
+    Column->AddChildToVerticalBox(Controls);
     SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
@@ -35,9 +46,13 @@ void UPFBuildingHUD::NativeTick(const FGeometry& Geometry,float Delta)
     if(bWasOpen && Refresh<0.1f){return;}
     bWasOpen=true;Refresh=0;
     const auto* Settings=UPFGameUserSettings::Get();
-    PFReadOnlyOverlay::SetScale(Heading,Text,Result,Settings?Settings->Preferences.HUDScale:1);
-    Heading->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?
-        TEXT("BUILD  B / RB close | N / D-up next\nT / D-down rotate | Click / RT place\nH / LB demolish | J debug damage\nE / X door/storage | U / D-left store\nO / D-right take first stored item"):TEXT("BUILD")));
+    const float RequestedScale=Settings?Settings->Preferences.HUDScale:1;
+    const float Scale=FMath::IsFinite(RequestedScale)?FMath::Clamp(RequestedScale,0.75f,1.5f):1;
+    auto Font=[&](UTextBlock* Label,int32 Size){auto F=Label->GetFont();F.Size=FMath::RoundToInt(Size*Scale);if(Label->GetFont().Size!=F.Size){Label->SetFont(F);}};
+    Font(Heading,20);Font(Text,18);Font(Result,16);Font(Controls,14);
+    Heading->SetText(FText::FromString(TEXT("BUILDING & STORAGE")));
+    Controls->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?
+        TEXT("B / RB close | N / D-up next\nT / D-down rotate | Click / RT place\nH / LB demolish | J debug damage\nE / X door/storage | U / D-left store\nO / D-right take first stored item"):TEXT("")));
 
     FString Lines;
     // Selected piece, its cost, rotation and the preview's validity message.
