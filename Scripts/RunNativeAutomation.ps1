@@ -16,15 +16,21 @@ param(
     [Parameter(Mandatory = $true, ParameterSetName = 'Inspect')]
     [string]$ExistingReport,
     [Parameter(Mandatory = $true, ParameterSetName = 'Inspect')]
-    [int]$RecordedProcessExitCode
+    [int]$RecordedProcessExitCode,
+    [Parameter(ParameterSetName = 'Inspect')]
+    [ValidatePattern('^PF(?:\.[A-Za-z0-9_]+)+(?:\+PF(?:\.[A-Za-z0-9_]+)+)*$')]
+    [ValidateLength(1, 200)]
+    [string]$ExpectedFilter = ''
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-function Get-ReportVerdict([string]$Path, [int]$ProcessExitCode) {
+function Get-ReportVerdict([string]$Path, [int]$ProcessExitCode, [string]$Selection = '') {
     $reasons = @()
     $tests = @()
+    $selectors = @(); $missingSelectors = @(); $unexpectedTests = @()
+    if (-not [string]::IsNullOrWhiteSpace($Selection)) { $selectors = @($Selection.Split('+') | Select-Object -Unique) }
     if ($ProcessExitCode -ne 0) { $reasons += "Process exited $ProcessExitCode" }
     try {
         if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'Missing automation index.json' }
@@ -63,11 +69,32 @@ function Get-ReportVerdict([string]$Path, [int]$ProcessExitCode) {
         if (@($tests | Where-Object { $_.State -ne 'Success' -or $_.Errors -ne 0 -or $_.Warnings -ne 0 }).Count -gt 0) {
             $reasons += 'A test is not a clean Success'
         }
+        # Unreal may silently omit an unregistered filter term. A clean subset is not the requested gate.
+        if ($selectors.Count -gt 0) {
+            foreach ($selector in $selectors) {
+                $matches = @($tests | Where-Object {
+                    $_.Name.Equals($selector, [StringComparison]::OrdinalIgnoreCase) -or
+                    $_.Name.StartsWith($selector + '.', [StringComparison]::OrdinalIgnoreCase)
+                })
+                if ($matches.Count -eq 0) { $missingSelectors += $selector }
+            }
+            foreach ($test in $tests) {
+                $matches = @($selectors | Where-Object {
+                    $test.Name.Equals($_, [StringComparison]::OrdinalIgnoreCase) -or
+                    $test.Name.StartsWith($_ + '.', [StringComparison]::OrdinalIgnoreCase)
+                })
+                if ($matches.Count -eq 0) { $unexpectedTests += $test.Name }
+            }
+            if ($missingSelectors.Count -gt 0) { $reasons += ('No test matched requested selector(s): ' + ($missingSelectors -join ', ')) }
+            if ($unexpectedTests.Count -gt 0) { $reasons += ('Test outside requested selection: ' + ($unexpectedTests -join ', ')) }
+        }
     }
     catch { $reasons += 'Missing, malformed or unsupported automation report' }
     return [pscustomobject]@{
         Passed = ($reasons.Count -eq 0); Reasons = @($reasons); ProcessExitCode = $ProcessExitCode
         TestCount = $tests.Count; Tests = @($tests)
+        SelectionChecked = ($selectors.Count -gt 0); ExpectedFilter = $Selection
+        MissingSelectors = @($missingSelectors); UnexpectedTests = @($unexpectedTests)
     }
 }
 
@@ -86,7 +113,7 @@ try {
         $reportFile = Get-SafeFullPath $ExistingReport
         if (-not $reportFile.StartsWith($reportRoot + '\', [StringComparison]::OrdinalIgnoreCase) -or
             [IO.Path]::GetFileName($reportFile) -ne 'index.json') { throw 'Inspect only project-local automation index.json reports' }
-        $verdict = Get-ReportVerdict $reportFile $RecordedProcessExitCode
+        $verdict = Get-ReportVerdict $reportFile $RecordedProcessExitCode $ExpectedFilter
         $verdict | ConvertTo-Json -Depth 5
         if ($verdict.Passed) { exit 0 } else { exit 1 }
     }
@@ -116,7 +143,7 @@ try {
             Start-Sleep -Milliseconds 500
         }
         $process.WaitForExit()
-        $verdict = Get-ReportVerdict (Join-Path $runDirectory 'index.json') $process.ExitCode
+        $verdict = Get-ReportVerdict (Join-Path $runDirectory 'index.json') $process.ExitCode $TestFilter
         if ($timedOut) { $verdict.Passed = $false; $verdict.Reasons += 'Owned automation process timed out' }
         # Log severity counts require review; never dump raw lines, login URLs, credentials or save data.
         $logText = if (Test-Path -LiteralPath $logFile) { Get-Content -LiteralPath $logFile -Raw } else { '' }

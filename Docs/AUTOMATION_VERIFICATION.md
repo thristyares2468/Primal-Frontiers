@@ -10,14 +10,16 @@ powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File Scripts/RunNativeA
 
 Use `PF.Persistence.StartupFailurePreservesSave` for the focused startup regression. A filter can join project test prefixes with `+`; it cannot contain arbitrary console commands. Default timeout is 300 seconds, bounded to 30–1800 seconds. This invocation changes execution policy only for its child process, not saved Windows policy; it does not override Group Policy.
 
+Every Run selector must match an exact test or a namespace child with a dot boundary; unmatched selectors and returned tests outside the selection refuse the gate. This prevents a registered subset hiding a misspelled/unregistered term. Read-only Inspect can receive `-ExpectedFilter` for the same check. Without it, older Inspect callers retain count/severity checks with `SelectionChecked=false` and need their own exact test contract. This verifies selector coverage, not all possible registrations beneath a broad prefix. Exact regression evidence and replay: [NATIVE_SELECTION_CONTRACT.md](NATIVE_SELECTION_CONTRACT.md).
+
 The runner refuses a second Unreal Editor process. Finish an existing session before launching it. It starts its own hidden `UnrealEditor-Cmd.exe` with NullRHI, unattended, no sound, no Live Coding and `-NoSaveConfig`. A timeout terminates only that owned process. It does not build, save assets, mutate rendering settings or close the user's editor. Compile first after C++ changes.
 
 Each launch generates a unique `Saved/AutomationReports/Automation_<label>_<UTC>_<id>` folder with the engine report and `run-summary.json`, plus a matching `Saved/Logs/PFAutomation_<...>.log`. The summary records individual test names/states/counts, exit, timeout, log severity counts and sampled working/private memory. It does not print log events, login credentials or save data. Generated evidence stays outside Git.
 
 Exit meanings:
 
-- **0:** nonempty report, every test a clean Success, counts agree, no failed/unrun/in-process/warning tests, engine exit 0 and no logged fatal/ensure.
-- **1:** failed, missing, malformed, empty, incomplete or warned report; nonzero engine exit; timeout or fatal/ensure.
+- **0:** nonempty report, every test a clean Success, counts agree, no failed/unrun/in-process/warning tests, engine exit 0 and no logged fatal/ensure; supplied selection fully covered with no unexpected tests.
+- **1:** failed, missing, malformed, empty, incomplete or warned report; missing requested selector or test outside supplied selection; nonzero engine exit; timeout or fatal/ensure.
 - **2:** setup/safety refusal, such as a running Editor or invalid report path. PowerShell parameter-binding/loader errors can themselves return 1 before the runner starts.
 
 Counters must be nonnegative JSON integers; null/missing counters and duplicate test identifiers are refused. `LogReviewRequired` is separate from the verdict: inspect raw warning/error causes even when tests pass. A missing report is a failure. Report success does not certify rendering, manual traversal, overnight survival, controller use or multiplayer restart.
