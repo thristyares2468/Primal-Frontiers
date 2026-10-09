@@ -62,7 +62,7 @@ bool FPFProgressionWorldCompatibilityTest::RunTest(const FString&)
     TArray<uint8> Owned;if(!TestTrue(TEXT("Decode test envelope"),FBase64::Decode(V2.Players[0].Progression,Owned)) || !TestTrue(TEXT("Known envelope fixture size"),Owned.Num()>44)){return false;}
     auto Put=[&](TArray<uint8>& B,int32 At,uint32 Value){for(int32 I=0;I<4;++I){B[At+I]=static_cast<uint8>(Value>>(I*8));}};
     auto Forged=Owned;Forged.Last()^=1;Bad=V2;Bad.Players[0].Progression=FBase64::Encode(Forged);RefuseRecord(Bad,TEXT("Inner CRC refuses"));
-    Forged=Owned;Put(Forged,20,2);Bad=V2;Bad.Players[0].Progression=FBase64::Encode(Forged);RefuseRecord(Bad,TEXT("Future progression version refuses"));
+    Forged=Owned;Put(Forged,20,FPFProgressionSaveFormat::CurrentVersion+1);Bad=V2;Bad.Players[0].Progression=FBase64::Encode(Forged);RefuseRecord(Bad,TEXT("Future progression version refuses"));
     Forged=Owned;Forged[44]=TEXT('X');Put(Forged,28,FCrc::MemCrc32(Forged.GetData()+32,Forged.Num()-32));Bad=V2;Bad.Players[0].Progression=FBase64::Encode(Forged);RefuseRecord(Bad,TEXT("Checksum-valid unknown knowledge refuses"));
     Forged=Owned;Put(Forged,32,2701);Put(Forged,28,FCrc::MemCrc32(Forged.GetData()+32,Forged.Num()-32));Bad=V2;Bad.Players[0].Progression=FBase64::Encode(Forged);RefuseRecord(Bad,TEXT("Checksum-valid invalid XP refuses"));
     auto PreservedBytes=V1Bytes;Bad=V2;Bad.Version=1;TestFalse(TEXT("V1 refuses to discard progression on write"),FPFWorldSaveFormat::Encode(Bad,PreservedBytes,Error));TestTrue(TEXT("Failed encode retains original bytes"),PreservedBytes==V1Bytes);
@@ -79,6 +79,18 @@ bool FPFProgressionWorldCompatibilityTest::RunTest(const FString&)
     Refuse(MutateJson(V2Bytes,[](auto R){R->SetArrayField(TEXT("players"),{MakeShared<FJsonValueString>(TEXT("bad"))});}),TEXT("Nonobject player refuses without assertion"));
     Read=Earned;TestFalse(TEXT("Invalid owner read refuses"),FPFWorldSaveFormat::UnpackProgression(V2.Players[0].Progression,Second.PlayerId,*Catalog,*Crafting,*Items,Read,Error));TestTrue(TEXT("Failed owner read preserves record"),Read.Experience==Earned.Experience && Read.Knowledge==Earned.Knowledge);
     FString Prior=V2.Players[0].Progression;TestFalse(TEXT("Invalid owner write refuses"),FPFWorldSaveFormat::PackProgression({},Earned,*Catalog,*Crafting,*Items,Prior,Error));TestEqual(TEXT("Failed owner write preserves encoding"),Prior,V2.Players[0].Progression);
+    auto WindowRecord=Earned;const auto Wood=FPFProgressionTransactions::GatherCategoryForItem(TEXT("Item_Wood"));
+    for(int32 N=0;N<5;++N){TestTrue(TEXT("Prepare owner window record"),FPFProgressionTransactions::CreditGather(WindowRecord,Wood,*Catalog,*Crafting,*Items,Error));}
+    TestTrue(TEXT("Capture fractional active duration"),FPFProgressionTransactions::AdvanceGatherWindows(WindowRecord,600.25,*Catalog,*Crafting,*Items,Error));
+    auto WindowWorld=V2;TestTrue(TEXT("Pack new innerV2 with existing owner wrapper"),FPFWorldSaveFormat::PackProgression(Owner.PlayerId,WindowRecord,*Catalog,*Crafting,*Items,WindowWorld.Players[0].Progression,Error));
+    TArray<uint8> WindowBytes;TestTrue(TEXT("WorldV2 encode containing old/new inner versions"),FPFWorldSaveFormat::Encode(WindowWorld,WindowBytes,Error));
+    for(int32 N=0;N<2;++N)
+    {
+        TestTrue(TEXT("Validated world read new owner window"),Decode(WindowBytes,Decoded));
+        TestTrue(TEXT("No XP/clock refresh in repeated owner read"),FPFWorldSaveFormat::UnpackProgression(Decoded.Players[0].Progression,Owner.PlayerId,*Catalog,*Crafting,*Items,Read,Error) && Read.Experience==WindowRecord.Experience && Read.GatherWindows==WindowRecord.GatherWindows && Read.Knowledge==Earned.Knowledge);
+        TestTrue(TEXT("Old innerV1 second player still independent"),FPFWorldSaveFormat::UnpackProgression(Decoded.Players[1].Progression,Second.PlayerId,*Catalog,*Crafting,*Items,Read,Error) && Read.Experience==0 && Read.GatherWindows.IsEmpty());
+    }
+    Read=WindowRecord;TestFalse(TEXT("New window owner cannot be substituted"),FPFWorldSaveFormat::UnpackProgression(WindowWorld.Players[0].Progression,Second.PlayerId,*Catalog,*Crafting,*Items,Read,Error));TestTrue(TEXT("Owner refusal preserves windows"),Read.GatherWindows==WindowRecord.GatherWindows && Read.Experience==WindowRecord.Experience);
     AddInfo(TEXT("[PrimalAgentTools] Legacy V1 omission/defaults and owner-bound V2 roundtrip/refusal checked; gameplay application has a separate component/runtime gate."));return true;
 }
 #endif

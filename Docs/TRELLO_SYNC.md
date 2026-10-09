@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October10 gather-window record foundation: fresh Programming/HUD/parent audit afterb0bb585; x19QhKcg Doing during pure/codec implementation. Nativefinal5+parser2/Editor+Game passed with reviewedraw logs/actualtemporary-file seed, retained fixtureTArraycrash/failed-only1retry. Immediately evidenceupdate/move/readback bounded technicalDone; parent/Personalunchanged. ScopedSolpublication thenfreshboardaudit before actual gather/activeclock integration; no live earning/window replication certificate.
+
 October10 earned combat: fresh4TnyuMEm/current-state audit after13a3ae8. Native2/finalrendered1/Editor+Game passed, six finalPNG/rawbaseline/hash guards reviewed. Initial fixture compile failure and selected-loot artifact improvement retained in EARNED_COMBAT_M12.md. Immediately evidenceupdate/move/readback only bounded taskDone; parentM12Doing/Personalunchanged. Scoped Sol publication then fresh board audit for gather reward-window compatibility foundation before another live XP hook.
 
 October10 earned route: fresh Programming/HUD/parent audit selected rQh7E4jL Doing after35e3673 publication. Native1/rendered1/Editor+Game passed;3PNG/rawbaseline/hash guards reviewed. Retain initial label preflight failure and prefix-only retry. Immediately update/move/readback technicalDone, parent/manual status unchanged, scoped Sol publication; next fresh audit for earned protection/default creature combat. No new Personal task.

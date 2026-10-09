@@ -39,6 +39,43 @@ bool ReadProgressionIds(FArchive& Reader,int32 Maximum,const TArray<FName>& Know
     }
     if(Reader.IsError()){return CodecRefuse(Error,TEXT("Truncated progression IDs"));}Out=MoveTemp(Candidate);return true;
 }
+bool WriteGatherWindows(FArchive& Writer,const TArray<FPFGatherRewardWindow>& Windows)
+{
+    int32 Count=Windows.Num();Writer<<Count;
+    for(const auto& W:Windows)
+    {
+        const FString Text=W.Category.ToString();int32 Length=Text.Len();Writer<<Length;
+        for(TCHAR C:Text){uint8 Ascii=static_cast<uint8>(C);Writer<<Ascii;}
+        int32 Rewards=W.Rewards;double Remaining=W.RemainingSeconds;Writer<<Rewards<<Remaining;
+    }
+    return !Writer.IsError();
+}
+bool ReadGatherWindows(FArchive& Reader,TArray<FPFGatherRewardWindow>& Out,FString& Error)
+{
+    if(Reader.TotalSize()-Reader.Tell()<4){return CodecRefuse(Error,TEXT("Truncated gather window count"));}
+    int32 Count=0;Reader<<Count;
+    if(Reader.IsError() || Count<0 || Count>FPFProgressionTransactions::MaximumGatherCategories || Reader.TotalSize()-Reader.Tell()<static_cast<int64>(Count)*17)
+    {return CodecRefuse(Error,TEXT("Invalid gather window count"));}
+    TArray<FPFGatherRewardWindow> Candidate;const auto Known=FPFProgressionTransactions::GatherCategories();
+    for(int32 I=0;I<Count;++I)
+    {
+        if(Reader.TotalSize()-Reader.Tell()<4){return CodecRefuse(Error,TEXT("Truncated gather category length"));}
+        int32 Length=0;Reader<<Length;
+        if(Reader.IsError() || Length<1 || Length>64 || Reader.TotalSize()-Reader.Tell()<Length+12){return CodecRefuse(Error,TEXT("Invalid gather category length"));}
+        FString Text;Text.Reserve(Length);for(int32 N=0;N<Length;++N)
+        {
+            uint8 Ascii=0;Reader<<Ascii;
+            if(!((Ascii>='A' && Ascii<='Z') || (Ascii>='a' && Ascii<='z') || Ascii=='.')){return CodecRefuse(Error,TEXT("Invalid gather category characters"));}
+            Text.AppendChar(static_cast<TCHAR>(Ascii));
+        }
+        FPFGatherRewardWindow Window;
+        for(const auto& Tag:Known){if(Tag.ToString().Equals(Text,ESearchCase::IgnoreCase)){Window.Category=Tag;break;}}
+        // Resolve only exact known native tags, never intern/request arbitrary untrusted strings.
+        if(!Window.Category.IsValid()){return CodecRefuse(Error,TEXT("Unknown gather reward category"));}
+        Reader<<Window.Rewards<<Window.RemainingSeconds;Candidate.Add(Window);
+    }
+    if(Reader.IsError()){return CodecRefuse(Error,TEXT("Truncated gather windows"));}Out=MoveTemp(Candidate);return true;
+}
 }
 bool FPFProgressionSaveFormat::Encode(const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog,
     const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,TArray<uint8>& Out,FString& Error)
@@ -46,8 +83,10 @@ bool FPFProgressionSaveFormat::Encode(const FPFProgressionRecord& Record,const U
     if(!FPFProgressionTransactions::Validate(Record,Catalog,Crafting,Items,Error)){return false;}
     TArray<uint8> Payload;FMemoryWriter Writer(Payload,true);int32 XP=Record.Experience;Writer<<XP;
     if(!WriteProgressionIds(Writer,Record.Knowledge,Error) || !WriteProgressionIds(Writer,Record.CreditedCrafts,Error)){return false;}
+    const uint32 WireVersion=Record.GatherWindows.IsEmpty()?1:CurrentVersion;
+    if(WireVersion==2 && !WriteGatherWindows(Writer,Record.GatherWindows)){return CodecRefuse(Error,TEXT("Gather window write failed"));}
     if(Writer.IsError() || Payload.Num()>MaximumBytes-EnvelopeBytes){return CodecRefuse(Error,TEXT("Progression payload exceeds limit"));}
-    TArray<uint8> Bytes;FMemoryWriter Envelope(Bytes,true);uint32 Magic=ProgressionMagic,Version=CurrentVersion,Length=Payload.Num(),CRC=FCrc::MemCrc32(Payload.GetData(),Payload.Num());
+    TArray<uint8> Bytes;FMemoryWriter Envelope(Bytes,true);uint32 Magic=ProgressionMagic,Version=WireVersion,Length=Payload.Num(),CRC=FCrc::MemCrc32(Payload.GetData(),Payload.Num());
     Envelope<<Magic<<Version<<Length<<CRC;Envelope.Serialize(Payload.GetData(),Payload.Num());
     if(Envelope.IsError()){return CodecRefuse(Error,TEXT("Progression envelope write failed"));}Out=MoveTemp(Bytes);Error.Reset();return true;
 }
@@ -57,13 +96,14 @@ bool FPFProgressionSaveFormat::Decode(const TArray<uint8>& Bytes,const UPFProgre
     if(!Catalog.Validate(Crafting,Items,Error)){return false;}
     if(Bytes.Num()<EnvelopeBytes+12 || Bytes.Num()>MaximumBytes){return CodecRefuse(Error,TEXT("Invalid progression file size"));}
     FMemoryReader Reader(Bytes,true);uint32 Magic=0,Version=0,Length=0,CRC=0;Reader<<Magic<<Version<<Length<<CRC;
-    if(Magic!=ProgressionMagic || Version!=CurrentVersion){return CodecRefuse(Error,TEXT("Invalid progression signature or unsupported version"));}
+    if(Magic!=ProgressionMagic || (Version!=1 && Version!=CurrentVersion)){return CodecRefuse(Error,TEXT("Invalid progression signature or unsupported version"));}
     if(Length!=static_cast<uint32>(Bytes.Num()-EnvelopeBytes) || FCrc::MemCrc32(Bytes.GetData()+EnvelopeBytes,Length)!=CRC)
     {return CodecRefuse(Error,TEXT("Progression length/checksum mismatch"));}
     FPFProgressionRecord Candidate;Reader<<Candidate.Experience;TArray<FName> KnowledgeIds,RecipeIds;
     for(const auto& D:Catalog.Knowledge){KnowledgeIds.Add(D.Id);}for(const auto& D:Crafting.Recipes){RecipeIds.Add(D.Id);}
     if(!ReadProgressionIds(Reader,UPFProgressionCatalog::MaximumKnowledge,KnowledgeIds,Candidate.Knowledge,Error) ||
         !ReadProgressionIds(Reader,UPFProgressionCatalog::MaximumCraftRecords,RecipeIds,Candidate.CreditedCrafts,Error)){return false;}
+    if(Version==2 && !ReadGatherWindows(Reader,Candidate.GatherWindows,Error)){return false;}
     if(Reader.IsError() || Reader.Tell()!=Reader.TotalSize()){return CodecRefuse(Error,TEXT("Truncated or trailing progression payload"));}
     if(!FPFProgressionTransactions::Validate(Candidate,Catalog,Crafting,Items,Error)){return false;}Out=MoveTemp(Candidate);Error.Reset();return true;
 }

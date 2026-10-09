@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Persist bounded gather windows before connecting rewards
+
+Use one exact native GameplayTag category window for each of five ordinary gathered resources,5XP per confirmed success event/five events per1800active-server seconds. Save remaining duration and bounded count, not UTC/machine clocks or item/node event histories. Pure validated transactions commit candidates atomically; a separate future server hook must supply actual success and active elapsed. Preserve byte-compatible innerV1 writes when no windows exist, support innerV2 only for nonempty windows, and retain existing outer world owner binding. Decoder never interns unknown tag strings and rejects malformed counters/time/version/CRC without changing outputs. GATHER_WINDOWS_M12.md records adversarial/native/actual-file compatibility gates; pure budget arithmetic and trusted window seeds are not live earning or multiplayer acceptance.
+
 ## 2026-10-10 — Knowledge availability is a read-only view of server transactions
 
 Describe selected recipe learning by validating a copy of the owner record against the complete catalog. Show explicit level/point/prerequisite refusals and already-learned state; never mutate XP/items in the menu. Real Learn button/K/D-right sends only the owned knowledge ID. Server feedback and later replicated record control the displayed outcome and Craft availability. Keep growing details inside the existing scroll panel. Screenshot fixtures wait for deferred captures/layout and measure the examined text inside that panel; do not weaken clipping assertions or change production layout to satisfy a stale capture. KNOWLEDGE_MENU_M12.md records native and real Slate-rendered gates. Synthetic input and trusted boundary XP are not human controller or earned pacing acceptance.

@@ -22,7 +22,7 @@ bool FPFProgressionCodecTest::RunTest(const FString&)
     TestFalse(TEXT("Decoded completed craft cannot reward again"),FPFProgressionTransactions::CreditFirstCraft(Decoded,TEXT("Recipe_Tool"),*Catalog,*Crafting,*Items,Error));
     const auto Sentinel=Decoded;
     auto Refuse=[&](const TArray<uint8>& Bad,const TCHAR* Why){TestFalse(Why,FPFProgressionSaveFormat::Decode(Bad,*Catalog,*Crafting,*Items,Decoded,Error));TestTrue(TEXT("Failed read preserves all outputs"),Decoded.Experience==Sentinel.Experience && Decoded.Knowledge==Sentinel.Knowledge && Decoded.CreditedCrafts==Sentinel.CreditedCrafts);};
-    auto Bad=Bytes;ProgressionPutWord(Bad,4,2);Refuse(Bad,TEXT("Future version"));Bad=Bytes;Bad[0]^=1;Refuse(Bad,TEXT("Signature"));Bad=Bytes;Bad.Last()^=1;Refuse(Bad,TEXT("Checksum"));
+    auto Bad=Bytes;ProgressionPutWord(Bad,4,FPFProgressionSaveFormat::CurrentVersion+1);Refuse(Bad,TEXT("Future version"));Bad=Bytes;Bad[0]^=1;Refuse(Bad,TEXT("Signature"));Bad=Bytes;Bad.Last()^=1;Refuse(Bad,TEXT("Checksum"));
     Bad=Bytes;Bad.Pop();Refuse(Bad,TEXT("Truncated length"));Bad=Bytes;Bad.Add(1);ProgressionRefresh(Bad);Refuse(Bad,TEXT("Trailing bytes with valid envelope"));
     Bad=Bytes;ProgressionPutWord(Bad,16,2701);ProgressionRefresh(Bad);Refuse(Bad,TEXT("CRC-valid invalid XP"));
     Bad=Bytes;ProgressionPutWord(Bad,20,std::numeric_limits<uint32>::max());ProgressionRefresh(Bad);Refuse(Bad,TEXT("Negative count"));

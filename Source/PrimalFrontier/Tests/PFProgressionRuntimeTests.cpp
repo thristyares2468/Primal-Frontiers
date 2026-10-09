@@ -57,6 +57,8 @@ bool FPFProgressionComponentTest::RunTest(const FString&)
     TestTrue(TEXT("Unsaved reconnect retains XP/ledger and tools"),G->GetExperience()==20 && G->GetRecord().CreditedCrafts.Num()==1 && I->Count(TEXT("Item_Tool"))==3);
     P->GetCharacterMovement()->DisableMovement();
     FPFProgressionRecord Seed=G->GetRecord();Seed.Experience=100;Seed.Knowledge={FName(TEXT("Tech_FieldTools"))};
+    // Trusted record compatibility fixture, not actual gathering or a running window clock.
+    Seed.GatherWindows={{FPFProgressionTransactions::GatherCategoryForItem(TEXT("Item_Wood")),1,1234.5}};
     if(!TestTrue(TEXT("Trusted server restores valid earned fixture"),G->Restore(Seed,Error))){AddError(Error);return false;}
     TestTrue(TEXT("Derived level/points"),G->GetLevel()==2 && G->GetAvailablePoints()==1);
     TestTrue(TEXT("Trusted existing bound-tool compatibility fixture"),I->Grant(TEXT("Item_BoundTool"),1));
@@ -67,12 +69,12 @@ bool FPFProgressionComponentTest::RunTest(const FString&)
     ON_SCOPE_EXIT{Persistence->ActiveSlot.Reset();for(const auto& S:{Slot,LegacySlot}){for(bool B:{false,true}){IFileManager::Get().Delete(*FPFSaveFileStore::Path(S,B));}}};
     if(!TestTrue(TEXT("Save real earned world"),Persistence->Save(Slot,Error))){AddError(Error);return false;}FPFSavedFile File;FPFWorldSaveData Snapshot;
     if(!TestTrue(TEXT("Read actual V2 snapshot"),FPFSaveFileStore::Read(Slot,File,Error) && Persistence->Decode(File.Payload,Snapshot,Error))){AddError(Error);return false;}TestEqual(TEXT("Runtime writer now explicitV2"),Snapshot.Version,2);
-    for(int32 Repeat=0;Repeat<2;++Repeat){G->Restore({},Error);if(!TestTrue(TEXT("Actual load restores earned state"),Persistence->Load(Slot,Error))){AddError(Error);return false;}TestTrue(TEXT("Repeated load never reawards or loses knowledge"),G->GetExperience()==100 && G->GetRecord().Knowledge==Seed.Knowledge && G->GetRecord().CreditedCrafts==Seed.CreditedCrafts && G->GetAvailablePoints()==1);}
+    for(int32 Repeat=0;Repeat<2;++Repeat){G->Restore({},Error);if(!TestTrue(TEXT("Actual load restores earned state"),Persistence->Load(Slot,Error))){AddError(Error);return false;}TestTrue(TEXT("Repeated load never reawards or loses knowledge/windows"),G->GetExperience()==100 && G->GetRecord().Knowledge==Seed.Knowledge && G->GetRecord().CreditedCrafts==Seed.CreditedCrafts && G->GetRecord().GatherWindows==Seed.GatherWindows && G->GetAvailablePoints()==1);}
     P->Survival->SetHealth(0);Advance(35);TestTrue(TEXT("Death/respawn retains same PlayerState progression"),PC->GetPlayerState<APFInventoryPlayerState>()==PS && PC->GetPawn()!=P && PC->GetPawn() && G->GetExperience()==100 && G->GetRecord().Knowledge==Seed.Knowledge);
     // Produce a real old-format world using the same validated IDs/bags; no private save is rewritten.
     Snapshot.Version=1;for(auto& Entry:Snapshot.Players){Entry.Progression.Reset();}TArray<uint8> LegacyBytes;
     if(!TestTrue(TEXT("Write legacy fixture"),FPFWorldSaveFormat::Encode(Snapshot,LegacyBytes,Error) && FPFSaveFileStore::Write(LegacySlot,LegacyBytes,Error)) || !TestTrue(TEXT("Runtime V1 default migration"),Persistence->Load(LegacySlot,Error))){AddError(Error);return false;}
-    TestTrue(TEXT("Legacy existing tools do not give retrospective XP"),I->Count(TEXT("Item_Tool"))==3 && G->GetExperience()==0 && G->GetRecord().Knowledge.IsEmpty() && G->GetRecord().CreditedCrafts.IsEmpty());
+    TestTrue(TEXT("Legacy existing tools do not give retrospective XP/windows"),I->Count(TEXT("Item_Tool"))==3 && G->GetExperience()==0 && G->GetRecord().Knowledge.IsEmpty() && G->GetRecord().CreditedCrafts.IsEmpty() && G->GetRecord().GatherWindows.IsEmpty());
     TestTrue(TEXT("Actual V1 existing bound tool remains usable but grants no learned recipe"),I->Count(TEXT("Item_BoundTool"))==1 && I->GatheringHits()==3 && !G->CanCraftRecipe(TEXT("Recipe_BoundTool"),Error));
     if(!TestTrue(TEXT("Explicit save publishes migrated V2"),Persistence->Save(Slot,Error) && Persistence->Load(Slot,Error))){AddError(Error);return false;}TestEqual(TEXT("Repeated migrated restore stays zero"),G->GetExperience(),0);
     Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Real craft success/dedupe/failure/grant refusal, private component authority, V2 repeated files, death/respawn and V1 zero defaults checked."));return true;

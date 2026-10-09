@@ -2,13 +2,13 @@
 #include "Progression/PFProgressionRecord.h"
 #include "Persistence/PFPlayerSaveFormat.h"
 
-/** Separate bounded progression bytes; no existing player/world writer or file I/O integration.
+/** Bounded owner progression bytes. V1 stays byte-compatible when no gather windows exist.
  *  CRC detects accidental corruption, not authentication. Trusted server records only.
  *  All failed methods preserve output bytes/records. Never interns unknown on-disk names. */
 class PRIMALFRONTIER_API FPFProgressionSaveFormat
 {
 public:
-    static constexpr uint32 CurrentVersion=1;
+    static constexpr uint32 CurrentVersion=2;
     static constexpr int32 EnvelopeBytes=16;
     static constexpr int32 MaximumBytes=16*1024;
     static bool Encode(const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog,
