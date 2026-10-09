@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Inventory details are catalog/batch queries
+
+Keep the original input/RPC authority and stable stack GUIDs. A read-only presentation model derives item category, unit/batch weight, quantity/limit, expiry and per-portion effects from validated definitions plus synchronized server time. Availability is not a server action acknowledgment: missing/expired data is explicit and real recovery remains capped/validated by existing gameplay. Native UMG inset reuses the original texture-free palette, maintains four rows/10Hz and leaves first-person aim/vitals clear; no icon loading, data/schema migration or new dependencies. Narrow build/native/rendered evidence: INVENTORY_DETAILS_M11.md. Full human acceptance remains separate.
+
 ## 2026-10-09 — Explicit solo world menu and cosmetic world names
 
 Use the existing lightweight /Engine/Maps/Entry shell with a native session GameInstance and replaceable UMG menu, without new binary assets or dependencies. One-shot menu New/Load intent takes precedence over stale process save flags. GameDefaultMap is Entry; ServerDefaultMap is the open-world development map; EditorStartupMap/template assets are preserved. Pause Save is local-authority only and visibly reports the real server save result; it never resets/loads gameplay. Multiplayer menu currently provides information only, not a host/join/browser implementation.

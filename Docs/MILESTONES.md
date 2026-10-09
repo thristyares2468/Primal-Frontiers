@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-09 M11 themed inventory and selected batch details
+
+Completed bounded read-only inventory presentation: original theme/inset, validated name/category, stack limit, unit/batch weight, actual deadline and per-portion recovery; missing/expired data explicit, stable GUID controls/four rows/10Hz unchanged. No assets/dependencies/authority/save changes. Editor26.72s/final6.09s and Game31.48s PASSED with no compiler warnings. Native3/3: Automation_M11InventoryDetails_20261009_035056210_36edc1d2; rendered InventorySelectionLive1/1 each final720/1440p,maxscale1.5: M11Inventory720_20261009_035458173_4eba9f3d and M11Inventory1440_20261009_035559629_0dcf4cc4. Alltest severity0,engine/report/runner0;ten PNGs inspected,149/150 unrelated saves/default settings unchanged. Existing26raw warnings+14Pythonstartup lines/renderedprocess,noensure/fatal/newgameplay severity. Native raw clean. Working/private3.163/5.414 and3.235/5.159GiB;uncapped stationary UI is not traversal/hardware acceptance. Exact logs/replay/initialpassingreport: INVENTORY_DETAILS_M11.md. Trello task https://trello.com/c/T70Pta7d; Personal M8/M11 remain open. Next independent step: data-driven crafting interface, actual resources/recipes M12 later.
+
 ## 2026-10-09 Requested local Editor Medium preset after menu completion
 
 After publishing menu/save/Rename6571bc6, ran supported Editor Scalability1/Scalability/CLOSE_SLATE_MAINFRAME in a single NullRHI editor process. Normal exit0 and actual GEditorSettingsIni disk readback show all11quality groups1 (Medium), resolutionquality71. Profile: C:/Users/jackh/AppData/Local/UnrealEngine/5.8/Saved/Config/WindowsEditor/EditorSettings.ini. Actual GameUserSettings hashes unchanged; no tracked assets/maps/source/project settings modified or raw generated INI editing. Machine preferences remain out of Git. No C++ build required; no rendered preview/FPS acceptance.

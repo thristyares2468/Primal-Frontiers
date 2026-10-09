@@ -1,7 +1,7 @@
 // PFInventoryHUD.h
 //
-// Placeholder inventory overlay (Tab / gamepad View), top-right of the screen.
-// Read-only: lists the bag's stacks, slot/weight totals, freshness countdowns,
+// Themed inventory overlay (Tab / gamepad View), top-right of the screen.
+// Read-only: lists the bag's stacks, slot/weight totals, selected batch details,
 // the selected row and the latest server feedback. Selection and actions are
 // handled by APFSurvivalPlayerController.
 //
@@ -26,6 +26,8 @@ private:
     UPROPERTY() TObjectPtr<UTextBlock> Text;
     UPROPERTY() TObjectPtr<UTextBlock> Heading;
     UPROPERTY() TObjectPtr<UTextBlock> Result;
+    UPROPERTY() TObjectPtr<UTextBlock> DetailTitle;
+    UPROPERTY() TObjectPtr<UTextBlock> DetailBody;
     UPROPERTY() TObjectPtr<UBorder> Panel;
     float Refresh=0;
     bool bWasOpen=false;

@@ -60,7 +60,7 @@ public:
             Test->TestTrue(TEXT("Explicit select feedback"),PC->GetInventoryMessage().Contains(TEXT("Select")));
             Until=Now+1;Phase=2;return false;
         }
-        if(Phase==2){Shot=Directory/TEXT("expired_selection.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+2;Phase=3;return false;}
+        if(Phase==2){CheckDetail(TEXT("SELECT AN ITEM"),TEXT("Removed stacks never choose a replacement."));Shot=Directory/TEXT("expired_selection.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+2;Phase=3;return false;}
         if(Phase==3)
         {
             if(IFileManager::Get().FileSize(*Shot)<=0){return false;}
@@ -69,7 +69,7 @@ public:
             Test->TestTrue(TEXT("Reselection replaces stale missing-stack warning"),PC->GetInventoryMessage().StartsWith(TEXT("Selected ")));
             Until=Now+1;Phase=4;return false;
         }
-        if(Phase==4){Shot=Directory/TEXT("reselected_stack.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+2;Phase=5;return false;}
+        if(Phase==4){CheckDetail(TEXT("Wood"),TEXT("2.50 kg this batch"));Test->TestTrue(TEXT("Actual permanent resource details"),AllText().Contains(TEXT("Does not expire")) && AllText().Contains(TEXT("Not consumable")));Shot=Directory/TEXT("reselected_stack.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+2;Phase=5;return false;}
         if(Phase==5)
         {
             if(IFileManager::Get().FileSize(*Shot)<=0){return false;}
@@ -94,7 +94,7 @@ public:
         }
         if(Phase==8)
         {
-            CheckReadability();CheckSelectedVisible();
+            CheckReadability();CheckSelectedVisible();CheckDetail(TEXT("Found food"),TEXT("+35 food / +10 water"));
             Shot=Directory/TEXT("full_bag_last.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+1;Phase=9;return false;
         }
         if(Phase==9)
@@ -106,11 +106,32 @@ public:
             if(PC->GetInventory()->GetStacks().IsValidIndex(Selected)){Test->TestEqual(TEXT("Selection follows stable identity after reorder"),PC->GetInventory()->GetStacks()[Selected].StackId,LastId);}
             Until=Now+0.4;Phase=10;return false;
         }
-        CheckReadability();CheckSelectedVisible();
+        if(Phase==10)
+        {
+            CheckReadability();CheckSelectedVisible();
+            Test->TestTrue(TEXT("Add catalog water to last free slot"),PC->GetInventory()->Grant(TEXT("Item_Water"),1));
+            Press(EKeys::Down);Test->TestEqual(TEXT("Explicitly select actual water"),PC->GetSelectedInventoryIndex(),7);
+            Until=Now+0.4;Phase=11;return false;
+        }
+        if(Phase==11)
+        {
+            CheckReadability();CheckDetail(TEXT("Water portion (placeholder)"),TEXT("+0 food / +35 water"));
+            Shot=Directory/TEXT("water_details.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=Now+1;Phase=12;return false;
+        }
+        if(IFileManager::Get().FileSize(*Shot)<=0){return false;}
+        Test->AddInfo(TEXT("[PrimalUI] Water details screenshot: ")+Shot);
+        Test->TestEqual(TEXT("Read-only details preserve water"),PC->GetInventory()->Count(TEXT("Item_Water")),1);
         Press(EKeys::Tab);Test->TestFalse(TEXT("Inventory closes normally"),PC->IsInventoryOpen());
         Test->AddInfo(TEXT("[PrimalUI] Real expiry, full bag, stable selection and rendered bounds checked. No hardware/manual acceptance claimed."));return true;
     }
 private:
+    void CheckDetail(const TCHAR* Title,const TCHAR* Body)
+    {
+        auto* T=Cast<UTextBlock>(HUD->WidgetTree->FindWidget(TEXT("PF_InventoryDetailTitle")));
+        auto* B=Cast<UTextBlock>(HUD->WidgetTree->FindWidget(TEXT("PF_InventoryDetailBody")));
+        Test->TestTrue(TEXT("Actual selected detail title"),T && T->GetText().ToString()==Title);
+        Test->TestTrue(TEXT("Actual selected detail content"),B && B->GetText().ToString().Contains(Body));
+    }
     void CheckSelectedVisible()
     {
         const auto* I=PC->GetInventory();const int32 Selected=PC->GetSelectedInventoryIndex();
@@ -136,8 +157,8 @@ private:
         {
             if(auto* T=Cast<UTextBlock>(W))
             {
-                Test->TestTrue(TEXT("Inventory text fits allocated height"),T->GetDesiredSize().Y<=T->GetCachedGeometry().GetLocalSize().Y+1);
-                if(T->GetText().ToString().Contains(TEXT("fresh")))
+                Test->TestTrue(FString::Printf(TEXT("Inventory text %s fits allocated height"),*T->GetName()),T->GetDesiredSize().Y<=T->GetCachedGeometry().GetLocalSize().Y+1);
+                if(T->GetFName()==TEXT("PF_InventoryPanel_Body"))
                 {bBody=true;Test->TestEqual(TEXT("Inventory rows respect HUD scaling"),T->GetFont().Size,float(FMath::RoundToInt(22*UPFGameUserSettings::Get()->Preferences.HUDScale)));}
             }
             if(Cast<UBorder>(W))
@@ -146,7 +167,7 @@ private:
                 Test->TestTrue(TEXT("Inventory panel fits right side without covering aim"),TL.X>Root.GetLocalSize().X*0.55 && TL.Y>=0 && BR.X<Root.GetLocalSize().X && BR.Y<Root.GetLocalSize().Y);
             }
         }
-        Test->TestTrue(TEXT("Actual food freshness rendered"),bBody);
+        Test->TestTrue(TEXT("Inventory row body rendered"),bBody);
     }
     void Press(FKey Key)
     {

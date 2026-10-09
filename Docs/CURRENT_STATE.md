@@ -2,6 +2,10 @@
 
 Updated October9,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
 
+## Latest bounded M11 step — inventory details
+
+Themed read-only inventory details are now verified: category, stack limit, unit/batch weight, actual freshness and per-portion food/water recovery. Expired/missing selection/catalog stays explicit; stable GUID actions, four rows and10Hz refresh retained. No assets, gameplay authority, save schema or dependencies changed. Editor final6.09s/Game31.48s PASSED, no compiler warnings. Native PF.UI.InventoryDetails/Input.InventorySelection/Inventory.Transactions PASSED3/3; rendered InventorySelectionLive PASSED1/1 at720p and1440p/maxHUDScale1.5, ten final PNGs inspected. No test severity/ensure/fatal/crash; known startup categories remain.149/150 unrelated saves and actual default settings unchanged. Exact paths/measurements and initial pass: [INVENTORY_DETAILS_M11.md](INVENTORY_DETAILS_M11.md). [AI task](https://trello.com/c/T70Pta7d) immediately updated and read back Done; Personal UI cards retain Doing. Full M11 and failed Personal M8 replay stay open. Next independent step: catalog-driven crafting selection/details; more resources/recipes remain M12.
+
 ## Current game
 
 First-person, server-authoritative greybox survival: Health/Stamina/Hunger/Thirst, exposure/damage/death/respawn; finite expiring food; inventory/pickup/drop; gathering/crafting; primitive building/storage/ownership; passive/hostile creatures; time of day; versioned world/player saves and reconnect. Remote players retain full-body presentation. No third-person gameplay.
@@ -42,7 +46,7 @@ Prior broader regression:35distinct native cases passed in the October9 pre-menu
 | M7 | User reported Personal check completed October9 | No route/night/FPS measurements invented; broader production world remains future |
 | M8 | Native/live persistence implemented; latest network checks pass; **human rendered check failed/replay pending** | [Personal2 replay](https://trello.com/c/UZVTTPLE), GuideG3: actual gather/craft/build/store/Pause Save/close/relaunch/Load comparison |
 | M9 | Independent intake/provenance audit completed; candidate approval open | Exact local source/license mapping before integration |
-| M11 | Bounded UI/menu slices passed; full usability/physical controller/audio acceptance unverified | Human first-person usability remains separate; next independent slice is inventory/item details and data-driven crafting UI |
+| M11 | Bounded UI/menu/item-details slices passed; full usability/physical controller/audio acceptance unverified | Human first-person usability remains separate; next independent slice is data-driven crafting selection/details |
 | M10,M12–M25 | Future plans, not accepted | More resources/recipes tracked M12, world distribution M14; adaptation/biomod and tech-tree references remain design inputs |
 
 **Completed requested Editor Medium preset:** after menu/save task6571bc6 was published, supported Editor Scalability1/CLOSE_SLATE_MAINFRAME applied and saved all11quality groups=1 plus engine preset resolutionquality71. Actual disk readback: C:/Users/jackh/AppData/Local/UnrealEngine/5.8/Saved/Config/WindowsEditor/EditorSettings.ini. Game preferences hashes unchanged; no tracked assets/maps/source/project settings modified. This is the local UE5.8 Editor profile, kept out of Git. Report/log EditorMediumRetry_20261009_033618504_9a8391f0,16.11s,working/private2.903/2.718GiB,engine0,zero raw warning/error/ensure/fatal; Editor closed normally. NullRHI avoids rendering; actual FPS benefit unmeasured. [Trello task](https://trello.com/c/vfPfBayv) read back Done.
