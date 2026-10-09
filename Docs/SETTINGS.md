@@ -1,8 +1,10 @@
 # Local settings and performance
 
-October9 test tooling now isolates every rendered run's GameUserSettings INI and verifies the actual branch destination/default-file hash preservation: [SETTINGS_ISOLATION_M11.md](SETTINGS_ISOLATION_M11.md). Earlier Cancel test's direct file assertion used a cache key rather than a filename and is corrected in its evidence document;live preference/UI assertions remain valid. Actual Apply/display automation remains pending.
+October9 non-resolution Apply and real disposable-file reload passed at720p/1440p, including camera FOV/blur, vitals font scale, focus/inventory and unchanged actual default config: [SETTINGS_APPLY_M11.md](SETTINGS_APPLY_M11.md). Actual windowed Keep/Back/15-second paused timeout passed from1440p;attempted720p shrink failed before Apply because the engine menu floor offers no smaller mode: [SETTINGS_DISPLAY_M11.md](SETTINGS_DISPLAY_M11.md). No floor changes or false720p pass. Process-restart,fullscreen/HDR and physical audio/controller acceptance remain pending.
 
-October9 bounded rendered draft/Cancel verification passed at720p/1440p with live preferences,renderer and user config contents unchanged: [SETTINGS_CANCEL_M11.md](SETTINGS_CANCEL_M11.md). This does not verify display Apply/timeout or physical audio/controller acceptance.
+October9 test tooling isolates every rendered run's GameUserSettings INI and verifies the actual branch destination/default-file hash preservation: [SETTINGS_ISOLATION_M11.md](SETTINGS_ISOLATION_M11.md). Earlier Cancel test's direct file assertion used a cache key rather than a filename and is corrected in its evidence document;live preference/UI assertions remain valid.
+
+October9 bounded rendered draft/Cancel verification passed at720p/1440p with live preferences and renderer unchanged: [SETTINGS_CANCEL_M11.md](SETTINGS_CANCEL_M11.md). Its original file assertion was insufficient; actual default-file preservation was proved later by the isolation/Apply/display checks above. Physical audio/controller acceptance remains separate.
 
 Open **P → Settings** while playing. Game, Graphics, Audio and Accessibility tabs are available with mouse, keyboard and controller. Arrow keys/D-pad select and change rows; controller LB/RB change tabs; Enter/A applies, B returns, Y selects defaults. Changes are a draft until Apply. Cancel discards the draft. Display changes require confirmation within 15 real-time seconds, including while the solo world is paused; timeout restores the prior display.
 

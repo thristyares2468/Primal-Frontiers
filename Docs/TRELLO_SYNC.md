@@ -32,6 +32,8 @@ Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed
 
 ## Every continue/task
 
+October9 windowed display: https://trello.com/c/rZT9QNCL Doing → Done for actual normal1440p Keep/Back/paused15-second timeout/config reload. Initial720p smaller-mode prerequisite remains failed because engine UI floor;explicit limitation before1440p replay,no artificial floor/no false pass. Three screenshots/default-config gate/log/memory inspected. Inline current replay uses1440p,original plan retained historically. Personal gates,assignments/dates/assets unchanged. Separate-process preferences next independent settings scope.
+
 October9 non-resolution Apply: https://trello.com/c/sIfh4PuZ Doing → Done after Editor/Game and actual720p/1440p SettingsApplyLive passes,six screenshots/default-config preservation. Initial C2666 and VSync-priority strict failure retained;fixed only test/runner,no suppression. Inline exact-level/replay/evidence guide retained. Personal gates,members/deadlines/assets unchanged. Display confirmation is separate next task.
 
 October9 settings config prerequisite: https://trello.com/c/3DWwvvZU Doing → Done after fixing cache-key/filename lookup,final Editor/Game,two rendered guarded SettingsCancelLive passes/eightPNG inspection and actual default-file hash/presence preservation. Initial2-error failure retained; corrected historical file assertion on WwM89qzB instead of inventing evidence. Two new startup ConsoleManager priority warnings investigated/recorded;not suppressed. No actual Apply/display or Personal acceptance inferred. Next task must explicitly guard disposable writes before Apply.
