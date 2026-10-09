@@ -22,6 +22,10 @@ UPFRecipeChoiceButton::UPFRecipeChoiceButton(){InitIsFocusable(true);}
 void UPFRecipeChoiceButton::InitializeChoice(UPFCraftingHUD* Menu,FName Id)
 {OwnerMenu=Menu;RecipeId=Id;OnClicked.AddDynamic(this,&UPFRecipeChoiceButton::Choose);}
 void UPFRecipeChoiceButton::Choose(){if(OwnerMenu){OwnerMenu->SelectRecipe(RecipeId);}}
+UPFRecipeCategoryButton::UPFRecipeCategoryButton(){InitIsFocusable(true);}
+void UPFRecipeCategoryButton::InitializeCategory(UPFCraftingHUD* Menu,FGameplayTag Tag)
+{OwnerMenu=Menu;Category=Tag;OnClicked.AddDynamic(this,&UPFRecipeCategoryButton::Choose);}
+void UPFRecipeCategoryButton::Choose(){if(OwnerMenu){OwnerMenu->SelectCategory(Category);}}
 
 void UPFCraftingHUD::NativeOnInitialized()
 {
@@ -36,6 +40,7 @@ void UPFCraftingHUD::NativeOnInitialized()
     auto Label=[&](FName Name,FLinearColor Color){auto* T=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),Name);T->SetAutoWrapText(true);T->SetColorAndOpacity(Color);return T;};
     Heading=Label(TEXT("PF_CraftingPanel_Heading"),PFUITheme::Accent);Heading->SetText(FText::FromString(TEXT("CRAFTING")));
     Rows->AddChildToVerticalBox(Heading)->SetPadding(FMargin(0,0,0,10));
+    Categories=WidgetTree->ConstructWidget<UHorizontalBox>();Rows->AddChildToVerticalBox(Categories)->SetPadding(FMargin(0,0,0,10));
     auto* Columns=WidgetTree->ConstructWidget<UHorizontalBox>();Rows->AddChildToVerticalBox(Columns)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
     FSlateChildSize ListWidth(ESlateSizeRule::Fill);ListWidth.Value=0.42f;
     auto* Browser=WidgetTree->ConstructWidget<UScrollBox>();auto* BrowserSlot=Columns->AddChildToHorizontalBox(Browser);BrowserSlot->SetSize(ListWidth);BrowserSlot->SetPadding(FMargin(0,0,16,0));
@@ -64,6 +69,18 @@ void UPFCraftingHUD::NativeOnInitialized()
     Hints=Label(TEXT("PF_CraftingHints"),PFUITheme::Muted);Rows->AddChildToVerticalBox(Hints)->SetPadding(FMargin(0,8,0,0));
     SetVisibility(ESlateVisibility::Collapsed);
 }
+void UPFCraftingHUD::RebuildCategories(const TArray<FGameplayTag>& Tags)
+{
+    Categories->ClearChildren();CategoryButtons.Reset();CategoryTitles.Reset();CategoryIds=Tags;
+    for(int32 N=0;N<Tags.Num();++N)
+    {
+        auto* B=WidgetTree->ConstructWidget<UPFRecipeCategoryButton>(UPFRecipeCategoryButton::StaticClass(),FName(*FString::Printf(TEXT("PF_Category%d_Button"),N)));B->InitializeCategory(this,Tags[N]);
+        auto* T=WidgetTree->ConstructWidget<UTextBlock>();T->SetAutoWrapText(false);T->SetColorAndOpacity(PFUITheme::Text);
+        FString Caption=TEXT("All");if(Tags[N].IsValid()){Caption=Tags[N].ToString();int32 Dot;if(Caption.FindLastChar(TEXT('.'),Dot)){Caption=Caption.Mid(Dot+1);}}
+        T->SetText(FText::FromString(Caption));B->SetContent(T);CategoryButtons.Add(B);CategoryTitles.Add(T);
+        auto* S=Categories->AddChildToHorizontalBox(B);S->SetSize(FSlateChildSize(ESlateSizeRule::Fill));S->SetPadding(FMargin(0,0,8,0));
+    }
+}
 void UPFCraftingHUD::RebuildRecipes(const TArray<FName>& Ids)
 {
     RecipeList->ClearChildren();RecipeButtons.Reset();RecipeTitles.Reset();RecipeBodies.Reset();RecipePictures.Reset();RecipeIds=Ids;
@@ -88,13 +105,15 @@ void UPFCraftingHUD::RefreshMenu()
 {
     Refresh=0;
     const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());const auto* C=PC?PC->GetCrafting():nullptr;const auto* I=PC?PC->GetInventory():nullptr;
-    TArray<FName> Ids;
-    if(C && C->Catalog && I){for(const auto& D:C->Catalog->Recipes){if(C->Catalog->Recipe(D.Id,I->Catalog)){Ids.Add(D.Id);}}}
+    TArray<FName> Ids;TArray<FGameplayTag> Tags;Tags.Add(FGameplayTag());
+    if(C && C->Catalog && I){for(const auto& D:C->Catalog->Recipes){if(C->Catalog->Recipe(D.Id,I->Catalog)){Tags.AddUnique(D.Category);if(!CategoryFilter.IsValid() || D.Category.MatchesTag(CategoryFilter)){Ids.Add(D.Id);}}}}
+    if(Tags!=CategoryIds){RebuildCategories(Tags);}
     if(Ids!=RecipeIds){RebuildRecipes(Ids);}
     const auto* Settings=UPFGameUserSettings::Get();const float Requested=Settings?Settings->Preferences.HUDScale:1;
     const float Scale=FMath::IsFinite(Requested)?FMath::Clamp(Requested,0.75f,1.5f):1;
     auto Font=[&](UTextBlock* T,int32 Size){auto F=T->GetFont();F.Size=FMath::RoundToInt(Size*Scale);if(T->GetFont().Size!=F.Size){T->SetFont(F);}};
     Font(Heading,20);Font(DetailTitle,18);Font(DetailBody,16);Font(ItemStats,14);Font(Result,14);Font(Hints,12);for(auto T:ButtonLabels){Font(T.Get(),16);}
+    for(int32 N=0;N<CategoryIds.Num();++N){Font(CategoryTitles[N],14);CategoryButtons[N]->SetStyle(PFUITheme::NavigationButton(CategoryFilter==CategoryIds[N]));}
     for(int32 N=0;N<RecipeIds.Num();++N)
     {
         const auto* D=C->Catalog->Recipe(RecipeIds[N],I->Catalog);const auto* Output=I->Definition(D->Output);
@@ -104,6 +123,11 @@ void UPFCraftingHUD::RefreshMenu()
     const auto* D=C && C->Catalog && I?C->Catalog->Recipe(SelectedRecipe,I->Catalog):nullptr;
     const auto View=PFRecipeDetails::Describe(D,I,UPFInventoryComponent::ServerTime(GetWorld()),C && !C->ActiveRecipe.IsNone());
     DetailTitle->SetText(View.Title);DetailBody->SetText(View.Body);
+    if(SelectedRecipe.IsNone() && !RecipeIds.IsEmpty())
+    {
+        DetailTitle->SetText(FText::FromString(TEXT("CHOOSE A RECIPE")));
+        DetailBody->SetText(FText::FromString(TEXT("Select a recipe on the left to view its ingredients and craft it.")));
+    }
     const auto* Output=D?I->Definition(D->Output):nullptr;Picture->SetItem(Output);
     FString Stats=TEXT("No valid item selected.");
     if(Output)
@@ -121,12 +145,19 @@ void UPFCraftingHUD::RefreshMenu()
     if(C){Status+=TEXT(" | ")+(C->Feedback.IsEmpty()?FString(TEXT("No server result yet")):C->Feedback);}
     if(PC && PC->GetInventoryMessage().StartsWith(TEXT("Craft "))){Status+=TEXT("\nLast request: ")+PC->GetInventoryMessage();}
     Result->SetText(FText::FromString(Status));CraftButton->SetIsEnabled(D!=nullptr);CancelButton->SetIsEnabled(C && !C->ActiveRecipe.IsNone());
-    Hints->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?TEXT("Arrows / D-pad: recipe | Enter / A / X: craft | R / D-left: cancel | C / Y / B / Esc: close\n1/2/3: quick craft | P / Menu: pause. The world keeps running."):TEXT("The world keeps running.")));
+    Hints->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?NavigationHelp():TEXT("The world keeps running.")));
 }
 void UPFCraftingHUD::SelectRecipe(FName Id)
 {RefreshMenu();if(RecipeIds.Contains(Id)){SelectedRecipe=Id;RefreshMenu();if(auto* Scroll=Cast<UScrollBox>(RecipeList->GetParent())){Scroll->ScrollWidgetIntoView(RecipeButtons[RecipeIds.IndexOfByKey(Id)],false);}}}
 void UPFCraftingHUD::MoveSelection(int32 Direction)
-{RefreshMenu();if(!RecipeIds.IsEmpty()){const int32 Index=RecipeIds.IndexOfByKey(SelectedRecipe);SelectRecipe(RecipeIds[(FMath::Max(0,Index)+Direction+RecipeIds.Num())%RecipeIds.Num()]);}}
+{RefreshMenu();if(!RecipeIds.IsEmpty()){const int32 Index=RecipeIds.IndexOfByKey(SelectedRecipe);const int32 Next=Index==INDEX_NONE?(Direction>=0?0:RecipeIds.Num()-1):(Index+Direction+RecipeIds.Num())%RecipeIds.Num();SelectRecipe(RecipeIds[Next]);}}
+void UPFCraftingHUD::SelectCategory(FGameplayTag Tag)
+{
+    RefreshMenu();if(!CategoryIds.Contains(Tag) || Tag==CategoryFilter){return;}
+    CategoryFilter=Tag;SelectedRecipe=NAME_None;bInitialChoiceMade=true;RefreshMenu();
+}
+void UPFCraftingHUD::MoveCategory(int32 Direction)
+{RefreshMenu();if(!CategoryIds.IsEmpty()){const int32 Index=CategoryIds.IndexOfByKey(CategoryFilter);SelectCategory(CategoryIds[(FMath::Max(0,Index)+Direction+CategoryIds.Num())%CategoryIds.Num()]);}}
 void UPFCraftingHUD::CraftSelected()
 {if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){if(PC->IsCraftingOpen() && !PC->IsPauseMenuOpen()){RefreshMenu();if(!SelectedRecipe.IsNone()){PC->ServerCraftAction(SelectedRecipe,false);}}}}
 void UPFCraftingHUD::CancelCraft()
@@ -141,7 +172,9 @@ FReply UPFCraftingHUD::NativeOnPreviewKeyDown(const FGeometry&,const FKeyEvent& 
     if(K==EKeys::Down || K==EKeys::Up || K==EKeys::Gamepad_DPad_Down || K==EKeys::Gamepad_DPad_Up){MoveSelection(K==EKeys::Down || K==EKeys::Gamepad_DPad_Down?1:-1);}
     else if(!E.IsRepeat())
     {
-        if(K==EKeys::C || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Top || K==EKeys::Gamepad_FaceButton_Right){CloseMenu();}
+        if(K==EKeys::PageUp || K==EKeys::Gamepad_LeftShoulder){MoveCategory(-1);}
+        else if(K==EKeys::PageDown || K==EKeys::Gamepad_RightShoulder){MoveCategory(1);}
+        else if(K==EKeys::C || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Top || K==EKeys::Gamepad_FaceButton_Right){CloseMenu();}
         else if(K==EKeys::P || K==EKeys::Gamepad_Special_Right){PC->SetPauseMenuOpen(true);}
         else if(K==EKeys::R || K==EKeys::Gamepad_DPad_Left){CancelCraft();}
         else if(K==EKeys::Enter || K==EKeys::Gamepad_FaceButton_Bottom || K==EKeys::Gamepad_FaceButton_Left){CraftSelected();}

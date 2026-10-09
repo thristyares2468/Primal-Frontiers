@@ -14,6 +14,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/PlayerState.h"
 #include "Engine/Engine.h"
@@ -38,7 +39,8 @@ public:
     {
         const double Now=FPlatformTime::Seconds();
         if(Finished){if(Now-Changed<(bClient?3:12)){return false;}for(const auto& Path:Shots){Test->TestTrue(TEXT("Rendered screenshot written"),IFileManager::Get().FileSize(*Path)>0);}return true;}
-        if(Now-Started>160){Test->AddError(FString::Printf(TEXT("[PrimalAgentTools] Tool live timeout server=%d local=%d"),ServerStage,LocalStage));return true;}
+        // Leave enough time for Unreal to write a failed verdict before the runner's 180s cap.
+        if(Now-Started>140){Test->AddError(FString::Printf(TEXT("[PrimalAgentTools] Tool live timeout server=%d local=%d %s"),ServerStage,LocalStage,*LastObserved));return true;}
         UWorld* W=nullptr;for(const auto& X:GEngine->GetWorldContexts()){if(X.World() && X.World()->IsGameWorld()){W=X.World();break;}}
         if(!W){return false;}bClient=W->GetNetMode()==NM_Client;const bool Solo=W->GetNetMode()==NM_Standalone;
         TArray<APFSurvivalPlayerController*> Players;
@@ -86,6 +88,7 @@ public:
                 Test->AddInfo(TEXT("[PrimalAgentTools] Tool restart client identity, tier and privacy verified"));Finished=true;Changed=Now;return false;
             }
             APFResourceNode* Node=nullptr;for(TActorIterator<APFResourceNode> It(W);It;++It){if(It->GetOwner()==PC->GetPawn()){Node=*It;break;}}
+            LastObserved=FString::Printf(TEXT("fibre=%d hits=%d deadline=%.3f pause=%d crafting=%d pawn=%s"),I->Count(TEXT("Item_Fibre")),Node?Node->HitsRemaining:-1,Node?Node->RespawnAt:-1,PC->IsPauseMenuOpen(),PC->IsCraftingOpen(),*GetNameSafe(PC->GetPawn()));
             if(LocalStage<10 && !Node){return false;}
             if(LocalStage==0)
             {
@@ -111,17 +114,43 @@ public:
                 Start(PC,TEXT("Recipe_Cord"));Next(3,Now);
             }
             else if(LocalStage==20 && Now-Changed>0.5)
+            {
+                CheckMenu(TEXT("Recipe_Cord"),TEXT("Item_Cord"));Test->TestEqual(TEXT("All five recipes initially visible"),Menu->GetVisibleRecipeIds().Num(),5);
+                auto* Button=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_Category3_Button")));if(!Button){Test->AddError(TEXT("Missing material category button"));return true;}Button->SetKeyboardFocus();Test->TestTrue(TEXT("Category button has real Slate focus"),Button->HasKeyboardFocus());Press(EKeys::SpaceBar);Next(24,Now);
+            }
+            else if(LocalStage==24 && Now-Changed>0.3)
+            {
+                Test->TestEqual(TEXT("Button selects material category"),Menu->GetSelectedCategory().ToString(),FString(TEXT("Recipe.Category.Material")));
+                Test->TestEqual(TEXT("Material shows only cord"),Menu->GetVisibleRecipeIds().Num(),1);Test->TestTrue(TEXT("Material row is cord"),Menu->GetVisibleRecipeIds().Contains(TEXT("Recipe_Cord")));
+                Test->TestEqual(TEXT("Filtering clears selection instead of silently replacing it"),Menu->GetSelectedRecipe(),NAME_None);Press(EKeys::Enter);Next(25,Now);
+            }
+            else if(LocalStage==25 && Now-Changed>0.3)
+            {Test->TestEqual(TEXT("Empty selection sends no craft"),C->ActiveRecipe,NAME_None);Test->TestEqual(TEXT("Filtering preserves ingredients"),I->Count(TEXT("Item_Fibre")),4);Press(EKeys::PageUp);Next(26,Now);}
+            else if(LocalStage==26 && Now-Changed>0.3)
+            {
+                Test->TestEqual(TEXT("Keyboard switches food category"),Menu->GetSelectedCategory().ToString(),FString(TEXT("Recipe.Category.Food")));Test->TestEqual(TEXT("Both food recipes visible"),Menu->GetVisibleRecipeIds().Num(),2);
+                auto* Title=Cast<UTextBlock>(Menu->WidgetTree->FindWidget(TEXT("PF_CraftingDetail_Title")));Test->TestTrue(TEXT("Empty selection asks for a recipe instead of reporting invalid data"),Title && Title->GetText().ToString()==TEXT("CHOOSE A RECIPE"));
+                Test->TestTrue(TEXT("Food IDs are cook and dry"),Menu->GetVisibleRecipeIds().Contains(TEXT("Recipe_Cook")) && Menu->GetVisibleRecipeIds().Contains(TEXT("Recipe_Dry")));Shot(TEXT("food_category"));Next(29,Now);
+            }
+            else if(LocalStage==29 && Now-Changed>0.3){Press(EKeys::Gamepad_LeftShoulder);Next(27,Now);}
+            else if(LocalStage==27 && Now-Changed>0.3)
+            {
+                Test->TestEqual(TEXT("Controller shoulder switches tool category"),Menu->GetSelectedCategory().ToString(),FString(TEXT("Recipe.Category.Tool")));Test->TestEqual(TEXT("Both tools visible"),Menu->GetVisibleRecipeIds().Num(),2);
+                const auto Prior=Menu->GetSelectedCategory();Menu->SelectCategory(FGameplayTag::RequestGameplayTag(TEXT("Item.Category.Resource")));Test->TestEqual(TEXT("Unknown recipe category safely refused"),Menu->GetSelectedCategory(),Prior);
+                Press(EKeys::Gamepad_RightShoulder);Press(EKeys::Gamepad_RightShoulder);Press(EKeys::Down);Next(28,Now);
+            }
+            else if(LocalStage==28 && Now-Changed>0.3)
             {CheckMenu(TEXT("Recipe_Cord"),TEXT("Item_Cord"));Shot(TEXT("cord_selected"));Start(PC,TEXT("Recipe_Cord"));Next(3,Now);}
             else if(LocalStage==3 && C->ActiveRecipe==TEXT("Recipe_Cord") && Now-Changed>0.6)
             {PC->ServerCraftAction(TEXT("Recipe_Cord"),false);Next(4,Now);}
             else if(LocalStage==4 && Now-Changed>0.6)
-            {PC->ServerCraftAction(NAME_None,true);Next(5,Now);}
+            {if(Menu.IsValid()){const double Deadline=C->FinishAt;Press(EKeys::PageDown);Test->TestEqual(TEXT("Filter does not cancel active job"),C->ActiveRecipe,FName(TEXT("Recipe_Cord")));Test->TestEqual(TEXT("Filter does not restart or charge job"),C->FinishAt,Deadline);Press(EKeys::PageUp);Press(EKeys::Down);}PC->ServerCraftAction(NAME_None,true);Next(5,Now);}
             else if(LocalStage==5 && C->ActiveRecipe.IsNone() && Now-Changed>0.6)
             {Test->TestEqual(TEXT("Cancel preserves four fibre"),I->Count(TEXT("Item_Fibre")),4);Test->TestEqual(TEXT("Cancel creates no cord"),I->Count(TEXT("Item_Cord")),0);Start(PC,TEXT("Recipe_Cord"));Next(6,Now);}
             else if(LocalStage==6 && I->Count(TEXT("Item_Cord"))==1 && C->ActiveRecipe.IsNone())
             {
                 Test->TestEqual(TEXT("Exact cord input cost"),I->Count(TEXT("Item_Fibre")),0);
-                if(Menu.IsValid()){Press(EKeys::Down);Next(21,Now);}else{Start(PC,TEXT("Recipe_BoundTool"));Next(7,Now);}
+                if(Menu.IsValid()){Press(EKeys::PageDown);Press(EKeys::PageDown);Press(EKeys::Down);Press(EKeys::Down);Next(21,Now);}else{Start(PC,TEXT("Recipe_BoundTool"));Next(7,Now);}
             }
             else if(LocalStage==21 && Now-Changed>0.5)
             {CheckMenu(TEXT("Recipe_BoundTool"),TEXT("Item_BoundTool"));Shot(TEXT("bound_selected"));Start(PC,TEXT("Recipe_BoundTool"));Next(7,Now);}
@@ -155,7 +184,7 @@ public:
         return false;
     }
 private:
-    void Next(int32 S,double Now){LocalStage=S;Changed=Now;Test->AddInfo(FString::Printf(TEXT("[PrimalAgentTools] Tool local stage=%d"),S));}
+    void Next(int32 S,double Now){LocalStage=S;Changed=Now;const FString Message=FString::Printf(TEXT("[PrimalAgentTools] Tool local stage=%d"),S);Test->AddInfo(Message);UE_LOG(LogTemp,Display,TEXT("%s"),*Message);}
     void CheckCosts(UPFInventoryComponent* I){Test->TestEqual(TEXT("Old tool consumed once"),I->Count(TEXT("Item_Tool")),0);Test->TestEqual(TEXT("Cord consumed once"),I->Count(TEXT("Item_Cord")),0);Test->TestEqual(TEXT("Wood consumed once"),I->Count(TEXT("Item_Wood")),0);Test->TestEqual(TEXT("Owned gathering tier"),I->GatheringHits(),3);Test->TestEqual(TEXT("Owned melee tier"),I->MeleeDamage(),45.f);}
     void CheckBag(UPFInventoryComponent* I){CheckCosts(I);Test->TestEqual(TEXT("One bound tool"),I->Count(TEXT("Item_BoundTool")),1);Test->TestEqual(TEXT("Conserved finite fibre"),I->Count(TEXT("Item_Fibre")),8);}
     void Privacy(UWorld* W,APFSurvivalPlayerController* PC)
@@ -173,7 +202,7 @@ private:
         TArray<UWidget*> Children;M->WidgetTree->GetAllWidgets(Children);for(auto* Child:Children){if(auto* Text=Cast<UTextBlock>(Child)){const auto Geometry=Text->GetCachedGeometry();Test->TestTrue(TEXT("Expanded menu text fits allocated row"),Text->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);}}
         if(Item==TEXT("Item_BoundTool")){auto* Stats=Cast<UTextBlock>(M->WidgetTree->FindWidget(TEXT("PF_CraftingDetail_Stats")));Test->TestTrue(TEXT("Selected tier statistics visible"),Stats && Stats->GetText().ToString().Contains(TEXT("3 gather hits | 45 melee damage")));}
     }
-    FAutomationTestBase* Test;FString Directory,Slot;TArray<FString> Shots;TWeakObjectPtr<UPFCraftingHUD> Menu;
+    FAutomationTestBase* Test;FString Directory,Slot,LastObserved;TArray<FString> Shots;TWeakObjectPtr<UPFCraftingHUD> Menu;
     double Started=FPlatformTime::Seconds(),Changed=0,ServerChanged=0;int32 Expected=1,ServerStage=0,LocalStage=0;bool bRestore=false,bClient=false,Finished=false,bScaleChanged=false;float OldScale=1;
 };
 }

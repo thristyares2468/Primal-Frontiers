@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Recipe categories are local browsing state
+
+Build crafting tabs from validated Recipe.Category Gameplay Tags. A category change clears the selected recipe and requires a deliberate row choice; it must never send a craft RPC, consume inputs, select a substitute, cancel or restart a job. Baseline numeric shortcuts act only if visible. Keep job state/feedback authoritative and category selection absent from save data. Share the real modal footer text with Pause help so contextual shoulder controls remain discoverable without changing world/build bindings. Native regressions and actual Slate/rendered filtering/conservation checks are recorded in CRAFTING_CATEGORIES_M11.md; human acceptance is separate.
+
 ## 2026-10-09 — Tool tiers change effort, not resource totals
 
 Make tool hit count and melee damage bounded validated item data, queried from the authoritative owned inventory rather than supplied by a client or cached after dropping. Best valid carried benefit per action preserves the existing automatic-tool behavior; explicit equipment slots/durability remain future work. Fibre cord plus the existing stone tool and wood produce a bound tool through the existing timed exact-batch conversion. The upgraded node action spends up to three remaining hits and inserts the corresponding finite yield, preserving depletion/regrowth/cooldown/capacity and total available resources. Existing attack trace/life/stamina/cooldown checks remain mandatory; replicated public held-tool presence does not expose private inventory. Stable IDs reuse V1 save validation without an asset/schema migration. No retroactive XP/unlocks or external assets. TOOL_TIERS_M12.md records native/rendered/network checks and retained fixture/build failures; full M12/human acceptance remains separate.

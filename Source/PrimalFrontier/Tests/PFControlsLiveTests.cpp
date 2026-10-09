@@ -5,6 +5,7 @@
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPauseMenu.h"
 #include "Survival/PFControlsMenu.h"
+#include "Crafting/PFCraftingHUD.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Building/PFBuildingComponent.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
@@ -118,6 +119,8 @@ public:
             if(!Test->TestNotNull(TEXT("Pause navigation opens controls"),S->Controls.Get())){PC->SetPauseMenuOpen(false);return true;}
             Test->TestTrue(TEXT("Help keeps controller paused and input blocked"),PC->IsPauseMenuOpen() && PC->IsMoveInputIgnored() && PC->IsLookInputIgnored());
             Test->TestTrue(TEXT("Help returns to owning pause widget"),S->Controls->ReturnFocus==S->Pause.Get());
+            bool bCraftHelp=false;S->Controls->WidgetTree->ForEachWidget([&](UWidget* W){if(auto* Text=Cast<UTextBlock>(W)){bCraftHelp|=Text->GetText().ToString().Contains(UPFCraftingHUD::NavigationHelp());}});
+            Test->TestTrue(TEXT("Pause help includes actual shared crafting category controls"),bCraftHelp);
             Test->TestFalse(TEXT("Help starts with keyboard page"),S->Controls->IsGamepadPage());
             Test->TestTrue(TEXT("Real Enhanced Input movement mappings shown"),PC->GetControlHints(false).ContainsByPredicate([](const FPFControlHint& H){return H.Context==TEXT("Movement / view");}));
             Test->TestTrue(TEXT("Gameplay attack key consumed by help"),Press(EKeys::LeftMouseButton));

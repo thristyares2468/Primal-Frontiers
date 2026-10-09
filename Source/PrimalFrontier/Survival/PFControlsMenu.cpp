@@ -1,5 +1,6 @@
 #include "Survival/PFControlsMenu.h"
 #include "Survival/PFSurvivalPlayerController.h"
+#include "Crafting/PFCraftingHUD.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -45,6 +46,7 @@ void UPFControlsMenu::Refresh()
         for(const auto& H:PC->GetControlHints(bGamepad))
         {Text+=FString::Printf(TEXT("[%s] %s — %s\n\n"),*H.Context,*H.Key.GetDisplayName().ToString(),*H.Action);}
     }
+    Text+=FString(TEXT("CRAFTING MENU (C / Y)\n"))+UPFCraftingHUD::NavigationHelp()+TEXT("\nChanging category clears selection. Choose a recipe before crafting; browsing does not cancel a job or spend ingredients.\n\n");
     Text+=TEXT("SURVIVAL TIPS\nAim at a pickup or resource within 2.5 metres. Scenery is not automatically gatherable. Read the crosshair prompt and server refusal message.\n\nFood is finite: find/gather it, then cook/dry it when ingredients are available. Consume an edible inventory stack; expired food cannot be eaten. Freshness continues to age offline.\n\nOnly one inventory/crafting/building overlay is active. Closing help returns to Pause and cannot trigger a gameplay action. P is preferred in Editor Play because Esc may stop PIE.\n\n");
     Text+=PC && PC->GetNetMode()==NM_Standalone?TEXT("Standalone: the world is paused while this menu is open.\n"):TEXT("Multiplayer: the server/world continues while menus are open; you are not protected from danger.\n");
     Text+=TEXT("Save explicitly before ending a session. There is no timed autosave or automatic standalone/server-exit save. PF.SaveWorld / PF.LoadWorld are server developer commands.\n");
