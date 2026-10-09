@@ -2,6 +2,28 @@
 
 Updated October9,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
 
+## Active bounded M12 player progression integration
+
+**Private player/craft persistence technical gate PASSED:** Editor26.66s/corrections6.10/6.29/6.65s/plugin6.43s and Game28.01s clean; finalnative5/5,one-client4/two-client75ms1%loss6passed. Actual40XPvs20XP owner-private records survive manual load/restart, pre-first-save reconnect/death/legacyzero defaults verified. Retained first fixture3assertion failure and real mixed-roster reconnect2error failure,failed-only retries/finalregressions passed. Exact paths/memory/limits PLAYER_PROGRESSION_M12.md. TrelloboundedDone/scopedSolpublication next. FullM12/manualgatesopen; next independentworkreadable XP feedback/knowledge purchase/optionalunlock,thenboundedgather/build rewards.
+
+Two-client75ms1%loss Create/Restart6/6 PASSED `M8Live2_20261009_114214761_a8e1ad78`,exits0/test severity0/no fatal/ensure,working/private1.721–1.819/1.580–1.731GiB. Real storage-owner40XP/tool+cook ledger and other20XP/tool ledger restored independently; observers remainzeroXP/emptyledger; both clientmutations refuse; Client2didnotcrash. All10network rawlogs retain24warnings/14Pythonerrorlines each,0new normalized severity versus archive baseline. Game build next; fullM12/human/renderedperformance unverified.
+
+Plugin-only live-fixture Editor rebuild6.43s clean; one-client Create/Restart4/4 PASSED `M8Live1_20261009_114018336_4f534f23`,PF.Persistence.Live/exits0/test severity0/no fatal/ensure,working/private1.719–1.816/1.576–1.731GiB. Actual tool+cooking40XP/privateledger/client refusal restored across actual process restart. Raw24startupwarnings/14experimentalPythonerrorlines per process retained for baseline review. Two NullRHI clients75ms1%loss next; no render/human acceptance.
+
+Final original5native regressions PASSED `Automation_M12ProgressionPlayerFinal_20261009_113738338_e0dc2fb4`,16.64s,working/private2.988/2.955GiB,severity/exits0. Live baseline strengthened to real tool20XP per player plus storage-owner cooking40XP, so two-client restart/privacy checks have independent values. Plugin-only test rebuild and one-client then two NullRHI75ms1%loss checks next. Native retained failures documented above.
+
+Reconnect fix build6.65s/failed-only Component1/1 PASSED `Automation_M12ProgressionReconnectFix_20261009_113644751_75918954`,16.12s,working/private2.915/2.778GiB,raw/test severity0/exits0. Actual pre-first-save controller teardown/reconnect now retains20XP/onecraftledger/3tools, then V2 repeated real-file restore/death and V1zero defaults pass. Final original5test regression next, followed by one-client then two NullRHI clients. Full M12/manual acceptance still open.
+
+Pre-first-save reconnect probe FAILED `Automation_M12ProgressionReconnectProbe_20261009_113519768_cb1b0af7`,16.21s,working/private3.114/3.045GiB,engine0/runner1,Component2errors,raw4errorlines/no fatal/ensure. Actual restore refused `Invalid progression world version`: logout had updated the progression field without publishing rosterV2. Fixed only checkpoint to prepare entire updated roster/legacy zero defaults then publish records+version atomically, even without ActiveSlot. Rebuild/failed-only retry pending; retained failure evidence. No network expansion yet.
+
+Fixture-only correction rebuild6.10s/failed-only Component1/1 PASSED `Automation_M12ProgressionPlayerRetry_20261009_113315807_46d84228`,16.35s,working/private2.969/2.826GiB,severity/exits0. Code review identified a possible pre-first-save reconnect roster-version mismatch; added a real controller teardown/reconnect fixture before network expansion. Its build/test is pending; not claimed resolved.
+
+Initial native selection FAILED `Automation_M12ProgressionPlayer_20261009_113111797_58d2b292`,36.94s,working/private2.909/2.782GiB,engine0/runner1,Component3assertions; other4tests passed. Test fixture removed2of4stone, leaving the reserved2 sufficient: actual conversion legitimately awarded20XP and shifted later expectations. Fixed fixture only to remove all4/replenish4; no runtime change. Failed-only Component rebuild/retry next. Raw0warnings/4errorlines retained; no crash/fatal/ensure. No multiplayer expansion until retry passes.
+
+Editor PASSED26.66s/no compiler warnings `Saved/Logs/PFM12ProgressionPlayerEditorBuild.log`. Implemented owner-private component, actual completed-craft20XP once, validatedV1zero defaults/V2runtimecapture/restore. Native component/world/craft tests pending; gameplay/persistence integration is not claimed passed yet. No purchaseUI/recipe restriction or broader XP sources.
+
+World compatibility132520f published/Sol/local-remote equality/clean verified; cardDone. Fresh Programming/HUD/parentM12 audit selected https://trello.com/c/qmZ2ESrC Doing: owner-private PlayerState progression, safeV1defaults/V2runtime persistence,20XPonce on actual craft completion. No client XP RPC/purchase UI/recipe restriction/gather/build/discovery reward yet. Implementation/build/native/live gates pending; Personal/fullM12acceptance remains open.
+
 ## Active bounded M12 world progression compatibility
 
 **World archive compatibility technical gate PASSED:** Editor22.27s/Game34.88s clean,native5/5 clean,one-client4/two-client75ms1%loss6 baseline Create/Restart passed. All10network raw logs reviewed/0new normalized severity against known startup baseline; full exact paths/memory/limits WORLD_PROGRESSION_COMPATIBILITY_M12.md. No live progression/player/recipe/UI acceptance claimed. Trello bounded Done/scoped Sol publication next; next independent gate is server-owned private PlayerState integration.

@@ -1,5 +1,7 @@
 # Technical Architecture
 
+Latest M12 runtime integration supersedes the earlier temporary archive-only V2 refusal below. UPFProgressionComponent lives on PlayerState, replicates records owner-only and earns first-craft XP only after the existing server inventory conversion. Runtime world capture/restore is V2 with explicit V1 zero defaults; logout publishes schema/records together so pre-first-save reconnect works. All progression preflights join the existing inventory/location checks. Native knowledge metadata remains non-gating; no purchase RPC/UI or gathering/building reward window yet. PLAYER_PROGRESSION_M12.md records exact current gates and retained failures.
+
 FPFWorldSaveFormat now supports explicit owner-bound progression in opt-in world V2 metadata with atomic semantic DecodeValidated. Normal runtime writer remainsV1, omitting the new reflected field; legacy reads use empty defaults. Current runtime refuses V2 before mutation until a server PlayerState component can preserve its records. WORLD_PROGRESSION_COMPATIBILITY_M12.md separates these archive contracts from unimplemented gameplay integration.
 
 Progression now has a separate bounded native byte codec and validated V1 player default adapter. It is not called by existing world/player writers; their schema and runtime access remain unchanged. Known-name resolution/atomic output refusal and zero retrospective XP are tested. PROGRESSION_CODEC_M12.md defines the upcoming owner-bound world archive compatibility gate before player integration.

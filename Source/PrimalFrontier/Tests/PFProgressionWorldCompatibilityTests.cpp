@@ -79,6 +79,6 @@ bool FPFProgressionWorldCompatibilityTest::RunTest(const FString&)
     Refuse(MutateJson(V2Bytes,[](auto R){R->SetArrayField(TEXT("players"),{MakeShared<FJsonValueString>(TEXT("bad"))});}),TEXT("Nonobject player refuses without assertion"));
     Read=Earned;TestFalse(TEXT("Invalid owner read refuses"),FPFWorldSaveFormat::UnpackProgression(V2.Players[0].Progression,Second.PlayerId,*Catalog,*Crafting,*Items,Read,Error));TestTrue(TEXT("Failed owner read preserves record"),Read.Experience==Earned.Experience && Read.Knowledge==Earned.Knowledge);
     FString Prior=V2.Players[0].Progression;TestFalse(TEXT("Invalid owner write refuses"),FPFWorldSaveFormat::PackProgression({},Earned,*Catalog,*Crafting,*Items,Prior,Error));TestEqual(TEXT("Failed owner write preserves encoding"),Prior,V2.Players[0].Progression);
-    AddInfo(TEXT("[PrimalAgentTools] Legacy V1 omission/defaults and opt-in owner-bound V2 roundtrip/refusal checked; gameplay V2 restoration remains blocked."));return true;
+    AddInfo(TEXT("[PrimalAgentTools] Legacy V1 omission/defaults and owner-bound V2 roundtrip/refusal checked; gameplay application has a separate component/runtime gate."));return true;
 }
 #endif

@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Publish private player progression with real craft transactions
+
+Use a no-tick owner-only component on the persistent PlayerState. Prepare a validated first-craft candidate before inventory conversion; commit 20 XP/recipe ID only after actual success, never on grants/cancellation/failed output. Runtime capture now emits owner-bound world V2; strict V1 reads supply zero defaults and preserve existing items/ownership/freshness without retrospective reward. Publish in-memory roster records and version atomically on disconnect, even before the first manual save. PLAYER_PROGRESSION_M12.md retains the actual mixed-version reconnect failure and successful correction. No XP RPC/purchase UI/recipe restriction or other earning source yet.
+
 ## 2026-10-09 — Opt-in owner-bound world V2 before player integration
 
 Preserve normal V1 writer field shape and empty legacy progression defaults. Explicit world V2 requires bounded owner-bound progression for every player and full candidate validation; future world versions start at3. Runtime refuses valid V2 until PlayerState capture/restore is integrated, preventing silent progression loss through ignored fields. Separate metadata acceptance from actual runtime migration. No automatic private-file rewrite or retrospective item rewards. WORLD_PROGRESSION_COMPATIBILITY_M12.md records exact native/live gates and limits.

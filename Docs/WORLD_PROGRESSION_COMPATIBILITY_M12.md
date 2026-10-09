@@ -1,5 +1,7 @@
 # M12 — optional owner-bound world progression archive
 
+This is the earlier archive-only checkpoint. The later PLAYER_PROGRESSION_M12.md integration deliberately replaces the temporary runtime V2 refusal and normal V1 writer described below, after actual component/legacy/reconnect/native/live gates. Historical archive evidence remains intact.
+
 October9,2026. This bounded native compatibility step accepts explicit world V2 metadata while retaining the normal runtime V1 writer. No live XP, player component, rewards, recipe restriction or UI added. Full M12 and the Personal M8/M11 gates remain open. Trello https://trello.com/c/dgafRfoo.
 
 ## Contract

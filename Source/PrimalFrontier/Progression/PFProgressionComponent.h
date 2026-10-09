@@ -1,0 +1,31 @@
+#pragma once
+#include "Components/ActorComponent.h"
+#include "Progression/PFProgressionRecord.h"
+#include "PFProgressionComponent.generated.h"
+class UPFCraftingComponent;
+class UPFCraftingCatalog;
+class UPFItemCatalog;
+
+/** PlayerState lifetime; trusted server persistence and completed-craft hook only. No grant RPC. */
+UCLASS(ClassGroup=(PrimalFrontier))
+class PRIMALFRONTIER_API UPFProgressionComponent : public UActorComponent
+{
+    GENERATED_BODY()
+public:
+    UPFProgressionComponent();
+    const FPFProgressionRecord& GetRecord() const { return Record; }
+    UFUNCTION(BlueprintPure,Category="Progression") int32 GetExperience() const { return Record.Experience; }
+    UFUNCTION(BlueprintPure,Category="Progression") int32 GetLevel() const;
+    UFUNCTION(BlueprintPure,Category="Progression") int32 GetAvailablePoints() const;
+    bool Capture(FPFProgressionRecord& Out,FString& Error) const;
+    bool CanRestore(const FPFProgressionRecord& Candidate,FString& Error) const;
+    bool Restore(const FPFProgressionRecord& Candidate,FString& Error);
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+private:
+    UPROPERTY(Replicated) FPFProgressionRecord Record;
+    bool Authority(const UPFCraftingCatalog*& Crafting,const UPFItemCatalog*& Items,FString& Error) const;
+    // Only the actual timed crafting transaction can prepare/commit a first-craft award.
+    friend class UPFCraftingComponent;
+    bool PrepareCompletedCraft(FName Recipe,FPFProgressionRecord& Candidate,FString& Error) const;
+    void CommitCompletedCraft(const FPFProgressionRecord& Candidate);
+};

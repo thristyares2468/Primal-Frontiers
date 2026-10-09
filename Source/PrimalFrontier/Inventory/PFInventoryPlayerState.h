@@ -3,7 +3,7 @@
 // PlayerState that carries the player's bag (UPFInventoryComponent) and crafting
 // queue (UPFCraftingComponent). PlayerState outlives the pawn, so items and the
 // player identity survive death/respawn, while vitals reset with the new pawn.
-// Reconnect currently starts empty; persistence is planned for M8.
+// M8 reconnect restores server-owned records; M12 progression survives pawn replacement.
 //
 // History: M3 (340c538) inventory; M4 (e7ffd71) crafting. Docs: Docs/INVENTORY_M3.md
 
@@ -12,6 +12,7 @@
 #include "PFInventoryPlayerState.generated.h"
 class UPFInventoryComponent;
 class UPFCraftingComponent;
+class UPFProgressionComponent;
 UCLASS()
 class PRIMALFRONTIER_API APFInventoryPlayerState : public APlayerState
 {
@@ -32,4 +33,6 @@ public:
 
     /** One timed crafting job at a time, converting items in Inventory on completion. */
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly) TObjectPtr<UPFCraftingComponent> Crafting;
+    /** Owner-private XP/knowledge/first-craft ledger; never reset on pawn death. */
+    UPROPERTY(VisibleAnywhere,BlueprintReadOnly) TObjectPtr<UPFProgressionComponent> Progression;
 };

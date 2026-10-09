@@ -2,6 +2,7 @@
 
 #include "Crafting/PFCraftingComponent.h"
 #include "PFAssetPaths.h"
+#include "Progression/PFProgressionComponent.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
@@ -104,6 +105,11 @@ void UPFCraftingComponent::TickComponent(float Delta,ELevelTick Type,FActorCompo
     if(UPFInventoryComponent::ServerTime(GetWorld())<FinishAt){return;}
     // Atomic conversion of the exact reserved batches; fails cleanly if anything changed.
     auto* I=Inventory();
+    auto* Progression=GetOwner()->FindComponentByClass<UPFProgressionComponent>();FPFProgressionRecord Reward;FString Error;
+    // Validate the prospective reward before consuming inputs. Commit it only after actual item conversion.
+    const bool RewardReady=!Progression || Progression->PrepareCompletedCraft(ActiveRecipe,Reward,Error);
+    if(!RewardReady){Finish(TEXT("Failed: progression validation refused; no conversion"));return;}
     const bool Done=I && I->Transform(Inputs,PendingRecipe.Output,PendingRecipe.OutputQuantity);
+    if(Done && Progression){Progression->CommitCompletedCraft(Reward);}
     Finish(Done?TEXT("Completed"):TEXT("Failed: ingredients changed/expired or output will not fit; no conversion"));
 }

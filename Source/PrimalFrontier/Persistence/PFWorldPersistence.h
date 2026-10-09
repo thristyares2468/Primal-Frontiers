@@ -8,6 +8,7 @@ class UPFItemCatalog;
 class UPFBuildingCatalog;
 class UPFCraftingCatalog;
 class UPFCreatureCatalog;
+struct FPFProgressionRecord;
 
 /** Server-only orchestration; records contain values, never arbitrary actor classes. */
 UCLASS()
@@ -47,4 +48,5 @@ private:
     bool Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FString& Error);
     bool PackPlayer(const FPFPlayerSaveData& Player, double Weight, FString& Out, FString& Error);
     bool UnpackPlayer(const FString& Text, double Weight, FPFPlayerSaveData& Out, FString& Error);
+    bool UnpackProgression(int32 Version,const FPFWorldPlayerRecord& Player,FPFProgressionRecord& Out,FString& Error);
 };

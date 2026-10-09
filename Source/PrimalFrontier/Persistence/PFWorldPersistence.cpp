@@ -5,6 +5,8 @@
 #include "Persistence/PFPlayerSaveAdapter.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
+#include "Progression/PFProgressionComponent.h"
+#include "Progression/PFProgressionCatalog.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFItemPickup.h"
 #include "Building/PFBuildPiece.h"
@@ -59,10 +61,13 @@ bool UPFWorldPersistence::Decode(const TArray<uint8>& Bytes, FPFWorldSaveData& O
 {
     FPFWorldSaveData Candidate;
     if (!Authority(Error) || !FPFWorldSaveFormat::DecodeValidated(Bytes, *Items, *Buildings, *Crafting, *Creatures, Candidate, Error)) { return false; }
-    // Compatibility bytes can be verified before player progression restoration exists.
-    // Never accept V2 and silently lose its fields during today's V1 capture.
-    if(Candidate.Version==2){Error=TEXT("World V2 progression restoration is not integrated; load refused to preserve saved data");return false;}
     Out = MoveTemp(Candidate); return true;
+}
+bool UPFWorldPersistence::UnpackProgression(int32 Version,const FPFWorldPlayerRecord& Player,FPFProgressionRecord& Out,FString& Error)
+{
+    if(Version==1 && Player.Progression.IsEmpty()){Out=FPFProgressionRecord();return true;}
+    if(Version!=2){Error=TEXT("Invalid progression world version");return false;}
+    return FPFWorldSaveFormat::UnpackProgression(Player.Progression,Player.PlayerId,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Out,Error);
 }
 
 bool UPFWorldPersistence::CheckLogin(const FString& Options, FString& Error) const
@@ -106,6 +111,7 @@ void UPFWorldPersistence::Login(APFSurvivalPlayerController* PC, const FString& 
     {
         FPFWorldPlayerRecord Fresh; Fresh.PlayerId = FGuid::NewGuid(); Fresh.ReconnectCredential = FGuid::NewGuid();
         Fresh.CapturedUtc = PersistenceUtcNow(); Roster.Players.Add(Fresh); Entry = &Roster.Players.Last();
+        if(Roster.Version==2){FPFProgressionRecord Zero;FPFWorldSaveFormat::PackProgression(Entry->PlayerId,Zero,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Entry->Progression,Error);}
     }
     PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId = Entry->PlayerId;
     RestoredLogins.Remove(Entry->PlayerId);
@@ -133,7 +139,9 @@ bool UPFWorldPersistence::RestorePlayer(APFSurvivalPlayerController* PC, bool* b
     }
     if (Entry->Data.IsEmpty()) { return false; } // Pending restoration requires a saved record.
     FPFPlayerSaveData Data;
-    if (!UnpackPlayer(Entry->Data, 30, Data, Error) || !FPFPlayerSaveAdapter::Restore(PC, Data, FMath::Max<int64>(0, PersistenceUtcNow() - Entry->CapturedUtc), Error))
+    FPFProgressionRecord Progress;auto* Component=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();
+    if (!Component || !UnpackProgression(Roster.Version,*Entry,Progress,Error) || !Component->CanRestore(Progress,Error) ||
+        !UnpackPlayer(Entry->Data, 30, Data, Error) || !FPFPlayerSaveAdapter::Restore(PC, Data, FMath::Max<int64>(0, PersistenceUtcNow() - Entry->CapturedUtc), Error) || !Component->Restore(Progress,Error))
     {
         UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Reconnect restoration refused: %s"), *Error); return false;
     }
@@ -153,8 +161,18 @@ void UPFWorldPersistence::Logout(APFSurvivalPlayerController* PC)
     if (PS && PendingRestores.Contains(PS->PersistentPlayerId)) { PendingRestores.Remove(PS->PersistentPlayerId); return; }
     if (!Authority(Error) || !FPFPlayerSaveAdapter::Capture(PC, Player, Error)) { return; }
     auto* Entry = Roster.Players.FindByPredicate([&](const auto& P) { return P.PlayerId == Player.PlayerId; });
-    if (!Entry || !PackPlayer(Player, 30, Entry->Data, Error)) { return; }
-    Entry->CapturedUtc = PersistenceUtcNow();
+    if (!Entry || !PS->Progression) { return; }auto Candidate=*Entry;FPFProgressionRecord Progress;
+    if(!PS->Progression->Capture(Progress,Error) || !PackPlayer(Player,30,Candidate.Data,Error) ||
+        !FPFWorldSaveFormat::PackProgression(Player.PlayerId,Progress,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Candidate.Progression,Error)){return;}
+    Candidate.CapturedUtc=PersistenceUtcNow();auto UpdatedRoster=Roster;
+    *UpdatedRoster.Players.FindByPredicate([&](const auto& P){return P.PlayerId==Player.PlayerId;})=MoveTemp(Candidate);
+    if(UpdatedRoster.Version==1)
+    {
+        FPFProgressionRecord Zero;
+        for(auto& P:UpdatedRoster.Players){if(P.Progression.IsEmpty() && !FPFWorldSaveFormat::PackProgression(P.PlayerId,Zero,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,P.Progression,Error)){return;}}
+    }
+    // Reconnect can precede the first disk save. Publish schema and every owner record together.
+    UpdatedRoster.Version=2;Roster=MoveTemp(UpdatedRoster);
     if (!ActiveSlot.IsEmpty() && !Save(ActiveSlot, Error))
     { UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Disconnect save refused: %s"), *Error); }
 }
@@ -167,7 +185,13 @@ bool UPFWorldPersistence::Capture(FPFWorldSaveData& Out, FString& Error)
         return false;
     }
     if (!Authority(Error)) { return false; }
-    FPFWorldSaveData Data; Data.Map = PersistenceMapName(GetWorld()); Data.Players = Roster.Players;
+    FPFWorldSaveData Data;Data.Version=2; Data.Map = PersistenceMapName(GetWorld()); Data.Players = Roster.Players;
+    // Old offline identities receive validated zero defaults once; V2 missing fields never silently reset.
+    if(Roster.Version==1)
+    {
+        FPFProgressionRecord Zero;
+        for(auto& P:Data.Players){if(P.Progression.IsEmpty() && !FPFWorldSaveFormat::PackProgression(P.PlayerId,Zero,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,P.Progression,Error)){return false;}}
+    }
     int32 ClockCount = 0;
     for (TActorIterator<APFWorldClock> It(GetWorld()); It; ++It) { Data.Hour = It->Hour; ++ClockCount; }
     if (ClockCount != 1) { Error = TEXT("Save requires exactly one world clock"); return false; }
@@ -179,7 +203,9 @@ bool UPFWorldPersistence::Capture(FPFWorldSaveData& Out, FString& Error)
         if (!PC || !FPFPlayerSaveAdapter::Capture(PC, Player, Error)) { return false; }
         auto* Entry = Data.Players.FindByPredicate([&](const auto& P) { return P.PlayerId == Player.PlayerId; });
         if (!Entry) { Error = TEXT("Player has no server-issued reconnect registration"); return false; }
-        if (!PackPlayer(Player, 30, Entry->Data, Error)) { return false; } Entry->CapturedUtc = PersistenceUtcNow();
+        FPFProgressionRecord Progress;
+        if (!PS || !PS->Progression || !PS->Progression->Capture(Progress,Error) || !PackPlayer(Player, 30, Entry->Data, Error) ||
+            !FPFWorldSaveFormat::PackProgression(Player.PlayerId,Progress,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Entry->Progression,Error)) { return false; } Entry->CapturedUtc = PersistenceUtcNow();
     }
     for (TActorIterator<APFBuildPiece> It(GetWorld()); It; ++It)
     {
@@ -221,7 +247,7 @@ bool UPFWorldPersistence::Save(const FString& Slot, FString& Error)
     {Error=TEXT("Invalid or reserved world-save slot.");return false;}
     FPFWorldSaveData Data; TArray<uint8> Bytes;
     if (!Capture(Data, Error) || !Encode(Data, Bytes, Error) || !FPFSaveFileStore::Write(Slot, Bytes, Error)) { return false; }
-    ActiveSlot = Slot; Roster.Players = Data.Players;
+    ActiveSlot = Slot; Roster.Players = Data.Players;Roster.Version=Data.Version;
     UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Saved slot=%s players=%d structures=%d pickups=%d bytes=%d"),
         *Slot, Data.Players.Num(), Data.Structures.Num(), Data.Pickups.Num(), Bytes.Num()); return true;
 }
@@ -262,7 +288,7 @@ void UPFWorldPersistence::ConfigureStartup()
     {
         bStartupBlocked = true; UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Startup save/map identity mismatch")); return;
     }
-    PendingUtc = File.SavedUtc; Roster.Players = Pending.Players; bPending = true; bLoadedWorld = true;
+    PendingUtc = File.SavedUtc; Roster.Players = Pending.Players;Roster.Version=Pending.Version; bPending = true; bLoadedWorld = true;
 }
 
 void UPFWorldPersistence::ApplyStartup()
@@ -289,7 +315,7 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
         { Error = TEXT("Resource layout/definition mismatch"); return false; }
     }
     for (const auto& S : Data.Spawners) { if (!SpawnPoints.Contains(S.Name)) { Error = TEXT("Spawner layout mismatch"); return false; } }
-    struct FPlayerRestore { APFSurvivalPlayerController* PC; FPFPlayerSaveData Data; double Age; };
+    struct FPlayerRestore { APFSurvivalPlayerController* PC; FPFPlayerSaveData Data; FPFProgressionRecord Progression; double Age; };
     TArray<FPlayerRestore> Players;
     for (auto It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
     {
@@ -298,7 +324,8 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
         auto* Record = Data.Players.FindByPredicate([&](const auto& P) { return P.PlayerId == PS->PersistentPlayerId; });
         if (!Record) { Error = TEXT("Connected player absent from save; restart with load enabled before joining"); return false; }
         FPlayerRestore Restore; Restore.PC = PC; Restore.Age = FMath::Max<int64>(0, PersistenceUtcNow() - Record->CapturedUtc);
-        if (!UnpackPlayer(Record->Data, 30, Restore.Data, Error) || !FPFPlayerSaveAdapter::CanRestore(PC, Restore.Data, Restore.Age, Error)) { return false; }
+        if (!PS->Progression || !UnpackProgression(Data.Version,*Record,Restore.Progression,Error) || !PS->Progression->CanRestore(Restore.Progression,Error) ||
+            !UnpackPlayer(Record->Data, 30, Restore.Data, Error) || !FPFPlayerSaveAdapter::CanRestore(PC, Restore.Data, Restore.Age, Error)) { return false; }
         Players.Add(MoveTemp(Restore));
     }
     for (TActorIterator<APFBuildPiece> It(GetWorld()); It; ++It) { OldPieces.Add(*It); }
@@ -344,11 +371,12 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
         Pickup->FinishSpawning(T); if (!IsValid(Pickup)) { Error = TEXT("Pickup restoration rejected"); return Abort(); }
     }
     // Preflight above ran on the same game-thread transaction, with no world tick in between.
-    for (const auto& P : Players) { if (!FPFPlayerSaveAdapter::Restore(P.PC, P.Data, P.Age, Error)) { return Abort(); } }
+    for (const auto& P : Players)
+    {if (!FPFPlayerSaveAdapter::Restore(P.PC, P.Data, P.Age, Error) || !P.PC->GetPlayerState<APFInventoryPlayerState>()->Progression->Restore(P.Progression,Error)) { return Abort(); }}
     for (auto* A : OldPieces) { A->Destroy(); } for (auto* A : OldCreatures) { A->Destroy(); } for (auto* A : OldPickups) { A->Destroy(); }
     for (const auto& R : Data.Resources) { Nodes[R.Name]->RestorePersistence(R.Hits, R.Respawn); }
     for (const auto& S : Data.Spawners) { SpawnPoints[S.Name]->RestorePersistence(Animals.FindRef(S.Resident), S.Respawn, S.Enabled); }
-    Clocks[0]->SetHour(Data.Hour); Roster.Players = Data.Players;
+    Clocks[0]->SetHour(Data.Hour); Roster.Players = Data.Players;Roster.Version=Data.Version;
     RestoredLogins.Reset();
     for (auto* A : Staged) { A->SetActorHiddenInGame(false); A->SetActorEnableCollision(true); A->ForceNetUpdate(); }
     for (const auto& P : Players)

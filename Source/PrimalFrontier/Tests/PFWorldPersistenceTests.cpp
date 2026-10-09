@@ -239,7 +239,7 @@ bool FPFWorldStartupFailureTest::RunTest(const FString&)
             FPFResourceSaveRecord Node; Node.Name = TEXT("SavedOnlyNode"); Node.Definition = TEXT("Node_Wood"); Node.Hits = 3;
             Data.Resources.Add(Node); // Valid record; this authored node is absent from the current map.
         }
-        else { Data.Version = 2; } // Valid file checksum; unsupported world payload.
+        else { Data.Version = 3; } // Valid file checksum; unsupported world payload.
         FString Error; TArray<uint8> Bytes;
         const FString Slot = TEXT("AutomationStartupFailure_") + FGuid::NewGuid().ToString(EGuidFormats::Digits);
         ON_SCOPE_EXIT
@@ -324,7 +324,7 @@ bool FPFWorldRejectedLoadTest::RunTest(const FString&)
     if (!TestTrue(TEXT("Save good active world"), Persistence->Save(ActiveSlot, Error))) { AddError(Error); return false; }
     FPFSavedFile Original;
     if (!TestTrue(TEXT("Read active generation"), FPFSaveFileStore::Read(ActiveSlot, Original, Error))) { return false; }
-    const TCHAR* Cases[] = {TEXT("unsupported version"), TEXT("wrong map"), TEXT("resource layout"), TEXT("unsafe player ground"), TEXT("unintegrated V2 progression")};
+    const TCHAR* Cases[] = {TEXT("unsupported version"), TEXT("wrong map"), TEXT("resource layout"), TEXT("unsafe player ground"), TEXT("owner-swapped V2 progression")};
     for (int32 Case = 0; Case < UE_ARRAY_COUNT(Cases); ++Case)
     {
         auto Bad = Good; Bad.Hour = 5; Bad.Structures[0].Health = 50; Bad.Resources[0].Hits = 0;
@@ -341,14 +341,14 @@ bool FPFWorldRejectedLoadTest::RunTest(const FString&)
         if (Case == 4)
         {
             Bad.Version=2;auto* Catalog=NewObject<UPFProgressionCatalog>();auto* Crafting=NewObject<UPFCraftingCatalog>();FPFProgressionRecord Record;
-            for(auto& P:Bad.Players){if(!TestTrue(TEXT("Pack valid unintegrated progression"),FPFWorldSaveFormat::PackProgression(P.PlayerId,Record,*Catalog,*Crafting,*PC->GetInventory()->Catalog,P.Progression,Error))){return false;}}
+            for(auto& P:Bad.Players){if(!TestTrue(TEXT("Pack progression with wrong owner"),FPFWorldSaveFormat::PackProgression(FGuid::NewGuid(),Record,*Catalog,*Crafting,*PC->GetInventory()->Catalog,P.Progression,Error))){return false;}}
         }
         const FString RejectedSlot = ActiveSlot + FString::Printf(TEXT("_%d"), Case); Slots.Add(RejectedSlot);
         TArray<uint8> Bytes;
         if (!TestTrue(TEXT("Encode rejected candidate"), FPFWorldSaveFormat::Encode(Bad, Bytes, Error)) ||
             !TestTrue(TEXT("Write checksummed rejected candidate"), FPFSaveFileStore::Write(RejectedSlot, Bytes, Error))) { AddError(Error); return false; }
         TestFalse(*FString::Printf(TEXT("Refuse %s"), Cases[Case]), Persistence->Load(RejectedSlot, Error));
-        if(Case==4){TestTrue(TEXT("Specific unintegrated V2 refusal"),Error.Contains(TEXT("progression restoration is not integrated")));}
+        if(Case==4){TestTrue(TEXT("Specific owner-bound V2 refusal"),Error.Contains(TEXT("Progression owner mismatch")));}
         TestFalse(TEXT("Explicit load refusal reason"), Error.IsEmpty());
         TestEqual(TEXT("Active slot preserved"), Persistence->ActiveSlot, ActiveSlot);
         TestTrue(TEXT("Same pawn remains possessed"), PC->GetPawn() == Pawn);
