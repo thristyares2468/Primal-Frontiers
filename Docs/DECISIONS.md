@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Derive progression points and validate complete native candidates first
+
+Before live XP or save extensions, introduce bounded native records/catalog transactions. Derive level/earned points from cumulativeXP and spent points from unique validated knowledge IDs; do not persist redundant point/level fields. First-craft identities dedupe even at cap. Knowledge prerequisite graphs are acyclic and affordable at declared level; baseline recipes cannot be gated. Pure methods are trusted-server building blocks, not proof of a successful event/network authority. No existing recipe access/save changes until explicit compatibility and real successful-event/server tests. PROGRESSION_RECORDS_M12.md records exact native scope, retained test alias crash and future integration gate.
+
 ## 2026-10-09 — Carried guard mitigates only creature-caused server hits
 
 One craftable woven guard provides a bounded25% best-carried benefit, freshly derived from valid owned inventory. Do not stack bonuses or cache/save a modifier. Apply through server survivor TakeDamage only for actual APFCreature causers; generic damage, starvation/dehydration/exposure stay unchanged. Native Protection tags/stack1/finite0–0.5 validation and original procedural picture/details keep the contract explicit. Exact timed inputs/capacity use existing atomic crafting; V1 stable item IDs need no new schema. Public Health and private bags retain their replication boundaries. No equipment slots/worn meshes/durability or immunity added. PROTECTION_M12.md records actual damage, native/rendered/network/restart gates and human limits; balance remains provisional.

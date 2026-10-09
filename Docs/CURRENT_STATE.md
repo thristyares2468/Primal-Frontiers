@@ -2,6 +2,24 @@
 
 Updated October9,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
 
+## Active bounded M12 progression-record foundation
+
+**Record foundation technical gate PASSED:** final Editor5.07s/Game22.88s clean, failed-test-only1/1 and final native4/4 clean. Exact scope/failure/evidence: PROGRESSION_RECORDS_M12.md. Pure records/data asset transactions only; no live XP/recipe restriction/UI/save extension. Retained first test-only TArray alias crash corrected. Trello evidence/Done/scoped Sol publication next; compatible codec is next bounded prerequisite.
+
+Final native4/4 PASSED Automation_M12ProgressionRecordsFinal_20261009_105111554_a7175097,16.12s,working/private2.918/2.794GiB,raw/test severity0/exits0. Records/Transactions/PlayerRoundTrip/WorldRecords all clean; no live XP/UI/recipe gating/schema implication. Game build/documentation/Trello/publication next.
+
+Failed-record replay PASSED1/1 Automation_M12ProgressionRecordsRetry_20261009_105008341_a1b309e1,16.09s,working/private2.937/2.792GiB,raw/test severity0/exits0. Test-only alias correction sufficient; now completing the original four-case regression selection and Game build. No live progression hook/schema change.
+
+Fixture correction Editor retry PASSED5.07s/no compiler warnings; PF.Progression.Records-only replay running before regression coverage resumes.
+
+Native first run FAILED Automation_M12ProgressionRecords_20261009_104812641_69c2ca62,engine3/runner1/no valid final report,18.81s,3.019/2.868GiB. New test-only self-aliasing TArray::Add at PFProgressionRecordTests.cpp:29 asserted/crashed; three prior regressions completed but not counted as a passed report. Copy duplicate ID before Add; rebuild and failed test replay only. Failure artifacts retained; no runtime XP/progression pass.
+
+Final progression-record Editor PASSED5.38s/no warnings; narrow native Records/Transactions/PlayerRoundTrip/WorldRecords running. No runtime progression authority/UI/reward/save extension implemented yet.
+
+Initial progression-record Editor build PASSED16.36s/no compiler warnings. Review added fail-closed read-only point bounds and prerequisite-closure affordability before final native verification; rebuild pending. Records remain unhooked: no live XP/recipe gate/save change.
+
+Protection191573e published/Sol/local-remote equality/clean status verified. Fresh Programming/HUD boards and parentM12 select native XP/knowledge record validation before live hooks/save extensions: https://trello.com/c/K9NYY2ad Doing. Build/test pending. Keep baseline recipes/player saves unchanged; no UI/RPC/reward/gating/adaptations implied. Full M12/Personal gates stay open. Next after record gate is explicit save compatibility, then server component integration.
+
 ## Latest bounded M12 protection step
 
 **Protection technical gates PASSED:** one craftable woven guard,25% nonstacking carried creature-hit reduction only, exact8fibre+1cord+2wood/6s cost, no generic/needs/exposure immunity. Editor retry5.59s/Game25.26s clean; native7/7, rendered720p/1440p1/1 each/maxHUD1.5 and one-client4/two-client lag-loss6 Create/Restart reports passed. All test severity/exits0; six PNGs reviewed; personal settings/200–201 unrelated saves unchanged. Raw startup findings retained/no new severity or crash. Real server damage/Health85 replication, private bags, startup restoration, cancellation/refusal/removal/respawn and V1 compatibility checked. Exact evidence/memory/limits: [PROTECTION_M12.md](PROTECTION_M12.md). Trello bounded evidence/Done and scoped Sol publication follow; parentM12 and Personal M8/M11 stay open. Next independent scope: fresh Trello audit, likely persistent progression prerequisite; no M13 advance.
