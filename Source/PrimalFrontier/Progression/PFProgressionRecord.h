@@ -26,6 +26,8 @@ public:
     static constexpr int32 MaximumExperience=2700;
     static constexpr int32 FirstCraftExperience=20;
     static int32 LevelForExperience(int32 Experience);
+    /** Cumulative threshold; clamped to the supported ten-level slice. */
+    static int32 ExperienceForLevel(int32 Level);
     static bool Validate(const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog,
         const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Error);
     static int32 AvailablePoints(const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog);

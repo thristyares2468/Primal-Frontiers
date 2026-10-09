@@ -1,6 +1,20 @@
 # Primal Frontier — current state
 
-Updated October9,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
+Updated October10,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
+
+## Active bounded M12 progression feedback
+
+**Feedback technical gate PASSED:** Editor19.56s/Game24.94s clean,native3/3 and rendered720p/1440p1/1each,maxHUD1.5.8PNG/rawlogs/unchanged personal files reviewed; exact PROGRESSION_FEEDBACK_M12.md. No failures in this bounded step. Trello evidence/Done and scopedSolpublication next,then fresh nexttask audit. FullM12/human gates open; server optional knowledge spending/effect and broader rewards still future.
+
+Rendered1440p/maxHUD1.5 PF.UI.ProgressionFeedbackLive1/1 PASSED M11Progression1440_20261009_191621261_70457efa (37.73s,working/private3.347/5.264GiB,engine/strict0,test severity0,no timeout). All8 PNGs inspected across720p/1440p: readable conditional/deduplicated/cap summaries and existing recipe controls. Both rawlogs26knownwarnings/14enginePython-errorlines/0fatalensure,0new normalized severity vs protection1440 baseline.233/232 personal saves/defaultconfig unchanged. Game build running; technical gate not complete until it passes. Human feel/traversalFPS still unverified.
+
+Rendered720p/maxHUD1.5 PF.UI.ProgressionFeedbackLive1/1 PASSED M11Progression720_20261009_191525464_90a89cbe (39.94s,working/private3.205/4.800GiB,engine/strict0,test severity0,no timeout). Actual cancel0/first20/repeat20/othereligible/cap-fixture UI and Slate Close passed;232 personal saves and default config unchanged. Screenshots/raw log review pending with1440p next; no human/FPS/minimum16GB claim.
+
+Native3/3 PASSED Automation_M12ProgressionFeedback_20261009_191446900_2837ea86 (16.67s,working/private2.923/2.787GiB,raw/test severity0,exits0): UI.ProgressionDetails,Progression.Component,Progression.Records. Cap/boundary/unavailable/conditional/dedupe text and prior save/reconnect authority regressions passed. Next isolated rendered720p then1440p maximumscale; no human acceptance/FPS claim.
+
+Editor19.56s PASSED without compiler warnings (Saved/Logs/PFM12ProgressionFeedbackEditorBuild.log). Shared level thresholds/UI/native/live fixture compiled; narrow native formatter/component/record checks next. Rendered and Game gates still pending.
+
+Private player integration3a76cc7 published with Sol coauthor,local/remote equality and clean tree verified. Fresh Programming/HUD audit selected https://trello.com/c/mKHbaAu0 Doing: read-only actual owner XP/level/points and selected-recipe first-craft eligibility in centered crafting screen. Points explicitly not spendable yet; no new RPC/assets/recipe gate. Shared threshold derivation/native boundary formatter and disposable actual cancelled/completed/repeated craft/rendered cap-seed fixture added. Editor/native/rendered/Game gates pending; no visual pass claimed. Next build and narrow native checks,then720p/1440p maxscale renders. FullM12 and Personal acceptance remain open.
 
 ## Active bounded M12 player progression integration
 

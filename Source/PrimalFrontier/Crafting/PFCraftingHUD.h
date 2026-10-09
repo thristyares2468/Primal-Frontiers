@@ -75,6 +75,8 @@ private:
     UPROPERTY() TArray<TObjectPtr<UTextBlock>> RecipeTitles;
     UPROPERTY() TArray<TObjectPtr<UTextBlock>> RecipeBodies;
     UPROPERTY() TObjectPtr<UTextBlock> Heading;
+    UPROPERTY() TObjectPtr<UTextBlock> ProgressionSummary;
+    UPROPERTY() TObjectPtr<UTextBlock> ProgressionReward;
     UPROPERTY() TObjectPtr<UTextBlock> DetailTitle;
     UPROPERTY() TObjectPtr<UTextBlock> DetailBody;
     UPROPERTY() TObjectPtr<UTextBlock> ItemStats;

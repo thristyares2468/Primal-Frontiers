@@ -15,6 +15,9 @@
 #include "Components/SizeBox.h"
 #include "UI/PFUITheme.h"
 #include "UI/PFRecipeDetails.h"
+#include "UI/PFProgressionDetails.h"
+#include "Progression/PFProgressionComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
 #include "UI/PFItemPicture.h"
 #include "Settings/PFGameUserSettings.h"
 
@@ -40,6 +43,8 @@ void UPFCraftingHUD::NativeOnInitialized()
     auto Label=[&](FName Name,FLinearColor Color){auto* T=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),Name);T->SetAutoWrapText(true);T->SetColorAndOpacity(Color);return T;};
     Heading=Label(TEXT("PF_CraftingPanel_Heading"),PFUITheme::Accent);Heading->SetText(FText::FromString(TEXT("CRAFTING")));
     Rows->AddChildToVerticalBox(Heading)->SetPadding(FMargin(0,0,0,10));
+    ProgressionSummary=Label(TEXT("PF_CraftingProgression_Summary"),PFUITheme::Muted);
+    Rows->AddChildToVerticalBox(ProgressionSummary)->SetPadding(FMargin(0,0,0,8));
     Categories=WidgetTree->ConstructWidget<UHorizontalBox>();Rows->AddChildToVerticalBox(Categories)->SetPadding(FMargin(0,0,0,10));
     auto* Columns=WidgetTree->ConstructWidget<UHorizontalBox>();Rows->AddChildToVerticalBox(Columns)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
     FSlateChildSize ListWidth(ESlateSizeRule::Fill);ListWidth.Value=0.42f;
@@ -55,6 +60,8 @@ void UPFCraftingHUD::NativeOnInitialized()
     DetailTitle=Label(TEXT("PF_CraftingDetail_Title"),PFUITheme::Text);Details->AddChildToVerticalBox(DetailTitle)->SetPadding(FMargin(0,8,0,8));
     DetailBody=Label(TEXT("PF_CraftingPanel_Body"),PFUITheme::Text);Details->AddChildToVerticalBox(DetailBody)->SetPadding(FMargin(0,0,0,12));
     ItemStats=Label(TEXT("PF_CraftingDetail_Stats"),PFUITheme::Muted);Details->AddChildToVerticalBox(ItemStats);
+    ProgressionReward=Label(TEXT("PF_CraftingProgression_Reward"),PFUITheme::Accent);
+    Details->AddChildToVerticalBox(ProgressionReward)->SetPadding(FMargin(0,10,0,0));
     Result=Label(TEXT("PF_CraftingPanel_Result"),PFUITheme::Warning);Rows->AddChildToVerticalBox(Result)->SetPadding(FMargin(0,10,0,8));
     auto* Actions=WidgetTree->ConstructWidget<UHorizontalBox>();Rows->AddChild(Actions);
     auto Button=[&](FName Name,const TCHAR* Caption)
@@ -113,6 +120,7 @@ void UPFCraftingHUD::RefreshMenu()
     const float Scale=FMath::IsFinite(Requested)?FMath::Clamp(Requested,0.75f,1.5f):1;
     auto Font=[&](UTextBlock* T,int32 Size){auto F=T->GetFont();F.Size=FMath::RoundToInt(Size*Scale);if(T->GetFont().Size!=F.Size){T->SetFont(F);}};
     Font(Heading,20);Font(DetailTitle,18);Font(DetailBody,16);Font(ItemStats,14);Font(Result,14);Font(Hints,12);for(auto T:ButtonLabels){Font(T.Get(),16);}
+    Font(ProgressionSummary,14);Font(ProgressionReward,14);
     for(int32 N=0;N<CategoryIds.Num();++N){Font(CategoryTitles[N],14);CategoryButtons[N]->SetStyle(PFUITheme::NavigationButton(CategoryFilter==CategoryIds[N]));}
     for(int32 N=0;N<RecipeIds.Num();++N)
     {
@@ -121,6 +129,11 @@ void UPFCraftingHUD::RefreshMenu()
         Font(RecipeTitles[N],16);Font(RecipeBodies[N],12);RecipeButtons[N]->SetStyle(PFUITheme::NavigationButton(SelectedRecipe==D->Id));RecipePictures[N]->SetItem(Output);
     }
     const auto* D=C && C->Catalog && I?C->Catalog->Recipe(SelectedRecipe,I->Catalog):nullptr;
+    const auto* PS=PC?PC->GetPlayerState<APFInventoryPlayerState>():nullptr;
+    const auto* Progression=PS?PS->Progression.Get():nullptr;
+    const auto ProgressionView=PFProgressionDetails::Describe(Progression?&Progression->GetRecord():nullptr,
+        Progression?Progression->GetAvailablePoints():INDEX_NONE,D?D->Id:NAME_None);
+    ProgressionSummary->SetText(ProgressionView.Summary);ProgressionReward->SetText(ProgressionView.RecipeReward);
     const auto View=PFRecipeDetails::Describe(D,I,UPFInventoryComponent::ServerTime(GetWorld()),C && !C->ActiveRecipe.IsNone());
     DetailTitle->SetText(View.Title);DetailBody->SetText(View.Body);
     if(SelectedRecipe.IsNone() && !RecipeIds.IsEmpty())

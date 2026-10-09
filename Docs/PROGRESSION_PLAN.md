@@ -1,5 +1,7 @@
 # Original progression and biological upgrades — M12/M13 plan
 
+October10 read-only feedback checkpoint: PROGRESSION_FEEDBACK_M12.md documents actual owner XP/level/points and selected first-craft reward states in centered crafting. Native3/3 and rendered720p/1440p passed; Game completion recorded there. Spending explicitly unavailable; no purchaseRPC or recipe restriction. This supersedes earlier statements that XP has no UI. Full progression pacing,technology access and M13 remain incomplete/future.
+
 October9 player integration checkpoint: PLAYER_PROGRESSION_M12.md implements owner-private PlayerState records, actual successful first-craft20XP/dedupe and V2 runtime save/restore with V1zero defaults. Native and one-client restart gates passed; remaining live/build gates are recorded there. This supersedes the temporary archive-onlyV2refusal below. No purchaseUI/recipe restriction or gathering/building/discovery reward yet; eight existing recipes alone earn at most160XP, so full progression pacing/ten levels remain incomplete.
 
 October9 world archive checkpoint: WORLD_PROGRESSION_COMPATIBILITY_M12.md adds opt-in owner-bound V2 metadata and V1 omission/defaults; normal writer staysV1 and actual runtimeV2 load explicitly refuses until component capture/restore integration. No live rewards, points UI or recipe gate yet. The native owner/corruption/atomic-refusal gate passed; live baseline/build completion is recorded in that evidence document.

@@ -4,10 +4,15 @@
 #include "Inventory/PFItemCatalog.h"
 
 namespace {bool RecordRefuse(FString& Error,const TCHAR* Reason){Error=Reason;return false;}}
+int32 FPFProgressionTransactions::ExperienceForLevel(int32 Level)
+{
+    const int32 Steps=FMath::Clamp(Level,1,10)-1;
+    return 100*Steps+25*Steps*(Steps-1);
+}
 int32 FPFProgressionTransactions::LevelForExperience(int32 Experience)
 {
-    int32 Level=1,Threshold=0;
-    for(int32 L=1;L<10;++L){Threshold+=100+50*(L-1);if(Experience<Threshold){break;}++Level;}
+    int32 Level=1;
+    for(int32 L=2;L<=10;++L){if(Experience<ExperienceForLevel(L)){break;}++Level;}
     return Level;
 }
 int32 FPFProgressionTransactions::AvailablePoints(const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog)
