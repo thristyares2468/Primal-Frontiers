@@ -6,6 +6,14 @@ For numbered steps copied into Trello, use [TRELLO_TEST_GUIDES.md](TRELLO_TEST_G
 
 ## Open the game
 
+**Normal solo play and saved worlds:** with Editor closed, use the command below without a map/save flag. Single player → Create new world (unused ID) or select an existing world → Load selected world. In gameplay **P → Save world**, require visible success, then End session → Confirm end session to return to the menu. In Single player, select a save, type a friendly name in the field below Refresh worlds and choose **Rename selected world**. Names can contain spaces; gameplay save IDs/files/ownership stay unchanged. Do not recreate an existing world to load it. [WORLD_MENU_M11.md](WORLD_MENU_M11.md) has the short guide/evidence; Trello guide G3 covers human replay after the reported M8 failure. Multiplayer menu is currently information only.
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe' 'C:\UnrealProjects\PrimalFrontier\PrimalFrontier.uproject' -game -windowed
+```
+
+The older direct-map console workflow below is an advanced alternative; reusing its create-only launch does not load saved data unless -PFLoadSave is appended. End session does not autosave.
+
 **Inventory selection:** if your selected stack expires/disappears, Up/Down or D-pad selects another stack deliberately. Drop/eat/split/store will not act on the item that moved into its old row. Read the selected name/quantity; closing/reopening the bag retains a lost selection until you choose again. [INVENTORY_SELECTION_M11.md](INVENTORY_SELECTION_M11.md) records the fix and evidence.
 
 **Controls/help:** P → Controls & help. Left/Right or LB/RB selects keyboard/controller; Up/Down or D-pad scrolls; Esc/P/B/Menu returns to Pause. Bindings are read-only and derived from registered controls/current Enhanced Input mappings. Pause alone is safe in standalone; multiplayer continues. Save explicitly before ending. [CONTROLS_HELP_M11.md](CONTROLS_HELP_M11.md) records automated rendered720p/1440p evidence; human/controller acceptance remains unverified and nonblocking for independent development.

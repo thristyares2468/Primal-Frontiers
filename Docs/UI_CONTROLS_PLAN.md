@@ -1,5 +1,7 @@
 # Controls, reconnect feedback and research UI plan — M11–M13
 
+October9 user requests a substantial visual improvement after completing their M7 check. Begin M11's original texture-free visual theme with Pause: clear title/action hierarchy, styled navigation and separate session/save notes. Next apply the theme to inventory item details and a catalog-driven recipe interface. Keep current server transactions, stable stack identity, freshness and contextual controls intact. More resources and recipes are planned in M12, wider resource distribution in M14; do not add new crafting outputs without authority/save/network verification. The current Pause implementation awaits build/rendered verification; no full M11 acceptance claimed.
+
 October9 windowed display update: normal1440p real Keep/Back/paused15-second timeout and disposable-file confirmed state passed. Minimum720p shrink prerequisite failed under engine UI floor and remains explicit;not a menu/runtime fix. [SETTINGS_DISPLAY_M11.md](SETTINGS_DISPLAY_M11.md). Fullscreen/HDR,process-restart and human acceptance remain separate pending checks.
 
 October9 bounded update: real non-resolution Settings Apply and same-process disposable disk reload now passed at720p/1440p. Camera FOV/blur and vitals HUD scale consume applied values; personal settings stay unchanged. [SETTINGS_APPLY_M11.md](SETTINGS_APPLY_M11.md) has exact failure/success/log/memory evidence. Display confirmation/revert and process-restart/physical audio acceptance remain separate pending checks. Full M11/manual gates remain open.

@@ -1,6 +1,7 @@
 #include "Persistence/PFWorldPersistence.h"
 #include "Persistence/PFWorldSaveFormat.h"
 #include "Persistence/PFSaveFileStore.h"
+#include "Persistence/PFSessionGameInstance.h"
 #include "Persistence/PFPlayerSaveAdapter.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
@@ -72,6 +73,11 @@ bool UPFWorldPersistence::CheckLogin(const FString& Options, FString& Error) con
         return true;
     }
     const auto* Entry = Roster.Players.FindByPredicate([&](const auto& P) { return P.ReconnectCredential == Token; });
+    // Solo worlds share a local endpoint profile. Opening a different world can
+    // replace that credential; its sole saved owner is still this local player.
+    // Match Login's existing standalone adoption rule while retaining the
+    // connected-identity check below. Network servers never adopt unknown tokens.
+    if(!Entry && GetWorld()->GetNetMode()==NM_Standalone && Roster.Players.Num()==1){Entry=&Roster.Players[0];}
     if (!Entry)
     {
         if (!bLoadedWorld && Roster.Players.Num() < 32) { return true; } // Fresh world, credentials from an old session are not claims.
@@ -208,6 +214,8 @@ bool UPFWorldPersistence::Capture(FPFWorldSaveData& Out, FString& Error)
 
 bool UPFWorldPersistence::Save(const FString& Slot, FString& Error)
 {
+    if(!FPFSaveFileStore::ValidSlot(Slot) || Slot.StartsWith(TEXT("Identity_"),ESearchCase::IgnoreCase) || Slot.StartsWith(TEXT("Metadata_"),ESearchCase::IgnoreCase))
+    {Error=TEXT("Invalid or reserved world-save slot.");return false;}
     FPFWorldSaveData Data; TArray<uint8> Bytes;
     if (!Capture(Data, Error) || !Encode(Data, Bytes, Error) || !FPFSaveFileStore::Write(Slot, Bytes, Error)) { return false; }
     ActiveSlot = Slot; Roster.Players = Data.Players;
@@ -217,6 +225,8 @@ bool UPFWorldPersistence::Save(const FString& Slot, FString& Error)
 
 bool UPFWorldPersistence::Load(const FString& Slot, FString& Error)
 {
+    if(!FPFSaveFileStore::ValidSlot(Slot) || Slot.StartsWith(TEXT("Identity_"),ESearchCase::IgnoreCase) || Slot.StartsWith(TEXT("Metadata_"),ESearchCase::IgnoreCase))
+    {Error=TEXT("Invalid or reserved world-save slot.");return false;}
     FPFSavedFile File; FPFWorldSaveData Data;
     if (!Authority(Error) || !FPFSaveFileStore::Read(Slot, File, Error) || !Decode(File.Payload, Data, Error) || !Apply(Data, File.SavedUtc, Error)) { return false; }
     ActiveSlot = Slot; bLoadedWorld = true;
@@ -226,14 +236,20 @@ bool UPFWorldPersistence::Load(const FString& Slot, FString& Error)
 
 void UPFWorldPersistence::ConfigureStartup()
 {
-    FString Slot;
-    if (!FParse::Value(FCommandLine::Get(), TEXT("PFSaveSlot="), Slot)) { return; }
-    if (!FPFSaveFileStore::ValidSlot(Slot))
+    FString Slot;bool bLoad=false;
+    auto* Session=GetWorld()->GetGameInstance<UPFSessionGameInstance>();
+    const bool bMenuRequest=Session && Session->ConsumeWorldRequest(Slot,bLoad);
+    if(!bMenuRequest)
+    {
+        if (!FParse::Value(FCommandLine::Get(), TEXT("PFSaveSlot="), Slot)) { return; }
+        bLoad=FParse::Param(FCommandLine::Get(),TEXT("PFLoadSave"));
+    }
+    if (!FPFSaveFileStore::ValidSlot(Slot) || Slot.StartsWith(TEXT("Identity_"),ESearchCase::IgnoreCase) || Slot.StartsWith(TEXT("Metadata_"),ESearchCase::IgnoreCase))
     {
         bStartupBlocked = true; UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Invalid startup save-slot identifier")); return;
     }
     ActiveSlot = Slot;
-    if (!FParse::Param(FCommandLine::Get(), TEXT("PFLoadSave"))) { return; }
+    if (!bLoad) { return; }
     FPFSavedFile File; FString Error;
     if (!FPFSaveFileStore::Read(Slot, File, Error) || !Decode(File.Payload, Pending, Error))
     {

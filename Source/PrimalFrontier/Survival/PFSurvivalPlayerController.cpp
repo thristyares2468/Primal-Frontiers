@@ -34,6 +34,9 @@
 #include "Settings/PFGameUserSettings.h"
 #include "Persistence/PFLocalPlayer.h"
 #include "Persistence/PFWorldPersistence.h"
+#include "Persistence/PFSaveFileStore.h"
+#include "Persistence/PFWorldMenuModel.h"
+#include "Misc/DateTime.h"
 #include "EnhancedPlayerInput.h"
 #include "EnhancedActionKeyMapping.h"
 #include "InputAction.h"
@@ -113,6 +116,9 @@ void APFSurvivalPlayerController::BeginPlay()
         if(CraftingHUD){CraftingHUD->AddToPlayerScreen();}
         BuildingHUD=CreateWidget<UPFBuildingHUD>(this,UPFBuildingHUD::StaticClass());
         if(BuildingHUD){BuildingHUD->AddToPlayerScreen();}
+        // Travel from the main menu must release its UI-only viewport input mode.
+        FInputModeGameOnly Mode;Mode.SetConsumeCaptureMouseDown(false);SetInputMode(Mode);
+        bShowMouseCursor=false;
     }
 }
 
@@ -181,6 +187,23 @@ TArray<FPFControlHint> APFSurvivalPlayerController::GetControlHints(bool bGamepa
 // ---------------------------------------------------------------------------
 
 void APFSurvivalPlayerController::TogglePauseMenu(){SetPauseMenuOpen(!bPauseMenuOpen);}
+
+bool APFSurvivalPlayerController::SaveWorldFromMenu()
+{
+    FString Error;bool bSaved=false;
+    if(!IsLocalController() || !HasAuthority() || GetNetMode()==NM_Client)
+    {Error=TEXT("Only the host can save this world.");}
+    else if(auto* P=GetWorld()->GetSubsystem<UPFWorldPersistence>())
+    {
+        const FString Slot=P->ActiveSlot.IsEmpty()?TEXT("World_")+FDateTime::UtcNow().ToString(TEXT("%Y%m%d_%H%M%S"))+TEXT("_")+FGuid::NewGuid().ToString(EGuidFormats::Digits).Left(8):P->ActiveSlot;
+        if(Slot.StartsWith(TEXT("Identity_"))){Error=TEXT("Reconnect profile names cannot be world-save slots.");}
+        else{bSaved=P->Save(Slot,Error);}
+        if(bSaved){WorldSaveFeedback=TEXT("Saved world: ")+PFWorldMenuModel::NameFor(Slot)+TEXT(". Your live world was not reloaded.");}
+    }
+    if(!bSaved){WorldSaveFeedback=TEXT("Save refused: ")+Error;}
+    UE_LOG(LogPFSurvival,Display,TEXT("[PrimalUI] %s"),*WorldSaveFeedback);
+    return bSaved;
+}
 
 void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
 {

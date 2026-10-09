@@ -483,7 +483,8 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
             }
             if (!Passed) { Fail(R, TEXT("PersistenceRejected"), Why); }
             else { R.Add(TEXT("Info"), TEXT("PersistenceValidated"), Name == TEXT("PF.TestPersistence") ? FString() : Slot,
-                Name == TEXT("PF.TestPersistence") ? TEXT("Captured and round-tripped current records only; restart/reconnect/playtesting is separate.") : TEXT("Server gameplay save/load completed; no editor asset was saved.")); }
+                Name == TEXT("PF.TestPersistence") ? TEXT("Captured and round-tripped current records only; restart/reconnect/playtesting is separate.") :
+                Name == TEXT("PF.SaveWorld") ? TEXT("Server gameplay save completed. Live world was not loaded or reset; no editor asset was saved.") : TEXT("Server gameplay load completed; no editor asset was saved.")); }
         }
     }
     else if (Name == TEXT("PF.SetHealth") || Name == TEXT("PF.SetStamina") || Name == TEXT("PF.Damage") || Name == TEXT("PF.Kill") || Name == TEXT("PF.Respawn") ||

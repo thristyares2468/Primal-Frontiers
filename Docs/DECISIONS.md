@@ -1,5 +1,12 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Explicit solo world menu and cosmetic world names
+
+Use the existing lightweight /Engine/Maps/Entry shell with a native session GameInstance and replaceable UMG menu, without new binary assets or dependencies. One-shot menu New/Load intent takes precedence over stale process save flags. GameDefaultMap is Entry; ServerDefaultMap is the open-world development map; EditorStartupMap/template assets are preserved. Pause Save is local-authority only and visibly reports the real server save result; it never resets/loads gameplay. Multiplayer menu currently provides information only, not a host/join/browser implementation.
+
+Rename changes a1–64-character display label in a bounded version1 checksummed Metadata_WorldNames registry, preserving world file generations, IDs and ownership. Identity_/Metadata_ are reserved from gameplay saves. Reject invalid/duplicate labels and corrupt metadata without overwrite; missing labels fall back to stable slot IDs. This avoids migrating personal save files. Solo CheckLogin now matches the pre-existing sole-owner Login adoption when another solo world's endpoint credential replaced the local profile; unknown network credentials and connected-identity reuse remain rejected. Final builds, native4/4, rendered UI and one-/two-client restart regressions passed; exact evidence/retained failures: WORLD_MENU_M11.md. Personal rendered full-loop acceptance remains separate.
+
+
 ## 2026-10-09 — Server setup acknowledgment is separate from profile storage
 
 Use the existing deferred PostLogin restore result to send one reliable owner-client acknowledgment of NewSurvivor/Restored; remain Unconfirmed until it arrives. Track successful restoration transiently per login rather than infer it from a nonempty saved record: saving alone is not restoring. Failed setup returns to menu without acknowledgment. Pause labels and Blueprint getters are read-only presentation, preserve focus and reveal no credentials. This confirms server setup for this connection, not client replication arrival, later manual world loads, world-save success or production authentication. No save schema or gameplay RPC mutation is added. Exact evidence/limits: SERVER_SETUP_FEEDBACK_M11.md.

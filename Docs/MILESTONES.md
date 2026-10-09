@@ -1,5 +1,14 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-09 M8/M11 Pause Save, explicit world menu and safe Rename
+
+Completed bounded native menu/UI slice: original theme, Single player New/Load/Refresh/Rename, Main Settings, confirmed return to menu and host-local Pause Save. Uses existing /Engine/Maps/Entry and L_PrimalFrontier_OpenWorld without asset changes. Multiplayer menu remains informational; no host/join/browser claim. Rename persists a friendly label separately from stable gameplay IDs/files; invalid/duplicate names and corrupt metadata are refused without overwrite. Reproduced/fixed standalone sole-owner reopen rejection while preserving network credential checks. User-reported Save reset remains a failed manual gate; conservation tests did not reproduce it and timed resource respawns in the retained log do not fully explain the observation.
+
+Final Editor19.22s/Game50.32s clean; native WorldRuntime/StartupFailurePreservesSave/RejectedLoadPreservesWorld/Gamepad4/4 clean, report Automation_M11WorldMenuFinal_20261009_031014929_6efba8a2. WorldMenu720p/1440p1/1 each, Controls720p1/1 and Reconnect720p1/1; all zero test severity, engine/report/runner0. Final exact prefixes, sampled memory, inspected PNGs, all retained failed builds/pointer/warning/reopen reports and replay commands: [WORLD_MENU_M11.md](WORLD_MENU_M11.md). Rendered runners verified actual default settings and131/133/135/136 unrelated save files unchanged. Real Slate keyboard activation passes; mouse/physical controller not certified.
+
+Separate uncooked dedicated-server NullRHI Create/Restart: one-client4/4 (M8Live1_20261009_031704133_94663d4f) and two-client6/6 (M8Live2_20261009_031919719_d6a38e7e). All engine/report/runner0; identity/ownership/inventory/storage privacy and authoritative rejection pass, no crash/ensure/fatal. Raw network logs retain21widget+3HLOD warnings and14Python errors per process, existing startup categories. Menu fixture acknowledges six exact baseline travel messages individually, no blanket suppression. No new gameplay severity found. Actual host31.93GiB, not a16GB certification; stationary uncapped UI is not traversal FPS/stutter measurement. Packaged Server and human rendered close/restart/full-loop remain unverified/blocked separately. User reported M7 Personal complete; no invented measurements. No M12 resources/recipes added.
+
+
 ## 2026-10-09 M11 full Pause menu on secondary P key
 
 P already routed to the full menu. Clarified registered controls/HUD hints and require successful AddToPlayerScreen before pausing or blocking input; an unavailable local viewport cannot leave gameplay frozen with no menu. This defensive guard does not prove the cause of an earlier observation. No Editor Esc Stop, asset, save or rendering changes.

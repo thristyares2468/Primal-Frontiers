@@ -69,6 +69,9 @@ public:
     // ---- Pause menu (local UI only; world pauses only in Standalone) ----
     void SetPauseMenuOpen(bool bOpen);
     bool IsPauseMenuOpen() const {return bPauseMenuOpen;}
+    /** Host-local action only. No client save/load RPC is exposed. */
+    bool SaveWorldFromMenu();
+    FString GetWorldSaveFeedback() const {return WorldSaveFeedback;}
     /** Descriptions recorded beside real legacy bindings plus current Enhanced Input mappings. */
     TArray<FPFControlHint> GetControlHints(bool bGamepad) const;
 
@@ -127,6 +130,7 @@ private:
     UPROPERTY() TObjectPtr<UPFPauseMenu> PauseMenu;
     bool bPauseMenuOpen=false;
     bool bPausedWorld=false;      // true only if we actually paused a Standalone world
+    FString WorldSaveFeedback;
     double MessageUntil=0;        // real time until which InventoryMessage is shown
     void TogglePauseMenu();
 

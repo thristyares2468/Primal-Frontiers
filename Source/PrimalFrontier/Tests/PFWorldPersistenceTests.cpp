@@ -148,6 +148,23 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
         for (bool B : {false, true}) { IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot, B)); }
     };
     if (!TestTrue(TEXT("Write real world slot"), Persistence->Save(Slot, Error))) { AddError(Error); return false; }
+    // Reported M8 regression: saving appeared to return the world to a fresh state.
+    // Save must capture/publish only; loading and natural respawn are separate.
+    TestTrue(TEXT("Save retains the same possessed pawn"),PC->GetPawn()==Pawn && IsValid(Pawn));
+    TestTrue(TEXT("Save retains live structures, pickup and creature instances"),IsValid(Base) && IsValid(Chest) && IsValid(Pickup) && IsValid(Creature));
+    TestEqual(TEXT("Save preserves player health"),Pawn->Survival->GetVitals().Health,65.f);
+    TestEqual(TEXT("Save preserves inventory"),PC->GetInventory()->Count(TEXT("Item_Wood")),4);
+    TestEqual(TEXT("Save preserves storage"),Chest->Storage->Count(TEXT("Item_Stone")),2);
+    TestEqual(TEXT("Save preserves depleted resource"),Node->HitsRemaining,0);
+    TestEqual(TEXT("Save preserves world time"),Clock->Hour,22.f);
+    FPFWorldSaveData AfterSave;TArray<uint8> BeforeBytes,AfterBytes;
+    if(!TestTrue(TEXT("Capture live world after saving"),Persistence->Capture(AfterSave,Error))){AddError(Error);return false;}
+    // Capture timestamps can cross a real-time second; they are metadata, not
+    // simulation. Normalize only those before comparing all serialized state.
+    for(auto& P:AfterSave.Players)
+    {if(const auto* Before=Snapshot.Players.FindByPredicate([&](const auto& V){return V.PlayerId==P.PlayerId;})){P.CapturedUtc=Before->CapturedUtc;}}
+    if(!TestTrue(TEXT("Encode before/after live records"),Persistence->Encode(Snapshot,BeforeBytes,Error) && Persistence->Encode(AfterSave,AfterBytes,Error))){AddError(Error);return false;}
+    TestTrue(TEXT("Saving changes no serialized live gameplay state"),BeforeBytes==AfterBytes);
     PC->GetInventory()->RemoveItem(TEXT("Item_Wood"), 4); PC->GetInventory()->Grant(TEXT("Item_Fibre"), 3);
     Chest->Storage->RemoveItem(TEXT("Item_Stone"), 2); Chest->Health = 50;
     Clock->SetHour(9); Node->RestorePersistence(3, 0); Pawn->Survival->SetHealth(90);
@@ -190,6 +207,8 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
     TestTrue(TEXT("Departure updated generation"), DepartureFile.Generation > 1);
     if (!TestTrue(TEXT("Departed player decode"), FPFWorldSaveFormat::UnpackPlayer(Departure.Players[0].Data, *NewObject<UPFItemCatalog>(), 30, DepartedPlayer, Error))) { return false; }
     TestTrue(TEXT("Disconnect preserves change since manual save"), DepartedPlayer.Inventory.ContainsByPredicate([](const auto& S) { return S.ItemId == TEXT("Item_Fibre") && S.Quantity == 1; }));
+    TestTrue(TEXT("Sole standalone owner can reopen a world after another world's profile"),
+        Persistence->CheckLogin(TEXT("?PFReconnect=")+FGuid::NewGuid().ToString(EGuidFormats::Digits),Error));
     Fixture.ForwardErrorMessages(this);
     AddInfo(TEXT("[PrimalPersistence] Real file/world restore twice: player, storage, ownership, depletion, clock, pickup and creature IDs; no append duplication"));
     return true;

@@ -44,6 +44,8 @@ private:
     UPROPERTY() TObjectPtr<UButton> QuitButton;
     UPROPERTY() TObjectPtr<UButton> SettingsButton;
     UPROPERTY() TObjectPtr<UButton> ControlsButton;
+    UPROPERTY() TObjectPtr<UButton> SaveButton;
+    UPROPERTY() TObjectPtr<UTextBlock> SaveFeedback;
     UPROPERTY() TObjectPtr<UPFControlsMenu> ControlsMenu;
     UPROPERTY() TObjectPtr<UPFSettingsMenu> SettingsMenu;
     int32 SelectedButton=0;
@@ -52,6 +54,7 @@ private:
     bool bConfirmQuit=false;    // first End-session press arms it, the second quits
     UFUNCTION() void Resume();
     UFUNCTION() void Quit();
+    UFUNCTION() void Save();
     UFUNCTION() void Settings();
     UFUNCTION() void Controls();
 };
