@@ -4,6 +4,7 @@ param(
     [ValidateSet(1, 2)][int]$Players = 1,
     [switch]$SimulateLagLoss,
     [switch]$ToolProgression,
+    [switch]$WeaponProgression,
     [ValidateRange(1024, 65535)][int]$Port = 17989,
     [ValidateRange(30, 600)][int]$TimeoutSeconds = 210,
     [string]$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8',
@@ -51,9 +52,10 @@ try {
     }
 
     $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff') + '_' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
-    $prefix = $(if($ToolProgression){'M12ToolLive'}else{'M8Live'}) + $Players + '_' + $stamp
-    $testFilter = if($ToolProgression){'PF.Crafting.ToolProgressionLive'}else{'PF.Persistence.Live'}
-    $testFlag = if($ToolProgression){'-PFRunToolProgressionTests'}else{'-PFRunPersistenceLiveTests'}
+    if($ToolProgression -and $WeaponProgression){throw 'Choose one progression fixture per run'}
+    $prefix = $(if($WeaponProgression){'M12WeaponLive'}elseif($ToolProgression){'M12ToolLive'}else{'M8Live'}) + $Players + '_' + $stamp
+    $testFilter = if($WeaponProgression){'PF.Crafting.WeaponProgressionLive'}elseif($ToolProgression){'PF.Crafting.ToolProgressionLive'}else{'PF.Persistence.Live'}
+    $testFlag = if($WeaponProgression){'-PFRunWeaponProgressionTests'}elseif($ToolProgression){'-PFRunToolProgressionTests'}else{'-PFRunPersistenceLiveTests'}
     $slot = 'Automation' + $prefix
     # Profiles are private local test state. Same aliases and endpoint survive both phases.
     $profile = 'PF' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
@@ -153,6 +155,7 @@ try {
                         ($ownerRole -xor $foreignRole)
                     }
                     if($ToolProgression){$contract=if($run.Role -eq 'Server'){$text -match $(if($phase -eq 'Restart'){'Tool restart server restored every owner'}else{'Tool server conservation and save verified'})}else{$text -match $(if($phase -eq 'Restart'){'Tool restart client identity, tier and privacy verified'}else{'Tool owned RPC loop, finite yield and privacy verified'})}}
+                    if($WeaponProgression){$contract=if($run.Role -eq 'Server'){$text -match $(if($phase -eq 'Restart'){'Weapon restart server restored every owner'}else{'Weapon server conservation and save verified'})}else{$text -match $(if($phase -eq 'Restart'){'Weapon restart client identity, tier and privacy verified'}else{'Weapon owned RPC loop, tier and privacy verified'})}}
                     $exactTest = $verdict.TestCount -eq 1 -and @($verdict.Tests | Where-Object { $_.Name -eq $testFilter }).Count -eq 1
                     $entry = [ordered]@{
                         Run = $run.Name; Role = $run.Role; Passed = ($reportExit -eq 0 -and $verdict.Passed -and $exactTest -and $fatal -eq 0 -and $contract -and $networkApplied)
@@ -176,7 +179,7 @@ try {
             $summary | ConvertTo-Json -Depth 9 | Set-Content -LiteralPath (Join-Path $summaryDirectory 'run-summary.json') -Encoding UTF8
         }
         $allPassed = $phaseRecord.Processes.Count -eq ($Players + 1) -and @($phaseRecord.Processes | Where-Object { -not $_.Passed }).Count -eq 0
-        $rolesCovered = $ToolProgression -or (@($phaseRecord.Processes | Where-Object { $_.StorageOwnerRole }).Count -eq 1 -and
+        $rolesCovered = $WeaponProgression -or $ToolProgression -or (@($phaseRecord.Processes | Where-Object { $_.StorageOwnerRole }).Count -eq 1 -and
             @($phaseRecord.Processes | Where-Object { $_.StorageForeignRole }).Count -eq ($Players - 1))
         if ($phaseRecord.CleanupFailures.Count -or -not $allPassed -or -not $rolesCovered) { throw 'Live report, cleanup or RPC/privacy/profile evidence failed' }
         $phaseRecord.Passed = $true

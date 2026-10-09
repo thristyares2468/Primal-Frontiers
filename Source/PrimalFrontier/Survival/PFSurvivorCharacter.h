@@ -5,7 +5,7 @@
 //  - a UPFPlayerSurvivalComponent (vitals, death),
 //  - stamina-gated jumping and movement lock on death,
 //  - automatic respawn scheduling through APFSurvivalGameMode,
-//  - placeholder gathering-tool meshes shown while the inventory holds Item_Tool.
+//  - placeholder held meshes derived from validated carried tools/weapons.
 //
 // Presentation (meshes, anim BPs, input assets) is supplied by the Blueprint
 // child Content/PrimalFrontier/Survival/BP_Survivor; this class holds the rules.
@@ -29,6 +29,8 @@ class PRIMALFRONTIER_API APFSurvivorCharacter : public APrimalFrontierCharacter
 public:
     /** Public presentation state; inventory and damage authority remain server-owned. */
     UFUNCTION(BlueprintPure,Category="Presentation") bool HasGatheringTool() const {return bHasGatheringTool;}
+    /** Only the publicly held item identity replicates; the full inventory stays private. */
+    UFUNCTION(BlueprintPure,Category="Presentation") FName GetHeldMeleeItem() const {return HeldMeleeItem;}
     APFSurvivorCharacter();
 
     /** Authoritative vitals. Recreated with each respawned pawn. */
@@ -47,7 +49,7 @@ public:
     /** Server deducts JumpStaminaCost when a jump actually starts. */
     virtual void OnJumped_Implementation() override;
 
-    /** Server: track whether the gathering tool is carried. Clients: show/hide tool meshes. */
+    /** Server: derive held item from owned inventory. Clients: show/hide primitive meshes. */
     virtual void Tick(float DeltaSeconds) override;
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -64,8 +66,10 @@ protected:
     UFUNCTION() void HandleDeath();
 
 private:
-    /** Server-derived "carries Item_Tool" flag, replicated so remote players see the tool too. */
+    /** Server-derived gathering benefit, independently replicated from held melee identity. */
     UPROPERTY(Replicated) bool bHasGatheringTool=false;
+    UPROPERTY(Replicated) FName HeldMeleeItem;
+    bool bClubShape=false;
 
     // Placeholder tool: two cubes in first person (owner only) and one cube in the
     // remote full-body mesh's right hand (everyone except the owner).

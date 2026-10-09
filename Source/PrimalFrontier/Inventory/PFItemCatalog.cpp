@@ -10,6 +10,7 @@
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Resource,"Item.Category.Resource");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Food,"Item.Category.Food");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Tool,"Item.Category.Tool");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Weapon,"Item.Category.Weapon");
 
 UPFItemCatalog::UPFItemCatalog()
 {
@@ -49,6 +50,10 @@ UPFItemCatalog::UPFItemCatalog()
     Add(TEXT("Item_Cord"),TEXT("Fibre cord"),0.15f,TAG_PF_Resource);
     Add(TEXT("Item_BoundTool"),TEXT("Bound stone tool"),2.5f,TAG_PF_Tool);
     Items.Last().StackLimit=1;Items.Last().GatheringHits=3;Items.Last().MeleeDamage=45;
+    Add(TEXT("Item_Club"),TEXT("Wooden club"),1.5f,TAG_PF_Weapon);
+    Items.Last().StackLimit=1;Items.Last().MeleeDamage=40;
+    Add(TEXT("Item_BoundClub"),TEXT("Stone-bound club"),2.5f,TAG_PF_Weapon);
+    Items.Last().StackLimit=1;Items.Last().MeleeDamage=60;
 }
 
 const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
@@ -63,7 +68,9 @@ const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
             !FMath::IsFinite(D.FoodRecovery) || D.FoodRecovery<0 || D.FoodRecovery>100 ||
             !FMath::IsFinite(D.WaterRecovery) || D.WaterRecovery<0 || D.WaterRecovery>100 ||
             D.GatheringHits<0 || D.GatheringHits>8 || !FMath::IsFinite(D.MeleeDamage) || D.MeleeDamage<0 || D.MeleeDamage>100 ||
-            (!D.Category.MatchesTag(TAG_PF_Tool) && (D.GatheringHits!=0 || D.MeleeDamage!=0))) { return nullptr; }
+            (!D.Category.MatchesTag(TAG_PF_Tool) && D.GatheringHits!=0) ||
+            (!D.Category.MatchesTag(TAG_PF_Tool) && !D.Category.MatchesTag(TAG_PF_Weapon) && D.MeleeDamage!=0) ||
+            (D.Category.MatchesTag(TAG_PF_Weapon) && (D.MeleeDamage<=20 || D.StackLimit!=1))) { return nullptr; }
         Result=&D;
     }
     return Result;

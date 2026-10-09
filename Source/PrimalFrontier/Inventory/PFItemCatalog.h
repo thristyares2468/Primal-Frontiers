@@ -30,7 +30,7 @@ struct FPFItemDefinition
     /** Stable identifier used everywhere (e.g. "Item_Wood"). Never rename once saved data exists. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FName Id;
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FText DisplayName;
-    /** Item.Category.Resource / Food / Tool. */
+    /** Item.Category.Resource / Food / Tool / Weapon. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FGameplayTag Category;
     /** Maximum quantity in one inventory slot (1..1000). */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="1",ClampMax="1000")) int32 StackLimit = 20;
@@ -43,7 +43,7 @@ struct FPFItemDefinition
     /** Food/water restored when eaten (0..100). Both 0 means the item isn't edible. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) float FoodRecovery = 0;
     UPROPERTY(EditAnywhere, BlueprintReadOnly) float WaterRecovery = 0;
-    /** Tool performance selected from the server's owned bag; zero means no tool benefit. */
+    /** Performance selected from the server's owned bag; weapons cannot grant gathering. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="8")) int32 GatheringHits = 0;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="100")) float MeleeDamage = 0;
 };

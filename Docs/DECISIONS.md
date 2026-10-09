@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Weapon tiers preserve the existing server melee boundary
+
+Two original club recipes use the existing timed exact-batch crafting path and native Weapon Gameplay Tags. Inventory derives best validated fresh carried melee item separately from best gathering benefit, with no equip cache/stack bonus/client damage parameter. Server still requires its own2.5m creature trace, life,0.5s cooldown and5stamina. Publish only held stable ID for local/remote engine primitive shape; full bag stays private. Item IDs fit existing V1 records, avoiding needless save migration. Original texture-free UI pictures/statistics are advisory. Weapons confer no gathering benefit; baseline recipes/yields remain. No PvP,XP,armor,repair or human balance acceptance implied. Exact gates/failures/limits: WEAPON_TIERS_M12.md.
+
 ## 2026-10-09 — Recipe categories are local browsing state
 
 Build crafting tabs from validated Recipe.Category Gameplay Tags. A category change clears the selected recipe and requires a deliberate row choice; it must never send a craft RPC, consume inputs, select a substitute, cancel or restart a job. Baseline numeric shortcuts act only if visible. Keep job state/feedback authoritative and category selection absent from save data. Share the real modal footer text with Pause help so contextual shoulder controls remain discoverable without changing world/build bindings. Native regressions and actual Slate/rendered filtering/conservation checks are recorded in CRAFTING_CATEGORIES_M11.md; human acceptance is separate.

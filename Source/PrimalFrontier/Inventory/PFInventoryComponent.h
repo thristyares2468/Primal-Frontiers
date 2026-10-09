@@ -72,6 +72,8 @@ public:
     /** Best valid still-fresh owned tool benefit; defaults to bare hands (1 hit/20 damage). */
     int32 GatheringHits() const;
     float MeleeDamage() const;
+    /** Stable ID of the best valid carried melee benefit; None means bare hands. */
+    FName MeleeItem() const;
 
     // ---- Server-only mutations (all atomic) ----
 

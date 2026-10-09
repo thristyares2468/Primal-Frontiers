@@ -85,9 +85,13 @@ int32 UPFInventoryComponent::GatheringHits() const
 }
 float UPFInventoryComponent::MeleeDamage() const
 {
-    float Best=20;const double Now=ServerTime(GetWorld());
-    for(const auto& S:Stacks){if(S.Quantity>0 && (S.ExpiresAt==0 || S.ExpiresAt>Now)){if(const auto* D=Definition(S.ItemId)){Best=FMath::Max(Best,D->MeleeDamage);}}}
-    return Best;
+    const auto* D=Definition(MeleeItem());return D?D->MeleeDamage:20.f;
+}
+FName UPFInventoryComponent::MeleeItem() const
+{
+    float Best=20;FName Id=NAME_None;const double Now=ServerTime(GetWorld());
+    for(const auto& S:Stacks){if(S.Quantity>0 && (S.ExpiresAt==0 || S.ExpiresAt>Now)){if(const auto* D=Definition(S.ItemId)){if(D->MeleeDamage>Best){Best=D->MeleeDamage;Id=D->Id;}}}}
+    return Id;
 }
 
 float UPFInventoryComponent::GetWeight() const

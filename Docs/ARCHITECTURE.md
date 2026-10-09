@@ -1,5 +1,7 @@
 # Technical Architecture
 
+M12 weapons derive melee strength and held item from validated fresh owned inventory independently from gathering benefit. Public character replication carries only held item ID; existing local/remote engine primitives show a club shape. Timed recipe component, server trace/cooldown/life/stamina and V1 stable-ID saves remain the authority boundaries. See WEAPON_TIERS_M12.md; explicit equip slots, PvP,XP,armor and save extensions are separate future slices.
+
 ## Technology
 
 - Unreal Engine 5.8.2

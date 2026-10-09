@@ -115,7 +115,7 @@ public:
             }
             else if(LocalStage==20 && Now-Changed>0.5)
             {
-                CheckMenu(TEXT("Recipe_Cord"),TEXT("Item_Cord"));Test->TestEqual(TEXT("All five recipes initially visible"),Menu->GetVisibleRecipeIds().Num(),5);
+                CheckMenu(TEXT("Recipe_Cord"),TEXT("Item_Cord"));Test->TestEqual(TEXT("All seven recipes initially visible"),Menu->GetVisibleRecipeIds().Num(),7);
                 auto* Button=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_Category3_Button")));if(!Button){Test->AddError(TEXT("Missing material category button"));return true;}Button->SetKeyboardFocus();Test->TestTrue(TEXT("Category button has real Slate focus"),Button->HasKeyboardFocus());Press(EKeys::SpaceBar);Next(24,Now);
             }
             else if(LocalStage==24 && Now-Changed>0.3)

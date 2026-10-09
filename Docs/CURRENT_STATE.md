@@ -2,6 +2,30 @@
 
 Updated October9,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
 
+## Latest bounded M12 weapon step
+
+**Weapon technical gates PASSED:** original wooden/stone-bound club recipes (3wood+cord/6s;club+cord+2stone+2wood/8s),40/60creature melee damage with no gathering benefit, native Weapon categories, public held identity and engine primitive shape. Final Editor17.81s/Game24.11s clean; native6/6,720p/1440p rendered1/1each and one-client4/two-client lag-loss6 Create/Restart passed,all test severity/exits0. Six PNGs reviewed; settings/188–189 unrelated saves unchanged. Raw known26rendered/24network warnings+14Python startup lines retained; no new severity/ensure/fatal/crash. First missing-header compile failure fixed/retained. Exact evidence, memory, costs, source, limits: [WEAPON_TIERS_M12.md](WEAPON_TIERS_M12.md). Full M11/M12 and Personal M8/UI/controller gates remain open. Trello bounded task evidence/Done update and scoped Sol publication follow; next independent scope requires fresh boards, likely protection or original XP/knowledge with deliberate save compatibility. No assets/XP/armor/save-schema expansion.
+
+### Retained weapon checkpoints (historical sequence)
+
+Weapon Trello https://trello.com/c/MnrDEHgZ updated/read back Done; parentM12 Doing and existing Personal1 G2 cards Doing/priorities preserved. Game24.11s clean; all12 unique rendered/network raw logs reviewed with only known baseline categories/nootherseverity. Six PNGs inspected. Scoped Sol commit/push now; no full milestone/manual acceptance.
+
+Weapon two-client lag75ms/loss1% Create/Restart PASSED6/6 M12WeaponLive2_20261009_100858033_9be4f161,working/private1.719–1.813/1.568–1.757GiB per process; test severity/exits0, Client2 no crash. Independent owner bags/public held IDs/original records restored without duplication; foreign bag privacy passed. Final Game build/raw-log/doc/Trello/publication pending; full milestone/human gates remain open.
+
+Weapon one-client Create/Restart PASSED4/4 M12WeaponLive1_20261009_100635127_a96d6222; working/private1.718–1.810/1.574–1.739GiB per process,all exits/test severity0. Actual server-owned craft/save/restored record, client credential/tier/held ID and save refusal passed. Six720p/1440p PNGs reviewed. Two-client lag75/loss1 test next; final Game/raw review pending.
+
+Weapon rendered1440p/maxHUD1.5 PASSED1/1 M12Weapon1440_20261009_100508041_3c1da9c0,54.14s,working/private3.239/5.413GiB,test severity/exits0; settings/189 unrelated saves unchanged. One-client NullRHI create/restart next before two; final1440p PNG/raw review and Game gate pending.
+
+Weapon final Editor17.81s clean; rendered720p/maxHUD1.5 PASSED1/1 M12Weapon720_20261009_100342657_e0766342,54.27s,working/private3.066/4.858GiB,test severity/exits0. Three actual menu PNGs reviewed; ingredients/pictures/stats/complete and Close/Pause paths pass. Settings/188 unrelated saves unchanged.1440p and one/two-client restart/Game/raw-log gates pending; no manual combat feel/FPS claim.
+
+Weapon native PASSED6/6 Automation_M12Weapon_20261009_100220696_ba69f620: ToolProgression,Transactions,WeaponProgression,Creatures.Lifecycle,Persistence.WorldRuntime,UI.RecipeDetails.16.63s,working/private2.988/2.865GiB; test/raw severity0/exits0. Real traced40/60 damage/death/stamina/cooldown, exact costs, refusal/fallback and V1 weapon roundtrip verified. Rendered/network/Game gates pending.
+
+Weapon Editor retry PASSED5.58s/no compiler warnings (PFM12WeaponEditorRetry.log). Six focused native regressions now running; live UI, authority/replication/restart, Game build and screenshot/log gates pending.
+
+Weapon first Editor build FAILED19.01s/exit6 C2027: native fixture omitted PFItemCatalog.h (PFM12WeaponEditorBuild.log). Added only required include; retry pending. Two club recipes/catalog validation, public held identity and disposable native/rendered/network fixtures are implemented but unverified; no pass or milestone completion claimed.
+
+Category48f2e11 is published, local/remote equality and clean pre-step status checked. Fresh Programming/HUD boards and parentM12 reconciled; https://trello.com/c/MnrDEHgZ is Doing. Auditing two original craftable club tiers through the existing server-owned best-carried melee path, validated Weapon tags, primitive first-/remote presentation and V1 item-ID saves. Implementation/testing pending. No XP/armor/equipment slots/new assets or human acceptance implied; full M11/M12 and Personal M8/M11 stay open.
+
 ## Latest bounded M11 steps — inventory, recipe and building details
 
 **Latest category slice verified:** original Gameplay Tag All/Tool/Food/Material tabs, deliberate empty selection, keyboard/controller shoulders and unchanged authoritative job are implemented. Editor16.25s/Game22.68s clean; two native cases and four final rendered executions passed with zero test severity/exits. Seventeen PNGs reviewed; default settings and184–187 unrelated saves unchanged. Raw known startup findings remain. First timeout retained/unreproduced, not claimed fixed. Exact evidence, memory, controls and limits: [CRAFTING_CATEGORIES_M11.md](CRAFTING_CATEGORIES_M11.md). Trello https://trello.com/c/Fw7nOnMS evidence/Done readback verified and existing G2 guides updated, human status preserved. Scoped Sol publication follows. Full M11/M12 and Personal M8/M11 remain open; next independent task requires fresh Trello/source audit.

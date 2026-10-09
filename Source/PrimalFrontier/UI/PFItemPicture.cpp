@@ -48,6 +48,13 @@ int32 UPFItemPicture::NativePaint(const FPaintArgs& Args,const FGeometry& G,cons
         Line({{0.52,0.19},{0.69,0.31}},PFUITheme::Text,0.04f);
         if(ItemId==TEXT("Item_BoundTool")){Line({{0.52,0.27},{0.69,0.36},{0.49,0.32},{0.65,0.41}},PFUITheme::Accent,0.04f);}
     }
+    else if(ItemId==TEXT("Item_Club") || ItemId==TEXT("Item_BoundClub"))
+    {
+        Line({{0.27,0.84},{0.64,0.28}},FLinearColor(0.53f,0.32f,0.14f,1),0.14f);
+        Line({{0.54,0.39},{0.71,0.17}},FLinearColor(0.43f,0.25f,0.11f,1),0.25f);
+        if(ItemId==TEXT("Item_BoundClub"))
+        {Line({{0.50,0.35},{0.69,0.46}},PFUITheme::Accent,0.045f);Box({0.59,0.13},{0.25,0.23},PFUITheme::Muted,0.06f);}
+    }
     else if(ItemId==TEXT("Item_Cord"))
     {
         Line({{0.74,0.76},{0.28,0.76},{0.18,0.54},{0.27,0.26},{0.68,0.23},{0.82,0.49},{0.72,0.66},{0.36,0.64},{0.32,0.43},{0.64,0.39}},FLinearColor(0.72f,0.60f,0.30f,1),0.07f);

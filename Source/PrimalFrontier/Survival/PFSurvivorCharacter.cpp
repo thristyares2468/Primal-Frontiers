@@ -58,6 +58,7 @@ void APFSurvivorCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(APFSurvivorCharacter,bHasGatheringTool);
+    DOREPLIFETIME(APFSurvivorCharacter,HeldMeleeItem);
 }
 
 void APFSurvivorCharacter::Tick(float DeltaSeconds)
@@ -84,14 +85,26 @@ void APFSurvivorCharacter::Tick(float DeltaSeconds)
             bHasGatheringTool=Equipped;
             ForceNetUpdate();
         }
+        const FName Melee=I && !Survival->IsDead()?I->MeleeItem():NAME_None;
+        if(HeldMeleeItem!=Melee){HeldMeleeItem=Melee;ForceNetUpdate();}
     }
 
     // Anyone who renders: first-person cubes for the local player, hand cube for others.
     if(GetNetMode()!=NM_DedicatedServer)
     {
-        ToolHandle->SetVisibility(bHasGatheringTool && IsLocallyControlled());
-        ToolHead->SetVisibility(bHasGatheringTool && IsLocallyControlled());
-        RemoteTool->SetVisibility(bHasGatheringTool && !IsLocallyControlled());
+        const bool Club=HeldMeleeItem==TEXT("Item_Club") || HeldMeleeItem==TEXT("Item_BoundClub");
+        if(Club!=bClubShape)
+        {
+            bClubShape=Club;
+            ToolHandle->SetRelativeScale3D(Club?FVector(0.06,0.06,0.45):FVector(0.04,0.04,0.4));
+            ToolHead->SetRelativeLocation(Club?FVector(45,25,-3):FVector(45,30,-5));
+            ToolHead->SetRelativeScale3D(Club?FVector(0.12,0.12,0.22):FVector(0.09,0.22,0.08));
+            RemoteTool->SetRelativeScale3D(Club?FVector(0.1,0.1,0.5):FVector(0.06,0.06,0.4));
+        }
+        const bool Held=bHasGatheringTool || !HeldMeleeItem.IsNone();
+        ToolHandle->SetVisibility(Held && IsLocallyControlled());
+        ToolHead->SetVisibility(Held && IsLocallyControlled());
+        RemoteTool->SetVisibility(Held && !IsLocallyControlled());
     }
 }
 
