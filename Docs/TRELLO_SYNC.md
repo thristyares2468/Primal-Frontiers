@@ -32,6 +32,8 @@ Final six-board readback for this checkpoint retains all 54 Personal/AI-prefixed
 
 ## Every continue/task
 
+October9 full Pause menu on secondary P: https://trello.com/c/JDRFFoNv Doing → Done with verified readback. Retained existing P routing; clearer menu hints, attachment guard before simulation/input pause and real Slate P open/resume/reopen/visible entries coverage. Editor/Game14.41/21.11s clean; rendered ControlsLive720p1/1,zero test warnings/errors,engine/report/runner0. Three PNGs/default-config preservation/log categories/memory inspected;exact evidence in MILESTONES. No Editor keybindings/assets changed, no personal PIE or broader acceptance claimed. Other cards/assignments/deadlines preserved.
+
 October9 windowed display: https://trello.com/c/rZT9QNCL Doing → Done for actual normal1440p Keep/Back/paused15-second timeout/config reload. Initial720p smaller-mode prerequisite remains failed because engine UI floor;explicit limitation before1440p replay,no artificial floor/no false pass. Three screenshots/default-config gate/log/memory inspected. Inline current replay uses1440p,original plan retained historically. Personal gates,assignments/dates/assets unchanged. Separate-process preferences next independent settings scope.
 
 October9 non-resolution Apply: https://trello.com/c/sIfh4PuZ Doing → Done after Editor/Game and actual720p/1440p SettingsApplyLive passes,six screenshots/default-config preservation. Initial C2666 and VSync-priority strict failure retained;fixed only test/runner,no suppression. Inline exact-level/replay/evidence guide retained. Personal gates,members/deadlines/assets unchanged. Display confirmation is separate next task.

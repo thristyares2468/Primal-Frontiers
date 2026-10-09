@@ -8,6 +8,8 @@
 #include "Inventory/PFInventoryComponent.h"
 #include "Building/PFBuildingComponent.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/TextBlock.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
@@ -43,10 +45,15 @@ bool Press(FKey Key,bool bRepeat=false)
     // Deliver through Slate's real focus path, not directly to the widget handler.
     return FSlateApplication::Get().ProcessKeyDownEvent(FKeyEvent(Key,FModifierKeysState(),uint32(0),bRepeat,0,0));
 }
+void Release(FKey Key)
+{
+    FSlateApplication::Get().ProcessKeyUpEvent(FKeyEvent(Key,FModifierKeysState(),uint32(0),false,0,0));
+}
 class FControlsExercise final : public IAutomationLatentCommand
 {
 public:
     FControlsExercise(FAutomationTestBase* InTest,TSharedRef<FControlsState> InState):Test(InTest),S(InState){}
+    ~FControlsExercise(){if(S->PC.IsValid()){S->PC->SetPauseMenuOpen(false);}}
     bool Update() override
     {
         const double Now=FPlatformTime::Seconds();
@@ -61,16 +68,51 @@ public:
             }
             if(!S->PC.IsValid()){return false;}
             auto* PC=S->PC.Get();S->Wood=PC->GetInventory()->Count(TEXT("Item_Wood"));
-            PC->SetPauseMenuOpen(true);S->Pause=FindWidget<UPFPauseMenu>(PC->GetWorld());
-            if(!Test->TestNotNull(TEXT("Pause widget added to local player"),S->Pause.Get())){PC->SetPauseMenuOpen(false);return true;}
-            // SetInputMode queues focus through LocalPlayer Slate operations. Allow
-            // a frame before sending user navigation, as real input does.
-            S->Until=Now+1;S->Phase=10;return false;
+            if(!Test->TestEqual(TEXT("Pause shortcut fixture is solo"),PC->GetNetMode(),NM_Standalone)){return true;}
+            // Start in gameplay focus: opening Pause must come from the registered
+            // P key through Slate/viewport/player input, not SetPauseMenuOpen.
+            FSlateApplication::Get().SetAllUserFocusToGameViewport();
+            S->Until=Now+0.5;S->Phase=9;return false;
+        }
+        if(S->Phase==9)
+        {
+            Press(EKeys::P);Release(EKeys::P);
+            S->Until=Now+0.5;S->Phase=8;return false;
+        }
+        if(S->Phase==8)
+        {
+            auto* PC=S->PC.Get();
+            if(!PC){Test->AddError(TEXT("Lost pause shortcut fixture"));return true;}
+            S->Pause=FindWidget<UPFPauseMenu>(PC->GetWorld());
+            if(!Test->TestNotNull(TEXT("P from gameplay creates Pause"),S->Pause.Get())){return true;}
+            TSet<FString> Captions;
+            S->Pause->WidgetTree->ForEachWidget([&](UWidget* W){if(auto* Text=Cast<UTextBlock>(W)){Captions.Add(Text->GetText().ToString());}});
+            for(const TCHAR* Caption:{TEXT("Resume"),TEXT("Settings"),TEXT("Controls & help"),TEXT("End session")})
+            {Test->TestTrue(FString(TEXT("P opens full menu with "))+Caption,Captions.Contains(Caption));}
+            Test->TestTrue(TEXT("P menu is visible on the player's viewport"),S->Pause->IsInViewport() && S->Pause->IsVisible());
+            Test->TestTrue(TEXT("P pauses solo world and blocks movement/look"),PC->IsPauseMenuOpen() && PC->IsPaused() && PC->IsMoveInputIgnored() && PC->IsLookInputIgnored());
+            Test->TestTrue(TEXT("P puts keyboard focus on Pause"),S->Pause->HasKeyboardFocus());
+            Press(EKeys::P,true);
+            Test->TestTrue(TEXT("Held P cannot immediately resume Pause"),PC->IsPauseMenuOpen());
+            Press(EKeys::P);Release(EKeys::P);
+            S->Until=Now+0.5;S->Phase=7;return false;
+        }
+        if(S->Phase==7)
+        {
+            auto* PC=S->PC.Get();
+            if(!PC || !S->Pause.IsValid()){Test->AddError(TEXT("Lost resume fixture"));return true;}
+            Test->TestFalse(TEXT("Second P resumes solo simulation"),PC->IsPauseMenuOpen() || PC->IsPaused());
+            Test->TestFalse(TEXT("Second P restores movement/look"),PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
+            Test->TestFalse(TEXT("Second P removes Pause"),S->Pause->IsInViewport());
+            // Reopening after Resume also verifies gameplay focus was restored.
+            Press(EKeys::P);Release(EKeys::P);
+            S->Until=Now+0.5;S->Phase=10;return false;
         }
         if(S->Phase==10)
         {
             auto* PC=S->PC.Get();
             if(!PC || !S->Pause.IsValid()){Test->AddError(TEXT("Lost pause fixture"));return true;}
+            if(!Test->TestTrue(TEXT("P reopens Pause after Resume"),PC->IsPauseMenuOpen() && S->Pause->IsInViewport())){return true;}
             Press(EKeys::Down);Press(EKeys::Down);Press(EKeys::Enter);
             S->Controls=FindWidget<UPFControlsMenu>(PC->GetWorld());
             if(!Test->TestNotNull(TEXT("Pause navigation opens controls"),S->Controls.Get())){PC->SetPauseMenuOpen(false);return true;}
@@ -113,7 +155,7 @@ public:
             S->Shot=S->Directory/TEXT("pause.png");FScreenshotRequest::RequestScreenshot(S->Shot,true,false);S->Until=Now+2;S->Phase=5;return false;
         }
         if(IFileManager::Get().FileSize(*S->Shot)<=0){return false;}
-        Press(EKeys::P);
+        Press(EKeys::P);Release(EKeys::P);
         Test->TestFalse(TEXT("P resumes after returning from help"),S->PC->IsPauseMenuOpen());
         Test->TestFalse(TEXT("Resume restores movement input"),S->PC->IsMoveInputIgnored());
         Test->TestFalse(TEXT("Resume removes pause"),S->Pause->IsInViewport());

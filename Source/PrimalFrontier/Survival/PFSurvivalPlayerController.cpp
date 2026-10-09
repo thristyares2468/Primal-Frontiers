@@ -124,8 +124,8 @@ void APFSurvivalPlayerController::SetupInputComponent()
     // Legacy key bindings for the greybox survival actions. Movement/look/jump come
     // from the template Enhanced Input context (IMC_Default) via the base class.
     // P is the reliable pause key in PIE, where Esc may end the Play session.
-    BindControl(EKeys::P,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Pause / resume (preferred in Editor Play)"),true);
-    BindControl(EKeys::Escape,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Pause / resume (Editor may stop PIE)"),true);
+    BindControl(EKeys::P,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Open / close Pause menu (secondary key; use in Editor Play)"),true);
+    BindControl(EKeys::Escape,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Open / close Pause menu (Editor may stop PIE)"),true);
     BindControl(EKeys::E,&APFSurvivalPlayerController::Interact,TEXT("World"),TEXT("Pick up / gather / use door or storage"));
     // Inventory (M3)
     BindControl(EKeys::Tab,&APFSurvivalPlayerController::ToggleInventory,TEXT("General"),TEXT("Open / close inventory"));
@@ -190,6 +190,13 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
         PauseMenu=CreateWidget<UPFPauseMenu>(this,UPFPauseMenu::StaticClass());
         if(!PauseMenu){return;}
     }
+    // Never freeze gameplay without a visible menu. Adding can fail if the
+    // local-player viewport is unavailable; leave gameplay/input unchanged.
+    if(bOpen && !PauseMenu->IsInViewport() && !PauseMenu->AddToPlayerScreen(100))
+    {
+        UE_LOG(LogPFSurvival,Warning,TEXT("[PrimalUI] Pause menu could not be added to the local viewport; gameplay was not paused"));
+        return;
+    }
     bPauseMenuOpen=bOpen;
     SetIgnoreMoveInput(bOpen);
     SetIgnoreLookInput(bOpen);
@@ -203,7 +210,6 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
         bCraftingOpen=false;
         Building->bBuildMode=false;
         bPausedWorld=GetNetMode()==NM_Standalone && SetPause(true);
-        PauseMenu->AddToPlayerScreen(100);
         PauseMenu->Refresh();
         FInputModeUIOnly Mode;
         Mode.SetWidgetToFocus(PauseMenu->TakeWidget());

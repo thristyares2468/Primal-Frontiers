@@ -165,7 +165,7 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
         else if(V.Thirst<=25){Warnings.Add(TEXT("LOW WATER - find water"));}
         if(V.Exposure>0){Warnings.Add(TEXT("EXPOSURE - leave hazard"));}
         if(Warnings.IsEmpty() && (!Settings || Settings->Preferences.bControlHints))
-        {Warnings.Add(TEXT("P / Menu: Controls & help"));}
+        {Warnings.Add(TEXT("P / Menu: Pause, settings & help"));}
     }
     const FText Status=FText::FromString(FString::Join(Warnings,TEXT("\n")));
     if(StateLabel){StateLabel->SetText(Status);StateLabel->SetVisibility(Status.IsEmpty()?ESlateVisibility::Collapsed:ESlateVisibility::HitTestInvisible);}

@@ -18,7 +18,7 @@ The latest world extension adds primitive woodland, rocky ground, a roofed ruin,
 4. In the Play dropdown choose **one player**, **Standalone** net mode, and **Selected Viewport**. Press **F11** for immersive view. This avoids the observed slow New Editor Window presentation path; the stationary sample averaged 107.81 FPS at 2560x1392 with 75% render scale.
 5. Click Play, then click the game view. Move with WASD, look with the mouse and jump with Space.
 
-**P** opens the pause menu. **Esc may stop PIE** before the game receives it. Shift+F1 releases the mouse to the Editor; click the game to recapture it. The Editor Stop button ends the session. No map save is needed to play.
+**P** is the secondary pause key: press it to open Pause, then press it again to resume. Use P while testing in the Editor because **Esc may stop PIE** before the game receives it. Click the game view first so it receives keyboard input. Shift+F1 releases the mouse to the Editor; click the game to recapture it. The Editor Stop button ends the session. No map save is needed to play.
 
 **P → Settings** opens Game, Graphics, Audio and Accessibility. Apply retains changes; Cancel discards the draft. Motion blur defaults off. Display changes require a 15-second confirmation in standalone; PIE owns its window. See [SETTINGS.md](SETTINGS.md). New Editor Window PIE has an unresolved D3D12 presentation delay. `L_PrimalFrontier_OpenWorld` is the new World Partition development candidate; its full traversal/overnight gate remains pending.
 
