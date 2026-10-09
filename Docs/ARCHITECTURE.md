@@ -1,5 +1,7 @@
 # Technical Architecture
 
+FPFWorldSaveFormat now supports explicit owner-bound progression in opt-in world V2 metadata with atomic semantic DecodeValidated. Normal runtime writer remainsV1, omitting the new reflected field; legacy reads use empty defaults. Current runtime refuses V2 before mutation until a server PlayerState component can preserve its records. WORLD_PROGRESSION_COMPATIBILITY_M12.md separates these archive contracts from unimplemented gameplay integration.
+
 Progression now has a separate bounded native byte codec and validated V1 player default adapter. It is not called by existing world/player writers; their schema and runtime access remain unchanged. Known-name resolution/atomic output refusal and zero retrospective XP are tested. PROGRESSION_CODEC_M12.md defines the upcoming owner-bound world archive compatibility gate before player integration.
 
 M12 progression currently consists only of bounded native records/catalog and atomic validated transactions. XP/knowledge/credited-craft IDs have no owner component, RPC/event/UI hook or save integration yet. Levels/points are derived; baseline recipes remain unrestricted. PROGRESSION_RECORDS_M12.md defines the separate codec/V1 compatibility gate before authoritative PlayerState integration.

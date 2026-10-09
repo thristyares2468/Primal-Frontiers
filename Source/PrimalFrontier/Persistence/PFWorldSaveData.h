@@ -7,6 +7,8 @@ struct FPFWorldPlayerRecord
 {
     GENERATED_BODY()
     UPROPERTY() FString Data;
+    // Explicit world V2 only; V1 encoding omits this field entirely.
+    UPROPERTY() FString Progression;
     UPROPERTY() FGuid PlayerId;
     UPROPERTY() FGuid ReconnectCredential;
     UPROPERTY() int64 CapturedUtc = 0;

@@ -2,6 +2,20 @@
 
 Updated October9,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
 
+## Active bounded M12 world progression compatibility
+
+**World archive compatibility technical gate PASSED:** Editor22.27s/Game34.88s clean,native5/5 clean,one-client4/two-client75ms1%loss6 baseline Create/Restart passed. All10network raw logs reviewed/0new normalized severity against known startup baseline; full exact paths/memory/limits WORLD_PROGRESSION_COMPATIBILITY_M12.md. No live progression/player/recipe/UI acceptance claimed. Trello bounded Done/scoped Sol publication next; next independent gate is server-owned private PlayerState integration.
+
+Two-client75ms/1%loss baseline Create/Restart6/6 PASSED `M8Live2_20261009_111810709_5d820e56`,exits0/test severity0/no fatal/ensure,working/private1.718–1.819/1.564–1.742GiB. Client2 did not crash; owner/foreign storage and V1 reconnect contracts passed. All10raw network logs compared with prior protection baseline:0new normalized warning/error lines; retained24warnings/14Python-error lines per process. Game build next; compatibility technical evidence WORLD_PROGRESSION_COMPATIBILITY_M12.md. Full M12/Personal acceptance remains open.
+
+One-client baseline Create/Restart4/4 PASSED `M8Live1_20261009_111620756_b4260025`, PF.Persistence.Live on server/client each phase, exits0/test severity0/no fatal/ensure. Working/private range1.721–1.821/1.570–1.735GiB. Raw startup24warning/14Python-error lines per process retained for baseline review; not clean raw logs. Two NullRHI clients with75ms/1%loss next. Existing normal V1 writer and reconnect behavior retained.
+
+Native5/5 PASSED `Automation_M12WorldProgression_20261009_111526323_3675c124`,33.5s,working/private2.961/2.805GiB,raw/test severity0,engine/runner0. Exact tests WorldCompatibility,Codec,Records,WorldRecords,RejectedLoadPreservesWorld. V1 omission/defaults, owner-bound independent V2, corrupt/unknown/future refusal and real-file unintegrated V2 load preserving live state passed. One-client baseline restart regression next, then two NullRHI clients; Game build pending. Full M12/manual gates remain open.
+
+Editor build PASSED22.27s, no compiler warnings, `Saved/Logs/PFM12WorldProgressionEditorBuild.log`. Native compatibility/refusal fixtures added; test results pending. V1 writer still omits progression; runtime V2 restoration explicitly refuses until player integration. No asset changes or manual gate completion.
+
+Codec702df77 published/Sol/clean/local-remote equality verified. Fresh Trello audit selects explicit opt-in worldV2 progression fields, preserving normalV1 writer shape/zeroXP defaults before player integration. Compatibility card Doing; implementation/build/native and baseline network gates pending. No private save rewrite/liveXP/UI/recipe gate. Full M12/Personal gates remain open.
+
 ## Active bounded M12 progression codec
 
 **Codec technical gate PASSED:** Editor14.49s/final4.98s/Game21.83s clean,native5/5 clean. Exact evidence/source/replay/limits PROGRESSION_CODEC_M12.md. Trello evidence/Done/scoped Sol publication next; next independent scope is owner-bound world archive compatibility. No live XP/world migration/player/UI acceptance.

@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Opt-in owner-bound world V2 before player integration
+
+Preserve normal V1 writer field shape and empty legacy progression defaults. Explicit world V2 requires bounded owner-bound progression for every player and full candidate validation; future world versions start at3. Runtime refuses valid V2 until PlayerState capture/restore is integrated, preventing silent progression loss through ignored fields. Separate metadata acceptance from actual runtime migration. No automatic private-file rewrite or retrospective item rewards. WORLD_PROGRESSION_COMPATIBILITY_M12.md records exact native/live gates and limits.
+
 ## 2026-10-09 — Separate bounded progression bytes precede live save changes
 
 Use explicit16KiB/version/length/CRC progression bytes and resolve known catalog names without interning disk strings. All outputs change only after full candidate validation. Legacy V1 player records first pass their existing decoder, then get zeroXP/empty ledgers; owned items are not proof of past events. No existing main save writer/format changes in this codec slice; next owner-bound world compatibility must preserve actual world records before component/event hooks. PROGRESSION_CODEC_M12.md records exact tests/builds and integration limits. CRC is corruption detection, not trusted-source authentication.

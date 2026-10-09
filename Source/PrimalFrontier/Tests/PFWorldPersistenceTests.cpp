@@ -1,6 +1,8 @@
 #include "Persistence/PFWorldSaveFormat.h"
 #include "Persistence/PFWorldPersistence.h"
 #include "Persistence/PFSaveFileStore.h"
+#include "Progression/PFProgressionCatalog.h"
+#include "Progression/PFProgressionRecord.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
@@ -89,7 +91,7 @@ bool FPFWorldRecordTest::RunTest(const FString&)
     Decoded.Map = TEXT("Preserved");
     TestFalse(TEXT("Truncated JSON refused"), FPFWorldSaveFormat::Decode({uint8('{')}, Decoded, Error));
     TestEqual(TEXT("Failed decode preserves output"), Decoded.Map, FString(TEXT("Preserved")));
-    Bad = Data; Bad.Version = 2; FPFWorldSaveFormat::Encode(Bad, Bytes, Error);
+    Bad = Data; Bad.Version = 3; FPFWorldSaveFormat::Encode(Bad, Bytes, Error);
     TestFalse(TEXT("Future version requires migration"), FPFWorldSaveFormat::Decode(Bytes, Decoded, Error));
     AddInfo(TEXT("[PrimalPersistence] World records, support graph, independent ownership, duplicate batches and future-version refusal checked"));
     return true;
@@ -322,11 +324,11 @@ bool FPFWorldRejectedLoadTest::RunTest(const FString&)
     if (!TestTrue(TEXT("Save good active world"), Persistence->Save(ActiveSlot, Error))) { AddError(Error); return false; }
     FPFSavedFile Original;
     if (!TestTrue(TEXT("Read active generation"), FPFSaveFileStore::Read(ActiveSlot, Original, Error))) { return false; }
-    const TCHAR* Cases[] = {TEXT("unsupported version"), TEXT("wrong map"), TEXT("resource layout"), TEXT("unsafe player ground")};
+    const TCHAR* Cases[] = {TEXT("unsupported version"), TEXT("wrong map"), TEXT("resource layout"), TEXT("unsafe player ground"), TEXT("unintegrated V2 progression")};
     for (int32 Case = 0; Case < UE_ARRAY_COUNT(Cases); ++Case)
     {
         auto Bad = Good; Bad.Hour = 5; Bad.Structures[0].Health = 50; Bad.Resources[0].Hits = 0;
-        if (Case == 0) { Bad.Version = 2; }
+        if (Case == 0) { Bad.Version = 3; }
         if (Case == 1) { Bad.Map = TEXT("L_M7SurvivalArena"); }
         if (Case == 2) { Bad.Resources[0].Name = TEXT("DifferentAuthoredNode"); }
         if (Case == 3)
@@ -336,11 +338,17 @@ bool FPFWorldRejectedLoadTest::RunTest(const FString&)
             Unsafe.Location = FVector(100000, 0, 120); // Finite/bounded, but outside this fixture's walkable floor.
             if (!TestTrue(TEXT("Encode unsafe location fixture"), FPFWorldSaveFormat::PackPlayer(Unsafe, *PC->GetInventory()->Catalog, 30, Bad.Players[0].Data, Error))) { return false; }
         }
+        if (Case == 4)
+        {
+            Bad.Version=2;auto* Catalog=NewObject<UPFProgressionCatalog>();auto* Crafting=NewObject<UPFCraftingCatalog>();FPFProgressionRecord Record;
+            for(auto& P:Bad.Players){if(!TestTrue(TEXT("Pack valid unintegrated progression"),FPFWorldSaveFormat::PackProgression(P.PlayerId,Record,*Catalog,*Crafting,*PC->GetInventory()->Catalog,P.Progression,Error))){return false;}}
+        }
         const FString RejectedSlot = ActiveSlot + FString::Printf(TEXT("_%d"), Case); Slots.Add(RejectedSlot);
         TArray<uint8> Bytes;
         if (!TestTrue(TEXT("Encode rejected candidate"), FPFWorldSaveFormat::Encode(Bad, Bytes, Error)) ||
             !TestTrue(TEXT("Write checksummed rejected candidate"), FPFSaveFileStore::Write(RejectedSlot, Bytes, Error))) { AddError(Error); return false; }
         TestFalse(*FString::Printf(TEXT("Refuse %s"), Cases[Case]), Persistence->Load(RejectedSlot, Error));
+        if(Case==4){TestTrue(TEXT("Specific unintegrated V2 refusal"),Error.Contains(TEXT("progression restoration is not integrated")));}
         TestFalse(TEXT("Explicit load refusal reason"), Error.IsEmpty());
         TestEqual(TEXT("Active slot preserved"), Persistence->ActiveSlot, ActiveSlot);
         TestTrue(TEXT("Same pawn remains possessed"), PC->GetPawn() == Pawn);

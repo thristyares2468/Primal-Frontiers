@@ -1,5 +1,7 @@
 # Original progression and biological upgrades — M12/M13 plan
 
+October9 world archive checkpoint: WORLD_PROGRESSION_COMPATIBILITY_M12.md adds opt-in owner-bound V2 metadata and V1 omission/defaults; normal writer staysV1 and actual runtimeV2 load explicitly refuses until component capture/restore integration. No live rewards, points UI or recipe gate yet. The native owner/corruption/atomic-refusal gate passed; live baseline/build completion is recorded in that evidence document.
+
 October9 codec checkpoint: PROGRESSION_CODEC_M12.md verifies separate bounded progression bytes and validated legacy V1 player zero-XP defaults. Main save writers remain unmodified/V1; no runtime rewards, world migration or UI. Owner-bound world compatibility and authoritative PlayerState/event integration are still required before playable progression.
 
 October9 native record checkpoint: PROGRESSION_RECORDS_M12.md introduces bounded XP/point derivation, one-shot craft IDs and optional Tech_FieldTools metadata/transactions with native tests. No live player component, event reward, recipe gate, UI or save field yet. Implemented32knowledge/128craft-record limits are deliberately narrower than the proposed future64 technology entries below. A bounded codec/V1 compatibility gate precedes all gameplay integration. The six-entry technology graph and remaining reward/respec/adaptation plans are still proposals.

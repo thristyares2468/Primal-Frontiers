@@ -4,6 +4,10 @@
 #include "Building/PFBuildingCatalog.h"
 #include "Crafting/PFCraftingCatalog.h"
 #include "Creatures/PFCreatureCatalog.h"
+#include "Progression/PFProgressionSaveFormat.h"
+#include "Progression/PFProgressionCatalog.h"
+#include "Serialization/MemoryReader.h"
+#include "Serialization/MemoryWriter.h"
 #include "JsonObjectConverter.h"
 #include "Serialization/JsonSerializer.h"
 #include "Misc/Base64.h"
@@ -38,10 +42,11 @@ bool FPFWorldSaveFormat::UnpackPlayer(const FString& Text, const UPFItemCatalog&
 }
 
 bool FPFWorldSaveFormat::Validate(const FPFWorldSaveData& Data, const UPFItemCatalog& Items,
-    const UPFBuildingCatalog& Buildings, const UPFCraftingCatalog& Crafting, const UPFCreatureCatalog& Creatures, FString& Error)
+    const UPFBuildingCatalog& Buildings, const UPFCraftingCatalog& Crafting, const UPFCreatureCatalog& Creatures, FString& Error,
+    const UPFProgressionCatalog* Progression)
 {
     Error.Reset();
-    if (Data.Version != 1 || !WorldMapAllowed(Data.Map) || !ValidWorldScalar(Data.Hour, 24) || Data.Hour == 24 ||
+    if ((Data.Version != 1 && Data.Version != 2) || !WorldMapAllowed(Data.Map) || !ValidWorldScalar(Data.Hour, 24) || Data.Hour == 24 ||
         Data.Players.Num() > 32 || Data.Structures.Num() > 128 || Data.Resources.Num() > 128 ||
         Data.Creatures.Num() > 8 || Data.Spawners.Num() > 32 || Data.Pickups.Num() > 128)
     { return RefuseWorldRecord(Error, TEXT("Invalid world version/map/clock/record limits")); }
@@ -65,6 +70,12 @@ bool FPFWorldSaveFormat::Validate(const FPFWorldSaveData& Data, const UPFItemCat
         { return RefuseWorldRecord(Error, TEXT("Invalid/duplicate player identity or capture time")); }
         Players.Add(P.PlayerId); Credentials.Add(P.ReconnectCredential);
         if (!Batches(P.Data, 30, P.PlayerId, false)) { return false; }
+        if(Data.Version==1 && !P.Progression.IsEmpty()){return RefuseWorldRecord(Error,TEXT("V1 cannot contain progression"));}
+        if(Data.Version==2)
+        {
+            FPFProgressionRecord Record;const auto* Catalog=Progression?Progression:GetDefault<UPFProgressionCatalog>();
+            if(!UnpackProgression(P.Progression,P.PlayerId,*Catalog,Crafting,Items,Record,Error)){return false;}
+        }
     }
     for (const auto& S : Data.Structures)
     {
@@ -135,8 +146,18 @@ bool FPFWorldSaveFormat::Validate(const FPFWorldSaveData& Data, const UPFItemCat
 
 bool FPFWorldSaveFormat::Encode(const FPFWorldSaveData& Data, TArray<uint8>& Out, FString& Error)
 {
+    auto Root=MakeShared<FJsonObject>();
+    if(!FJsonObjectConverter::UStructToJsonObject(FPFWorldSaveData::StaticStruct(),&Data,Root,0,0))
+    {return RefuseWorldRecord(Error,TEXT("Cannot encode world metadata"));}
+    if(Data.Version==1)
+    {
+        for(const auto& P:Data.Players){if(!P.Progression.IsEmpty()){return RefuseWorldRecord(Error,TEXT("V1 cannot discard progression"));}}
+        const TArray<TSharedPtr<FJsonValue>>* Players=nullptr;
+        if(!Root->TryGetArrayField(TEXT("players"),Players)){return RefuseWorldRecord(Error,TEXT("Cannot encode player array"));}
+        for(const auto& Value:*Players){Value->AsObject()->RemoveField(TEXT("progression"));}
+    }
     FString Json;
-    if (!FJsonObjectConverter::UStructToJsonObjectString(Data, Json, 0, 0, 0, nullptr, false))
+    if (!FJsonSerializer::Serialize(Root,TJsonWriterFactory<TCHAR,TCondensedJsonPrintPolicy<TCHAR>>::Create(&Json)))
     { return RefuseWorldRecord(Error, TEXT("Cannot encode world metadata")); }
     FTCHARToUTF8 Utf8(*Json);
     if (Utf8.Length() > FPFSaveFileStore::MaxPayloadBytes) { return RefuseWorldRecord(Error, TEXT("World metadata exceeds file limit")); }
@@ -153,7 +174,7 @@ bool FPFWorldSaveFormat::Decode(const TArray<uint8>& Bytes, FPFWorldSaveData& Ou
     if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Json), Root) || !Root.IsValid())
     { return RefuseWorldRecord(Error, TEXT("Malformed world JSON")); }
     double Version = 0;
-    if (!Root->TryGetNumberField(TEXT("version"), Version) || Version != 1)
+    if (!Root->TryGetNumberField(TEXT("version"), Version) || (Version != 1 && Version != 2))
     { return RefuseWorldRecord(Error, TEXT("Unsupported world version; migration required")); }
     const TPair<const TCHAR*, int32> Limits[] = {{TEXT("players"), 32}, {TEXT("structures"), 128}, {TEXT("resources"), 128},
         {TEXT("creatures"), 8}, {TEXT("spawners"), 32}, {TEXT("pickups"), 128}};
@@ -163,7 +184,46 @@ bool FPFWorldSaveFormat::Decode(const TArray<uint8>& Bytes, FPFWorldSaveData& Ou
         if (!Root->TryGetArrayField(Limit.Key, Array) || Array->Num() > Limit.Value) { return RefuseWorldRecord(Error, TEXT("Missing/oversized world record array")); }
     }
     FPFWorldSaveData Candidate; FText Why;
+    const TArray<TSharedPtr<FJsonValue>>* Players=nullptr;Root->TryGetArrayField(TEXT("players"),Players);
+    for(const auto& Value:*Players)
+    {
+        if(Value->Type!=EJson::Object){return RefuseWorldRecord(Error,TEXT("Invalid world player record"));}auto Player=Value->AsObject();FString Progression;
+        if(Version==1)
+        {
+            if(Player->HasField(TEXT("progression")) && (!Player->TryGetStringField(TEXT("progression"),Progression) || !Progression.IsEmpty()))
+            {return RefuseWorldRecord(Error,TEXT("V1 cannot conceal progression"));}
+            Player->SetStringField(TEXT("progression"),TEXT("")); // New reflected field has explicit legacy default.
+        }
+        else if(!Player->TryGetStringField(TEXT("progression"),Progression) || Progression.IsEmpty() || Progression.Len()>(FPFProgressionSaveFormat::MaximumBytes+18)/3*4)
+        {return RefuseWorldRecord(Error,TEXT("Missing or oversized V2 progression record"));}
+    }
     if (!FJsonObjectConverter::JsonObjectToUStruct(Root.ToSharedRef(), &Candidate, 0, 0, true, &Why))
     { return RefuseWorldRecord(Error, TEXT("Invalid world metadata fields")); }
     Out = MoveTemp(Candidate); Error.Reset(); return true;
+}
+
+bool FPFWorldSaveFormat::PackProgression(FGuid Owner,const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog,
+    const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Out,FString& Error)
+{
+    if(!Owner.IsValid()){return RefuseWorldRecord(Error,TEXT("Invalid progression owner"));}TArray<uint8> Payload;
+    if(!FPFProgressionSaveFormat::Encode(Record,Catalog,Crafting,Items,Payload,Error)){return false;}
+    TArray<uint8> Owned;FMemoryWriter Writer(Owned,true);Writer<<Owner;Writer.Serialize(Payload.GetData(),Payload.Num());
+    if(Writer.IsError()){return RefuseWorldRecord(Error,TEXT("Progression owner encoding failed"));}Out=FBase64::Encode(Owned);Error.Reset();return true;
+}
+bool FPFWorldSaveFormat::UnpackProgression(const FString& Text,FGuid Owner,const UPFProgressionCatalog& Catalog,
+    const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FPFProgressionRecord& Out,FString& Error)
+{
+    if(!Owner.IsValid() || Text.IsEmpty() || Text.Len()>(FPFProgressionSaveFormat::MaximumBytes+18)/3*4)
+    {return RefuseWorldRecord(Error,TEXT("Invalid progression owner or encoding length"));}TArray<uint8> Owned;
+    if(!FBase64::Decode(Text,Owned) || Owned.Num()<16+28 || Owned.Num()>16+FPFProgressionSaveFormat::MaximumBytes)
+    {return RefuseWorldRecord(Error,TEXT("Invalid owner-bound progression bytes"));}
+    FMemoryReader Reader(Owned,true);FGuid SavedOwner;Reader<<SavedOwner;
+    if(Reader.IsError() || SavedOwner!=Owner){return RefuseWorldRecord(Error,TEXT("Progression owner mismatch"));}
+    TArray<uint8> Payload;Payload.Append(Owned.GetData()+16,Owned.Num()-16);return FPFProgressionSaveFormat::Decode(Payload,Catalog,Crafting,Items,Out,Error);
+}
+bool FPFWorldSaveFormat::DecodeValidated(const TArray<uint8>& Bytes,const UPFItemCatalog& Items,const UPFBuildingCatalog& Buildings,
+    const UPFCraftingCatalog& Crafting,const UPFCreatureCatalog& Creatures,FPFWorldSaveData& Out,FString& Error,const UPFProgressionCatalog* Progression)
+{
+    FPFWorldSaveData Candidate;if(!Decode(Bytes,Candidate,Error) || !Validate(Candidate,Items,Buildings,Crafting,Creatures,Error,Progression)){return false;}
+    Out=MoveTemp(Candidate);Error.Reset();return true;
 }

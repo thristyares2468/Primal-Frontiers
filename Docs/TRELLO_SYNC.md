@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October9 world compatibility: fresh Programming/parentM12 audit selected https://trello.com/c/dgafRfoo Doing. Editor/Game,native5,baseline one-client4/two-client75ms1%loss6 passed; rawlogs0new normalized severity against known baseline. Immediately record WORLD_PROGRESSION_COMPATIBILITY_M12.md evidence/move only this archive task Done; parentM12Doing/Personal gates unchanged. RuntimeV2stillrefuses/no live progression or migration. Scoped Sol publication follows, then fresh board audit before private PlayerState integration.
+
 October9 M12 codec: https://trello.com/c/p08EeRT7 Doing during separate native encoding/default work; Editor/Game and native5/5 passed with zero severity, exact evidence PROGRESSION_CODEC_M12.md. Immediately record evidence/Done, retaining parentM12 Doing/manual gaps. Scoped Sol commit/push and fresh boards precede world compatibility. No private save/world writer/player hook or invented manual gate changed.
 
 October9 M12 record foundation: https://trello.com/c/K9NYY2ad Doing during native transaction work. Retain test-only alias assertion/crash,failed-only retry1/1 and final4/4 clean,Editor/Game passed. Immediately record exact PROGRESSION_RECORDS_M12.md evidence and move only this bounded foundation Done; no live XP/player/save/UI/recipe gate or full milestone claim. ParentM12 staysDoing. Scoped Sol publication and fresh board audit precede compatible codec work.

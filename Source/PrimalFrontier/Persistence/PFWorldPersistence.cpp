@@ -58,7 +58,10 @@ bool UPFWorldPersistence::Encode(const FPFWorldSaveData& Data, TArray<uint8>& Ou
 bool UPFWorldPersistence::Decode(const TArray<uint8>& Bytes, FPFWorldSaveData& Out, FString& Error)
 {
     FPFWorldSaveData Candidate;
-    if (!Authority(Error) || !FPFWorldSaveFormat::Decode(Bytes, Candidate, Error) || !Validate(Candidate, Error)) { return false; }
+    if (!Authority(Error) || !FPFWorldSaveFormat::DecodeValidated(Bytes, *Items, *Buildings, *Crafting, *Creatures, Candidate, Error)) { return false; }
+    // Compatibility bytes can be verified before player progression restoration exists.
+    // Never accept V2 and silently lose its fields during today's V1 capture.
+    if(Candidate.Version==2){Error=TEXT("World V2 progression restoration is not integrated; load refused to preserve saved data");return false;}
     Out = MoveTemp(Candidate); return true;
 }
 
