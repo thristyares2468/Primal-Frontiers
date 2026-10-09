@@ -87,6 +87,12 @@ float UPFInventoryComponent::MeleeDamage() const
 {
     const auto* D=Definition(MeleeItem());return D?D->MeleeDamage:20.f;
 }
+float UPFInventoryComponent::CreatureHitReduction() const
+{
+    float Best=0;const double Now=ServerTime(GetWorld());
+    for(const auto& S:Stacks){if(S.Quantity>0 && (S.ExpiresAt==0 || S.ExpiresAt>Now)){if(const auto* D=Definition(S.ItemId)){Best=FMath::Max(Best,D->CreatureHitReduction);}}}
+    return Best;
+}
 FName UPFInventoryComponent::MeleeItem() const
 {
     float Best=20;FName Id=NAME_None;const double Now=ServerTime(GetWorld());

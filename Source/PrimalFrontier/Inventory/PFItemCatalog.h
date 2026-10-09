@@ -30,7 +30,7 @@ struct FPFItemDefinition
     /** Stable identifier used everywhere (e.g. "Item_Wood"). Never rename once saved data exists. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FName Id;
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FText DisplayName;
-    /** Item.Category.Resource / Food / Tool / Weapon. */
+    /** Item.Category.Resource / Food / Tool / Weapon / Protection. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FGameplayTag Category;
     /** Maximum quantity in one inventory slot (1..1000). */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="1",ClampMax="1000")) int32 StackLimit = 20;
@@ -46,6 +46,8 @@ struct FPFItemDefinition
     /** Performance selected from the server's owned bag; weapons cannot grant gathering. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="8")) int32 GatheringHits = 0;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="100")) float MeleeDamage = 0;
+    /** Best carried Protection item mitigates creature-caused hits only, never needs/hazards. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="0.5")) float CreatureHitReduction = 0;
 };
 
 UCLASS(BlueprintType)

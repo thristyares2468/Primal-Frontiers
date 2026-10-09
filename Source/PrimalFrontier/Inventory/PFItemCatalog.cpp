@@ -11,6 +11,7 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Resource,"Item.Category.Resource");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Food,"Item.Category.Food");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Tool,"Item.Category.Tool");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Weapon,"Item.Category.Weapon");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Protection,"Item.Category.Protection");
 
 UPFItemCatalog::UPFItemCatalog()
 {
@@ -54,6 +55,8 @@ UPFItemCatalog::UPFItemCatalog()
     Items.Last().StackLimit=1;Items.Last().MeleeDamage=40;
     Add(TEXT("Item_BoundClub"),TEXT("Stone-bound club"),2.5f,TAG_PF_Weapon);
     Items.Last().StackLimit=1;Items.Last().MeleeDamage=60;
+    Add(TEXT("Item_WovenGuard"),TEXT("Woven guard"),1.f,TAG_PF_Protection);
+    Items.Last().StackLimit=1;Items.Last().CreatureHitReduction=0.25f;
 }
 
 const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
@@ -70,7 +73,10 @@ const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
             D.GatheringHits<0 || D.GatheringHits>8 || !FMath::IsFinite(D.MeleeDamage) || D.MeleeDamage<0 || D.MeleeDamage>100 ||
             (!D.Category.MatchesTag(TAG_PF_Tool) && D.GatheringHits!=0) ||
             (!D.Category.MatchesTag(TAG_PF_Tool) && !D.Category.MatchesTag(TAG_PF_Weapon) && D.MeleeDamage!=0) ||
-            (D.Category.MatchesTag(TAG_PF_Weapon) && (D.MeleeDamage<=20 || D.StackLimit!=1))) { return nullptr; }
+            (D.Category.MatchesTag(TAG_PF_Weapon) && (D.MeleeDamage<=20 || D.StackLimit!=1)) ||
+            !FMath::IsFinite(D.CreatureHitReduction) || D.CreatureHitReduction<0 || D.CreatureHitReduction>0.5f ||
+            (!D.Category.MatchesTag(TAG_PF_Protection) && D.CreatureHitReduction!=0) ||
+            (D.Category.MatchesTag(TAG_PF_Protection) && (D.CreatureHitReduction<=0 || D.StackLimit!=1))) { return nullptr; }
         Result=&D;
     }
     return Result;

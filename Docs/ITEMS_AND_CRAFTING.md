@@ -1,3 +1,5 @@
+Current bounded M12 protection: Item_WovenGuard,1kg/stack1/nonperishable; Recipe_WovenGuard costs8fibre+1cord+2wood/6s. Best carried guard reduces actual creature-caused server hits25% without stacking, generic/needs/exposure immunity, gathering or melee benefit. Original Protection tag/picture/stat; V1 stable-ID compatible. Exact gates: PROTECTION_M12.md. No equipment slots/worn mesh/XP/durability.
+
 \# Items and Crafting
 
 Current bounded M12 weapon content: Item_Club (wooden club,40melee damage,1.5kg) and Item_BoundClub (stone-bound club,60melee damage,2.5kg), bothstack1/nonperishable/no gathering benefit. Recipe_Club costs3wood+1cord/6seconds; Recipe_BoundClub costs1club+1cord+2stone+2wood/8seconds. Existing Recipe_Cord costs4fibre/4seconds. Native Weapon Gameplay Tags drive the new category; best fresh owned carried item is automatic, no equip slots yet. Exact test/build/save compatibility evidence and provisional-balance limits: WEAPON_TIERS_M12.md. Broader technology/durability entries below remain direction, not implemented claims.

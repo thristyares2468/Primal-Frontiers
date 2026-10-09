@@ -1,5 +1,7 @@
 # Technical Architecture
 
+M12 protection derives the best fresh validated carried guard from owner-only inventory. Server survivor damage recognizes actual creature causers; generic/needs/exposure bypass mitigation. Public health replication shows resulting damage; no protection cache, extra replicated modifier or save field. Existing timed recipe transaction and V1 stable-ID inventory restoration remain authority boundaries. PROTECTION_M12.md records25% nonstacking behavior, data bounds and exact verification; no armor slot/worn-mesh system implemented.
+
 M12 weapons derive melee strength and held item from validated fresh owned inventory independently from gathering benefit. Public character replication carries only held item ID; existing local/remote engine primitives show a club shape. Timed recipe component, server trace/cooldown/life/stamina and V1 stable-ID saves remain the authority boundaries. See WEAPON_TIERS_M12.md; explicit equip slots, PvP,XP,armor and save extensions are separate future slices.
 
 ## Technology

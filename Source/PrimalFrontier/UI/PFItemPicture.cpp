@@ -55,6 +55,12 @@ int32 UPFItemPicture::NativePaint(const FPaintArgs& Args,const FGeometry& G,cons
         if(ItemId==TEXT("Item_BoundClub"))
         {Line({{0.50,0.35},{0.69,0.46}},PFUITheme::Accent,0.045f);Box({0.59,0.13},{0.25,0.23},PFUITheme::Muted,0.06f);}
     }
+    else if(ItemId==TEXT("Item_WovenGuard"))
+    {
+        Box({0.20,0.15},{0.60,0.65},FLinearColor(0.42f,0.35f,0.20f,1),0.08f);
+        for(float Y:{0.30f,0.45f,0.60f}){Line({{0.25,Y},{0.75,Y}},PFUITheme::Accent,0.045f);}
+        for(float X:{0.35f,0.50f,0.65f}){Line({{X,0.20},{X,0.75}},PFUITheme::Muted,0.035f);}
+    }
     else if(ItemId==TEXT("Item_Cord"))
     {
         Line({{0.74,0.76},{0.28,0.76},{0.18,0.54},{0.27,0.26},{0.68,0.23},{0.82,0.49},{0.72,0.66},{0.36,0.64},{0.32,0.43},{0.64,0.39}},FLinearColor(0.72f,0.60f,0.30f,1),0.07f);

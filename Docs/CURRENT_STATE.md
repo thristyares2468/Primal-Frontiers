@@ -2,7 +2,29 @@
 
 Updated October9,2026. This is the current handoff; historical evidence remains in MILESTONES.md and CURRENT_STATE_HISTORY_2026-10-08.md. Implemented does not mean human accepted.
 
-## Latest bounded M12 weapon step
+## Latest bounded M12 protection step
+
+**Protection technical gates PASSED:** one craftable woven guard,25% nonstacking carried creature-hit reduction only, exact8fibre+1cord+2wood/6s cost, no generic/needs/exposure immunity. Editor retry5.59s/Game25.26s clean; native7/7, rendered720p/1440p1/1 each/maxHUD1.5 and one-client4/two-client lag-loss6 Create/Restart reports passed. All test severity/exits0; six PNGs reviewed; personal settings/200–201 unrelated saves unchanged. Raw startup findings retained/no new severity or crash. Real server damage/Health85 replication, private bags, startup restoration, cancellation/refusal/removal/respawn and V1 compatibility checked. Exact evidence/memory/limits: [PROTECTION_M12.md](PROTECTION_M12.md). Trello bounded evidence/Done and scoped Sol publication follow; parentM12 and Personal M8/M11 stay open. Next independent scope: fresh Trello audit, likely persistent progression prerequisite; no M13 advance.
+
+### Retained protection checkpoints (historical sequence)
+
+Protection https://trello.com/c/EN7CXRq3 evidence/Done readback verified; parentM12 Doing and existing Personal1 G2 cards Doing/priorities retained with exact costs/controls. Scoped Sol commit/push next; fresh Trello task selection afterward. No full milestone/human acceptance.
+
+Two-client75mslag/1%loss Create/Restart PASSED6/6 M12ProtectionLive2_20261009_103613412_3d04833a,working/private1.719–1.822/1.577–1.750GiB per process,test severity/exits0,Client2 no crash. Independent original records/private bags/public Health85 and actual restored guards passed. All12 live raw logs show known26rendered/24network warnings+14Python startup error lines, no other severity/fatal/ensure. Game build and final documentation/Trello/publication next.
+
+One-client Create/Restart PASSED4/4 M12ProtectionLive1_20261009_103443674_dc2be119,working/private1.717–1.814/1.570–1.732GiB per process,test severity/exits0. Actual server damage/save/startup restoration/original player record, owned guard/Health85/client identity and save/direct creation refusals checked. Two-client75ms/1%loss next; full milestone/manual gates remain open.
+
+Rendered1440p/maxHUD1.5 PASSED1/1 M12Protection1440_20261009_103335442_3f0bea5f,45.72s,working/private3.207/5.123GiB,test severity/exits0. Three PNGs inspected; settings/201 unrelated saves unchanged. One-client save/restart next before two clients; Game/raw review/documentation pending.
+
+Rendered720p/maxHUD1.5 PASSED1/1 M12Protection720_20261009_102851546_fe05d71f,45.78s,working/private3.092/4.887GiB,test severity/exits0. Three PNGs inspected: guard cost/picture/25% creature-only wording, completion and inventory detail/Health85 fit. Default settings/200 unrelated saves unchanged.1440p,one/two-client restart,Game and raw-log gates pending; no human combat/FPS claim.
+
+Protection Editor retry PASSED5.59s/no compiler warnings; native7/7 Automation_M12Protection_20261009_102744385_9c0acc59,16.35s,working/private2.910/2.772GiB,raw/test severity0/exits0. Real loaded guard, crafting conservation/capacity/refusal,20→15 creature hit vs unmitigated generic/needs, nonstacking/removal/respawn/V1 checked. Rendered/network/Game gates pending.
+
+Protection first Editor FAILED18.96s/exit6 C3535 test-only auto* inference from TObjectPtr (PFM12ProtectionEditorBuild.log). Required .Get() correction made; rebuilding only this step. No runtime protection pass yet.
+
+Weapon84591ba published with Sol coauthor/local-remote equality/clean pre-step status verified. Fresh Programming/HUD board audit and M12 scope selected one woven guard, bounded best-carried25% creature-hit reduction only, exact server craft cost and honest Protection UI. https://trello.com/c/EN7CXRq3 Doing. No equip slots, worn armor mesh, generic/environmental immunity, XP/save-schema/assets; implementation and verification pending. Full M11/M12/Personal gates remain open. Weapon evidence below is historical completed scope, not a protection pass.
+
+## Latest bounded M12 weapon step (published84591ba)
 
 **Weapon technical gates PASSED:** original wooden/stone-bound club recipes (3wood+cord/6s;club+cord+2stone+2wood/8s),40/60creature melee damage with no gathering benefit, native Weapon categories, public held identity and engine primitive shape. Final Editor17.81s/Game24.11s clean; native6/6,720p/1440p rendered1/1each and one-client4/two-client lag-loss6 Create/Restart passed,all test severity/exits0. Six PNGs reviewed; settings/188–189 unrelated saves unchanged. Raw known26rendered/24network warnings+14Python startup lines retained; no new severity/ensure/fatal/crash. First missing-header compile failure fixed/retained. Exact evidence, memory, costs, source, limits: [WEAPON_TIERS_M12.md](WEAPON_TIERS_M12.md). Full M11/M12 and Personal M8/UI/controller gates remain open. Trello bounded task evidence/Done update and scoped Sol publication follow; next independent scope requires fresh boards, likely protection or original XP/knowledge with deliberate save compatibility. No assets/XP/armor/save-schema expansion.
 

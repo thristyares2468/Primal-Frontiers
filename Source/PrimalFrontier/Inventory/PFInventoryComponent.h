@@ -74,6 +74,8 @@ public:
     float MeleeDamage() const;
     /** Stable ID of the best valid carried melee benefit; None means bare hands. */
     FName MeleeItem() const;
+    /** Nonstacking best valid fresh carried Protection benefit; queried by server damage. */
+    float CreatureHitReduction() const;
 
     // ---- Server-only mutations (all atomic) ----
 

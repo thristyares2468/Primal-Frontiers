@@ -32,7 +32,7 @@ struct FPFRecipeDefinition
     /** Stable ID (e.g. "Recipe_Tool"); the only thing a client sends when crafting. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FName Id;
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FText DisplayName;
-    /** Recipe.Category.Tool / Food / Material / Weapon. */
+    /** Recipe.Category.Tool / Food / Material / Weapon / Protection. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FGameplayTag Category;
     /** 1..8 distinct items; none may equal Output (prevents refresh loops). */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) TArray<FPFCraftIngredient> Ingredients;

@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Creatures/PFCreature.h"
 #include "GameFramework/PlayerState.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -135,7 +136,13 @@ float APFSurvivorCharacter::TakeDamage(float Amount, const FDamageEvent& Event, 
     if (!HasAuthority() || !FMath::IsFinite(Amount) || Amount <= 0.f || Survival->IsDead() || !CanBeDamaged()) { return 0.f; }
     const float Before = Survival->GetVitals().Health;
     // Keep Unreal's damage-type and event pipeline; attributes remain authoritative.
-    const float Accepted = Super::TakeDamage(Amount, Event, InstigatorController, Causer);
+    // Protection does not intercept direct needs/exposure damage or unrelated damage causers.
+    float HitAmount=Amount;
+    if(Cast<APFCreature>(Causer))
+    {
+        if(auto* PS=GetPlayerState()){if(auto* I=PS->FindComponentByClass<UPFInventoryComponent>()){HitAmount*=1.f-I->CreatureHitReduction();}}
+    }
+    const float Accepted = Super::TakeDamage(HitAmount, Event, InstigatorController, Causer);
     Survival->ApplyDamage(Accepted);
     // Report what was actually lost (damage is clamped at remaining health).
     return Before - Survival->GetVitals().Health;

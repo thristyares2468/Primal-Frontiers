@@ -18,6 +18,7 @@ PFInventoryDetails::FView PFInventoryDetails::Describe(const FPFItemStack* Stack
     {
         Body+=Stack->ExpiresAt>0?FString::Printf(TEXT("Fresh for %ds (this batch)\n"),FMath::Max(1,FMath::CeilToInt(Stack->ExpiresAt-ServerTime))):TEXT("Does not expire\n");
         Body+=(Definition->FoodRecovery>0 || Definition->WaterRecovery>0)?FString::Printf(TEXT("One portion: +%.0f food / +%.0f water"),Definition->FoodRecovery,Definition->WaterRecovery):TEXT("Not consumable");
+        if(Definition->CreatureHitReduction>0){Body+=FString::Printf(TEXT("\nCarried: %.0f%% creature hit reduction"),Definition->CreatureHitReduction*100);}
     }
     return {Definition->DisplayName,FText::FromString(Body)};
 }

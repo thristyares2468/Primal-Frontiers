@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-09 — Carried guard mitigates only creature-caused server hits
+
+One craftable woven guard provides a bounded25% best-carried benefit, freshly derived from valid owned inventory. Do not stack bonuses or cache/save a modifier. Apply through server survivor TakeDamage only for actual APFCreature causers; generic damage, starvation/dehydration/exposure stay unchanged. Native Protection tags/stack1/finite0–0.5 validation and original procedural picture/details keep the contract explicit. Exact timed inputs/capacity use existing atomic crafting; V1 stable item IDs need no new schema. Public Health and private bags retain their replication boundaries. No equipment slots/worn meshes/durability or immunity added. PROTECTION_M12.md records actual damage, native/rendered/network/restart gates and human limits; balance remains provisional.
+
 ## 2026-10-09 — Weapon tiers preserve the existing server melee boundary
 
 Two original club recipes use the existing timed exact-batch crafting path and native Weapon Gameplay Tags. Inventory derives best validated fresh carried melee item separately from best gathering benefit, with no equip cache/stack bonus/client damage parameter. Server still requires its own2.5m creature trace, life,0.5s cooldown and5stamina. Publish only held stable ID for local/remote engine primitive shape; full bag stays private. Item IDs fit existing V1 records, avoiding needless save migration. Original texture-free UI pictures/statistics are advisory. Weapons confer no gathering benefit; baseline recipes/yields remain. No PvP,XP,armor,repair or human balance acceptance implied. Exact gates/failures/limits: WEAPON_TIERS_M12.md.

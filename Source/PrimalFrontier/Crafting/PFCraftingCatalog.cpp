@@ -11,6 +11,7 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_CraftTool,"Recipe.Category.Tool");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_CraftFood,"Recipe.Category.Food");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_CraftMaterial,"Recipe.Category.Material");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_CraftWeapon,"Recipe.Category.Weapon");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_CraftProtection,"Recipe.Category.Protection");
 
 UPFCraftingCatalog::UPFCraftingCatalog()
 {
@@ -33,6 +34,7 @@ UPFCraftingCatalog::UPFCraftingCatalog()
     AddRecipe(TEXT("Recipe_BoundTool"),TEXT("Bind stone tool"),TEXT("Item_BoundTool"),8,TAG_PF_CraftTool,{{TEXT("Item_Tool"),1},{TEXT("Item_Cord"),1},{TEXT("Item_Wood"),2}});
     AddRecipe(TEXT("Recipe_Club"),TEXT("Shape wooden club"),TEXT("Item_Club"),6,TAG_PF_CraftWeapon,{{TEXT("Item_Wood"),3},{TEXT("Item_Cord"),1}});
     AddRecipe(TEXT("Recipe_BoundClub"),TEXT("Bind stone club"),TEXT("Item_BoundClub"),8,TAG_PF_CraftWeapon,{{TEXT("Item_Club"),1},{TEXT("Item_Cord"),1},{TEXT("Item_Stone"),2},{TEXT("Item_Wood"),2}});
+    AddRecipe(TEXT("Recipe_WovenGuard"),TEXT("Weave protective guard"),TEXT("Item_WovenGuard"),6,TAG_PF_CraftProtection,{{TEXT("Item_Fibre"),8},{TEXT("Item_Cord"),1},{TEXT("Item_Wood"),2}});
 
     // Resource nodes use the struct defaults: 2 items per hit, 3 hits, 20 s regrowth.
     auto AddResource=[&](FName Id,const TCHAR* Name,FName Item)

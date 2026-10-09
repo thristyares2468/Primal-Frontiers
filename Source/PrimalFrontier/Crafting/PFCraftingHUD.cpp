@@ -139,6 +139,7 @@ void UPFCraftingHUD::RefreshMenu()
         if(Output->FoodRecovery>0 || Output->WaterRecovery>0){Stats+=FString::Printf(TEXT("Per portion: +%.0f food | +%.0f water\n"),Output->FoodRecovery,Output->WaterRecovery);}
         if(Output->GatheringHits>0){Stats+=FString::Printf(TEXT("Tool: %d gather hits | %.0f melee damage\n"),Output->GatheringHits,Output->MeleeDamage);}
         else if(Output->MeleeDamage>0){Stats+=FString::Printf(TEXT("Weapon: %.0f melee damage | no gathering benefit\n"),Output->MeleeDamage);}
+        if(Output->CreatureHitReduction>0){Stats+=FString::Printf(TEXT("Carried: %.0f%% creature hit reduction\nNeeds and environmental damage unaffected\n"),Output->CreatureHitReduction*100);}
         Stats+=TEXT("Greybox item preview");
     }
     ItemStats->SetText(FText::FromString(Stats));
