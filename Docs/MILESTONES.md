@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-10 M12 optional learned recipe access
+
+Server checks FieldTools knowledge before reserving BoundTool ingredients and again before conversion; explicit locked feedback, baseline recipes and legacy gear retained. Editor/Game clean (final7.01/14.93s), exact native4 plus V1 retention1, one-client4/two-client lag-loss6 restart and rendered720p1 passed. Four final screenshots/raw baseline/personal hashes inspected. RECIPE_ACCESS_M12.md records exact evidence and retained corrected build/navigation/offscreen fixture failures. Technical subtask complete, purchase controls next; fullM12 and human acceptance remain unverified.
+
 ## 2026-10-10 M12 native selection verdict hardening
 
 RunNativeAutomation requires each requested selector match an exact test/dot-boundary namespace child, refuses unrequested returned tests; optional Inspect ExpectedFilter while legacy no-filter checks remain explicitly SelectionChecked=false. Seven probes against unmodified actual knowledge reports met expected acceptance/refusal. Actual intentional missing+registered engine run Automation_M12FilterNegative_20261009_194323475_9e6ee517 executed clean UI.ProgressionDetails1/1/engine0, strict1 explicitlymissing NoSuchFixture,16.22s,3.030/2.871GiB. Corrected single selector Automation_M12FilterCorrected_20261009_194421138_71c30c2c same1/1/engine-strict0,16.11s,3.024/2.872GiB. Both raw/test severity0/nofatalensure/timeout; expected negative is tooling evidence, no gameplay regression. No C++/assets/personalfiles changed; current Editor14.96s/Game25.27s remain prerequisite builds. Exact NATIVE_SELECTION_CONTRACT.md, https://trello.com/c/Qk6Rk7Wd. No full-prefix-registry/manual/rendered/FPS/fullM12 claim. Next useful optional knowledge UI/recipe gate after freshaudit.

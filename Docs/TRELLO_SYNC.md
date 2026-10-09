@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October10 recipe access: fresh bounded https://trello.com/c/KopaBAfa and parent read. Editor/Game/native4+legacy1/one-client4/two-client lag-loss6/rendered720p exact1 passed, raw baseline/4PNG/personal hash guards reviewed. Retain compiler/fixture failures in RECIPE_ACCESS_M12.md. Immediately evidenceupdate/move/readback only bounded task Done; parentM12Doing and Personal unchanged. ScopedSolpublication then fresh audit for optional knowledge purchase UI, with no human/fullmilestone claim.
+
 October10 selector tooling: fresh Programming audit after4fdb8a6 published/clean/equal; bounded https://trello.com/c/Qk6Rk7Wd Doing. Seven actual-report probes and two real-engine negative/corrected launches meet expected contract; exact NATIVE_SELECTION_CONTRACT.md. Immediately evidenceupdate/move/readbackDone, then scopedSolpublication; parentM12Doing/Personalunchanged. Fresh audit before optional knowledge UI/effect.
 
 October10 knowledge request: fresh bounded https://trello.com/c/LcIKwFdv/parent read; Editor/Game/native3/one-client4/two-client lag-loss6 technical gate passed, all ten rawlogs0new known baseline. Record exact KNOWLEDGE_REQUESTS_M12.md evidence and immediately move/readback only bounded request Done; parentM12Doing, Personal gates unchanged. Scoped Sol publication follows. Next fresh audit selects incomplete native-filter runner verdict hardening before optional knowledge UI/useful recipe effect.

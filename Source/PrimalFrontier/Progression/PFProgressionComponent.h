@@ -21,6 +21,8 @@ public:
     bool Capture(FPFProgressionRecord& Out,FString& Error) const;
     bool CanRestore(const FPFProgressionRecord& Candidate,FString& Error) const;
     bool Restore(const FPFProgressionRecord& Candidate,FString& Error);
+    /** Read-only owner view; Start/completion independently enforce this on the server. */
+    bool CanCraftRecipe(FName Recipe,FString& Error) const;
     /** Owning live pawn only. Server catalog sets price/level; client never supplies XP or target. */
     bool RequestKnowledge(FName Knowledge,APawn* Pawn,FString& Error);
     UFUNCTION(BlueprintPure,Category="Progression") FString GetKnowledgeFeedback() const {return KnowledgeFeedback;}

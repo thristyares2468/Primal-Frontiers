@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Gate optional recipes without removing legacy gear
+
+Use the validated knowledge catalog mapping and private owner record to authorize optional crafting both at start and before conversion. Treat client read-only availability as presentation, never authority. Keep ordinary survival recipes and existing carried tools usable, including V1 zero-default saves; knowledge controls future optional crafts, not ownership of previously created items. Do not retroactively award or rewrite private saves. Tier-mechanics fixtures explicitly seed XP/learn via the real server request; separate access tests prove locked refusal/conservation and restart. Purchase UI remains its own rendered gate. RECIPE_ACCESS_M12.md.
+
 ## 2026-10-10 — Verify owned knowledge request before access/UI
 
 Accept only a lookup ID through the owned controller; validate authoritative live pawn/PlayerState/catalogs,level/prerequisites/price/duplicate and cooldown using server state. Commit candidate only after complete validation; never grant XP/items or accept target/price/amount fields. Private feedback explicitly keeps recipe integration pending. Preserve existing recipes/legacy gear while verifying request/persistence independently; adding purchase controls or a useful restriction needs a separate real gameplay/UI gate. Native/network tests explicitly seed100XP and disclose that this is boundary verification rather than earned-level pacing. KNOWLEDGE_REQUESTS_M12.md has current evidence/limits.

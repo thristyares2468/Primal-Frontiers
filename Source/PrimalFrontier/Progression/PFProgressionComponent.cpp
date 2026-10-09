@@ -33,6 +33,21 @@ bool UPFProgressionComponent::Capture(FPFProgressionRecord& Out,FString& Error) 
 {if(!CanRestore(Record,Error)){return false;}Out=Record;return true;}
 bool UPFProgressionComponent::Restore(const FPFProgressionRecord& Candidate,FString& Error)
 {if(!CanRestore(Candidate,Error)){return false;}Record=Candidate;GetOwner()->ForceNetUpdate();return true;}
+bool UPFProgressionComponent::CanCraftRecipe(FName Recipe,FString& Error) const
+{
+    const auto* PS=Cast<APFInventoryPlayerState>(GetOwner());
+    const auto* Catalog=GetDefault<UPFProgressionCatalog>();
+    if(!IsInGameThread() || !PS || !PS->Crafting || !PS->Inventory || !PS->Crafting->Catalog || !PS->Inventory->Catalog)
+    {Error=TEXT("Progression catalogs unavailable");return false;}
+    if(!FPFProgressionTransactions::Validate(Record,*Catalog,*PS->Crafting->Catalog,*PS->Inventory->Catalog,Error)){return false;}
+    if(!PS->Crafting->Catalog->Recipe(Recipe,PS->Inventory->Catalog)){Error=TEXT("Unknown or invalid recipe");return false;}
+    for(const auto& D:Catalog->Knowledge)
+    {
+        if(D.Recipes.Contains(Recipe) && !Record.Knowledge.Contains(D.Id))
+        {Error=FString::Printf(TEXT("Locked: learn %s (level %d, %d points)"),*D.DisplayName.ToString(),D.MinimumLevel,D.PointCost);return false;}
+    }
+    Error.Reset();return true;
+}
 bool UPFProgressionComponent::RequestKnowledge(FName Id,APawn* Pawn,FString& Error)
 {
     const UPFCraftingCatalog* Crafting=nullptr;const UPFItemCatalog* Items=nullptr;
@@ -52,7 +67,7 @@ bool UPFProgressionComponent::RequestKnowledge(FName Id,APawn* Pawn,FString& Err
         KnowledgeFeedback=FString(TEXT("Refused: "))+Error;GetOwner()->ForceNetUpdate();
         UE_LOG(LogPFSurvival,Display,TEXT("[PrimalProgression] Knowledge request refused; record unchanged"));return false;
     }
-    Record=MoveTemp(Candidate);KnowledgeFeedback=FString::Printf(TEXT("Learned %s; recipe access integration pending"),*GetDefault<UPFProgressionCatalog>()->Find(Id)->DisplayName.ToString());
+    Record=MoveTemp(Candidate);KnowledgeFeedback=FString::Printf(TEXT("Learned %s; recipe access available"),*GetDefault<UPFProgressionCatalog>()->Find(Id)->DisplayName.ToString());
     GetOwner()->ForceNetUpdate();
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalProgression] Knowledge learned; experience=%d level=%d points=%d"),GetExperience(),GetLevel(),GetAvailablePoints());
     Error.Reset();return true;
@@ -60,7 +75,7 @@ bool UPFProgressionComponent::RequestKnowledge(FName Id,APawn* Pawn,FString& Err
 bool UPFProgressionComponent::PrepareCompletedCraft(FName Recipe,FPFProgressionRecord& Candidate,FString& Error) const
 {
     const UPFCraftingCatalog* Crafting=nullptr;const UPFItemCatalog* Items=nullptr;
-    if(!Authority(Crafting,Items,Error) || !FPFProgressionTransactions::Validate(Record,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Error)){return false;}
+    if(!Authority(Crafting,Items,Error) || !CanCraftRecipe(Recipe,Error)){return false;}
     Candidate=Record;
     if(Record.CreditedCrafts.Contains(Recipe)){return true;} // Valid repeat crafts still produce items, never repeated XP.
     return FPFProgressionTransactions::CreditFirstCraft(Candidate,Recipe,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Error);

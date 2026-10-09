@@ -4,6 +4,8 @@
 #include "Crafting/PFCraftingHUD.h"
 #include "Crafting/PFResourceNode.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
+#include "Progression/PFProgressionComponent.h"
 #include "Persistence/PFWorldPersistence.h"
 #include "Persistence/PFSaveFileStore.h"
 #include "Survival/PFSurvivalPlayerController.h"
@@ -15,6 +17,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/ScrollBox.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/PlayerState.h"
 #include "Engine/Engine.h"
@@ -74,6 +77,9 @@ public:
                     N->ResourceId=TEXT("Node_Fibre");N->FinishSpawning(At);
                     Test->TestTrue(TEXT("Authority supplies existing tool only"),P->GetInventory()->Grant(TEXT("Item_Tool"),1));
                     Test->TestTrue(TEXT("Authority supplies two wood"),P->GetInventory()->Grant(TEXT("Item_Wood"),2));
+                    auto* G=P->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();FPFProgressionRecord Seed;Seed.Experience=100;FString Error;
+                    Test->TestTrue(TEXT("Explicit trusted100XP tier-mechanics fixture,not earned progression"),G->Restore(Seed,Error));P->ServerLearnKnowledge(TEXT("Tech_FieldTools"));
+                    Test->TestTrue(TEXT("Tier fixture must actually learn upgrade access"),G->CanCraftRecipe(TEXT("Recipe_BoundTool"),Error));
                 }
                 ServerStage=1;
             }
@@ -150,7 +156,16 @@ public:
             else if(LocalStage==6 && I->Count(TEXT("Item_Cord"))==1 && C->ActiveRecipe.IsNone())
             {
                 Test->TestEqual(TEXT("Exact cord input cost"),I->Count(TEXT("Item_Fibre")),0);
-                if(Menu.IsValid()){Press(EKeys::PageDown);Press(EKeys::PageDown);Press(EKeys::Down);Press(EKeys::Down);Next(21,Now);}else{Start(PC,TEXT("Recipe_BoundTool"));Next(7,Now);}
+                if(Menu.IsValid())
+                {
+                    // Activate the actual Tool button; appended Weapon/Protection categories changed wraparound.
+                    auto* Tool=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_Category1_Button")));
+                    if(!Tool){Test->AddError(TEXT("Missing actual Tool category button"));return true;}
+                    Tool->SetKeyboardFocus();Press(EKeys::SpaceBar);
+                    Test->TestEqual(TEXT("Explicit Tool category after material craft"),Menu->GetSelectedCategory().ToString(),FString(TEXT("Recipe.Category.Tool")));
+                    Press(EKeys::Down);Press(EKeys::Down);Next(21,Now);
+                }
+                else{Start(PC,TEXT("Recipe_BoundTool"));Next(7,Now);}
             }
             else if(LocalStage==21 && Now-Changed>0.5)
             {CheckMenu(TEXT("Recipe_BoundTool"),TEXT("Item_BoundTool"));Shot(TEXT("bound_selected"));Start(PC,TEXT("Recipe_BoundTool"));Next(7,Now);}
@@ -199,7 +214,24 @@ private:
         const FGeometry Root=M->GetCachedGeometry();const auto Size=Root.GetLocalSize();
         auto* Panel=M->WidgetTree->FindWidget(TEXT("PF_CraftingPanel"));const auto G=Panel->GetCachedGeometry();const auto TL=Root.AbsoluteToLocal(G.LocalToAbsolute(FVector2D::ZeroVector)),BR=Root.AbsoluteToLocal(G.LocalToAbsolute(G.GetLocalSize()));
         Test->TestTrue(TEXT("Menu remains centered and fits viewport"),TL.X>=0 && TL.Y>=0 && BR.X<Size.X && BR.Y<Size.Y && FMath::Abs(TL.X+BR.X-Size.X)<4);
-        TArray<UWidget*> Children;M->WidgetTree->GetAllWidgets(Children);for(auto* Child:Children){if(auto* Text=Cast<UTextBlock>(Child)){const auto Geometry=Text->GetCachedGeometry();Test->TestTrue(TEXT("Expanded menu text fits allocated row"),Text->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);}}
+        const FString SelectedRow=FString::Printf(TEXT("PF_Recipe%d_"),M->GetVisibleRecipeIds().IndexOfByKey(M->GetSelectedRecipe()));
+        TArray<UWidget*> Children;M->WidgetTree->GetAllWidgets(Children);
+        for(auto* Child:Children)
+        {
+            if(auto* Text=Cast<UTextBlock>(Child))
+            {
+                const auto Geometry=Text->GetCachedGeometry();
+                if(Geometry.GetLocalSize().Y==0)
+                {
+                    // ScrollBox culls recipe rows outside its viewport. Zero is not an allocated visible row.
+                    bool Scrollable=false;for(auto* Parent=Text->GetParent();Parent;Parent=Parent->GetParent()){if(Cast<UScrollBox>(Parent)){Scrollable=true;break;}}
+                    const bool OffscreenRecipe=Scrollable && Text->GetName().StartsWith(TEXT("PF_Recipe")) && !Text->GetName().StartsWith(SelectedRow);
+                    Test->TestTrue(TEXT("Only unselected scroll-managed recipe text may be culled"),OffscreenRecipe);
+                    if(OffscreenRecipe){continue;}
+                }
+                Test->TestTrue(FString::Printf(TEXT("Displayed menu text fits allocated row: %s desired=%.1f allocated=%.1f"),*Text->GetName(),Text->GetDesiredSize().Y,Geometry.GetLocalSize().Y),Text->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);
+            }
+        }
         if(Item==TEXT("Item_BoundTool")){auto* Stats=Cast<UTextBlock>(M->WidgetTree->FindWidget(TEXT("PF_CraftingDetail_Stats")));Test->TestTrue(TEXT("Selected tier statistics visible"),Stats && Stats->GetText().ToString().Contains(TEXT("3 gather hits | 45 melee damage")));}
     }
     FAutomationTestBase* Test;FString Directory,Slot,LastObserved;TArray<FString> Shots;TWeakObjectPtr<UPFCraftingHUD> Menu;

@@ -8,7 +8,7 @@
 class UPFCraftingCatalog;
 class UPFItemCatalog;
 
-/** Optional knowledge metadata. It does not gate recipes until a server integration is verified. */
+/** Optional learned recipes. Baseline survival recipes may never be assigned here. */
 USTRUCT(BlueprintType)
 struct FPFKnowledgeDefinition
 {

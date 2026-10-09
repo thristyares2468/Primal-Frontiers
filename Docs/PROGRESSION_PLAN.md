@@ -1,5 +1,7 @@
 # Original progression and biological upgrades — M12/M13 plan
 
+October10 optional recipe access: authoritative FieldTools → BoundTool start/completion gate, baseline survival preserved and actual V1 carried gear retained. Native4+legacy1 and one-/two-client access/restart gates passed; rendered fixture corrections/evidence pending in RECIPE_ACCESS_M12.md. This supersedes non-gating metadata statements below. Purchase UI still future; trusted100XP fixtures do not prove leveling pace. Native selector verdict has already been hardened/published6060557.
+
 Final October10 request technical gate: native3/3, one-client4/4, two-client75ms/1%loss6/6 restart, Editor/Game passed. KNOWLEDGE_REQUESTS_M12.md retains discovery/filter gaps and reviewed raw baseline. Owner knowledge purchase/replication/persistence is verified; useful recipe access and purchase UI remain unimplemented. FullM12/M13/human acceptance stays open; incomplete native-filter verdict is a small tooling prerequisite for further gates.
 
 October10 purchase-boundary checkpoint: KNOWLEDGE_REQUESTS_M12.md adds ownedID-only RPC/server life/relationship/cooldown/catalog point checks and private feedback. Native and one-client restart passed; remaining2client/Game gates recorded there. Existing records persist purchases, but recipe metadata remainsnon-gating and UI stillhasno purchase button. Do not present this as playable technology access; usefuleffect/UI and broader rewards stillneedtheir own gates.

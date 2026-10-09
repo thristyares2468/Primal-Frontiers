@@ -3,6 +3,7 @@
 #include "Progression/PFProgressionComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Crafting/PFCraftingComponent.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFSurvivorCharacter.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -33,7 +34,7 @@ public:
         for(auto It=W->GetPlayerControllerIterator();It;++It){auto* PC=Cast<APFSurvivalPlayerController>(It->Get());if(PC && PC->GetPawn() && PC->GetInventory() && Progression(PC)){Players.Add(PC);}}
         if(Players.Num()!=(bClient?1:Expected)){return false;}
         Players.Sort([](const auto& A,const auto& B){return A.PlayerState->GetPlayerId()<B.PlayerState->GetPlayerId();});
-        auto* PC=Players[0];auto* G=Progression(PC);auto* I=PC->GetInventory();FString Error;
+        auto* PC=Players[0];auto* G=Progression(PC);auto* I=PC->GetInventory();auto* C=PC->GetCrafting();if(!C){return false;}FString Error;
         auto Next=[&](int32 N){Stage=N;Changed=Now;};
         if(bRestore)
         {
@@ -41,11 +42,25 @@ public:
             if(bClient)
             {
                 if(PC->GetPlayerSetupStatus()!=EPFPlayerSetupStatus::Restored || !Privacy(W,PC)){return false;}
-                CheckState(PC);const FString Feedback=G->GetKnowledgeFeedback();
-                Test->TestFalse(TEXT("Restored client direct mutation refuses"),G->RequestKnowledge(TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
-                Test->TestEqual(TEXT("Client cannot forge restored feedback"),G->GetKnowledgeFeedback(),Feedback);
-                Test->TestFalse(TEXT("Client cannot save knowledge"),W->GetSubsystem<UPFWorldPersistence>()->Save(Slot,Error));
-                Test->AddInfo(TEXT("[PrimalProgression] Knowledge restart client identity,spent points,private records and refusal verified"));
+                if(Stage==0)
+                {
+                    CheckState(PC);const FString Feedback=G->GetKnowledgeFeedback();
+                    Test->TestFalse(TEXT("Restored client direct mutation refuses"),G->RequestKnowledge(TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
+                    Test->TestEqual(TEXT("Client cannot forge restored feedback"),G->GetKnowledgeFeedback(),Feedback);
+                    Test->TestFalse(TEXT("Client cannot save knowledge"),W->GetSubsystem<UPFWorldPersistence>()->Save(Slot,Error));
+                    PC->ServerCraftAction(TEXT("Recipe_BoundTool"),false);Next(20);return false;
+                }
+                if(Stage==20 && Now-Changed>.7)
+                {
+                    if(I->Count(TEXT("Item_Stone"))==1)
+                    {if(C->ActiveRecipe!=TEXT("Recipe_BoundTool")){return false;}PC->ServerCraftAction(NAME_None,true);Next(21);return false;}
+                    if(!C->Feedback.StartsWith(TEXT("Locked:"))){return false;}Test->TestTrue(TEXT("Unlearned restored RPC stays idle"),C->ActiveRecipe.IsNone());
+                }
+                else if(Stage==21 && Now-Changed>.7)
+                {if(!C->ActiveRecipe.IsNone() || !C->Feedback.StartsWith(TEXT("Cancelled"))){return false;}}
+                else{return false;}
+                CheckState(PC);Test->AddInfo(TEXT("[PrimalProgression] Knowledge restart client identity,spent points,private records and refusal verified"));
+                Test->AddInfo(TEXT("[PrimalProgression] Restored learned/locked recipe RPC and cancel conserve inputs"));
             }
             else
             {
@@ -68,13 +83,14 @@ public:
                     auto* Pawn=CastChecked<APFSurvivorCharacter>(P->GetPawn());Pawn->GetCharacterMovement()->DisableMovement();Pawn->SetActorLocation(FVector(-1200,Index*400,100));
                     Pawn->Survival->HungerDrainPerSecond=0;Pawn->Survival->ThirstDrainPerSecond=0;
                     Test->TestTrue(TEXT("Trusted identity role marker,not reward"),P->GetInventory()->Grant(TEXT("Item_Stone"),++Index));
+                    Test->TestTrue(TEXT("Trusted recipe-access ingredients,not purchase output"),P->GetInventory()->Grant(TEXT("Item_Tool"),1) && P->GetInventory()->Grant(TEXT("Item_Cord"),1) && P->GetInventory()->Grant(TEXT("Item_Wood"),2));
                     FPFProgressionRecord Seed;Seed.Experience=100;Test->TestTrue(TEXT("Explicit trusted100XP fixture,not earned pacing"),Progression(P)->Restore(Seed,Error));
                 }
                 Test->AddInfo(TEXT("[PrimalProgression] Seeded explicit100XP fixtures for purchase boundary,not an earned gameplay claim"));Next(1);return false;
             }
             if(Stage==1)
             {
-                for(auto* P:Players){auto* PG=Progression(P);if(!Restored(P) || !PG->GetKnowledgeFeedback().StartsWith(TEXT("Refused:"))){return false;}}
+                for(auto* P:Players){auto* PG=Progression(P);auto* Craft=P->GetCrafting();const bool Learned=P->GetInventory()->Count(TEXT("Item_Stone"))==1;if(!Restored(P) || !PG->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) || !Craft || !Craft->ActiveRecipe.IsNone() || !Craft->Feedback.StartsWith(Learned?TEXT("Cancelled"):TEXT("Locked:"))){return false;}}
                 for(auto* P:Players){CheckState(P);}Test->TestTrue(TEXT("Actual isolated knowledge save"),W->GetSubsystem<UPFWorldPersistence>()->Save(Slot,Error));if(!Error.IsEmpty()){Test->AddError(Error);}
                 Test->AddInfo(TEXT("[PrimalProgression] Knowledge server exact owned purchase,private record and save verified"));Next(99);return false;
             }
@@ -87,21 +103,24 @@ public:
                 Test->TestEqual(TEXT("Fresh seeded three points"),G->GetAvailablePoints(),3);Test->TestTrue(TEXT("No knowledge granted withXP"),G->GetRecord().Knowledge.IsEmpty());
                 Test->TestFalse(TEXT("Client cannot directly spend points"),G->RequestKnowledge(TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
                 Test->TestTrue(TEXT("Client cannot forge request feedback"),G->GetKnowledgeFeedback().IsEmpty());
-                PC->ServerLearnKnowledge(TEXT("Tech_Unknown"));Next(1);return false;
+                PC->ServerCraftAction(TEXT("Recipe_BoundTool"),false);PC->ServerLearnKnowledge(TEXT("Tech_Unknown"));Next(1);return false;
             }
             if(Stage==1 && Now-Changed>.7)
             {
                 if(!G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:"))){return false;}
+                if(!C->Feedback.StartsWith(TEXT("Locked:"))){return false;}Test->TestTrue(TEXT("Fresh locked RPC consumes no ingredients"),C->ActiveRecipe.IsNone() && I->Count(TEXT("Item_Tool"))==1 && I->Count(TEXT("Item_Cord"))==1 && I->Count(TEXT("Item_Wood"))==2);
                 Test->TestTrue(TEXT("Invalid owned RPC leaves record and inventory"),G->GetRecord().Knowledge.IsEmpty() && G->GetExperience()==100 && I->Count(TEXT("Item_Stone"))>=1);
                 if(I->Count(TEXT("Item_Stone"))==1){PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));Next(2);}
                 else{Next(4);}return false;
             }
             if(Stage==2 && Now-Changed>.7)
             {
-                if(G->GetRecord().Knowledge.Num()!=1){return false;}CheckState(PC);PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));Next(3);return false;
+                if(G->GetRecord().Knowledge.Num()!=1){return false;}CheckState(PC);PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));PC->ServerCraftAction(TEXT("Recipe_BoundTool"),false);Next(3);return false;
             }
             if(Stage==3 && Now-Changed>.7)
-            {if(!G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:"))){return false;}Next(4);return false;}
+            {if(!G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) || C->ActiveRecipe!=TEXT("Recipe_BoundTool")){return false;}PC->ServerCraftAction(NAME_None,true);Next(5);return false;}
+            if(Stage==5 && Now-Changed>.7)
+            {if(!C->ActiveRecipe.IsNone() || !C->Feedback.StartsWith(TEXT("Cancelled"))){return false;}Next(4);return false;}
             if(Stage==4)
             {
                 if(!Privacy(W,PC)){return false;}CheckState(PC);
@@ -122,7 +141,8 @@ private:
         auto* G=Progression(P);const int32 Marker=P->GetInventory()->Count(TEXT("Item_Stone"));
         Test->TestEqual(TEXT("Purchase never changes XP"),G->GetExperience(),100);Test->TestEqual(TEXT("Derived point spending exact per owner"),G->GetAvailablePoints(),Marker==1?1:3);
         Test->TestTrue(TEXT("Correct independent knowledge"),Marker==1?G->GetRecord().Knowledge==TArray<FName>{FName(TEXT("Tech_FieldTools"))}:G->GetRecord().Knowledge.IsEmpty());
-        Test->TestTrue(TEXT("No crafting credit or free items"),G->GetRecord().CreditedCrafts.IsEmpty() && P->GetInventory()->GetStacks().Num()==1 && (Marker==1 || Marker==2));
+        Test->TestTrue(TEXT("No crafting credit or free items, exact access fixture inputs"),G->GetRecord().CreditedCrafts.IsEmpty() && P->GetInventory()->GetStacks().Num()==4 && (Marker==1 || Marker==2) && P->GetInventory()->Count(TEXT("Item_Tool"))==1 && P->GetInventory()->Count(TEXT("Item_Cord"))==1 && P->GetInventory()->Count(TEXT("Item_Wood"))==2 && P->GetInventory()->Count(TEXT("Item_BoundTool"))==0);
+        FString Error;Test->TestEqual(TEXT("Recipe access follows this owner's persisted knowledge"),G->CanCraftRecipe(TEXT("Recipe_BoundTool"),Error),Marker==1);
     }
     bool Privacy(UWorld* W,APFSurvivalPlayerController* PC)
     {

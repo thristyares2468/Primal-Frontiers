@@ -9,6 +9,8 @@
 #include "Persistence/PFPlayerSaveFormat.h"
 #include "PFAssetPaths.h"
 #include "Creatures/PFCreature.h"
+#include "Inventory/PFInventoryPlayerState.h"
+#include "Progression/PFProgressionComponent.h"
 #if WITH_DEV_AUTOMATION_TESTS
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerState.h"
@@ -49,6 +51,9 @@ bool FPFToolProgressionTest::RunTest(const FString&)
     TestEqual(TEXT("Capacity refusal preserves fibre"),I->Count(TEXT("Item_Fibre")),4);TestEqual(TEXT("Capacity refusal no output"),I->Count(TEXT("Item_Cord")),1);
     I->Grant(TEXT("Item_Tool"),1);I->Grant(TEXT("Item_Wood"),2);
     TestEqual(TEXT("Baseline tier gathering"),I->GatheringHits(),2);TestEqual(TEXT("Baseline tier melee"),I->MeleeDamage(),35.f);
+    auto* G=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();FPFProgressionRecord Seed=G->GetRecord();Seed.Experience=100;FString AccessError;
+    TestFalse(TEXT("Tool upgrade requires learned knowledge"),C->Start(TEXT("Recipe_BoundTool"),P));
+    TestTrue(TEXT("Explicit trusted XP fixture for tier mechanics"),G->Restore(Seed,AccessError));PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));
     TestTrue(TEXT("Upgrade starts"),C->Start(TEXT("Recipe_BoundTool"),P));TestTrue(TEXT("Upgrade cancellation"),C->Cancel());
     TestEqual(TEXT("Cancellation retains tool"),I->Count(TEXT("Item_Tool")),1);
     TestTrue(TEXT("Upgrade restarts"),C->Start(TEXT("Recipe_BoundTool"),P));Advance();

@@ -57,6 +57,7 @@ bool FPFProgressionComponentTest::RunTest(const FString&)
     FPFProgressionRecord Seed=G->GetRecord();Seed.Experience=100;Seed.Knowledge={FName(TEXT("Tech_FieldTools"))};
     if(!TestTrue(TEXT("Trusted server restores valid earned fixture"),G->Restore(Seed,Error))){AddError(Error);return false;}
     TestTrue(TEXT("Derived level/points"),G->GetLevel()==2 && G->GetAvailablePoints()==1);
+    TestTrue(TEXT("Trusted existing bound-tool compatibility fixture"),I->Grant(TEXT("Item_BoundTool"),1));
     auto Bad=Seed;Bad.Experience=19;TestFalse(TEXT("Invalid accounting refused atomically"),G->Restore(Bad,Error));TestEqual(TEXT("Invalid restore preserves XP"),G->GetExperience(),100);
     PS->SetRole(ROLE_AutonomousProxy);FPFProgressionRecord ClientOut=Seed;ClientOut.Experience=250;
     TestFalse(TEXT("Client direct restore refuses"),G->Restore({},Error));TestFalse(TEXT("Client capture refuses"),G->Capture(ClientOut,Error));TestTrue(TEXT("Client outputs/state unchanged"),ClientOut.Experience==250 && G->GetExperience()==100);PS->SetRole(ROLE_Authority);
@@ -70,6 +71,7 @@ bool FPFProgressionComponentTest::RunTest(const FString&)
     Snapshot.Version=1;for(auto& Entry:Snapshot.Players){Entry.Progression.Reset();}TArray<uint8> LegacyBytes;
     if(!TestTrue(TEXT("Write legacy fixture"),FPFWorldSaveFormat::Encode(Snapshot,LegacyBytes,Error) && FPFSaveFileStore::Write(LegacySlot,LegacyBytes,Error)) || !TestTrue(TEXT("Runtime V1 default migration"),Persistence->Load(LegacySlot,Error))){AddError(Error);return false;}
     TestTrue(TEXT("Legacy existing tools do not give retrospective XP"),I->Count(TEXT("Item_Tool"))==3 && G->GetExperience()==0 && G->GetRecord().Knowledge.IsEmpty() && G->GetRecord().CreditedCrafts.IsEmpty());
+    TestTrue(TEXT("Actual V1 existing bound tool remains usable but grants no learned recipe"),I->Count(TEXT("Item_BoundTool"))==1 && I->GatheringHits()==3 && !G->CanCraftRecipe(TEXT("Recipe_BoundTool"),Error));
     if(!TestTrue(TEXT("Explicit save publishes migrated V2"),Persistence->Save(Slot,Error) && Persistence->Load(Slot,Error))){AddError(Error);return false;}TestEqual(TEXT("Repeated migrated restore stays zero"),G->GetExperience(),0);
     Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Real craft success/dedupe/failure/grant refusal, private component authority, V2 repeated files, death/respawn and V1 zero defaults checked."));return true;
 }

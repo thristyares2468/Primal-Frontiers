@@ -3,6 +3,7 @@
 #include "Crafting/PFCraftingComponent.h"
 #include "PFAssetPaths.h"
 #include "Progression/PFProgressionComponent.h"
+#include "Progression/PFProgressionCatalog.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
@@ -45,6 +46,10 @@ bool UPFCraftingComponent::Start(FName Id,APawn* Pawn)
     auto* I=Inventory();
     const auto* Recipe=I && Catalog ? Catalog->Recipe(Id,I->Catalog):nullptr;
     if(!Recipe){Finish(TEXT("Refused: unknown or invalid recipe"));return false;}
+    auto* Progression=GetOwner()->FindComponentByClass<UPFProgressionComponent>();FString AccessError;
+    const bool Optional=GetDefault<UPFProgressionCatalog>()->Knowledge.ContainsByPredicate([Id](const auto& D){return D.Recipes.Contains(Id);});
+    if((Progression && !Progression->CanCraftRecipe(Id,AccessError)) || (!Progression && Optional))
+    {Finish(AccessError.IsEmpty()?TEXT("Locked: progression unavailable"):AccessError);return false;}
     I->PruneExpired();
     TArray<FPFItemStack> Selected;
 
@@ -108,7 +113,7 @@ void UPFCraftingComponent::TickComponent(float Delta,ELevelTick Type,FActorCompo
     auto* Progression=GetOwner()->FindComponentByClass<UPFProgressionComponent>();FPFProgressionRecord Reward;FString Error;
     // Validate the prospective reward before consuming inputs. Commit it only after actual item conversion.
     const bool RewardReady=!Progression || Progression->PrepareCompletedCraft(ActiveRecipe,Reward,Error);
-    if(!RewardReady){Finish(TEXT("Failed: progression validation refused; no conversion"));return;}
+    if(!RewardReady){Finish(TEXT("Failed: recipe access or progression validation refused; no conversion"));return;}
     const bool Done=I && I->Transform(Inputs,PendingRecipe.Output,PendingRecipe.OutputQuantity);
     if(Done && Progression){Progression->CommitCompletedCraft(Reward);}
     Finish(Done?TEXT("Completed"):TEXT("Failed: ingredients changed/expired or output will not fit; no conversion"));
