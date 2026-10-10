@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## October10 progression guidance checkpoint
+
+Read-only locked recipe guidance now explains limited gathering and unique first-craft XP; current PROGRESSION_PLAN section separates implemented owner-private earning/save/FieldTools from historical proposals. Editor16.21s/Game23.10s clean; ProgressionDetails native1/1 and ProgressionFeedbackLive720p+1440p1/1each passed exact selection/exits/test0/no timeout. All16PNG reviewed/actual hint fits, raw26warning/14Pythonerror baseline unchanged/no assertfatalensure;288/289personal saves and default settings hashes unchanged. PROGRESSION_GUIDANCE_M12.md has exact commands, paths, peaks and trusted UI seed limits. No failed gate/reward/schema/network/assets changes. Bounded https://trello.com/c/HxqYElNZ technically complete; fullM11/M12/Personal stayopen. Fresh Trello audit precedes another independently actionable objective.
+
 ## October10 earned death/respawn checkpoint
 
 Earned native death/respawn conservation passed1/1 plus Component/GatherEvents/Survival.Lifecycle3/3; rendered EarnedCombat final1/1/default timer/205XP exact inventory+knowledge+ledger+window aging passed. Nine finalPNG inspected, personal287saves/default settings unchanged, known26warning/14Pythonerror baseline unchanged/no assertfatalensure. Editor7.54s/Game23.81s clean. EARNED_RESPAWN_M12.md records exact commands, paths, memory and retained initial test-only compile failure/capture-timing improvement. No production/network/assets changes or new multiplayer death certificate. Bounded https://trello.com/c/cUuBsCUy technically complete; fullM12/Personal remainopen. Next fresh Trello audit for current progression guidance; human pacing/combat/controller/persistence/FPS never assumed passed.

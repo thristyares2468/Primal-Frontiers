@@ -43,7 +43,7 @@ PFProgressionDetails::FKnowledgeView PFProgressionDetails::DescribeKnowledge(con
     for(FName Id:D->Prerequisites){if(!Record->Knowledge.Contains(Id)){Missing.Add(Catalog->Find(Id)->DisplayName.ToString());}}
     if(!Missing.IsEmpty()){Requirement+=TEXT("\nLearn first: ")+FString::Join(Missing,TEXT(", "));}
     auto Candidate=*Record;View.bCanLearn=FPFProgressionTransactions::Purchase(Candidate,D->Id,*Catalog,*Crafting,*Items,Error);
-    if(FPFProgressionTransactions::LevelForExperience(Record->Experience)<D->MinimumLevel){Requirement+=TEXT("\nComplete different recipes to earn first-craft XP.");}
+    if(FPFProgressionTransactions::LevelForExperience(Record->Experience)<D->MinimumLevel){Requirement+=TEXT("\nGather resources for limited XP, or complete different recipes for first-craft XP.");}
     else if(Points<D->PointCost){Requirement+=TEXT("\nNot enough knowledge points.");}
     View.Requirement=FText::FromString(Requirement);
     View.Button=FText::FromString(FString::Printf(TEXT("Learn for %d points (K / D-right)"),D->PointCost));return View;

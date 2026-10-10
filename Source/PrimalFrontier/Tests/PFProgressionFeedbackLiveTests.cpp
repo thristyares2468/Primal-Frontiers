@@ -65,6 +65,7 @@ public:
             Menu->RefreshMenu();Test->TestFalse(TEXT("Level one Learn button disabled"),Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled());
             Test->TestFalse(TEXT("Locked optional Craft button disabled"),Button(TEXT("PF_CraftSelected"))->GetIsEnabled());
             Test->TestTrue(TEXT("Real level cost available requirement"),Text(TEXT("PF_KnowledgeRequirement")).Contains(TEXT("Level 2 | Cost 2 points | Available 0")));
+            Test->TestTrue(TEXT("Real locked guide explains limited gathering and unique craft rewards"),Text(TEXT("PF_KnowledgeRequirement")).Contains(TEXT("Gather resources for limited XP")) && Text(TEXT("PF_KnowledgeRequirement")).Contains(TEXT("different recipes for first-craft XP")));
             Press(EKeys::K);Press(EKeys::Gamepad_DPad_Right);Press(EKeys::Enter);Test->TestEqual(TEXT("Locked UI never invents XP"),Progression->GetExperience(),0);
             Test->TestTrue(TEXT("Locked keys send no craft"),PC->GetCrafting()->ActiveRecipe.IsNone());Test->TestTrue(TEXT("Locked keys grant no knowledge"),Progression->GetRecord().Knowledge.IsEmpty());
             Bounds(true);Shot(TEXT("knowledge_level_locked"));Wait(Now,.6,16);return false;

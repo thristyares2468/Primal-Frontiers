@@ -1,5 +1,21 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M11/M12 progression guidance — technical gate passed
+
+Read-only locked recipe guidance now explains limited gathering and unique first-craft XP; current PROGRESSION_PLAN section separates implemented owner-private earning/save/FieldTools from historical proposals. Editor16.21s/Game23.10s clean; ProgressionDetails native1/1 and ProgressionFeedbackLive720p+1440p1/1each passed exact selection/exits/test0/no timeout. All16PNG reviewed/actual hint fits, raw26warning/14Pythonerror baseline unchanged/no assertfatalensure;288/289personal saves and default settings hashes unchanged. PROGRESSION_GUIDANCE_M12.md has exact commands, paths, peaks and trusted UI seed limits. No failed gate/reward/schema/network/assets changes. Bounded https://trello.com/c/HxqYElNZ technically complete; fullM11/M12/Personal stayopen. Fresh Trello audit precedes another independently actionable objective.
+
+## 2026-10-10 M11/M12 progression guidance — verification pending
+
+1440p ProgressionFeedbackLive PASSED1/1 M11Progression1440_20261010_043950978_341ea993,51.81s,working/private3.210/5.625GiB;289personal saves/default settings unchanged/exits0/test0/no timeout. Both raw baselines26warning/14Pythonerror unchanged/no assertfatalensure;720p8PNG reviewed,1440p remaining artifact review/Game next. FullM11/M12/Personal unchanged.
+
+Rendered ProgressionFeedbackLive720p PASSED1/1 M11Progression720_20261010_043836298_b0dae995,51.75s,working/private3.134/5.048GiB; exact selection/exits/test0/no timeout,288personal saves/default settings unchanged. Updated locked hint PNG inspected/readable/in scroll.1440p next; remainingPNG/raw/Game gate pending.
+
+Native ProgressionDetails PASSED1/1 Automation_M12ProgressionGuide_20261010_043738395_214d1aa1,16.57s,working/private2.952/2.816GiB; exact selector/exits/test/raw0/no timeout/assertfatalensure. Missing/invalid/locked/learned view remains truthful. Rendered720p/HUD1.5 next; no UI artifact pass yet.
+
+Editor PASSED16.21s clean PFM12ProgressionGuideEditorBuild.log; exact native read-only progression view next, rendered only after native pass. No reward/authority/schema change.
+
+Respawn21dea55 published/remoteequal/clean; fresh HUD/parent audit selected https://trello.com/c/HxqYElNZ Doing. Existing locked view now explains limited gathering XP and first-craft XP from different recipes; no authoritative reward/cost/schema/input change. Existing native invalid/learned view and rendered locked hint/bounds assertions extended. PROGRESSION_PLAN current-status block separates actual implemented/privateV2 earning from historical/future technology/adaptation proposals. Uncompiled/untested; next Editor, exact native view, rendered720p then1440p, Game/artifact/raw/hash checks. FullM11/M12/Personal stay open.
+
 ## 2026-10-10 M12 earned death/respawn — bounded technical gate passed
 
 Earned native death/respawn conservation passed1/1 plus Component/GatherEvents/Survival.Lifecycle3/3; rendered EarnedCombat final1/1/default timer/205XP exact inventory+knowledge+ledger+window aging passed. Nine finalPNG inspected, personal287saves/default settings unchanged, known26warning/14Pythonerror baseline unchanged/no assertfatalensure. Editor7.54s/Game23.81s clean. EARNED_RESPAWN_M12.md records exact commands, paths, memory and retained initial test-only compile failure/capture-timing improvement. No production/network/assets changes or new multiplayer death certificate. Bounded https://trello.com/c/cUuBsCUy technically complete; fullM12/Personal remainopen. Next fresh Trello audit for current progression guidance; human pacing/combat/controller/persistence/FPS never assumed passed.

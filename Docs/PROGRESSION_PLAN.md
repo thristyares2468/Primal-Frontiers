@@ -1,5 +1,18 @@
 # Original progression and biological upgrades — M12/M13 plan
 
+## Current implementation — October 10
+
+Read this section as current state. Dated checkpoints below retain historical evidence; the original proposal sections do not imply that their stations, discoveries or adaptations exist.
+
+- PlayerState holds server-authoritative XP and learned recipe access, replicated owner-only. First completion of each distinct recipe grants at most 20 XP once; failed, cancelled and repeated crafts grant no craft XP.
+- Successful owned gathering grants up to 5 XP per action, at most five credits per resource category in a 30-minute active-server window. Exhausted budgets still allow normal finite gathering. Categories are wood, stone, fibre, food and water; more yielded items from a better tool do not multiply the reward. Remaining windows pause offline and survive server restart. Food expiration uses its separate offline-aging policy.
+- Field Tools is the only implemented knowledge purchase: level 2, two earned points, optional bound-tool recipe access. Baseline food, cord, tool, weapon and shelter access remain available. The proposed six-entry graph below is future design, not additional current unlocks.
+- Current saves use the tested world V2 owner wrapper and compatible inner progression V1/V2 records, including earned recipe history and bounded gather windows. Old saves initialize zero progression without retroactive rewards. Earlier text describing these as future migrations is historical.
+- Ordinary death/default respawn conserves earned inventory IDs/freshness, XP, knowledge, first-craft ledger and aged windows. Exact native/rendered evidence: EARNED_RESPAWN_M12.md. Real fresh earned route reaches205XP through gathering, crafting and protection; this is a controlled technical route, not human pacing acceptance.
+- No repair/durability, respec station, discovery credits, adaptation, equipped biological modifier, second technology purchase or new world expansion is implemented by these progression slices. M13 remains a separate future gate.
+
+The locked crafting hint now names limited gathering rewards and unique first-craft rewards. Native1/1/rendered720p+1440p1/1each/Editor+Game and16inspectedPNG passed; exact evidence in PROGRESSION_GUIDANCE_M12.md. Full M11/M12 and the existing personal gates remain open.
+
 October10 successful gathering source now connected: GATHER_EVENTS_M12.md verifies actual server inventory conversion,5XP/action/five credits per category/1800active seconds, one credit per tool action and private counts/durations across one-/two-client server restart. Exact native7/rendered1/network4+6/Editor+Game gates passed. Fresh earned route is60gather→160firstcraft→180boundtool→185fibre→205guard, superseding earlier zero-gather/historical100/120/140 totals below. No retroactive rewards, free item grants or human pacing acceptance. Later discovery, broader technology graph and M13 remain proposals. FullM12/Personal stay open; existing selected-list clipping has a separate M11 follow-up.
 
 October10 active-time lifecycle: GATHER_CLOCK_M12.md connects lazy server capture/restore and successful craft/purchase commits to paused Unreal game time. Native clock1 plus affected regressions6, Editor/Game and raw review passed. No actual gathering XP yet. Restore rebases persisted remaining durations, snapshots cannot double-age/reset, and client countdown/new-process earning delivery remain separate gates. This supersedes the prior clock-absent checkpoint below, not its historical evidence.

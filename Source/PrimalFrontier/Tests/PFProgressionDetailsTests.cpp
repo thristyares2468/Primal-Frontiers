@@ -36,11 +36,12 @@ bool FPFProgressionDetailsTest::RunTest(const FString&)
     auto Knowledge=[&](){return PFProgressionDetails::DescribeKnowledge(&Record,&Catalog->Knowledge[0],Catalog,Crafting,Items);};
     Record={};auto Locked=Knowledge();
     TestFalse(TEXT("Level one cannot learn"),Locked.bCanLearn);TestTrue(TEXT("Exact lock requirements"),Locked.Requirement.ToString().Contains(TEXT("Level 2 | Cost 2 points | Available 0")));
-    TestTrue(TEXT("Earned route hint"),Locked.Requirement.ToString().Contains(TEXT("different recipes")));
+    TestTrue(TEXT("Both bounded gather and first-craft earning are explained"),Locked.Requirement.ToString().Contains(TEXT("Gather resources for limited XP")) && Locked.Requirement.ToString().Contains(TEXT("different recipes for first-craft XP")));
     Record.Experience=100;TestTrue(TEXT("Available optional knowledge"),Knowledge().bCanLearn);
     TestEqual(TEXT("Read-only purchase evaluation does not spend"),FPFProgressionTransactions::AvailablePoints(Record,*Catalog),3);TestTrue(TEXT("No optimistic grant"),Record.Knowledge.IsEmpty());
     Record.Knowledge.Add(TEXT("Tech_FieldTools"));TestTrue(TEXT("Learned is explicit"),Knowledge().bLearned);TestFalse(TEXT("Learned not purchasable twice"),Knowledge().bCanLearn);
     TestTrue(TEXT("Learned useful access described"),Knowledge().Requirement.ToString().Contains(TEXT("Recipe access available")));
+    TestFalse(TEXT("Learned view does not keep obsolete leveling instruction"),Knowledge().Requirement.ToString().Contains(TEXT("Gather resources")));
     Record={};Record.Experience=100;
     FPFKnowledgeDefinition Other=Catalog->Knowledge[0];Other.Id=TEXT("Tech_Other");Other.DisplayName=FText::FromString(TEXT("Other test knowledge"));Other.Recipes={TEXT("Recipe_Cord")};Other.PointCost=2;Catalog->Knowledge.Add(Other);
     Record.Knowledge.Add(Other.Id);TestFalse(TEXT("Insufficient remaining points"),Knowledge().bCanLearn);TestTrue(TEXT("Unaffordable explains remaining point"),Knowledge().Requirement.ToString().Contains(TEXT("Available 1")) && Knowledge().Requirement.ToString().Contains(TEXT("Not enough")));
