@@ -1,5 +1,23 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M12 earned gathering timers — technical gate passed
+
+PF.Progression.GatherLifecycle now verifies genuinely earned wood XP through ordinary Unreal world ticks: normal20s node regrowth,40 actual paused ticks, exhausted finite yields,1800 active seconds, fresh5XP credit and cooldown conservation. Exact native1/1 plus GatherEvents/GatherClock2/2 passed; raw logs have0warnings/errors/assertfatalensure. Editor5.61s/Game23.59s clean. GATHER_LIFECYCLE_M12.md retains the first failed fixture tick-budget assertion, engine-clamp diagnosis, corrected replay paths and process peaks (up to3.028/2.905GiB). No production/reward/assets/settings/network change or wall-clock/human/FPS/minimum16GB certificate. Bounded https://trello.com/c/uoZQxtUs technically complete; fullM11/M12/Personal stayopen. Next: fresh Trello audit for an independent M11/M12 objective.
+
+## 2026-10-10 M12 ordinary-tick earned gather lifecycle — pending
+
+Focused GatherEvents/GatherClock regression PASSED2/2 Automation_M12GatherLifeRegression_20261010_045331946_8d82a1c5,16.25s,working/private3.023/2.905GiB,exact selectors/exits0/no timeout/testwarnings/errors0. Raw focused pass/replay both0warnings/errors/assertfatalensure. Game build and final evidence review next.
+
+Failed-only GatherLifecycle retry PASSED1/1 Automation_M12GatherLifecycleRetry_20261010_045229915_e0a53fb1,18.13s,working/private3.028/2.865GiB,exact selector/exits0/testwarnings/errors0/no timeout/assertfatalensure. Normal1800s tick expiry and default20s refill now proven without clock writes. Focused regression and Game gate next; fullmanual/M12 unchanged.
+
+Installed WorldSettings::FixupDeltaSeconds clamps requested large deltas. Fixture now uses ordinary0.2s maximum frames with20000 bounded ticks; no engine/game time overrides. Corrected Editor PASSED5.61s/no compiler warnings PFM12GatherLifecycleFixEditorBuild.log. Failed-only replay next.
+
+Exact GatherLifecycle FAILED1 assertion Automation_M12GatherLifecycle_20261010_045058614_eb9d5bf1: bounded ordinary tick loop stopped before1800s deadline. Earlier real gather/depletion/pause/regrowth assertions passed; engine0/strict1,17.08s,2.965/2.814GiB,no warnings/ensures/timeouts. Stop expansion; inspect engine delta clamp and correct only fixture loop before replay. Retain failed report/raw log.
+
+Editor PASSED15.95s/no compiler warnings PFM12GatherLifecycleEditorBuild.log. Exact native ordinary-tick gate next; no runtime pass yet.
+
+Fresh Programming/parent Trello audit selected https://trello.com/c/uoZQxtUs Doing after guidance104c3d8 published/clean. Added test-only PF.Progression.GatherLifecycle: actual empty-bag/zero-XP trace/gathers, default20s node regrowth, actual paused ticks and1800 active game seconds through ordinary UWorld ticks. No grants/record seeds/direct clock writes/shortened timers/production changes. Uncompiled/untested; Editor and exact native gate next, focused regression/Game only after pass. FullM11/M12/Personal unchanged; no human/FPS/controller/16GB/network certificate.
+
 ## 2026-10-10 M11/M12 progression guidance — technical gate passed
 
 Read-only locked recipe guidance now explains limited gathering and unique first-craft XP; current PROGRESSION_PLAN section separates implemented owner-private earning/save/FieldTools from historical proposals. Editor16.21s/Game23.10s clean; ProgressionDetails native1/1 and ProgressionFeedbackLive720p+1440p1/1each passed exact selection/exits/test0/no timeout. All16PNG reviewed/actual hint fits, raw26warning/14Pythonerror baseline unchanged/no assertfatalensure;288/289personal saves and default settings hashes unchanged. PROGRESSION_GUIDANCE_M12.md has exact commands, paths, peaks and trusted UI seed limits. No failed gate/reward/schema/network/assets changes. Bounded https://trello.com/c/HxqYElNZ technically complete; fullM11/M12/Personal stayopen. Fresh Trello audit precedes another independently actionable objective.

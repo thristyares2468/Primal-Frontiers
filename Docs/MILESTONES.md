@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-10 M12 earned gathering timers — technical gate passed
+
+PF.Progression.GatherLifecycle now verifies genuinely earned wood XP through ordinary Unreal world ticks: normal20s node regrowth,40 actual paused ticks, exhausted finite yields,1800 active seconds, fresh5XP credit and cooldown conservation. Exact native1/1 plus GatherEvents/GatherClock2/2 passed; raw logs have0warnings/errors/assertfatalensure. Editor5.61s/Game23.59s clean. GATHER_LIFECYCLE_M12.md retains the first failed fixture tick-budget assertion, engine-clamp diagnosis, corrected replay paths and process peaks (up to3.028/2.905GiB). No production/reward/assets/settings/network change or wall-clock/human/FPS/minimum16GB certificate. Bounded https://trello.com/c/uoZQxtUs technically complete; fullM11/M12/Personal stayopen. Next: fresh Trello audit for an independent M11/M12 objective.
+
 ## 2026-10-10 M11/M12 current progression guidance
 
 Read-only locked recipe guidance now explains limited gathering and unique first-craft XP; current PROGRESSION_PLAN section separates implemented owner-private earning/save/FieldTools from historical proposals. Editor16.21s/Game23.10s clean; ProgressionDetails native1/1 and ProgressionFeedbackLive720p+1440p1/1each passed exact selection/exits/test0/no timeout. All16PNG reviewed/actual hint fits, raw26warning/14Pythonerror baseline unchanged/no assertfatalensure;288/289personal saves and default settings hashes unchanged. PROGRESSION_GUIDANCE_M12.md has exact commands, paths, peaks and trusted UI seed limits. No failed gate/reward/schema/network/assets changes. Bounded https://trello.com/c/HxqYElNZ technically complete; fullM11/M12/Personal stayopen. Fresh Trello audit precedes another independently actionable objective.

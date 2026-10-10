@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October10 ordinary-tick timer task https://trello.com/c/uoZQxtUs selected after fresh Programming/parent/current-state audit. Test-only native1plus regression2/Editor5.61s/Game23.59s passed with rawzero severity; initial engine delta-clamp fixture failure retained/replayed. Immediately record exact evidence and move/read back bounded task Done; parentM12 Doing/Personal membership/deadlines/status unchanged. GATHER_LIFECYCLE_M12.md records limits. Scoped Sol publication precedes next fresh audit.
+
 ## October10 progression guidance checkpoint
 
 Read-only locked recipe guidance now explains limited gathering and unique first-craft XP; current PROGRESSION_PLAN section separates implemented owner-private earning/save/FieldTools from historical proposals. Editor16.21s/Game23.10s clean; ProgressionDetails native1/1 and ProgressionFeedbackLive720p+1440p1/1each passed exact selection/exits/test0/no timeout. All16PNG reviewed/actual hint fits, raw26warning/14Pythonerror baseline unchanged/no assertfatalensure;288/289personal saves and default settings hashes unchanged. PROGRESSION_GUIDANCE_M12.md has exact commands, paths, peaks and trusted UI seed limits. No failed gate/reward/schema/network/assets changes. Bounded https://trello.com/c/HxqYElNZ technically complete; fullM11/M12/Personal stayopen. Fresh Trello audit precedes another independently actionable objective.
