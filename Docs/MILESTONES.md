@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-10 M13 inactive ecology spawn-policy prerequisite
+
+M13 data-only spawn policy technical prerequisite passed: native biome tags/known creature IDs/day-night weighted choice, whole-catalog validation, finite tuning and combined≤8 resident budget; no live consumer/assets/map/schema/population change. Corrected Editor8.32s/Game54.91s clean after retained test-only C2039/C3861 QuietNaN failure56.31s; standard<limits>fixture fixed. Exact SpawnPolicy1/1 plus Lifecycle/WorldRecords/Clock3/3 passed with test/raw severity/exits0/no timeout/fatalensure, peaks2.994/2.873GiB. ECOLOGY_SPAWN_POLICY_M13.md has exact paths/commands/contracts/limits; new54th core registration is narrow-tested, not combined54 checkpoint. Bounded MGOxKJEE complete; fullM11/M12 human acceptance and fullM13 remainopen. Next: separate authoritative biome/time/resident/save/network integration before activation; no new Personal task or asset needed now.
+
 ## 2026-10-10 M11/M12 current roadmap and native checkpoint
 
 October10 current-source native consolidation passed53/53 (50 core/UI/progression+3 runtime commands), exact source manifest/records/unique53,0missing/extra/duplicate. Editor up-to-date2.05s/zero compile actions/warnings. Both engine/strict exits0, no timeout, test/raw severity0/no assertfatalensure; process peaks2.994/2.869GiB and2.985/2.835GiB. NATIVE_CHECKPOINT_M12.md records source bd9206c, exact names/commands/reports/logs/limits. ROADMAP_STATUS current table and CURRENT_STATE overview reconcile implementation versus technical/human acceptance while preserving history. No source/assets/settings/schema changes or Personal acceptance/status changes. Bounded Jv4jvkRm technically complete; fullM8/M11/M12 remainopen. Next fresh Trello/source audit of remaining M12 and M13 prerequisites.

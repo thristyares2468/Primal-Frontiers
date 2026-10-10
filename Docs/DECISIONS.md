@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Separate ecology policy validation from live spawning
+
+Prepare a focused Unreal data-asset type with native Ecology.Biome tags, existing creature IDs, bounded day/night weights, finite respawn tuning and combined resident budgets no greater than eight. Validate the entire catalog before selection, including unrelated malformed rows. A pure zero-based ticket choice returns one eligible ID or an explicit refusal without modifying the output; no client seed, RNG state, actor creation, class loading or world mutation. A zero-total phase is valid dormant data and must never silently fall back to another phase/creature.
+
+Proposed Shore/Woodland/Ridge rows remain inactive until a separate server-only spawner integration derives biome/time and validates nav/clearance/global count. No asset/map/schema/population change is part of this prerequisite. Future integration must reconcile clock/biome changes, resident identity, bounded retries and persistence before activation; new art, creatures or taming are separate scopes. Full M11/M12 human acceptance remains open under the user's independent-continuation permission. ECOLOGY_SPAWN_POLICY_M13.md records verification when complete.
+
 ## 2026-10-10 — Gate only optional stone-bound weapons with original knowledge
 
 Use the existing validated catalog/owned purchase/recipe reservation and completion path for Tech_FieldWeapons, level3/threepoints/prerequisite FieldTools. Gate only existing BoundClub; baseline survival recipes remain available. Keep loaded legacy carried weapons valid at zero knowledge, without retrospective reward or schema migration; recreating them requires learning. Generic graph validation derives exact point spend and fails closed for unmet prerequisites. FIELD_WEAPONS_M12.md distinguishes grant-free earning from explicitly seeded network boundaries and retains live verification failures. No gameplay mutation RPC, item identity, asset or stat tuning change.

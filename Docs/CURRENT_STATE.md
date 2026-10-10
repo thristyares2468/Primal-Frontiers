@@ -2,6 +2,12 @@
 
 ## Current overview — October 10, 2026
 
+**Latest completed independent prerequisite:** M13 data-only biome/day-night creature spawn policy now has validated native biome tags, existing Forager/Prowler IDs, deterministic weights/refusals/atomic output, finite tuning and combined resident budget≤8. Live spawners, maps, assets, loot, population cap, authority and saves are unchanged; there is no active consumer. Trello https://trello.com/c/MGOxKJEE bounded technical gate passed. Full M11/M12 human acceptance and full M13 remain open.
+
+Corrected Editor passed8.32s/Game54.91s without compiler warnings. Native SpawnPolicy1/1 plus Lifecycle/WorldRecords/Clock3/3 passed exact selections/exits/test and raw severity0/no timeout/assertion/fatal/ensure; peaks2.994/2.873GiB working/private. First test-only C2039/C3861 QuietNaN compile failure56.31s is retained with the standard<limits> correction/replay. ECOLOGY_SPAWN_POLICY_M13.md records exact logs/reports/commands/defaults/limits. This is the54th registration after the source-specific53-test checkpoint, not a combined54-test run.
+
+**Next development step:** separately validate authoritative biome/time/resident/navigation/save/network integration before activating the data policy. Authored mapping and policy asset are TBD. Do not expand populations/world/art or assume pacing/combat feel passed. No new Personal action is needed for this inactive data prerequisite; existing manual gates below remain separate.
+
 Play on `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`, the small 400 x 400 m World Partition greybox. First-person survival, finite gathering/food, timed crafting, construction/storage, two primitive creatures, world/player persistence, pause/main/world-selection/rename menus and local settings are implemented. Press **P** for the full Pause menu in PIE; Esc may stop PIE.
 
 M11 now includes themed Pause/main/settings, selected item pictures/details, centered categorized crafting, knowledge purchase feedback, building/storage guidance and actual settings process-restart verification. M12 has stone/bound tools, wooden/stone-bound clubs, carried woven protection, finite yield/cooldown rules, private earned XP and optional level-2 FieldTools / level-3 FieldWeapons purchases. These are technical implementations with bounded native/rendered/network evidence, not completed human usability/balance acceptance. See ROADMAP_STATUS.md and PROGRESSION_PLAN.md for current versus proposed scope.

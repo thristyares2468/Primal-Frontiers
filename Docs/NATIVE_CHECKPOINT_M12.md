@@ -1,5 +1,7 @@
 # Current native regression checkpoint — M11/M12
 
+Later M13 policy prerequisite adds a54th registration, verified1/1 plus three affected regressions in ECOLOGY_SPAWN_POLICY_M13.md. The53-test source-specific result below remains historical evidence for bd9206c; it does not claim a combined54-test run.
+
 October 10, 2026. Source checkpoint `bd9206cd53512b9745eff2b97ec0a1fae43365bf`; no C++ or asset changes in this audit. Trello https://trello.com/c/Jv4jvkRm.
 
 All **53 Editor-context core/runtime-command tests passed at this source checkpoint**, in two sequential NullRHI Editor processes. Compared the registrations in Source/PrimalFrontier/Tests and Plugins/PrimalAgentTools/Source/PrimalAgentToolsRuntime/Private/Tests against actual index.json identifiers: 53 expected, 53 records, 53 unique, zero missing/extra/duplicate. This supersedes the retained 35-test checkpoint for these directories. It is not the entire editor-only plugin suite or ClientContext/ServerContext live suite.

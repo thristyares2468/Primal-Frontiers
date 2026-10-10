@@ -9,11 +9,13 @@
 
 #include "Creatures/PFCreature.h"
 #include "Creatures/PFCreatureSpawner.h"
+#include "Creatures/PFCreatureSpawnCatalog.h"
 #include "Survival/PFSurvivalGameMode.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFSurvivorCharacter.h"
 #include "Inventory/PFItemPickup.h"
 #if WITH_DEV_AUTOMATION_TESTS
+#include <limits>
 #include "Components/BoxComponent.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -23,6 +25,83 @@
 #include "Misc/AutomationTest.h"
 #include "Tests/AutomationCommon.h"
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFCreatureTest,"PF.Creatures.Lifecycle",EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFCreatureSpawnPolicyTest,"PF.Creatures.SpawnPolicy",EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FPFCreatureSpawnPolicyTest::RunTest(const FString&)
+{
+    auto* Creatures=NewObject<UPFCreatureCatalog>();
+    auto* Spawns=NewObject<UPFCreatureSpawnCatalog>();
+    const auto Original=Spawns->Policies;
+    const auto Tag=[](const TCHAR* Name){return FGameplayTag::RequestGameplayTag(Name);};
+    const auto Shore=Tag(TEXT("Ecology.Biome.Shore"));
+    const auto Woodland=Tag(TEXT("Ecology.Biome.Woodland"));
+    const auto Ridge=Tag(TEXT("Ecology.Biome.Ridge"));
+    const auto Day=Tag(TEXT("World.Time.Day"));
+    const auto Night=Tag(TEXT("World.Time.Night"));
+    const FName Forager(TEXT("Creature_Forager")), Prowler(TEXT("Creature_Prowler"));
+    FString Error;
+    TestTrue(TEXT("Known creature policy defaults validate"),Spawns->Validate(*Creatures,Error));
+    TestTrue(TEXT("Success clears error"),Error.IsEmpty());
+    int32 Residents=0;
+    for(const auto& Policy:Spawns->Policies){Residents+=Policy.MaximumResidents;}
+    TestEqual(TEXT("Proposed policies reserve seven of eight slots"),Residents,7);
+    for(int32 Roll=0;Roll<4;++Roll)
+    {
+        FName Id;
+        TestTrue(TEXT("Day weighted choice"),Spawns->Choose(*Creatures,Woodland,Day,Roll,Id,Error));
+        TestEqual(TEXT("Day three forager tickets and one prowler"),Id,Roll<3?Forager:Prowler);
+        TestTrue(TEXT("Night weighted choice"),Spawns->Choose(*Creatures,Woodland,Night,Roll,Id,Error));
+        TestEqual(TEXT("Night one forager ticket and three prowler"),Id,Roll<1?Forager:Prowler);
+        FName Repeat;
+        TestTrue(TEXT("Same policy/phase/roll repeats"),Spawns->Choose(*Creatures,Woodland,Night,Roll,Repeat,Error));
+        TestEqual(TEXT("Deterministic choice has no mutable random state"),Repeat,Id);
+    }
+    FName Id;
+    TestTrue(TEXT("Shore remains forager"),Spawns->Choose(*Creatures,Shore,Day,0,Id,Error));
+    TestEqual(TEXT("Shore definition"),Id,Forager);
+    TestTrue(TEXT("Ridge night prowler"),Spawns->Choose(*Creatures,Ridge,Night,0,Id,Error));
+    TestEqual(TEXT("Ridge definition"),Id,Prowler);
+    const FName Sentinel(TEXT("PreservedOutput"));
+    const auto Refused=[&](FGameplayTag Biome,FGameplayTag Phase,int32 Roll)
+    {
+        Id=Sentinel;
+        TestFalse(TEXT("Invalid or empty selection refuses"),Spawns->Choose(*Creatures,Biome,Phase,Roll,Id,Error));
+        TestEqual(TEXT("Refusal preserves output"),Id,Sentinel);
+        TestFalse(TEXT("Explicit refusal reason"),Error.IsEmpty());
+    };
+    Refused(Ridge,Day,0); // A dormant day phase is valid data, not a fallback spawn.
+    Refused(Woodland,Day,-1); Refused(Woodland,Day,4); Refused(Woodland,Day,MAX_int32);
+    Refused(FGameplayTag(),Day,0); Refused(Woodland,FGameplayTag(),0); Refused(Woodland,Shore,0);
+    const auto Invalid=[&]()
+    {
+        TestFalse(TEXT("Whole invalid catalog rejected"),Spawns->Validate(*Creatures,Error));
+        Refused(Woodland,Day,0); // Unrelated malformed rows cannot be hidden by selecting a valid row.
+        Spawns->Policies=Original;
+    };
+    Spawns->Policies.Reset(); Invalid();
+    Spawns->Policies.Add(Original[0]); Invalid();
+    Spawns->Policies[0].Biome=Day; Invalid();
+    Spawns->Policies[0].Biome=Tag(TEXT("Ecology.Biome")); Invalid();
+    Spawns->Policies[0].Biome=FGameplayTag(); Invalid();
+    Spawns->Policies[0].MaximumResidents=0; Invalid();
+    Spawns->Policies[0].MaximumResidents=9; Invalid();
+    Spawns->Policies[0].MaximumResidents=4; Invalid(); // Combined budget would be nine.
+    Spawns->Policies[0].RespawnSeconds=-1; Invalid();
+    Spawns->Policies[0].RespawnSeconds=301; Invalid();
+    Spawns->Policies[0].RespawnSeconds=std::numeric_limits<float>::quiet_NaN(); Invalid();
+    Spawns->Policies[0].Entries.Reset(); Invalid();
+    Spawns->Policies[0].Entries.Add(Original[0].Entries[0]); Invalid();
+    Spawns->Policies[0].Entries[0].CreatureId=NAME_None; Invalid();
+    Spawns->Policies[0].Entries[0].CreatureId=TEXT("Creature_Unknown"); Invalid();
+    Spawns->Policies[0].Entries[0].DayWeight=-1; Invalid();
+    Spawns->Policies[0].Entries[0].NightWeight=101; Invalid();
+    Spawns->Policies[0].Entries[0].DayWeight=0; Spawns->Policies[0].Entries[0].NightWeight=0; Invalid();
+    Creatures->Creatures[0].FoodLoot=-1; Invalid();
+    Creatures->Creatures[0].FoodLoot=2;
+    TestTrue(TEXT("Original data still valid after refusals"),Spawns->Validate(*Creatures,Error));
+    TestTrue(TEXT("No actor/map is required or modified"),Spawns->Choose(*Creatures,Woodland,Day,0,Id,Error));
+    return !HasAnyErrors();
+}
+
 bool FPFCreatureTest::RunTest(const FString&)
 {
     AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"),EAutomationExpectedMessageFlags::Contains,0);
