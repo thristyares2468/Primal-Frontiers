@@ -1,5 +1,7 @@
 # Current native regression checkpoint — M11
 
+Historical October9 checkpoint. The October10 **53/53** current-source core/runtime-command result supersedes this35-test coverage statement: [NATIVE_CHECKPOINT_M12.md](NATIVE_CHECKPOINT_M12.md). Original reports/results below remain valid for their recorded source, not later additions or human acceptance.
+
 October9,2026. Source checkpoint `df648eb`. The supported35-test native selection has now passed at one source checkpoint in two sequential NullRHI Editor processes. This closes the previously documented combined-coverage gap; it does not accept full M11, M7 traversal/overnight, M8 rendered persistence or later milestones. No C++/asset/settings change was needed.
 
 Editor target check passed1.14s, up to date with zero compile actions/warnings. Log: `Saved/Logs/M11ConsolidatedEditorCheck_20261009.log`. The actual Editor/Game compilations of this source remain24.88s/31.52s from [M11_REVIEW.md](M11_REVIEW.md). Installed engine reports5.8.3, not a verified5.8.2 executable.
