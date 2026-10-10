@@ -1,5 +1,23 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M12 actual gathering XP — technical gate passed
+
+Final gate passed: seven native tests, one rendered EarnedCombat, one-client4/4 and two-client lag/loss6/6 Create/Restart; latest Editor7.00s/Game25.91s clean. All ten network raw logs match prior24startupwarnings/14Python lines, zero new severity/assert/fatalensure; rendered baseline26/14 unchanged, six PNGs reviewed. GATHER_EVENTS_M12.md records exact evidence/limits. No failed build/test in this slice. Bounded xY9fEfpd technically complete; fullM12/Personal remain open. Next independently actionable M11 task: selected recipe row clipped at list bottom at720p/HUD1.5, separate layout/focus/rendered gate.
+
+Two-client lag/loss Create/Restart PASSED6/6 M8Live2_20261010_035338265_5d887ea6,75ms/1percent, exact PF.Persistence.Live per role/exits0/no timeout/fatalensure. Independent70/40XP,2/1 craft ledger and owner-private window counts/durations survive new server. Peak reported server/client working/private1.724/1.573 and1.816/1.742GiB. Unique raw review and final Game build next; fullM12/Personal remain open.
+
+One-client real Create/Restart PASSED4/4 M8Live1_20261010_034730959_27f89bfc, exact PF.Persistence.Live per role/exits0/no timeout; new-server saved window counts/durations and owner-private progression passed. All six rendered PNGs inspected; normalized raw26warnings/14Python lines equal previous baseline, no new severity/assert/fatalensure. Two NullRHI clients with lag/loss and Game build remain pending; no manual/fullM12 acceptance inferred.
+
+Rendered PF.Progression.EarnedCombatLive PASSED1/1 M12EarnedCombat720_20261010_034455160_b666a1ba,105.64s,working/private3.192/5.414GiB; exact selection/exits/test severity0/no timeout,268personal saves/default settings unchanged. Real160knowledge/180boundcraft/185fibre/205guardXP and normal combat/loot invariants passed. Capture Editor7.00s clean. Six PNG/rawbaseline review next; one-client then two NullRHI Create/Restart and Game still pending. G2 existing optional guide now specifies exact barehand counts and bounded reward rules, not another required human task.
+
+Final actual GatherEvents/EarnedUpgrade/GatherClock/Component/RecipeAccess/Crafting.Gathering/Crafting.Transactions PASSED7/7 Automation_M12GatherEventsFinal_20261010_034325819_200d5e19,18.15s,working/private2.958/2.809GiB,exact selection/exits/test/raw severity0/no timeout/fatalensure. Final Editor5.70s clean. Native grant-free route now proves60gather→160knowledge→180boundcraft→185fifth-fibre XP. Corrected stale rendered summary log before capture; rebuild then actual rendered720p/network/Game gates, fullM12/Personal unchanged.
+
+Initial GatherEvents PASSED1/1 Automation_M12GatherEvents_20261010_034142909_595c8f5e,16.55s,working/private2.999/2.837GiB,exact selection/exits/test/raw severity0/no timeout/fatalensure. Actual fivecategory125XP, one event/tool yield, full/cooldown/dead/client/foreign/depleted and drop/recovery noXP passed. Added explicit unknown node refusal and safer missing-window test guard; rebuild/final native regressions next, then rendered/network/Game. No failure so far; no fullM12 claim.
+
+Editor PASSED20.49s/no compiler warnings PFM12GatherEventsEditorBuild.log. New actual PF.Progression.GatherEvents native first gate now running; no earned/network/rendered pass claimed yet.
+
+Fresh Programming/parent audit after cc2361e published/clean/equal selected https://trello.com/c/xY9fEfpd Doing. Actual server node trace/living owned controller/PlayerState derives category from loaded yield; candidate prepare before inventory Grant, commit only after success. One5XP/action, five/category/1800active seconds; cap/exhausted/uncategorized budget permits normal finite gathering. No client reward RPC. Native GatherEvents real nodes/refusals and earned routes updated; rendered expected60gather→160knowledge→185toolbenefit→205guardXP. Existing PF.Persistence.Live expects independent70/40XP, firstcraft2/1, private owner windows and exact checkpoint/new-process counters/durations with no refresh. Uncompiled/untested. Next Editor/new native, affected regressions, one rendered720p, one then two NullRHI clients, Game/raw/artifact gates. FullM12/manual unchanged.
+
 ## 2026-10-10 M12 active gather-window clock — technical lifecycle gate passed
 
 Final lifecycle gate PASSED: Editor25.14s/Game27.02s clean; exact native1+6 passed, both unique raw logs reviewed0severity/assert/fatalensure. GATHER_CLOCK_M12.md records behavior/evidence/limits; Trello https://trello.com/c/6JeKDMcU technically complete. No gathering XP or new-process/network window certificate yet. Next bounded actual server success hook/rendered/private restart gates; fullM12/Personal remainopen.

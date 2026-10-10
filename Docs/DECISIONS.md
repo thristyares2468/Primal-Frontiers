@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Commit gathering rewards with successful inventory conversion
+
+Derive reward category from the loaded server node yield, verify the living owned pawn/controller/PlayerState and prepare an aged progression candidate before granting resources. Commit only after Grant succeeds on the same authoritative game thread. Reward one action regardless of tool hit count; exhausted/capped reward budgets permit normal finite gathering. Keep existing lazy active-game-time windows and private owner-only replication/save binding; no new client reward RPC or UTC clock. GATHER_EVENTS_M12.md records actual native/rendered and one-/two-client new-server duration conservation. No mutation of personal saves or world assets, and no human pacing certificate.
+
 ## 2026-10-10 — Lazy active-time reward budget
 
 Use server UWorld game time and a nonreplicated component epoch for gather reward windows. Capture is a validated read-only elapsed snapshot; successful craft/purchase commit and trusted restore rebase the epoch. Paused/dilated game time controls this budget, with no UTC/offline aging, per-frame ticking or client countdown promises. Save remaining duration/count/category through existing bounded innerV1/V2, not absolute timestamps. Invalid/backward clocks refuse atomically. GATHER_CLOCK_M12.md records native boundaries; real gather event/private new-process network gates remain separate. Manual whole-world restore is an authoritative checkpoint rollback, not a client budget reset.

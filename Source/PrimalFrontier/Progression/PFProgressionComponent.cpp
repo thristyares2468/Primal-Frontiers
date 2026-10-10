@@ -105,3 +105,30 @@ void UPFProgressionComponent::CommitCompletedCraft(const FPFProgressionRecord& C
 }
 void UPFProgressionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {Super::GetLifetimeReplicatedProps(OutLifetimeProps);DOREPLIFETIME_CONDITION(UPFProgressionComponent,Record,COND_OwnerOnly);DOREPLIFETIME_CONDITION(UPFProgressionComponent,KnowledgeFeedback,COND_OwnerOnly);}
+
+bool UPFProgressionComponent::PrepareGather(FName YieldItem,APawn* Pawn,FPFProgressionRecord& Candidate,FString& Error) const
+{
+    const UPFCraftingCatalog* Crafting=nullptr;const UPFItemCatalog* Items=nullptr;
+    if(!Authority(Crafting,Items,Error)){return false;}
+    const auto* V=IsValid(Pawn)?Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>():nullptr;
+    const auto* Controller=V?Pawn->GetController():nullptr;
+    if(!V || V->IsDead() || !Pawn->HasAuthority() || Pawn->GetWorld()!=GetWorld() || !Controller ||
+        !Controller->HasAuthority() || Controller->GetPawn()!=Pawn || Pawn->GetPlayerState()!=GetOwner() || Controller->PlayerState!=GetOwner())
+    {Error=TEXT("Gather reward requires your living authoritative survivor");return false;}
+    if(!Capture(Candidate,Error)){return false;}
+    const auto Category=FPFProgressionTransactions::GatherCategoryForItem(YieldItem);
+    const auto* Window=Candidate.GatherWindows.FindByPredicate([&](const auto& W){return W.Category==Category;});
+    // Ordinary finite gathering still works when a reward budget is exhausted, at cap or uncategorized.
+    if(!Category.IsValid() || Candidate.Experience==FPFProgressionTransactions::MaximumExperience ||
+        (Window && Window->Rewards==FPFProgressionTransactions::MaximumGatherRewards)){return true;}
+    return FPFProgressionTransactions::CreditGather(Candidate,Category,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Error);
+}
+void UPFProgressionComponent::CommitGather(const FPFProgressionRecord& Candidate)
+{
+    const bool Awarded=Record.Experience!=Candidate.Experience;
+    if(Awarded || Record.GatherWindows!=Candidate.GatherWindows)
+    {
+        Record=Candidate;RecordTime=GetWorld()->GetTimeSeconds();GetOwner()->ForceNetUpdate();
+        if(Awarded){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalProgression] [PrimalAgentTools] Successful gather; experience=%d level=%d points=%d"),GetExperience(),GetLevel(),GetAvailablePoints());}
+    }
+}

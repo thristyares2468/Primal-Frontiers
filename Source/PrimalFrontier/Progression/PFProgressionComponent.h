@@ -7,7 +7,7 @@ class UPFCraftingCatalog;
 class UPFItemCatalog;
 class APawn;
 
-/** PlayerState lifetime; trusted server persistence and completed-craft hook only. No grant RPC. */
+/** PlayerState lifetime; trusted server persistence and actual successful craft/gather hooks. No grant RPC. */
 UCLASS(ClassGroup=(PrimalFrontier))
 class PRIMALFRONTIER_API UPFProgressionComponent : public UActorComponent
 {
@@ -39,4 +39,8 @@ private:
     friend class UPFCraftingComponent;
     bool PrepareCompletedCraft(FName Recipe,FPFProgressionRecord& Candidate,FString& Error) const;
     void CommitCompletedCraft(const FPFProgressionRecord& Candidate);
+    // Category/yield comes from the validated server node catalog, never a client reward claim.
+    friend class APFResourceNode;
+    bool PrepareGather(FName YieldItem,APawn* Pawn,FPFProgressionRecord& Candidate,FString& Error) const;
+    void CommitGather(const FPFProgressionRecord& Candidate);
 };

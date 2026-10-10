@@ -5,6 +5,7 @@
 #include "Crafting/PFCraftingCatalog.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Progression/PFProgressionComponent.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Survival/PFInteraction.h"
 #include "Components/StaticMeshComponent.h"
@@ -107,8 +108,12 @@ bool APFResourceNode::Gather(APawn* Pawn)
     I->PruneExpired();
     // Tool tiers improve actions, never the node's finite total yield.
     const int32 Damage=FMath::Min(HitsRemaining,I->GatheringHits());
+    auto* Progression=Pawn->GetPlayerState()->FindComponentByClass<UPFProgressionComponent>();
+    FPFProgressionRecord Reward;FString Error;
+    if(!Progression || !Progression->PrepareGather(D->YieldItem,Pawn,Reward,Error)){return false;}
     // Grant first: if the bag is full the node keeps its hits.
     if(!I->Grant(D->YieldItem,D->YieldPerHit*Damage)){return false;}
+    Progression->CommitGather(Reward); // Same server-thread transaction; never reward a failed/full-bag grant.
     HitsRemaining-=Damage;
     NextHitAt=Now+0.5;
     if(HitsRemaining==0){RespawnAt=Now+D->RespawnSeconds;}

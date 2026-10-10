@@ -5,6 +5,8 @@
 #include "Inventory/PFInventoryPlayerState.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Progression/PFProgressionComponent.h"
+#include "Progression/PFProgressionCatalog.h"
+#include "Persistence/PFWorldSaveFormat.h"
 #include "Crafting/PFCraftingComponent.h"
 #include "Crafting/PFResourceNode.h"
 #include "Building/PFBuildingComponent.h"
@@ -71,7 +73,19 @@ public:
         auto Advance = [&](int32 Next) { Stage = Next; Changed = Now; Test->AddInfo(FString::Printf(TEXT("[PrimalPersistence] %s phase=%s stage=%d"), bClient ? TEXT("Client") : TEXT("Server"), bRestore ? TEXT("Restore") : TEXT("Create"), Stage)); };
         auto Check = [&](const TCHAR* Label, bool Value) { return Test->TestTrue(Label, Value); };
         auto ExpectedExperience=[&](const APFSurvivalPlayerController* P)
-        {for(TActorIterator<APFBuildPiece> It(W);It;++It){if(It->Kind==EPFBuildKind::Storage && It->IsOwnedBy(P->PlayerState)){return 40;}}return 20;};
+        {for(TActorIterator<APFBuildPiece> It(W);It;++It){if(It->Kind==EPFBuildKind::Storage && It->IsOwnedBy(P->PlayerState)){return 70;}}return 40;};
+        auto CheckWindows=[&](const APFSurvivalPlayerController* P,const FPFProgressionRecord& R)
+        {
+            const bool Owner=ExpectedExperience(P)==70;
+            bool Correct=R.GatherWindows.Num()==(Owner?3:2);
+            for(const auto& Pair:TArray<TPair<FName,int32>>{{TEXT("Item_Wood"),Owner?4:3},{TEXT("Item_Stone"),1},{TEXT("Item_Food"),Owner?1:0}})
+            {
+                const auto Tag=FPFProgressionTransactions::GatherCategoryForItem(Pair.Key);
+                const auto* Window=R.GatherWindows.FindByPredicate([&](const auto& X){return X.Category==Tag;});
+                Correct&=Pair.Value==0?!Window:(Window && Window->Rewards==Pair.Value && Window->RemainingSeconds>0 && Window->RemainingSeconds<1798);
+            }
+            return Test->TestTrue(TEXT("Actual private gather categories/counts and aged remaining duration"),Correct);
+        };
         auto Aim = [](APFSurvivalPlayerController* P, FVector At)
         { FVector Eye; FRotator Look; P->GetPawn()->GetActorEyesViewPoint(Eye, Look); P->SetControlRotation((At - Eye).Rotation()); };
         auto Approach = [&](APFSurvivalPlayerController* P, APFResourceNode* Node)
@@ -112,7 +126,9 @@ public:
                 int32 OtherPlayers = 0, StoragePieces = 0, OwnedStorage = 0;
                 const auto* OwnState = PC->GetPlayerState<APFInventoryPlayerState>();
                 const int32 ExpectedXP=ExpectedExperience(PC);
-                Test->TestTrue(TEXT("Independent owner XP/recipe ledger survives real load/reconnect"),OwnState->Progression && OwnState->Progression->GetExperience()==ExpectedXP && OwnState->Progression->GetRecord().CreditedCrafts.Num()==ExpectedXP/20 && OwnState->Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_Tool")) && (ExpectedXP==20 || OwnState->Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_Cook"))));
+                Test->TestTrue(TEXT("Independent owner XP/recipe ledger survives real load/reconnect"),OwnState->Progression && OwnState->Progression->GetExperience()==ExpectedXP && OwnState->Progression->GetRecord().CreditedCrafts.Num()==(ExpectedXP==70?2:1) && OwnState->Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_Tool")) && (ExpectedXP==40 || OwnState->Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_Cook"))));
+                CheckWindows(PC,OwnState->Progression->GetRecord());
+                Test->TestTrue(TEXT("Invalid owned RPC leaves window counters and durations unchanged"),OwnState->Progression->GetRecord().GatherWindows==ClientProgressionBefore.GatherWindows);
                 for (APlayerState* State : W->GetGameState()->PlayerArray)
                 {
                     const auto* Other = Cast<APFInventoryPlayerState>(State);
@@ -122,7 +138,7 @@ public:
                     if (Test->TestTrue(TEXT("Remote player inventory component exists"), Bag != nullptr))
                     { Test->TestEqual(TEXT("Remote private inventory never reaches this client"), Bag->GetStacks().Num(), 0); }
                     if(Test->TestTrue(TEXT("Remote progression component exists"),Other->Progression!=nullptr))
-                    {Test->TestTrue(TEXT("Remote XP/knowledge/ledger remains private"),Other->Progression->GetExperience()==0 && Other->Progression->GetRecord().Knowledge.IsEmpty() && Other->Progression->GetRecord().CreditedCrafts.IsEmpty());}
+                    {Test->TestTrue(TEXT("Remote XP/knowledge/ledger/windows remain private"),Other->Progression->GetExperience()==0 && Other->Progression->GetRecord().Knowledge.IsEmpty() && Other->Progression->GetRecord().CreditedCrafts.IsEmpty() && Other->Progression->GetRecord().GatherWindows.IsEmpty());}
                 }
                 Test->TestEqual(TEXT("Privacy check includes every other connected player"), OtherPlayers, Expected - 1);
                 for (TActorIterator<APFBuildPiece> It(W); It; ++It)
@@ -153,7 +169,7 @@ public:
                 PC->GetInventory()->Count(TEXT("Item_Fibre")) != 1 ||
                 !FMath::IsNearlyEqual(V->GetVitals().Health, 65.f) || !PC->GetPlayerState<APFInventoryPlayerState>()->PersistentPlayerId.IsValid()) { return false; }
             auto* Progression=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();
-            if(!Progression || Progression->GetExperience()!=ExpectedExperience(PC) || Progression->GetRecord().CreditedCrafts.Num()!=ExpectedExperience(PC)/20){return false;} // Wait for private property delivery.
+            if(!Progression || Progression->GetExperience()!=ExpectedExperience(PC) || Progression->GetRecord().CreditedCrafts.Num()!=(ExpectedExperience(PC)==70?2:1)){return false;} // Wait for private property delivery.
             const auto Before = PC->GetInventory()->Count(TEXT("Item_Wood"));
             FString Error;
             Test->TestFalse(TEXT("Client direct save rejected"), Persistence->Save(Slot, Error));
@@ -162,6 +178,10 @@ public:
             { Test->TestTrue(TEXT("Client PF persistence command rejected"), PF::AgentTools::ExecuteCommand(Name, {}, W, false).HasErrors()); }
             Test->TestFalse(TEXT("Client cannot create items"), PC->GetInventory()->Grant(TEXT("Item_Wood"), 1));
             Test->TestFalse(TEXT("Client cannot replace progression"),Progression->Restore({},Error));
+            ClientProgressionBefore=Progression->GetRecord();
+            FPFProgressionRecord Refused=ClientProgressionBefore;Refused.Experience=2700;
+            Test->TestFalse(TEXT("Client cannot capture/reset active server clock"),Progression->Capture(Refused,Error));
+            Test->TestTrue(TEXT("Client capture refusal leaves output and private windows intact"),Refused.Experience==2700 && Progression->GetRecord().GatherWindows==ClientProgressionBefore.GatherWindows);
             Test->TestEqual(TEXT("Client refusal conserves XP"),Progression->GetExperience(),ExpectedExperience(PC));
             Test->TestEqual(TEXT("Client refusals conserve inventory"), PC->GetInventory()->Count(TEXT("Item_Wood")), Before);
             TSet<FGuid> Seen;
@@ -198,12 +218,20 @@ public:
         if (bRestore)
         {
             if (Buildings != 2) { return false; }
+            FPFSavedFile SavedFile;FPFWorldSaveData SavedWorld;FString SavedError;
+            if(!Check(TEXT("Read actual pre-restart world file"),FPFSaveFileStore::Read(Slot,SavedFile,SavedError) && Persistence->Decode(SavedFile.Payload,SavedWorld,SavedError))){Test->AddError(SavedError);return true;}
             for (auto* P : Players)
             {
                 Test->TestEqual(TEXT("Tool survives server restart"), P->GetInventory()->Count(TEXT("Item_Tool")), 1);
                 const auto* Progression=P->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();
                 const int32 ExpectedXP=ExpectedExperience(P);
-                Test->TestTrue(TEXT("Independent completed-craft XP/ledger survives separate server process"),Progression && Progression->GetExperience()==ExpectedXP && Progression->GetRecord().CreditedCrafts.Num()==ExpectedXP/20 && Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_Tool")) && (ExpectedXP==20 || Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_Cook"))));
+                Test->TestTrue(TEXT("Independent completed-craft XP/ledger survives separate server process"),Progression && Progression->GetExperience()==ExpectedXP && Progression->GetRecord().CreditedCrafts.Num()==(ExpectedXP==70?2:1) && Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_Tool")) && (ExpectedXP==40 || Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_Cook"))));
+                const auto* State=P->GetPlayerState<APFInventoryPlayerState>();FPFProgressionRecord OnDisk,Current;FString Error;
+                const auto* SavedPlayer=SavedWorld.Players.FindByPredicate([&](const auto& X){return X.PlayerId==State->PersistentPlayerId;});
+                if(!Check(TEXT("Unpack actual owner-bound pre-restart progression"),SavedPlayer && FPFWorldSaveFormat::UnpackProgression(SavedPlayer->Progression,State->PersistentPlayerId,*GetDefault<UPFProgressionCatalog>(),*P->GetCrafting()->Catalog,*P->GetInventory()->Catalog,OnDisk,Error))){Test->AddError(Error);return true;}
+                Test->TestTrue(TEXT("New server preserves exact saved counts/durations without offline renewal or aging"),Progression->GetRecord().GatherWindows==OnDisk.GatherWindows);
+                if(!Check(TEXT("New server active clock snapshot"),Progression->Capture(Current,Error))){Test->AddError(Error);return true;}CheckWindows(P,Current);
+                for(const auto& Window:Current.GatherWindows){const auto* Saved=OnDisk.GatherWindows.FindByPredicate([&](const auto& X){return X.Category==Window.Category;});Test->TestTrue(TEXT("Restart active elapsed never renews saved duration"),Saved && Window.Rewards==Saved->Rewards && Window.RemainingSeconds<=Saved->RemainingSeconds);}
                 Test->TestEqual(TEXT("Unsaved change captured on disconnect"), P->GetInventory()->Count(TEXT("Item_Fibre")), 1);
                 Test->TestEqual(TEXT("Saved health survives reconnect"), P->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>()->GetVitals().Health, 65.f);
             }
@@ -251,7 +279,7 @@ public:
         if (Stage == 3 && Now - Changed > 6)
         {
             for (auto* P : Players) { if (!Check(TEXT("Timed craft completed"), P->GetInventory()->Count(TEXT("Item_Tool")) == 1)) { return true; } }
-            for(auto* P:Players){if(!Check(TEXT("Actual completed craft awarded exactly20XP"),P->GetPlayerState<APFInventoryPlayerState>()->Progression->GetExperience()==20)){return true;}}
+            for(auto* P:Players){if(!Check(TEXT("Actual gather20plus firstcraft20 equals40XP"),P->GetPlayerState<APFInventoryPlayerState>()->Progression->GetExperience()==40)){return true;}}
             PC->GetPawn()->SetActorLocation(FVector(-1200, 0, 100)); Aim(PC, FVector(-800, 0, 0));
             if (!Check(TEXT("Build foundation using gathered wood"), PC->Building->Place(TEXT("Build_Foundation"), 0) != nullptr)) { return true; }
             Approach(PC, Wood.Last()); Advance(4); return false;
@@ -283,7 +311,7 @@ public:
         }
         if(Stage==51 && Now-Changed>7)
         {
-            if(!Check(TEXT("Actual cooking completion yields food and40XP"),PC->GetInventory()->Count(TEXT("Item_CookedFood"))==1 && PC->GetPlayerState<APFInventoryPlayerState>()->Progression->GetExperience()==40)){return true;}
+            if(!Check(TEXT("Actual cooking completion yields food and70XP"),PC->GetInventory()->Count(TEXT("Item_CookedFood"))==1 && PC->GetPlayerState<APFInventoryPlayerState>()->Progression->GetExperience()==70)){return true;}
             Advance(6);return false;
         }
         if (Stage == 6 && Now - Changed > 1)
@@ -299,6 +327,13 @@ public:
             if (!Check(TEXT("Validate restored world"), Persistence->Capture(Restored, Error))) { Test->AddError(Error); return true; }
             Test->TestEqual(TEXT("No duplicate player records"), Restored.Players.Num(), Original.Players.Num());
             Test->TestEqual(TEXT("Server writes explicit V2 progression"),Restored.Version,2);
+            for(auto* P:Players)
+            {
+                auto* State=P->GetPlayerState<APFInventoryPlayerState>();FPFProgressionRecord Snapshot,Current;
+                const auto* Entry=Original.Players.FindByPredicate([&](const auto& X){return X.PlayerId==State->PersistentPlayerId;});
+                if(!Check(TEXT("Unpack actual manual save reward snapshot"),Entry && FPFWorldSaveFormat::UnpackProgression(Entry->Progression,State->PersistentPlayerId,*GetDefault<UPFProgressionCatalog>(),*P->GetCrafting()->Catalog,*P->GetInventory()->Catalog,Snapshot,Error) && State->Progression->Capture(Current,Error))){Test->AddError(Error);return true;}
+                CheckWindows(P,Current);Test->TestTrue(TEXT("Manual load conserves exact checkpoint window counters/durations"),Current.GatherWindows==Snapshot.GatherWindows);
+            }
             for(auto* P:Players){Test->TestEqual(TEXT("Manual load never reawards craft XP"),P->GetPlayerState<APFInventoryPlayerState>()->Progression->GetExperience(),ExpectedExperience(P));}
             Test->TestEqual(TEXT("No duplicate structures"), Restored.Structures.Num(), Original.Structures.Num());
             for (const auto& S : Original.Structures) { Test->TestTrue(TEXT("Structure stable ID retained"), Restored.Structures.ContainsByPredicate([&](const auto& R) { return R.Id == S.Id && R.Owner == S.Owner; })); }
@@ -318,6 +353,7 @@ private:
     int32 Expected = 1, Stage = 0, Hits = 0;
     FString Slot;
     TArray<FPFItemStack> ClientInventoryBefore;
+    FPFProgressionRecord ClientProgressionBefore;
     bool bClient = false, bRestore = false;
 };
 

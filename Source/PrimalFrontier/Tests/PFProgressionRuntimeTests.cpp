@@ -107,23 +107,23 @@ bool FPFEarnedUpgradeTest::RunTest(const FString&)
     };
     if(!Gather(TEXT("Node_Wood"),3) || !Gather(TEXT("Node_Wood"),3) || !Gather(TEXT("Node_Stone"),1) || !Gather(TEXT("Node_Food"),2) || !Gather(TEXT("Node_Fibre"),3) || !Gather(TEXT("Node_Fibre"),1)){return false;}
     TestTrue(TEXT("Finite bare-hand gathering yields exact route inputs"),I->Count(TEXT("Item_Wood"))==12 && I->Count(TEXT("Item_Stone"))==2 && I->Count(TEXT("Item_Food"))==4 && I->Count(TEXT("Item_Fibre"))==8);
-    TestEqual(TEXT("Gathering does not invent craft rewards"),G->GetExperience(),0);
+    TestEqual(TEXT("Gathering earns60XP in independent category budgets"),G->GetExperience(),60);
     auto Craft=[&](FName Recipe,int32 ExpectedXP)
     {
         const auto* D=C->Catalog->Recipe(Recipe,I->Catalog);if(!D || !TestTrue(TEXT("Real recipe starts"),C->Start(Recipe,P))){return false;}
         Advance(FMath::CeilToInt(D->Duration*10)+10);TestTrue(TEXT("Real duration completes successfully"),C->ActiveRecipe.IsNone() && C->Feedback==TEXT("Completed"));
         return TestEqual(TEXT("Only actual distinct conversion rewards XP"),G->GetExperience(),ExpectedXP);
     };
-    if(!Craft(TEXT("Recipe_Tool"),20) || !Craft(TEXT("Recipe_Cook"),40) || !Craft(TEXT("Recipe_Dry"),60) || !Craft(TEXT("Recipe_Cord"),80) || !Craft(TEXT("Recipe_Club"),100)){return false;}
+    if(!Craft(TEXT("Recipe_Tool"),80) || !Craft(TEXT("Recipe_Cook"),100) || !Craft(TEXT("Recipe_Dry"),120) || !Craft(TEXT("Recipe_Cord"),140) || !Craft(TEXT("Recipe_Club"),160)){return false;}
     TestTrue(TEXT("Five distinct earned crafts reach first knowledge boundary"),G->GetLevel()==2 && G->GetAvailablePoints()==3 && G->GetRecord().CreditedCrafts.Num()==5);
-    if(!Craft(TEXT("Recipe_Cord"),100)){return false;}TestEqual(TEXT("Repeat cord gives no duplicate credit"),G->GetRecord().CreditedCrafts.Num(),5);
+    if(!Craft(TEXT("Recipe_Cord"),160)){return false;}TestEqual(TEXT("Repeat cord gives no duplicate credit"),G->GetRecord().CreditedCrafts.Num(),5);
     TestFalse(TEXT("Owned points alone don't unlock optional conversion"),C->Start(TEXT("Recipe_BoundTool"),P));
-    PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));TestTrue(TEXT("Earned owned purchase costs exactly two"),G->GetAvailablePoints()==1 && G->GetRecord().Knowledge.Contains(TEXT("Tech_FieldTools")) && G->GetExperience()==100);
+    PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));TestTrue(TEXT("Earned owned purchase costs exactly two"),G->GetAvailablePoints()==1 && G->GetRecord().Knowledge.Contains(TEXT("Tech_FieldTools")) && G->GetExperience()==160);
     Advance(4);PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));TestTrue(TEXT("Already-known request preserves points and items"),G->GetAvailablePoints()==1 && G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) && I->Count(TEXT("Item_Tool"))==1);
-    if(!Craft(TEXT("Recipe_BoundTool"),120)){return false;}
+    if(!Craft(TEXT("Recipe_BoundTool"),180)){return false;}
     TestTrue(TEXT("Single earned upgrade and exact full-route conservation"),I->Count(TEXT("Item_BoundTool"))==1 && I->Count(TEXT("Item_Tool"))==0 && I->Count(TEXT("Item_Cord"))==0 && I->Count(TEXT("Item_Wood"))==1 && I->Count(TEXT("Item_Stone"))==0 && I->Count(TEXT("Item_Fibre"))==0 && I->Count(TEXT("Item_Food"))==1 && I->Count(TEXT("Item_CookedFood"))==1 && I->Count(TEXT("Item_DriedFood"))==1 && I->Count(TEXT("Item_Club"))==1);
     TestTrue(TEXT("Upgrade retains earned accounting and useful performance"),G->GetRecord().CreditedCrafts.Num()==6 && G->GetAvailablePoints()==1 && I->GatheringHits()==3);
-    if(!Gather(TEXT("Node_Fibre"),1)){return false;}TestTrue(TEXT("Earned upgraded tool takes finite three-hit yield without extra XP"),I->Count(TEXT("Item_Fibre"))==6 && G->GetExperience()==120);
-    Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Earned first upgrade: real bare-hand trace gathering, seven timed jobs/six unique credits,100XP purchase boundary,120XP final,exact2point cost and three-hit benefit; no item/XP grants."));return true;
+    if(!Gather(TEXT("Node_Fibre"),1)){return false;}TestTrue(TEXT("Earned upgraded tool takes finite three-hit yield for one fifth fibre credit"),I->Count(TEXT("Item_Fibre"))==6 && G->GetExperience()==185);
+    Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Earned first upgrade: real bare-hand trace gathering, seven timed jobs/six unique credits,60gatherXP,160XP purchase boundary,185XP final,exact2point cost and three-hit benefit; no item/XP grants."));return true;
 }
 #endif

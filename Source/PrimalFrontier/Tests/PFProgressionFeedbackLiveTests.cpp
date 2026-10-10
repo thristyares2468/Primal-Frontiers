@@ -217,7 +217,7 @@ bool FPFProgressionFeedbackLiveTest::RunTest(const FString&)
 }
 namespace
 {
-// Fresh disposable route: every item comes from the normal interaction trace and every XP from a timed conversion.
+// Fresh disposable route: every item comes from the normal interaction trace and XP from actual bounded gathering or timed conversion.
 class FEarnedUpgradeExercise final : public IAutomationLatentCommand
 {
 public:
@@ -241,7 +241,7 @@ public:
         {
             if(GatherIndex==UE_ARRAY_COUNT(Resources))
             {
-                if(!Test->TestTrue(TEXT("Normal bare-hand input stock and zero reward"),I->Count(TEXT("Item_Wood"))==12 && I->Count(TEXT("Item_Stone"))==2 && I->Count(TEXT("Item_Food"))==4 && I->Count(TEXT("Item_Fibre"))==8 && G->GetExperience()==0)){return true;}
+                if(!Test->TestTrue(TEXT("Normal bare-hand stock and60bounded gatherXP"),I->Count(TEXT("Item_Wood"))==12 && I->Count(TEXT("Item_Stone"))==2 && I->Count(TEXT("Item_Food"))==4 && I->Count(TEXT("Item_Fibre"))==8 && G->GetExperience()==60)){return true;}
                 PC->SetCraftingMenuOpen(true);TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFCraftingHUD::StaticClass(),false);if(Widgets.Num()!=1){Test->AddError(TEXT("Missing actual earned-route menu"));return true;}
                 Menu=CastChecked<UPFCraftingHUD>(Widgets[0]);Wait(Now,.6,2);return false;
             }
@@ -268,13 +268,13 @@ public:
         }
         if(Stage==4)
         {
-            Menu->RefreshMenu();if(!Test->TestTrue(TEXT("Five distinct completions and repeated cord earn first level only"),G->GetExperience()==100 && G->GetLevel()==2 && G->GetAvailablePoints()==3 && G->GetRecord().CreditedCrafts.Num()==5 && Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled() && !Button(TEXT("PF_CraftSelected"))->GetIsEnabled())){return true;}
-            Test->TestTrue(TEXT("Actual100XP summary visible"),Text(TEXT("PF_CraftingProgression_Summary")).Contains(TEXT("Level 2 | 100 / 250 XP")));Bounds(TEXT("PF_KnowledgeRequirement"));Shot(TEXT("earned_level_two"));Wait(Now,.6,5);return false;
+            Menu->RefreshMenu();if(!Test->TestTrue(TEXT("Five distinct completions and repeated cord earn first level only"),G->GetExperience()==160 && G->GetLevel()==2 && G->GetAvailablePoints()==3 && G->GetRecord().CreditedCrafts.Num()==5 && Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled() && !Button(TEXT("PF_CraftSelected"))->GetIsEnabled())){return true;}
+            Test->TestTrue(TEXT("Actual160XP summary visible"),Text(TEXT("PF_CraftingProgression_Summary")).Contains(TEXT("Level 2 | 160 / 250 XP")));Bounds(TEXT("PF_KnowledgeRequirement"));Shot(TEXT("earned_level_two"));Wait(Now,.6,5);return false;
         }
         if(Stage==5){Button(TEXT("PF_LearnKnowledge"))->SetKeyboardFocus();Press(EKeys::SpaceBar);Wait(Now,.6,6);return false;}
         if(Stage==6)
         {
-            Menu->RefreshMenu();if(!Test->TestTrue(TEXT("Actual owned learned access and exact two earned points"),G->GetRecord().Knowledge.Contains(TEXT("Tech_FieldTools")) && G->GetAvailablePoints()==1 && G->GetExperience()==100 && !Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled() && Button(TEXT("PF_CraftSelected"))->GetIsEnabled())){return true;}
+            Menu->RefreshMenu();if(!Test->TestTrue(TEXT("Actual owned learned access and exact two earned points"),G->GetRecord().Knowledge.Contains(TEXT("Tech_FieldTools")) && G->GetAvailablePoints()==1 && G->GetExperience()==160 && !Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled() && Button(TEXT("PF_CraftSelected"))->GetIsEnabled())){return true;}
             Bounds(TEXT("PF_KnowledgeRequirement"));Shot(TEXT("earned_knowledge"));Wait(Now,.6,7);return false;
         }
         if(Stage==7){Menu->SetKeyboardFocus();Press(EKeys::K);Test->TestEqual(TEXT("Learn repeat costs nothing"),G->GetAvailablePoints(),1);CraftIndex=6;Wait(Now,.4,2);return false;}
@@ -283,7 +283,7 @@ public:
         if(Stage==11){Menu->SetKeyboardFocus();Press(EKeys::C);if(!Test->TestFalse(TEXT("Actual menu closes and releases interaction"),PC->IsCraftingOpen()) || !SpawnNode(TEXT("Node_Fibre"))){return true;}Wait(Now,.6,12);return false;}
         if(Stage==12)
         {
-            PC->Interact();if(!Test->TestTrue(TEXT("Earned tool grants finite three-hit benefit without extra XP"),I->GatheringHits()==3 && I->Count(TEXT("Item_Fibre"))==6 && Node->HitsRemaining==0 && G->GetExperience()==120)){return true;}Node->Destroy();Node.Reset();Wait(Now,.6,13);return false;
+            PC->Interact();if(!Test->TestTrue(TEXT("Earned tool grants finite three-hit benefit with one fifth fibre credit"),I->GatheringHits()==3 && I->Count(TEXT("Item_Fibre"))==6 && Node->HitsRemaining==0 && G->GetExperience()==185)){return true;}Node->Destroy();Node.Reset();Wait(Now,.6,13);return false;
         }
         if(Stage==13)
         {
@@ -295,7 +295,7 @@ public:
                 Creature->Think();if(!Test->TestEqual(TEXT("Real visible attack windup starts"),Creature->State.ToString(),FString(TEXT("Creature.State.Attack")))){return true;}Wait(Now,.7,20);return false;
             }
             for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned-route screenshot written"),IFileManager::Get().FileSize(*Path)>0);}
-            Test->AddInfo(TEXT("[PrimalAgentTools] Rendered earned upgrade:13real bare-hand interactions,7timed jobs/6unique credits,100XP/3points→owned2point Learn→120XP/1point/one bound tool,actual three-hit gathering; no XP/item grants. Synthetic UI,not human route/controller/FPS acceptance."));return true;
+            Test->AddInfo(TEXT("[PrimalAgentTools] Rendered earned upgrade:13real bare-hand interactions/60bounded gatherXP,7timed jobs/6unique craft credits,160XP/3points→owned2point Learn→180XP/one bound tool→185XP/1point after fifth fibre credit; no XP/item grants. Synthetic UI,not human route/controller/FPS acceptance."));return true;
         }
         auto* Needs=PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();
         if(Stage==20)
@@ -315,12 +315,12 @@ public:
         if(Stage==23){Menu->SelectRecipe(TEXT("Recipe_Cord"));Menu->RefreshMenu();Menu->SetKeyboardFocus();Press(EKeys::Enter);if(!Test->TestEqual(TEXT("Repeated real cord job starts"),C->ActiveRecipe,FName(TEXT("Recipe_Cord")))){return true;}Wait(Now,.6,24);return false;}
         if(Stage==24)
         {
-            if(!C->ActiveRecipe.IsNone()){return false;}if(!Test->TestTrue(TEXT("Repeated cord consumes four fibre with noXP"),C->Feedback==TEXT("Completed") && I->Count(TEXT("Item_Fibre"))==8 && I->Count(TEXT("Item_Cord"))==1 && G->GetExperience()==120)){return true;}
+            if(!C->ActiveRecipe.IsNone()){return false;}if(!Test->TestTrue(TEXT("Repeated cord consumes four fibre with noXP"),C->Feedback==TEXT("Completed") && I->Count(TEXT("Item_Fibre"))==8 && I->Count(TEXT("Item_Cord"))==1 && G->GetExperience()==185)){return true;}
             Menu->SelectRecipe(TEXT("Recipe_WovenGuard"));Menu->RefreshMenu();Menu->SetKeyboardFocus();Press(EKeys::Enter);if(!Test->TestEqual(TEXT("Real guard job starts"),C->ActiveRecipe,FName(TEXT("Recipe_WovenGuard")))){return true;}Wait(Now,.6,25);return false;
         }
         if(Stage==25)
         {
-            if(!C->ActiveRecipe.IsNone()){return false;}if(!Test->TestTrue(TEXT("Earned guard exact conversion and once-only20XP"),C->Feedback==TEXT("Completed") && I->Count(TEXT("Item_WovenGuard"))==1 && I->Count(TEXT("Item_Fibre"))==0 && I->Count(TEXT("Item_Cord"))==0 && I->Count(TEXT("Item_Wood"))==5 && I->CreatureHitReduction()==.25f && G->GetExperience()==140 && G->GetAvailablePoints()==1 && G->GetRecord().CreditedCrafts.Num()==7)){return true;}
+            if(!C->ActiveRecipe.IsNone()){return false;}if(!Test->TestTrue(TEXT("Earned guard exact conversion and once-only20XP"),C->Feedback==TEXT("Completed") && I->Count(TEXT("Item_WovenGuard"))==1 && I->Count(TEXT("Item_Fibre"))==0 && I->Count(TEXT("Item_Cord"))==0 && I->Count(TEXT("Item_Wood"))==5 && I->CreatureHitReduction()==.25f && G->GetExperience()==205 && G->GetAvailablePoints()==1 && G->GetRecord().CreditedCrafts.Num()==7)){return true;}
             Menu->RefreshMenu();Scroll(true);Wait(Now,.6,26);return false;
         }
         if(Stage==26){Scroll(true);Wait(Now,.6,27);return false;}
@@ -336,7 +336,7 @@ public:
             const float Before=Creature->Health,Stamina=Needs->GetVitals().Stamina;Action(EKeys::LeftMouseButton);
             if(!Test->TestTrue(TEXT("Actual first-person melee uses earned45damage and five stamina"),Creature->Health==FMath::Max(0.f,Before-45) && Stamina-Needs->GetVitals().Stamina==5)){return true;}
             const float After=Creature->Health,AfterStamina=Needs->GetVitals().Stamina;Action(EKeys::LeftMouseButton);Test->TestTrue(TEXT("Immediate repeated swing refused by cooldown"),Creature->Health==After && Needs->GetVitals().Stamina==AfterStamina);
-            if(++Swing<3){Wait(Now,.65,31);return false;}if(!Test->TestTrue(TEXT("Three accepted earned-tool hits kill default100HP Prowler"),Creature->IsDead() && G->GetExperience()==140)){return true;}
+            if(++Swing<3){Wait(Now,.65,31);return false;}if(!Test->TestTrue(TEXT("Three accepted earned-tool hits kill default100HP Prowler"),Creature->IsDead() && G->GetExperience()==205)){return true;}
             int32 Count=0;for(TActorIterator<APFItemPickup> It(PC->GetWorld());It;++It){if(FVector::DistSquared(It->GetActorLocation(),Creature->GetActorLocation()-FVector(0,0,25))<1){Loot=*It;++Count;}}
             if(!Test->TestTrue(TEXT("One default perishable creature loot batch"),Count==1 && Loot.IsValid() && Loot->GetContents().ItemId==TEXT("Item_Food") && Loot->GetContents().Quantity==3)){return true;}LootExpiry=Loot->GetContents().ExpiresAt;
             FVector Eye;FRotator Look;PC->GetPawn()->GetActorEyesViewPoint(Eye,Look);PC->SetControlRotation((Loot->GetActorLocation()-Eye).Rotation());Wait(Now,.65,32);return false;
@@ -349,7 +349,7 @@ public:
         }
         if(Stage==33)
         {
-            Action(EKeys::LeftMouseButton);PC->Interact();if(!Test->TestTrue(TEXT("Corpse attacks/repeated pickup create no loot orXP"),I->Count(TEXT("Item_Food"))==4 && G->GetExperience()==140 && Creature->IsDead())){return true;}
+            Action(EKeys::LeftMouseButton);PC->Interact();if(!Test->TestTrue(TEXT("Corpse attacks/repeated pickup create no loot orXP"),I->Count(TEXT("Item_Food"))==4 && G->GetExperience()==205 && Creature->IsDead())){return true;}
             Action(EKeys::Tab);Wait(Now,.6,34);return false;
         }
         if(Stage==34)
@@ -372,7 +372,7 @@ public:
         if(Stage==35)
         {
             for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned combat screenshot written"),IFileManager::Get().FileSize(*Path)>0);}Action(EKeys::Tab);
-            Test->AddInfo(TEXT("[PrimalAgentTools] Earned guard/default Prowler: real8→6damage via Think windup,140XP/onepoint,45damage/5stamina normal melee kills in3accepted swings, one3food batch/normal pickup/original freshness/no corpse duplication. No grants or default damage override; controlled positions/ticks,not navigation/human combat feel."));return true;
+            Test->AddInfo(TEXT("[PrimalAgentTools] Earned guard/default Prowler: real8→6damage via Think windup,205XP/onepoint,45damage/5stamina normal melee kills in3accepted swings, one3food batch/normal pickup/original freshness/no corpse duplication. No grants or default damage override; controlled positions/ticks,not navigation/human combat feel."));return true;
         }
         return false;
     }
@@ -397,7 +397,7 @@ private:
     double Started=FPlatformTime::Seconds(),Until=0;int32 Stage=0,GatherIndex=0,GatherAction=0,CraftIndex=0,BeforeOutput=0;float OldScale=1;bool bScaleChanged=false;
     const FName Resources[6]={TEXT("Node_Wood"),TEXT("Node_Wood"),TEXT("Node_Stone"),TEXT("Node_Food"),TEXT("Node_Fibre"),TEXT("Node_Fibre")};const int32 Actions[6]={3,3,1,2,3,1};
     const TCHAR* Recipes[7]={TEXT("Recipe_Tool"),TEXT("Recipe_Cook"),TEXT("Recipe_Dry"),TEXT("Recipe_Cord"),TEXT("Recipe_Club"),TEXT("Recipe_Cord"),TEXT("Recipe_BoundTool")};
-    const FName Outputs[7]={TEXT("Item_Tool"),TEXT("Item_CookedFood"),TEXT("Item_DriedFood"),TEXT("Item_Cord"),TEXT("Item_Club"),TEXT("Item_Cord"),TEXT("Item_BoundTool")};const int32 Experience[7]={20,40,60,80,100,100,120};
+    const FName Outputs[7]={TEXT("Item_Tool"),TEXT("Item_CookedFood"),TEXT("Item_DriedFood"),TEXT("Item_Cord"),TEXT("Item_Club"),TEXT("Item_Cord"),TEXT("Item_BoundTool")};const int32 Experience[7]={80,100,120,140,160,160,180};
 };
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEarnedUpgradeLiveTest,"PF.Progression.EarnedUpgradeLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::EngineFilter)
