@@ -1,4 +1,5 @@
 #include "Settings/PFSettingsMenu.h"
+#include "UI/PFUITheme.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -17,10 +18,14 @@
 
 namespace
 {
-UTextBlock* Text(UWidgetTree* Tree,const FString& Value,int32 Size=22)
+UTextBlock* Text(UWidgetTree* Tree,const FString& Value,int32 Size=22,FName Name=NAME_None)
 {
-    auto* T=Tree->ConstructWidget<UTextBlock>();T->SetText(FText::FromString(Value));
-    auto Font=T->GetFont();Font.Size=Size;T->SetFont(Font);return T;
+    auto* T=Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),Name);T->SetText(FText::FromString(Value));
+    auto Font=T->GetFont();Font.Size=Size;T->SetFont(Font);T->SetColorAndOpacity(PFUITheme::Text);T->SetAutoWrapText(true);return T;
+}
+FButtonStyle SettingsButton(bool bSelected)
+{
+    auto Style=PFUITheme::NavigationButton(bSelected);Style.SetNormalPadding(FMargin(12,8));Style.SetPressedPadding(FMargin(12,8));return Style;
 }
 FString Toggle(bool Value){return Value?TEXT("On"):TEXT("Off");}
 FString Quality(int32 Value){const TCHAR* Names[]={TEXT("Low"),TEXT("Medium"),TEXT("High"),TEXT("Epic")};return Value>=0&&Value<4?Names[Value]:TEXT("Custom");}
@@ -30,15 +35,21 @@ int32 Cycle(int32 Value,int32 Direction,int32 Count){return (Value+Direction+Cou
 void UPFSettingsRow::InitializeRow(UPFSettingsMenu* InOwner,int32 InIndex)
 {
     Menu=InOwner;Index=InIndex;
-    auto* Box=WidgetTree->ConstructWidget<UHorizontalBox>();WidgetTree->RootWidget=Box;
-    auto* Left=WidgetTree->ConstructWidget<UButton>();Left->SetContent(Text(WidgetTree,TEXT(" < ")));
-    Box->AddChildToHorizontalBox(Left);Left->OnClicked.AddDynamic(this,&UPFSettingsRow::Previous);
+    Frame=WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(),TEXT("PF_SettingsRowFrame"));WidgetTree->RootWidget=Frame;Frame->SetPadding(FMargin(8,3));
+    auto* Box=WidgetTree->ConstructWidget<UHorizontalBox>();Frame->SetContent(Box);
+    PreviousButton=WidgetTree->ConstructWidget<UButton>();PreviousButton->SetContent(Text(WidgetTree,TEXT("<"),20));
+    Box->AddChildToHorizontalBox(PreviousButton)->SetVerticalAlignment(VAlign_Center);PreviousButton->OnClicked.AddDynamic(this,&UPFSettingsRow::Previous);
     Label=Text(WidgetTree,TEXT(""));
-    auto* LabelSlot=Box->AddChildToHorizontalBox(Label);LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));LabelSlot->SetPadding(FMargin(12,6));
-    auto* Right=WidgetTree->ConstructWidget<UButton>();Right->SetContent(Text(WidgetTree,TEXT(" > ")));
-    Box->AddChildToHorizontalBox(Right);Right->OnClicked.AddDynamic(this,&UPFSettingsRow::Next);
+    auto* LabelSlot=Box->AddChildToHorizontalBox(Label);LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));LabelSlot->SetPadding(FMargin(12,6));LabelSlot->SetVerticalAlignment(VAlign_Center);
+    NextButton=WidgetTree->ConstructWidget<UButton>();NextButton->SetContent(Text(WidgetTree,TEXT(">"),20));
+    Box->AddChildToHorizontalBox(NextButton)->SetVerticalAlignment(VAlign_Center);NextButton->OnClicked.AddDynamic(this,&UPFSettingsRow::Next);
 }
-void UPFSettingsRow::SetCaption(const FString& Caption,bool bSelected){Label->SetText(FText::FromString(Caption));Label->SetColorAndOpacity(bSelected?FLinearColor(0.3f,0.85f,1):FLinearColor::White);}
+void UPFSettingsRow::SetCaption(const FString& Caption,bool bSelected)
+{
+    Label->SetText(FText::FromString(Caption));Label->SetColorAndOpacity(bSelected?PFUITheme::Accent:PFUITheme::Text);
+    Frame->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Inset,6.f,bSelected?PFUITheme::Accent:FLinearColor(0.12f,0.18f,0.15f,1),bSelected?2.f:1.f));
+    PreviousButton->SetStyle(SettingsButton(bSelected));NextButton->SetStyle(SettingsButton(bSelected));
+}
 void UPFSettingsRow::Previous(){if(Menu){Menu->Change(Index,-1);}}
 void UPFSettingsRow::Next(){if(Menu){Menu->Change(Index,1);}}
 
@@ -53,25 +64,29 @@ void UPFSettingsMenu::NativeOnInitialized()
 {
     Super::NativeOnInitialized();SetIsFocusable(true);CopyFromLive();
     auto* Canvas=WidgetTree->ConstructWidget<UCanvasPanel>();WidgetTree->RootWidget=Canvas;
-    auto* Panel=WidgetTree->ConstructWidget<UBorder>();Panel->SetBrushColor(FLinearColor(0.025f,0.035f,0.045f,1));Panel->SetPadding(FMargin(24));
+    auto* Panel=WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(),TEXT("PF_SettingsPanel"));Panel->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Surface,16.f,FLinearColor(0.16f,0.25f,0.20f,1),1.f));Panel->SetPadding(FMargin(24));
     auto* Placement=Canvas->AddChildToCanvas(Panel);Placement->SetAnchors(FAnchors(0.08f,0.06f,0.92f,0.94f));Placement->SetOffsets(FMargin(0));
     auto* Body=WidgetTree->ConstructWidget<UVerticalBox>();Panel->SetContent(Body);
+    auto* Eyebrow=Text(WidgetTree,TEXT("PRIMAL FRONTIER / LOCAL PREFERENCES"),14);Eyebrow->SetColorAndOpacity(PFUITheme::Accent);Body->AddChild(Eyebrow);
     Body->AddChild(Text(WidgetTree,TEXT("SETTINGS"),30));
     auto* Tabs=WidgetTree->ConstructWidget<UHorizontalBox>();Body->AddChild(Tabs);
-    auto Tab=[&](const TCHAR* Name){auto* B=WidgetTree->ConstructWidget<UButton>();B->SetContent(Text(WidgetTree,Name));Tabs->AddChild(B);return B;};
+    auto Tab=[&](const TCHAR* Name){auto* B=WidgetTree->ConstructWidget<UButton>();B->SetContent(Text(WidgetTree,Name,18));auto* Slot=Tabs->AddChildToHorizontalBox(B);Slot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));Slot->SetPadding(FMargin(0,8,6,8));CategoryButtons.Add(B);return B;};
     auto* G=Tab(TEXT(" Game "));G->OnClicked.AddDynamic(this,&UPFSettingsMenu::Game);
     auto* V=Tab(TEXT(" Graphics "));V->OnClicked.AddDynamic(this,&UPFSettingsMenu::Graphics);
     auto* A=Tab(TEXT(" Audio "));A->OnClicked.AddDynamic(this,&UPFSettingsMenu::Audio);
     auto* X=Tab(TEXT(" Accessibility "));X->OnClicked.AddDynamic(this,&UPFSettingsMenu::Accessibility);
-    Scroll=WidgetTree->ConstructWidget<UScrollBox>();Body->AddChildToVerticalBox(Scroll)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+    CategoryGuide=Text(WidgetTree,TEXT(""),16,TEXT("PF_SettingsCategoryGuide"));CategoryGuide->SetColorAndOpacity(PFUITheme::Muted);Body->AddChild(CategoryGuide);
+    Scroll=WidgetTree->ConstructWidget<UScrollBox>();auto* ScrollSlot=Body->AddChildToVerticalBox(Scroll);ScrollSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));ScrollSlot->SetPadding(FMargin(0,10));
     RowsPanel=WidgetTree->ConstructWidget<UVerticalBox>();Scroll->AddChild(RowsPanel);
-    Status=Text(WidgetTree,TEXT("Changes apply only when confirmed. Display changes unavailable in PIE."),18);Status->SetAutoWrapText(true);Body->AddChild(Status);
-    auto* Actions=WidgetTree->ConstructWidget<UHorizontalBox>();Body->AddChild(Actions);
-    auto Action=[&](const TCHAR* Name){auto* B=WidgetTree->ConstructWidget<UButton>();B->SetContent(Text(WidgetTree,Name));Actions->AddChild(B);return B;};
+    auto* Footer=WidgetTree->ConstructWidget<UBorder>();Footer->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Inset,8.f));Footer->SetPadding(FMargin(12,10));Body->AddChild(Footer);
+    auto* FooterBody=WidgetTree->ConstructWidget<UVerticalBox>();Footer->SetContent(FooterBody);
+    Status=Text(WidgetTree,TEXT("Changes apply only when confirmed. Display changes unavailable in PIE."),16);Status->SetColorAndOpacity(PFUITheme::Warning);FooterBody->AddChild(Status);
+    auto* Actions=WidgetTree->ConstructWidget<UHorizontalBox>();FooterBody->AddChild(Actions);
+    auto Action=[&](const TCHAR* Name){auto* B=WidgetTree->ConstructWidget<UButton>();B->SetStyle(SettingsButton(false));B->SetContent(Text(WidgetTree,Name,18));auto* Slot=Actions->AddChildToHorizontalBox(B);Slot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));Slot->SetPadding(FMargin(0,8,6,8));return B;};
     Action(TEXT(" Apply / Keep "))->OnClicked.AddDynamic(this,&UPFSettingsMenu::Apply);
     Action(TEXT(" Cancel / Back "))->OnClicked.AddDynamic(this,&UPFSettingsMenu::Cancel);
     Action(TEXT(" Defaults "))->OnClicked.AddDynamic(this,&UPFSettingsMenu::Defaults);
-    Body->AddChild(Text(WidgetTree,TEXT("Arrows / D-pad: select & change | LB/RB: tab | Enter/A: apply | Esc/B: back | Y: defaults"),16));
+    auto* Help=Text(WidgetTree,TEXT("Arrows / D-pad: select & change | LB/RB: tab | Enter/A: apply | Esc/B: back | Y: defaults"),14);Help->SetColorAndOpacity(PFUITheme::Muted);FooterBody->AddChild(Help);
     RefreshRows();
 }
 void UPFSettingsMenu::Game(){Category=0;Selected=0;RefreshRows();}
@@ -81,8 +96,11 @@ void UPFSettingsMenu::Accessibility(){Category=3;Selected=0;RefreshRows();}
 void UPFSettingsMenu::RefreshRows()
 {
     RowsPanel->ClearChildren();Rows.Reset();if(!Draft){return;}
+    const TCHAR* Guides[]={TEXT("First-person view and look controls. Changes stay local to this player."),TEXT("Lower render scale or quality for a lighter frame. Display changes need confirmation; the Editor owns window size in PIE."),TEXT("Adjust each local mix. Master volume scales music, effects and UI."),TEXT("Adjust HUD text, the aiming marker and colour correction. Apply to preview; Cancel discards your draft.")};
+    CategoryGuide->SetText(FText::FromString(Guides[Category]));
+    for(int32 I=0;I<CategoryButtons.Num();++I){CategoryButtons[I]->SetStyle(SettingsButton(I==Category));}
     const int32 Counts[]={4,17,5,4};
-    for(int32 I=0;I<Counts[Category];++I){auto* Row=CreateWidget<UPFSettingsRow>(GetOwningPlayer());Row->InitializeRow(this,I);RowsPanel->AddChild(Row);Rows.Add(Row);Row->SetCaption(Caption(I),I==Selected);}
+    for(int32 I=0;I<Counts[Category];++I){auto* Row=CreateWidget<UPFSettingsRow>(GetOwningPlayer());Row->InitializeRow(this,I);RowsPanel->AddChildToVerticalBox(Row)->SetPadding(FMargin(0,0,0,4));Rows.Add(Row);Row->SetCaption(Caption(I),I==Selected);}
 }
 FString UPFSettingsMenu::Caption(int32 I) const
 {

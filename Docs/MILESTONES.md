@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-10 M11 themed settings — bounded technical gate passed
+
+Settings now shares the original texture-free PFUITheme, with outlined active categories/rows, wrapped category guidance and separate action/status/help footer. Exact settings transactions/controls unchanged. Editor40.20s/Game51.03s clean; native Preferences1/1, real two-process720p+1440p4/4,Cancel720p1/1 andDisplay1440p1/1 passed exact selections/exits/testseverity0/no timeout. All21PNG inspected; default settings/personal316–321saves/source INI hashes unchanged. Raw known Prepare/Cancel/Display26warning14Pythonerror,Verify24/14 removes two CVar warnings,0new categories/no assertfatalensure. SETTINGS_THEME_M11.md exact commands/paths/limits: peaks3.405/5.796GiB on31.93GiB host,not FPS/minimum16GB/controller/audio/human acceptance. Bounded PzdtVFJF complete; fullM11/M12/Personal stayopen. Immediate Trello evidence/Done,scoped Solpublication,then fresh eligible audit.
+
 ## 2026-10-10 M11 settings restart — bounded technical gate passed
 
 Actual two-process Apply/startup/display/camera/renderer/HUD/Cancel checks passed720p+1440p (four exact live selectors), PF.Settings.Preferences1/1 and shared SettingsApplyLive720p1/1. Editor34.94s/Game40.51s clean. All17PNG inspected; exact exits/testseverity0/no timeout, default settings/private311–315save hashes unchanged, both source INIs unchanged; four expected negative preflight probes passed. SETTINGS_RESTART_M11.md contains exact paths/commands/limits. Raw Prepare/Apply26warning/14Pythonerror baseline retained; Verify24/14 removes two known CVar warnings,0new normalized severity/no assertfatalensure. Peaks up to3.443/5.643GiB on31.93GiB busy host; no FPS/minimum16GB/audio/controller/manual certificate. Bounded jeLo0isc complete; fullM11/M12/Personal remainopen. Immediate Trello evidence/Done, scoped Sol publication, then fresh eligible UI audit.

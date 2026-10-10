@@ -5,6 +5,8 @@
 class UVerticalBox;
 class UTextBlock;
 class UScrollBox;
+class UBorder;
+class UButton;
 class UPFSettingsMenu;
 
 /** A focusable value row. Buttons and keyboard/gamepad share the same mutation path. */
@@ -18,6 +20,9 @@ public:
 private:
     UPROPERTY() TObjectPtr<UPFSettingsMenu> Menu;
     UPROPERTY() TObjectPtr<UTextBlock> Label;
+    UPROPERTY() TObjectPtr<UBorder> Frame;
+    UPROPERTY() TObjectPtr<UButton> PreviousButton;
+    UPROPERTY() TObjectPtr<UButton> NextButton;
     int32 Index=0;
     UFUNCTION() void Previous();
     UFUNCTION() void Next();
@@ -40,6 +45,8 @@ private:
     UPROPERTY() TObjectPtr<UVerticalBox> RowsPanel;
     UPROPERTY() TObjectPtr<UScrollBox> Scroll;
     UPROPERTY() TObjectPtr<UTextBlock> Status;
+    UPROPERTY() TObjectPtr<UTextBlock> CategoryGuide;
+    UPROPERTY() TArray<TObjectPtr<UButton>> CategoryButtons;
     UPROPERTY() TArray<TObjectPtr<UPFSettingsRow>> Rows;
     int32 Category=0, Selected=0;
     double ConfirmDeadline=0;

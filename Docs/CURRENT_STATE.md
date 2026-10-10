@@ -1,5 +1,25 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M11 themed settings — bounded technical gate passed
+
+Settings now shares the original texture-free PFUITheme, with outlined active categories/rows, wrapped category guidance and separate action/status/help footer. Exact settings transactions/controls unchanged. Editor40.20s/Game51.03s clean; native Preferences1/1, real two-process720p+1440p4/4,Cancel720p1/1 andDisplay1440p1/1 passed exact selections/exits/testseverity0/no timeout. All21PNG inspected; default settings/personal316–321saves/source INI hashes unchanged. Raw known Prepare/Cancel/Display26warning14Pythonerror,Verify24/14 removes two CVar warnings,0new categories/no assertfatalensure. SETTINGS_THEME_M11.md exact commands/paths/limits: peaks3.405/5.796GiB on31.93GiB host,not FPS/minimum16GB/controller/audio/human acceptance. Bounded PzdtVFJF complete; fullM11/M12/Personal stayopen. Immediate Trello evidence/Done,scoped Solpublication,then fresh eligible audit.
+
+## 2026-10-10 M11 settings presentation — pending
+
+SettingsDisplayLive1440p PASSED1/1 M11Display1440_20261010_062559394_8da921f1,51.56s,working/private3.346/5.656GiB,actual smaller confirmed window/Back/15second paused timeout/file reload passed. Exact selector/exits0/testseverity0/no timeout;321personal saves/settings unchanged. DisplayPNG/raw review andGame build next.
+
+SettingsCancelLive720p PASSED1/1 M11Settings720_20261010_062445656_cc18fc2a,35.50s,working/private3.261/5.277GiB,exact selector/exits0/testseverity0/no timeout,320personal saves/settings unchanged. All14RestartPNG inspected/raw0new baseline,CancelPNG and Display1440p/Game next.
+
+Themed Prepare/Verify1440p PASSED2/2 M11RestartP1440_20261010_062317952_eef2e09d and M11RestartV1440_20261010_062349795_197c42a1,31.57/33.97s,working/private3.393/5.796 and3.405/4.721GiB,exact selectors/exits0/testseverity0/no timeout;318/319personal saves/settings/source hashes unchanged.720p sevenPNG reviewed. Cancel720p then Display1440p safety replay/artifact/raw/Game pending.
+
+Themed Prepare/Verify720p PASSED2/2 M11RestartP720_20261010_062052947_b3e98330 and M11RestartV720_20261010_062142358_b3c35aa7,48.77/33.89s,working/private3.342/5.169 and3.316/4.294GiB,exact selectors/exits0/testseverity0/no timeout. Personal316/317saves/default settings/source hashes unchanged; actual guidance/title/actions/help geometry checked.1440p next; artifact/raw and Cancel/display/Game pending.
+
+PF.Settings.Preferences PASSED1/1 Automation_M11SettingsTheme_20261010_061944568_e46ba2bd,45.20s,working/private2.963/2.915GiB,exact selector/exits0/test/rawseverity0/no timeout/fatalensure. Actual theme rendered Prepare/Verify720p running; human acceptance unchanged.
+
+Editor PASSED40.20s/no compiler warnings PFM11SettingsThemeEditorBuild.log. Native PF.Settings.Preferences next, then real sequential720p before1440p. No new runtime pass yet.
+
+b67cf42 settings restart published/localremote equal/clean; fresh HUD/Programming/current docs audit selected https://trello.com/c/PzdtVFJF Doing. Actual stock Settings screenshots led to original texture-free PFUITheme rows/tabs/footer, active outlines and concise four-category guidance. Exact value captions/draft/Apply/Cancel/display safety/controls remain; no assets/authority/settings backend changes. Uncompiled/untested; Editor/native then actual sequential720p/1440p,Cancel/display rollback andGame/artifact review. FullM11/M12/Personal unchanged.
+
 ## 2026-10-10 M11 settings restart — bounded technical gate passed
 
 Actual two-process Apply/startup/display/camera/renderer/HUD/Cancel checks passed720p+1440p (four exact live selectors), PF.Settings.Preferences1/1 and shared SettingsApplyLive720p1/1. Editor34.94s/Game40.51s clean. All17PNG inspected; exact exits/testseverity0/no timeout, default settings/private311–315save hashes unchanged, both source INIs unchanged; four expected negative preflight probes passed. SETTINGS_RESTART_M11.md contains exact paths/commands/limits. Raw Prepare/Apply26warning/14Pythonerror baseline retained; Verify24/14 removes two known CVar warnings,0new normalized severity/no assertfatalensure. Peaks up to3.443/5.643GiB on31.93GiB busy host; no FPS/minimum16GB/audio/controller/manual certificate. Bounded jeLo0isc complete; fullM11/M12/Personal remainopen. Immediate Trello evidence/Done, scoped Sol publication, then fresh eligible UI audit.

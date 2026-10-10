@@ -11,6 +11,8 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
+#include "Components/Border.h"
+#include "Components/ScrollBox.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "UnrealClient.h"
@@ -55,6 +57,7 @@ public:
         const double Now=FPlatformTime::Seconds();
         if(Now-Started>60){Test->AddError(FString::Printf(TEXT("Settings restart timeout stage%d"),Stage));return true;}
         if(Now<Until || (!Shot.IsEmpty() && IFileManager::Get().FileSize(*Shot)<=0)){return false;}
+        if(!Shot.IsEmpty()){if(Stage!=9){CheckLayout();}Shot.Empty();}
         auto* Live=UPFGameUserSettings::Get();
         if(Stage==0)
         {
@@ -165,6 +168,22 @@ public:
         Test->AddError(TEXT("Unexpected settings restart stage"));return true;
     }
 private:
+    void CheckLayout()
+    {
+        auto* Actual=Menu.Get();if(!Test->TestNotNull(TEXT("Painted Settings still exists"),Actual)){return;}
+        auto* Guide=Cast<UTextBlock>(Actual->WidgetTree->FindWidget(TEXT("PF_SettingsCategoryGuide")));
+        Test->TestTrue(TEXT("Current category has readable explanatory guidance"),Guide && !Guide->GetText().IsEmpty());
+        const auto& Root=Actual->GetCachedGeometry();
+        Actual->WidgetTree->ForEachWidget([&](UWidget* W)
+        {
+            if(Cast<UTextBlock>(W))
+            {
+                const auto& G=W->GetCachedGeometry();const auto Min=Root.AbsoluteToLocal(G.LocalToAbsolute(FVector2D::ZeroVector));const auto Max=Root.AbsoluteToLocal(G.LocalToAbsolute(G.GetLocalSize()));
+                Test->TestTrue(TEXT("Painted category/title/action/help text fits viewport"),G.GetLocalSize().X>0 && G.GetLocalSize().Y>0 && Min.X>=-1 && Min.Y>=-1 && Max.X<=Root.GetLocalSize().X+1 && Max.Y<=Root.GetLocalSize().Y+1);
+                Test->TestTrue(TEXT("Painted text desired height is not clipped"),W->GetDesiredSize().Y<=G.GetLocalSize().Y+1);
+            }
+        });
+    }
     void Capture(const TCHAR* Name){Shot=Directory/Name;FScreenshotRequest::RequestScreenshot(Shot,true,false);Until=FPlatformTime::Seconds()+0.8;}
     void CheckPreferences()
     {
