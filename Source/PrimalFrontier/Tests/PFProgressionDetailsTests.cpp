@@ -43,9 +43,9 @@ bool FPFProgressionDetailsTest::RunTest(const FString&)
     TestTrue(TEXT("Learned useful access described"),Knowledge().Requirement.ToString().Contains(TEXT("Recipe access available")));
     TestFalse(TEXT("Learned view does not keep obsolete leveling instruction"),Knowledge().Requirement.ToString().Contains(TEXT("Gather resources")));
     Record={};Record.Experience=100;
-    FPFKnowledgeDefinition Other=Catalog->Knowledge[0];Other.Id=TEXT("Tech_Other");Other.DisplayName=FText::FromString(TEXT("Other test knowledge"));Other.Recipes={TEXT("Recipe_Cord")};Other.PointCost=2;Catalog->Knowledge.Add(Other);
+    FPFKnowledgeDefinition Other=Catalog->Knowledge[0];Other.Id=TEXT("Tech_Other");Other.DisplayName=FText::FromString(TEXT("Other test knowledge"));Other.Recipes={TEXT("Recipe_Cord")};Other.PointCost=2;const int32 OtherIndex=Catalog->Knowledge.Add(Other);
     Record.Knowledge.Add(Other.Id);TestFalse(TEXT("Insufficient remaining points"),Knowledge().bCanLearn);TestTrue(TEXT("Unaffordable explains remaining point"),Knowledge().Requirement.ToString().Contains(TEXT("Available 1")) && Knowledge().Requirement.ToString().Contains(TEXT("Not enough")));
-    Record.Knowledge.Reset();Catalog->Knowledge[1].PointCost=1;Catalog->Knowledge[0].Prerequisites={Other.Id};
+    Record.Knowledge.Reset();Catalog->Knowledge[OtherIndex].PointCost=1;Catalog->Knowledge[0].Prerequisites={Other.Id};
     TestFalse(TEXT("Missing prerequisite stays locked"),Knowledge().bCanLearn);TestTrue(TEXT("Prerequisite display name readable"),Knowledge().Requirement.ToString().Contains(TEXT("Learn first: Other test knowledge")));
     Record.Knowledge.Add(Other.Id);TestTrue(TEXT("Satisfied prerequisite and exact cost allow view"),Knowledge().bCanLearn);
     Record.Experience=-1;TestTrue(TEXT("Corrupt record explicit unavailable"),Knowledge().Requirement.ToString().Contains(TEXT("Knowledge unavailable")));TestFalse(TEXT("Corrupt record disables purchase"),Knowledge().bCanLearn);

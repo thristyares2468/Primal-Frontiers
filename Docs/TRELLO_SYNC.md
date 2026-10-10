@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October10 FieldWeapons: fresh bounded dbGxD7ov/parent audit and current docs selected level3 optional existing weapon knowledge. Technical native1+6/rendered720p+corrected1440p/network4+6/sharedbase4/Editor+Game passed, exact FIELD_WEAPONS_M12.md,28PNG/rawbaselines/hashguards reviewed. Immediately evidenceupdate/move/readback boundedDone;parentM12Doing and existing Personal priorities/members/dates remain. Copy revised G2 including3b into existing two Personal cards; retain prior near-limit descriptions as historical comments to avoid stale contradictory instructions. Scoped Solpublication follows; fresh board audit before further scope. No added human assignment/fullmilestone pass.
+
 October10 ordinary-tick timer task https://trello.com/c/uoZQxtUs selected after fresh Programming/parent/current-state audit. Test-only native1plus regression2/Editor5.61s/Game23.59s passed with rawzero severity; initial engine delta-clamp fixture failure retained/replayed. Immediately record exact evidence and move/read back bounded task Done; parentM12 Doing/Personal membership/deadlines/status unchanged. GATHER_LIFECYCLE_M12.md records limits. Scoped Sol publication precedes next fresh audit.
 
 ## October10 progression guidance checkpoint

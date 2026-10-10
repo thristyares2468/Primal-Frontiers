@@ -22,7 +22,7 @@ class FKnowledgeLiveExercise final : public IAutomationLatentCommand
 {
 public:
     explicit FKnowledgeLiveExercise(FAutomationTestBase* T):Test(T)
-    {FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);FParse::Value(FCommandLine::Get(),TEXT("PFSaveSlot="),Slot);bRestore=FParse::Param(FCommandLine::Get(),TEXT("PFLoadSave"));}
+    {FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);FParse::Value(FCommandLine::Get(),TEXT("PFSaveSlot="),Slot);bRestore=FParse::Param(FCommandLine::Get(),TEXT("PFLoadSave"));bWeapon=FParse::Param(FCommandLine::Get(),TEXT("PFRunWeaponKnowledgeTests"));}
     bool Update() override
     {
         const double Now=FPlatformTime::Seconds();
@@ -45,15 +45,15 @@ public:
                 if(Stage==0)
                 {
                     CheckState(PC);const FString Feedback=G->GetKnowledgeFeedback();
-                    Test->TestFalse(TEXT("Restored client direct mutation refuses"),G->RequestKnowledge(TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
+                    Test->TestFalse(TEXT("Restored client direct mutation refuses"),G->RequestKnowledge(bWeapon?TEXT("Tech_FieldWeapons"):TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
                     Test->TestEqual(TEXT("Client cannot forge restored feedback"),G->GetKnowledgeFeedback(),Feedback);
                     Test->TestFalse(TEXT("Client cannot save knowledge"),W->GetSubsystem<UPFWorldPersistence>()->Save(Slot,Error));
-                    PC->ServerCraftAction(TEXT("Recipe_BoundTool"),false);Next(20);return false;
+                    PC->ServerCraftAction(AccessRecipe(),false);Next(20);return false;
                 }
                 if(Stage==20 && Now-Changed>.7)
                 {
-                    if(I->Count(TEXT("Item_Stone"))==1)
-                    {if(C->ActiveRecipe!=TEXT("Recipe_BoundTool")){return false;}PC->ServerCraftAction(NAME_None,true);Next(21);return false;}
+                    if(Marker(I)==1)
+                    {if(C->ActiveRecipe!=AccessRecipe()){return false;}PC->ServerCraftAction(NAME_None,true);Next(21);return false;}
                     if(!C->Feedback.StartsWith(TEXT("Locked:"))){return false;}Test->TestTrue(TEXT("Unlearned restored RPC stays idle"),C->ActiveRecipe.IsNone());
                 }
                 else if(Stage==21 && Now-Changed>.7)
@@ -82,15 +82,16 @@ public:
                     if(!P->GetInventory()->GetStacks().IsEmpty() || Progression(P)->GetExperience()!=0){Test->AddError(TEXT("Refusing non-fresh knowledge fixture"));return true;}
                     auto* Pawn=CastChecked<APFSurvivorCharacter>(P->GetPawn());Pawn->GetCharacterMovement()->DisableMovement();Pawn->SetActorLocation(FVector(-1200,Index*400,100));
                     Pawn->Survival->HungerDrainPerSecond=0;Pawn->Survival->ThirstDrainPerSecond=0;
-                    Test->TestTrue(TEXT("Trusted identity role marker,not reward"),P->GetInventory()->Grant(TEXT("Item_Stone"),++Index));
+                    Test->TestTrue(TEXT("Trusted identity role marker,not reward"),P->GetInventory()->Grant(bWeapon?TEXT("Item_Water"):TEXT("Item_Stone"),++Index));
                     Test->TestTrue(TEXT("Trusted recipe-access ingredients,not purchase output"),P->GetInventory()->Grant(TEXT("Item_Tool"),1) && P->GetInventory()->Grant(TEXT("Item_Cord"),1) && P->GetInventory()->Grant(TEXT("Item_Wood"),2));
-                    FPFProgressionRecord Seed;Seed.Experience=100;Test->TestTrue(TEXT("Explicit trusted100XP fixture,not earned pacing"),Progression(P)->Restore(Seed,Error));
+                    if(bWeapon){Test->TestTrue(TEXT("Trusted optional weapon inputs, not earned items"),P->GetInventory()->Grant(TEXT("Item_Club"),1) && P->GetInventory()->Grant(TEXT("Item_Stone"),2));}
+                    FPFProgressionRecord Seed;Seed.Experience=SeedXP();Test->TestTrue(TEXT("Explicit trusted level-boundary XP fixture,not earned pacing"),Progression(P)->Restore(Seed,Error));
                 }
-                Test->AddInfo(TEXT("[PrimalProgression] Seeded explicit100XP fixtures for purchase boundary,not an earned gameplay claim"));Next(1);return false;
+                Test->AddInfo(FString::Printf(TEXT("[PrimalProgression] Seeded explicit%dXP fixtures for purchase boundary,not an earned gameplay claim"),SeedXP()));Next(1);return false;
             }
             if(Stage==1)
             {
-                for(auto* P:Players){auto* PG=Progression(P);auto* Craft=P->GetCrafting();const bool Learned=P->GetInventory()->Count(TEXT("Item_Stone"))==1;if(!Restored(P) || !PG->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) || !Craft || !Craft->ActiveRecipe.IsNone() || !Craft->Feedback.StartsWith(Learned?TEXT("Cancelled"):TEXT("Locked:"))){return false;}}
+                for(auto* P:Players){auto* PG=Progression(P);auto* Craft=P->GetCrafting();const bool Learned=Marker(P->GetInventory())==1;if(!Restored(P) || !PG->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) || !Craft || !Craft->ActiveRecipe.IsNone() || !Craft->Feedback.StartsWith(Learned?TEXT("Cancelled"):TEXT("Locked:"))){return false;}}
                 for(auto* P:Players){CheckState(P);}Test->TestTrue(TEXT("Actual isolated knowledge save"),W->GetSubsystem<UPFWorldPersistence>()->Save(Slot,Error));if(!Error.IsEmpty()){Test->AddError(Error);}
                 Test->AddInfo(TEXT("[PrimalProgression] Knowledge server exact owned purchase,private record and save verified"));Next(99);return false;
             }
@@ -99,26 +100,30 @@ public:
         {
             if(Stage==0)
             {
-                if(G->GetExperience()!=100 || (I->Count(TEXT("Item_Stone"))!=1 && I->Count(TEXT("Item_Stone"))!=2)){return false;}
-                Test->TestEqual(TEXT("Fresh seeded three points"),G->GetAvailablePoints(),3);Test->TestTrue(TEXT("No knowledge granted withXP"),G->GetRecord().Knowledge.IsEmpty());
-                Test->TestFalse(TEXT("Client cannot directly spend points"),G->RequestKnowledge(TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
+                if(G->GetExperience()!=SeedXP() || (Marker(I)!=1 && Marker(I)!=2)){return false;}
+                Test->TestEqual(TEXT("Fresh seeded derived points"),G->GetAvailablePoints(),bWeapon?6:3);Test->TestTrue(TEXT("No knowledge granted withXP"),G->GetRecord().Knowledge.IsEmpty());
+                Test->TestFalse(TEXT("Client cannot directly spend points"),G->RequestKnowledge(bWeapon?TEXT("Tech_FieldWeapons"):TEXT("Tech_FieldTools"),PC->GetPawn(),Error));
                 Test->TestTrue(TEXT("Client cannot forge request feedback"),G->GetKnowledgeFeedback().IsEmpty());
-                PC->ServerCraftAction(TEXT("Recipe_BoundTool"),false);PC->ServerLearnKnowledge(TEXT("Tech_Unknown"));Next(1);return false;
+                PC->ServerCraftAction(AccessRecipe(),false);PC->ServerLearnKnowledge(bWeapon?TEXT("Tech_FieldWeapons"):TEXT("Tech_Unknown"));Next(1);return false;
             }
             if(Stage==1 && Now-Changed>.7)
             {
                 if(!G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:"))){return false;}
                 if(!C->Feedback.StartsWith(TEXT("Locked:"))){return false;}Test->TestTrue(TEXT("Fresh locked RPC consumes no ingredients"),C->ActiveRecipe.IsNone() && I->Count(TEXT("Item_Tool"))==1 && I->Count(TEXT("Item_Cord"))==1 && I->Count(TEXT("Item_Wood"))==2);
-                Test->TestTrue(TEXT("Invalid owned RPC leaves record and inventory"),G->GetRecord().Knowledge.IsEmpty() && G->GetExperience()==100 && I->Count(TEXT("Item_Stone"))>=1);
-                if(I->Count(TEXT("Item_Stone"))==1){PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));Next(2);}
+                Test->TestTrue(TEXT("Invalid owned RPC leaves record and inventory"),G->GetRecord().Knowledge.IsEmpty() && G->GetExperience()==SeedXP() && Marker(I)>=1);
+                if(Marker(I)==1){PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));Next(2);}
                 else{Next(4);}return false;
             }
             if(Stage==2 && Now-Changed>.7)
             {
-                if(G->GetRecord().Knowledge.Num()!=1){return false;}CheckState(PC);PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));PC->ServerCraftAction(TEXT("Recipe_BoundTool"),false);Next(3);return false;
+                if(G->GetRecord().Knowledge.Num()!=1){return false;}
+                if(bWeapon){Test->TestEqual(TEXT("Parent alone leaves four earned-boundary points"),G->GetAvailablePoints(),4);Test->TestFalse(TEXT("Parent alone does not unlock optional weapon"),G->CanCraftRecipe(AccessRecipe(),Error));PC->ServerLearnKnowledge(TEXT("Tech_FieldWeapons"));PC->ServerLearnKnowledge(TEXT("Tech_FieldWeapons"));Next(6);return false;}
+                CheckState(PC);PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));PC->ServerCraftAction(AccessRecipe(),false);Next(3);return false;
             }
+            if(Stage==6 && Now-Changed>.7)
+            {if(G->GetRecord().Knowledge.Num()!=2){return false;}CheckState(PC);PC->ServerLearnKnowledge(TEXT("Tech_FieldWeapons"));PC->ServerCraftAction(AccessRecipe(),false);Next(3);return false;}
             if(Stage==3 && Now-Changed>.7)
-            {if(!G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) || C->ActiveRecipe!=TEXT("Recipe_BoundTool")){return false;}PC->ServerCraftAction(NAME_None,true);Next(5);return false;}
+            {if(!G->GetKnowledgeFeedback().StartsWith(TEXT("Refused:")) || C->ActiveRecipe!=AccessRecipe()){return false;}PC->ServerCraftAction(NAME_None,true);Next(5);return false;}
             if(Stage==5 && Now-Changed>.7)
             {if(!C->ActiveRecipe.IsNone() || !C->Feedback.StartsWith(TEXT("Cancelled"))){return false;}Next(4);return false;}
             if(Stage==4)
@@ -130,19 +135,23 @@ public:
         return false;
     }
 private:
+    int32 SeedXP() const{return bWeapon?250:100;}
+    int32 Marker(const UPFInventoryComponent* I) const{return I->Count(bWeapon?TEXT("Item_Water"):TEXT("Item_Stone"));}
+    FName AccessRecipe() const{return bWeapon?TEXT("Recipe_BoundClub"):TEXT("Recipe_BoundTool");}
+    TArray<FName> LearnedGraph() const{return bWeapon?TArray<FName>{TEXT("Tech_FieldTools"),TEXT("Tech_FieldWeapons")}:TArray<FName>{TEXT("Tech_FieldTools")};}
     UPFProgressionComponent* Progression(APFSurvivalPlayerController* P){auto* PS=P->GetPlayerState<APFInventoryPlayerState>();return PS?PS->Progression.Get():nullptr;}
     bool Restored(APFSurvivalPlayerController* P)
     {
-        auto* G=Progression(P);const int32 Marker=P->GetInventory()->Count(TEXT("Item_Stone"));
-        return G && G->GetExperience()==100 && ((Marker==1 && G->GetRecord().Knowledge==TArray<FName>{FName(TEXT("Tech_FieldTools"))}) || (Marker==2 && G->GetRecord().Knowledge.IsEmpty()));
+        auto* G=Progression(P);const int32 OwnerMarker=Marker(P->GetInventory());
+        return G && G->GetExperience()==SeedXP() && ((OwnerMarker==1 && G->GetRecord().Knowledge==LearnedGraph()) || (OwnerMarker==2 && G->GetRecord().Knowledge.IsEmpty()));
     }
     void CheckState(APFSurvivalPlayerController* P)
     {
-        auto* G=Progression(P);const int32 Marker=P->GetInventory()->Count(TEXT("Item_Stone"));
-        Test->TestEqual(TEXT("Purchase never changes XP"),G->GetExperience(),100);Test->TestEqual(TEXT("Derived point spending exact per owner"),G->GetAvailablePoints(),Marker==1?1:3);
-        Test->TestTrue(TEXT("Correct independent knowledge"),Marker==1?G->GetRecord().Knowledge==TArray<FName>{FName(TEXT("Tech_FieldTools"))}:G->GetRecord().Knowledge.IsEmpty());
-        Test->TestTrue(TEXT("No crafting credit or free items, exact access fixture inputs"),G->GetRecord().CreditedCrafts.IsEmpty() && P->GetInventory()->GetStacks().Num()==4 && (Marker==1 || Marker==2) && P->GetInventory()->Count(TEXT("Item_Tool"))==1 && P->GetInventory()->Count(TEXT("Item_Cord"))==1 && P->GetInventory()->Count(TEXT("Item_Wood"))==2 && P->GetInventory()->Count(TEXT("Item_BoundTool"))==0);
-        FString Error;Test->TestEqual(TEXT("Recipe access follows this owner's persisted knowledge"),G->CanCraftRecipe(TEXT("Recipe_BoundTool"),Error),Marker==1);
+        auto* G=Progression(P);auto* I=P->GetInventory();const int32 OwnerMarker=Marker(I);
+        Test->TestEqual(TEXT("Purchase never changes XP"),G->GetExperience(),SeedXP());Test->TestEqual(TEXT("Derived point spending exact per owner"),G->GetAvailablePoints(),OwnerMarker==1?1:(bWeapon?6:3));
+        Test->TestTrue(TEXT("Correct independent knowledge"),OwnerMarker==1?G->GetRecord().Knowledge==LearnedGraph():G->GetRecord().Knowledge.IsEmpty());
+        Test->TestTrue(TEXT("No crafting credit or free items, exact access fixture inputs"),G->GetRecord().CreditedCrafts.IsEmpty() && I->GetStacks().Num()==(bWeapon?6:4) && (OwnerMarker==1 || OwnerMarker==2) && I->Count(TEXT("Item_Tool"))==1 && I->Count(TEXT("Item_Cord"))==1 && I->Count(TEXT("Item_Wood"))==2 && I->Count(TEXT("Item_BoundTool"))==0 && I->Count(TEXT("Item_BoundClub"))==0 && (!bWeapon || (I->Count(TEXT("Item_Club"))==1 && I->Count(TEXT("Item_Stone"))==2)));
+        FString Error;Test->TestEqual(TEXT("Recipe access follows this owner's persisted knowledge"),G->CanCraftRecipe(AccessRecipe(),Error),OwnerMarker==1);
     }
     bool Privacy(UWorld* W,APFSurvivalPlayerController* PC)
     {
@@ -150,7 +159,7 @@ private:
         for(TActorIterator<APFInventoryPlayerState> It(W);It;++It){if(*It!=PC->PlayerState){++Others;auto* G=It->Progression.Get();if(!G){return false;}Test->TestTrue(TEXT("Foreign XP,knowledge,credit and feedback private"),G->GetExperience()==0 && G->GetRecord().Knowledge.IsEmpty() && G->GetRecord().CreditedCrafts.IsEmpty() && G->GetKnowledgeFeedback().IsEmpty());}}
         return Others==Expected-1;
     }
-    FAutomationTestBase* Test;FString Slot;double Started=FPlatformTime::Seconds(),Changed=0;int32 Stage=0,Expected=1;bool bRestore=false,bClient=false;
+    FAutomationTestBase* Test;FString Slot;double Started=FPlatformTime::Seconds(),Changed=0;int32 Stage=0,Expected=1;bool bRestore=false,bClient=false,bWeapon=false;
 };
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFKnowledgeLiveTest,"PF.Progression.KnowledgeLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)

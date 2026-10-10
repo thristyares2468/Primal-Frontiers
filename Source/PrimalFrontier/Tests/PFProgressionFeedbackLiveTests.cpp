@@ -3,6 +3,7 @@
 #include "Crafting/PFCraftingHUD.h"
 #include "Crafting/PFCraftingComponent.h"
 #include "Crafting/PFResourceNode.h"
+#include "UI/PFItemPicture.h"
 #include "Inventory/PFInventoryPlayerState.h"
 #include "Inventory/PFItemPickup.h"
 #include "Inventory/PFInventoryHUD.h"
@@ -224,11 +225,11 @@ namespace
 class FEarnedUpgradeExercise final : public IAutomationLatentCommand
 {
 public:
-    FEarnedUpgradeExercise(FAutomationTestBase* T,FString D,bool Combat=false):Test(T),Directory(MoveTemp(D)),bCombat(Combat){}
+    FEarnedUpgradeExercise(FAutomationTestBase* T,FString D,bool Combat=false,bool Weapon=false):Test(T),Directory(MoveTemp(D)),bCombat(Combat),bWeapon(Weapon){}
     ~FEarnedUpgradeExercise(){if(Node.IsValid()){Node->Destroy();}if(Creature.IsValid()){Creature->Destroy();}if(bScaleChanged && UPFGameUserSettings::Get()){UPFGameUserSettings::Get()->Preferences.HUDScale=OldScale;}}
     bool Update() override
     {
-        const double Now=FPlatformTime::Seconds();if(Now-Started>(bCombat?130:100)){Test->AddError(FString::Printf(TEXT("[PrimalAgentTools] Earned upgrade timeout stage%d craft%d gather%d"),Stage,CraftIndex,GatherIndex));return true;}if(Now<Until){return false;}
+        const double Now=FPlatformTime::Seconds();if(Now-Started>(bWeapon?170:(bCombat?130:100))){Test->AddError(FString::Printf(TEXT("[PrimalAgentTools] Earned upgrade timeout stage%d craft%d gather%d"),Stage,CraftIndex,GatherIndex));return true;}if(Now<Until){return false;}
         if(Stage==0)
         {
             for(const auto& X:GEngine->GetWorldContexts()){if(X.World() && X.World()->IsGameWorld()){auto* Candidate=Cast<APFSurvivalPlayerController>(X.World()->GetFirstPlayerController());if(Candidate && Candidate->GetLocalPlayer() && Candidate->GetPawn() && Candidate->GetCrafting() && Candidate->GetInventory()){PC=Candidate;break;}}}
@@ -421,11 +422,121 @@ public:
         {
             for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned combat/death/respawn screenshot written"),IFileManager::Get().FileSize(*Path)>0);}
             Menu->SetKeyboardFocus();Press(EKeys::C);Test->TestFalse(TEXT("Reopened menu closes on new pawn"),PC->IsCraftingOpen());
-            Test->AddInfo(TEXT("[PrimalAgentTools] Earned guard/default Prowler,205XP/one point,normal melee/loot and ordinary lethal TakeDamage/default respawn checked: complete inventory IDs/original freshness,knowledge/firstcraft ledger,category counts and active-clock aging conserved; actual death/100HP/205XP HUD inspected. No grants, forced respawn or shortened delay; synthetic standalone,not new multiplayer/navigation/human/controller/FPS acceptance."));return true;
+            Test->AddInfo(TEXT("[PrimalAgentTools] Earned guard/default Prowler,205XP/one point,normal melee/loot and ordinary lethal TakeDamage/default respawn checked: complete inventory IDs/original freshness,knowledge/firstcraft ledger,category counts and active-clock aging conserved; actual death/100HP/205XP HUD inspected. No grants, forced respawn or shortened delay; synthetic standalone,not new multiplayer/navigation/human/controller/FPS acceptance."));
+            if(bWeapon){Wait(Now,.65,60);return false;}return true;
+        }
+        if(Stage==60)
+        {
+            PC->SetControlRotation(FRotator::ZeroRotator);
+            // Real unused food drops free normal bag capacity; no inventory/XP grants or limit overrides.
+            for(FName Id:{FName(TEXT("Item_Food")),FName(TEXT("Item_CookedFood")),FName(TEXT("Item_DriedFood"))}){if(!DropUnused(Id,0)){return true;}}
+            PC->SetCraftingMenuOpen(true);TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFCraftingHUD::StaticClass(),false);
+            if(!Test->TestEqual(TEXT("Actual weapon knowledge menu"),Widgets.Num(),1)){return true;}Menu=CastChecked<UPFCraftingHUD>(Widgets[0]);Menu->SelectRecipe(TEXT("Recipe_BoundClub"));Scroll(false);Wait(Now,.6,61);return false;
+        }
+        if(Stage==61)
+        {
+            Menu->RefreshMenu();if(!Test->TestTrue(TEXT("Earned205XP cannot learn level-three optional weapon"),G->GetExperience()==205 && !Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled() && !Button(TEXT("PF_CraftSelected"))->GetIsEnabled() && Text(TEXT("PF_KnowledgeRequirement")).Contains(TEXT("Level 3 | Cost 3 points | Available 1")))){return true;}
+            Bounds(TEXT("PF_KnowledgeRequirement"));Shot(TEXT("weapon_level_locked"));Wait(Now,.6,62);return false;
+        }
+        if(Stage==62)
+        {
+            if(PC->IsCraftingOpen()){Menu->SetKeyboardFocus();Press(EKeys::C);}
+            if(!SpawnNode(TEXT("Node_Stone"))){return true;}const int32 Before=I->Count(TEXT("Item_Stone"));PC->Interact();
+            if(!Test->TestTrue(TEXT("Four remaining actual stone credits, finite upgraded yield"),Node->HitsRemaining==0 && I->Count(TEXT("Item_Stone"))==Before+6 && G->GetExperience()==205+5*(WeaponGatherIndex+1))){return true;}
+            Node->Destroy();Node.Reset();if(!DropUnused(TEXT("Item_Stone"),2)){return true;}
+            if(++WeaponGatherIndex==4){WeaponGatherIndex=0;Wait(Now,.65,63);}else{Wait(Now,.65,62);}return false;
+        }
+        if(Stage==63)
+        {
+            if(!SpawnNode(TEXT("Node_Water"))){return true;}PC->Interact();
+            if(!Test->TestTrue(TEXT("Five actual independent water credits reach250XP"),Node->HitsRemaining==0 && I->Count(TEXT("Item_Water"))==6 && G->GetExperience()==225+5*(WeaponGatherIndex+1))){return true;}
+            Node->Destroy();Node.Reset();if(!DropUnused(TEXT("Item_Water"),0)){return true;}
+            if(++WeaponGatherIndex==5)
+            {
+                PC->SetCraftingMenuOpen(true);TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFCraftingHUD::StaticClass(),false);if(Widgets.Num()!=1){Test->AddError(TEXT("Missing earned level-three menu"));return true;}
+                Menu=CastChecked<UPFCraftingHUD>(Widgets[0]);Menu->SelectRecipe(TEXT("Recipe_BoundClub"));Scroll(false);Wait(Now,.6,64);
+            }
+            else{Wait(Now,.65,63);}return false;
+        }
+        if(Stage==64)
+        {
+            Menu->RefreshMenu();if(!Test->TestTrue(TEXT("Actual250XP level3 four remaining points allow original child knowledge"),G->GetExperience()==250 && G->GetLevel()==3 && G->GetAvailablePoints()==4 && Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled() && !Button(TEXT("PF_CraftSelected"))->GetIsEnabled())){return true;}
+            Test->TestTrue(TEXT("Level-three threshold and original weapon picture visible"),Text(TEXT("PF_CraftingProgression_Summary")).Contains(TEXT("Level 3 | 250 / 450 XP")) && CastChecked<UPFItemPicture>(Menu->WidgetTree->FindWidget(TEXT("PF_SelectedItemPicture")))->GetItemId()==TEXT("Item_BoundClub"));
+            Bounds(TEXT("PF_KnowledgeRequirement"));Shot(TEXT("weapon_knowledge_available"));Wait(Now,.6,65);return false;
+        }
+        if(Stage==65){Button(TEXT("PF_LearnKnowledge"))->SetKeyboardFocus();Press(EKeys::SpaceBar);Wait(Now,.6,66);return false;}
+        if(Stage==66)
+        {
+            if(!Test->TestTrue(TEXT("Actual owned child purchase spends exactly three points and grants no weapon"),G->GetRecord().Knowledge==TArray<FName>{TEXT("Tech_FieldTools"),TEXT("Tech_FieldWeapons")} && G->GetExperience()==250 && G->GetAvailablePoints()==1 && I->Count(TEXT("Item_BoundClub"))==0)){return true;}
+            Menu->SetKeyboardFocus();Press(EKeys::K);Test->TestEqual(TEXT("Duplicate child learn spends nothing"),G->GetAvailablePoints(),1);Press(EKeys::C);
+            if(!SpawnNode(TEXT("Node_Fibre"))){return true;}PC->Interact();if(!Test->TestTrue(TEXT("Exhausted fibre still supplies six real cord materials, no XP"),Node->HitsRemaining==0 && I->Count(TEXT("Item_Fibre"))==6 && G->GetExperience()==250)){return true;}Node->Destroy();Node.Reset();
+            PC->SetCraftingMenuOpen(true);TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFCraftingHUD::StaticClass(),false);if(!Test->TestEqual(TEXT("Actual earned cord crafting menu"),Widgets.Num(),1)){return true;}Menu=CastChecked<UPFCraftingHUD>(Widgets[0]);Menu->SelectRecipe(TEXT("Recipe_Cord"));Menu->RefreshMenu();Menu->SetKeyboardFocus();Press(EKeys::Enter);Wait(Now,.6,67);return false;
+        }
+        if(Stage==67)
+        {
+            if(!C->ActiveRecipe.IsNone()){return false;}if(!Test->TestTrue(TEXT("Normal repeated four-second cord keeps250XP"),C->Feedback==TEXT("Completed") && I->Count(TEXT("Item_Cord"))==1 && I->Count(TEXT("Item_Fibre"))==2 && G->GetExperience()==250)){return true;}
+            Menu->SelectRecipe(TEXT("Recipe_BoundClub"));Menu->RefreshMenu();Scroll(false);Wait(Now,.6,68);return false;
+        }
+        if(Stage==68)
+        {
+            if(!Test->TestTrue(TEXT("Learned child and real ingredients allow craft, no repeat purchase"),Button(TEXT("PF_CraftSelected"))->GetIsEnabled() && !Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled() && Text(TEXT("PF_KnowledgeRequirement")).Contains(TEXT("learned. Recipe access available")))){return true;}
+            Bounds(TEXT("PF_KnowledgeRequirement"));Shot(TEXT("weapon_knowledge_learned"));Wait(Now,.6,69);return false;
+        }
+        if(Stage==69){Menu->SetKeyboardFocus();Press(EKeys::Enter);if(!Test->TestEqual(TEXT("Actual default8s bound-club job starts"),C->ActiveRecipe,FName(TEXT("Recipe_BoundClub")))){return true;}Wait(Now,.6,70);return false;}
+        if(Stage==70){Menu->SetKeyboardFocus();Press(EKeys::R);Wait(Now,.6,71);return false;}
+        if(Stage==71)
+        {
+            if(!Test->TestTrue(TEXT("Real cancel keeps earned recipe inputs and no XP/output"),C->ActiveRecipe.IsNone() && C->Feedback.StartsWith(TEXT("Cancelled")) && G->GetExperience()==250 && I->Count(TEXT("Item_Club"))==1 && I->Count(TEXT("Item_Cord"))==1 && I->Count(TEXT("Item_Wood"))==5 && I->Count(TEXT("Item_Stone"))==2 && I->Count(TEXT("Item_BoundClub"))==0)){return true;}
+            Menu->SetKeyboardFocus();Press(EKeys::Enter);Wait(Now,.6,72);return false;
+        }
+        if(Stage==72)
+        {
+            if(!C->ActiveRecipe.IsNone()){return false;}
+            if(!Test->TestTrue(TEXT("Actual earned weapon conversion adds only one club and20XP"),C->Feedback==TEXT("Completed") && G->GetExperience()==270 && G->GetAvailablePoints()==1 && G->GetRecord().CreditedCrafts.Num()==8 && I->Count(TEXT("Item_BoundClub"))==1 && I->Count(TEXT("Item_Club"))==0 && I->Count(TEXT("Item_Cord"))==0 && I->Count(TEXT("Item_Wood"))==3 && I->Count(TEXT("Item_Stone"))==0 && I->Count(TEXT("Item_Fibre"))==2 && I->MeleeDamage()==60 && I->GatheringHits()==3 && I->CreatureHitReduction()==.25f)){return true;}
+            Menu->RefreshMenu();Scroll(true);Wait(Now,.6,73);return false;
+        }
+        if(Stage==73)
+        {
+            // The completed footer changes wrapping after layout. Scroll the actual painted reward,
+            // rather than using the previous frame's content end before that height has settled.
+            auto* Reward=Menu->WidgetTree->FindWidget(TEXT("PF_CraftingProgression_Reward"));
+            for(auto* P=Reward->GetParent();P;P=P->GetParent()){if(auto* S=Cast<UScrollBox>(P)){S->ScrollWidgetIntoView(Reward,false,EDescendantScrollDestination::IntoView,4);break;}}
+            Wait(Now,.6,76);return false;
+        }
+        if(Stage==76)
+        {
+            Bounds(TEXT("PF_CraftingProgression_Reward"));Test->TestTrue(TEXT("Actual final270XP summary readable"),Text(TEXT("PF_CraftingProgression_Summary")).Contains(TEXT("Level 3 | 270 / 450 XP | 180 to next level | 1 knowledge point")));Shot(TEXT("earned_bound_weapon"));Wait(Now,.6,74);return false;
+        }
+        if(Stage==74)
+        {
+            Menu->SetKeyboardFocus();Press(EKeys::C);const FTransform At(FRotator::ZeroRotator,PC->GetPawn()->GetActorLocation()+FVector(100,0,20));
+            Creature=PC->GetWorld()->SpawnActorDeferred<APFCreature>(APFCreature::StaticClass(),At,PC->GetPawn(),nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);if(!Test->TestTrue(TEXT("Actual second default creature spawns"),Creature.IsValid())){return true;}Creature->CreatureId=TEXT("Creature_Prowler");Creature->FinishSpawning(At);Creature->SetActorTickEnabled(false);Creature->GetCharacterMovement()->DisableMovement();
+            Test->TestEqual(TEXT("Default second Prowler health, no tuning override"),Creature->Health,100.f);const float Stamina=Needs->GetVitals().Stamina;Action(EKeys::LeftMouseButton);
+            if(!Test->TestTrue(TEXT("Actual new learned60damage weapon and five stamina swing"),Creature->Health==40 && Stamina-Needs->GetVitals().Stamina==5)){return true;}
+            Action(EKeys::LeftMouseButton);Test->TestEqual(TEXT("Immediate weapon swing cannot duplicate damage"),Creature->Health,40.f);Shot(TEXT("earned_weapon_hit"));Wait(Now,.65,75);return false;
+        }
+        if(Stage==75)
+        {
+            Action(EKeys::LeftMouseButton);Test->TestTrue(TEXT("Two accepted learned-weapon swings kill default creature with no free XP"),Creature->IsDead() && G->GetExperience()==270 && G->GetAvailablePoints()==1);
+            for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned weapon screenshots flushed"),IFileManager::Get().FileSize(*Path)>0);}
+            Test->AddInfo(TEXT("[PrimalAgentTools] EarnedWeaponLive: actual205XP combat/respawn route, four remaining stone credits plus five water credits reach250XP/level3; real owned FieldTools→FieldWeapons purchases totalfivepoints/oneleft, normal repeated cord/cancel/default8s club conversion reaches270XP, actual60damage/fivestamina/cooldown/two-hit default creature death. Normal unused drops preserve capacity; no grants/seeds/timer or bag overrides. Synthetic one rendered client,not human pacing/controller/FPS/network certificate."));return true;
         }
         return false;
     }
 private:
+    bool DropUnused(FName Id,int32 Keep)
+    {
+        auto* I=PC->GetInventory();auto* G=Progression.Get();
+        while(I->Count(Id)>Keep)
+        {
+            const auto* S=I->GetStacks().FindByPredicate([&](const auto& X){return X.ItemId==Id;});if(!S){Test->AddError(TEXT("Missing normal drop batch"));return false;}
+            const int32 Amount=FMath::Min(S->Quantity,I->Count(Id)-Keep);const double Expiry=S->ExpiresAt;const int32 XP=G->GetExperience();
+            auto* Pickup=I->Drop(S->StackId,Amount,PC->GetPawn());if(!Test->TestNotNull(TEXT("Actual unused drop, normal capacity"),Pickup)){return false;}
+            Test->TestTrue(TEXT("Drop preserves finite batch/freshness and cannot earn XP"),Pickup->GetContents().ItemId==Id && Pickup->GetContents().Quantity==Amount && Pickup->GetContents().ExpiresAt==Expiry && G->GetExperience()==XP);
+            Pickup->SetActorLocation(PC->GetPawn()->GetActorLocation()+FVector(0,600+(++UnusedDrops)*100,0));
+        }
+        return true;
+    }
     void CheckSurvivalHUD(bool Dead)
     {
         TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFSurvivalHUD::StaticClass(),false);
@@ -450,7 +561,7 @@ private:
     void Shot(const TCHAR* Name){const FString Path=Directory/(FString(Name)+TEXT(".png"));Shots.Add(Path);FScreenshotRequest::RequestScreenshot(Path,true,false);}
     void Wait(double Now,double Seconds,int32 Next){Until=Now+Seconds;Stage=Next;}
     FAutomationTestBase* Test;FString Directory;TArray<FString> Shots;TWeakObjectPtr<APFSurvivalPlayerController> PC;TWeakObjectPtr<UPFCraftingHUD> Menu;TWeakObjectPtr<UPFProgressionComponent> Progression;TWeakObjectPtr<APFResourceNode> Node;TWeakObjectPtr<APFCreature> Creature;TWeakObjectPtr<APFItemPickup> Loot;
-    bool bCombat=false;int32 Swing=0;double LootExpiry=0;
+    bool bCombat=false,bWeapon=false;int32 Swing=0,WeaponGatherIndex=0,UnusedDrops=0;double LootExpiry=0;
     FPFProgressionRecord BeforeDeath;TArray<FPFItemStack> InventoryBeforeDeath;TWeakObjectPtr<APawn> DeadPawn;double DeathAt=0;
     double Started=FPlatformTime::Seconds(),Until=0;int32 Stage=0,GatherIndex=0,GatherAction=0,CraftIndex=0,BeforeOutput=0;float OldScale=1;bool bScaleChanged=false;
     const FName Resources[6]={TEXT("Node_Wood"),TEXT("Node_Wood"),TEXT("Node_Stone"),TEXT("Node_Food"),TEXT("Node_Fibre"),TEXT("Node_Fibre")};const int32 Actions[6]={3,3,1,2,3,1};
@@ -474,5 +585,14 @@ bool FPFEarnedCombatLiveTest::RunTest(const FString&)
     FString Label;FParse::Value(FCommandLine::Get(),TEXT("PFControlsEvidence="),Label);if(Label.IsEmpty() || Label.Len()>48){AddError(TEXT("Supply bounded earned combat evidence label"));return false;}for(TCHAR C:Label){if(!FChar::IsAlnum(C) && C!=TEXT('_')){AddError(TEXT("Invalid earned combat label"));return false;}}
     const FString Directory=FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("AutomationReports/ControlsUI")/Label);if(IFileManager::Get().DirectoryExists(*Directory)){AddError(TEXT("Refusing reused earned combat evidence"));return false;}IFileManager::Get().MakeDirectory(*Directory,true);
     ADD_LATENT_AUTOMATION_COMMAND(FEarnedUpgradeExercise(this,Directory,true));return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEarnedWeaponLiveTest,"PF.Progression.EarnedWeaponLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::EngineFilter)
+bool FPFEarnedWeaponLiveTest::RunTest(const FString&)
+{
+    if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunControlsUITest")) || !FParse::Param(FCommandLine::Get(),TEXT("PFRunEarnedWeaponTest")) || FParse::Param(FCommandLine::Get(),TEXT("nullrhi"))){AddError(TEXT("Requires isolated rendered -game -PFRunControlsUITest -PFRunEarnedWeaponTest"));return false;}
+    FString Label;FParse::Value(FCommandLine::Get(),TEXT("PFControlsEvidence="),Label);if(Label.IsEmpty() || Label.Len()>48){AddError(TEXT("Supply bounded earned weapon evidence label"));return false;}
+    for(TCHAR C:Label){if(!FChar::IsAlnum(C) && C!=TEXT('_')){AddError(TEXT("Invalid earned weapon label"));return false;}}
+    const FString Directory=FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("AutomationReports/ControlsUI")/Label);if(IFileManager::Get().DirectoryExists(*Directory)){AddError(TEXT("Refusing reused earned weapon evidence"));return false;}IFileManager::Get().MakeDirectory(*Directory,true);
+    ADD_LATENT_AUTOMATION_COMMAND(FEarnedUpgradeExercise(this,Directory,true,true));return true;
 }
 #endif

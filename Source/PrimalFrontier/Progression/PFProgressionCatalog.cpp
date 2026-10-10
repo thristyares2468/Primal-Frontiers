@@ -5,6 +5,7 @@
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Knowledge,"Progression.Knowledge");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_KnowledgeTool,"Progression.Knowledge.Tool");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_KnowledgeWeapon,"Progression.Knowledge.Weapon");
 namespace
 {
 bool ProgressionRefuse(FString& Error,const TCHAR* Reason){Error=Reason;return false;}
@@ -20,6 +21,8 @@ UPFProgressionCatalog::UPFProgressionCatalog()
 {
     FPFKnowledgeDefinition D;D.Id=TEXT("Tech_FieldTools");D.DisplayName=FText::FromString(TEXT("Field tool knowledge"));D.Category=TAG_PF_KnowledgeTool;
     D.Recipes.Add(TEXT("Recipe_BoundTool"));Knowledge.Add(D);
+    FPFKnowledgeDefinition Weapon;Weapon.Id=TEXT("Tech_FieldWeapons");Weapon.DisplayName=FText::FromString(TEXT("Field weapon knowledge"));Weapon.Category=TAG_PF_KnowledgeWeapon;
+    Weapon.MinimumLevel=3;Weapon.PointCost=3;Weapon.Prerequisites={TEXT("Tech_FieldTools")};Weapon.Recipes={TEXT("Recipe_BoundClub")};Knowledge.Add(Weapon);
 }
 const FPFKnowledgeDefinition* UPFProgressionCatalog::Find(FName Id) const
 {

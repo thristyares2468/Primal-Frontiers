@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Gate only optional stone-bound weapons with original knowledge
+
+Use the existing validated catalog/owned purchase/recipe reservation and completion path for Tech_FieldWeapons, level3/threepoints/prerequisite FieldTools. Gate only existing BoundClub; baseline survival recipes remain available. Keep loaded legacy carried weapons valid at zero knowledge, without retrospective reward or schema migration; recreating them requires learning. Generic graph validation derives exact point spend and fails closed for unmet prerequisites. FIELD_WEAPONS_M12.md distinguishes grant-free earning from explicitly seeded network boundaries and retains live verification failures. No gameplay mutation RPC, item identity, asset or stat tuning change.
+
 ## 2026-10-10 — Reconcile crafting selection after layout settles
 
 Request supported UMG ScrollWidgetIntoView when selected recipe, cached row size or browser dimensions change, rather than on every refresh. This handles accessibility wrapping and server-feedback footer growth while preserving stable manual scrolling. Rendered tests measure full selected-row button/title/body/picture bounds in its actual browser; fixed controls fit the screen, painted text fits allocation. Culled nonselected children retain stale cached geometry and are verified after selection/painting, not forced simultaneously onscreen. No gameplay/input/authority change. CRAFTING_SCROLL_M11.md records reproduction and narrow/regression replays.

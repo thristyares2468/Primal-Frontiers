@@ -3,6 +3,8 @@
 #include "Crafting/PFCraftingComponent.h"
 #include "Crafting/PFCraftingHUD.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
+#include "Progression/PFProgressionComponent.h"
 #include "Persistence/PFWorldPersistence.h"
 #include "Persistence/PFSaveFileStore.h"
 #include "Survival/PFSurvivalPlayerController.h"
@@ -72,6 +74,8 @@ public:
             int32 Index=0;for(auto* P:Players)
             {
                 if(!P->GetInventory()->GetStacks().IsEmpty()){Test->AddError(TEXT("Refusing non-fresh weapon fixture"));return true;}
+                FPFProgressionRecord Seed;Seed.Experience=250;Seed.Knowledge={TEXT("Tech_FieldTools"),TEXT("Tech_FieldWeapons")};FString KnowledgeError;
+                if(!Test->TestTrue(TEXT("Explicit trusted level-three weapon-access fixture, not earned pacing"),P->GetPlayerState<APFInventoryPlayerState>()->Progression->Restore(Seed,KnowledgeError))){return true;}
                 auto* Needs=P->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();Needs->HungerDrainPerSecond=0;Needs->ThirstDrainPerSecond=0;
                 P->GetPawn()->SetActorLocation(FVector(-1200,Index++*400,100));P->SetControlRotation(FRotator::ZeroRotator);
                 Test->TestTrue(TEXT("Fixture supplies wood only"),P->GetInventory()->Grant(TEXT("Item_Wood"),5));

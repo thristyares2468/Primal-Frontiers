@@ -1,5 +1,35 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M12 field weapon knowledge — technical gate passed
+
+FieldWeapons now unlocks only optional BoundClub at250XP/level3,3points and learned FieldTools. Baseline survival/wooden weapon/guard/shelter remain accessible; legacy carried clubs keep60damage without retroactive knowledge. Native grant-free normal-limit earned285XP1/1+six regressions, rendered720p/corrected1440p earned270XP1/1each, advanced one-client4/two-clientlag-loss6 and shared baseKnowledge4 actual create/restart role reports passed. Editor7.41s/Game24.84s clean;28PNG reviewed/290+296personal saves/preferences unchanged,raw known baselines unchanged/no assertfatalensure. FIELD_WEAPONS_M12.md retains two fixture failures and exact paths/limits/memory (rendered up to3.244/5.651GiB,network1.809/1.747GiB). Bounded dbGxD7ov complete; parentM12/Personal remainopen. Next: immediate Trello evidence/status/guides,scoped Sol publication,then fresh eligible-task audit. No new human acceptance assumed.
+
+## 2026-10-10 M12 field weapon knowledge — pending
+
+Game Development Win64 PASSED24.84s/no compiler warnings PFM12FieldWeaponsGameBuild.log. All ten advanced network raw logs0new normalized severity/no assertfatalensure against retained24warning/14Pythonerror baseline. All28 rendered PNG inspected and final reward now fully readable. Shared single-purchase Knowledge runner regression next; then evidence/Trello/scoped Sol publication.
+
+Two-client75ms/1%loss Create/Restart PASSED6/6 M12KnowledgeWeaponLive2_20261010_052654170_cbe20c63,exact role reports/exits/testseverity0/no timeout/fatalensure; independent private two-node onepoint versus unlearned sixpoint records restored on a new server. Peaks working/private1.719–1.809/1.563–1.747GiB. All28 final renderedPNG reviewed;1440p normalized raw severity matches known baseline/no assertfatalensure. Game/shared base Knowledge regression/raw ten-network-log review pending.
+
+Failed-only1440p replay PASSED1/1 M12EarnedWeapon1440_20261010_052410389_5b0ee6c7,135.79s,working/private3.244/5.651GiB,exact selectors/all exits0/testseverity0/no timeout;296 personal saves/default settings unchanged. Supported settled-reward scroll resolves the failed assertion; artifact review/two-client lag-loss/Game next. Earlier720p and one-client4/4 remain passed; full manual gates unchanged.
+
+Scroll-fixture Editor PASSED7.41s/no compiler warnings PFM12FieldWeaponsScrollEditorBuild.log; failed1440p replay first. One-client Create/Restart PASSED4/4 M12KnowledgeWeaponLive1_20261010_052214736_eb4bdcee,exits/testseverity0,private250XP parent+child graph/onepoint/input cancellation and actual new-server restoration. Peaks working/private1.719–1.806/1.563–1.743GiB. Raw baseline review pending; two clients wait for1440p pass.
+
+Rendered1440p FAILED1 layout assertion M12EarnedWeapon1440_20261010_051946220_4afac396: final reward outside inner scroll (actual PNG clips its wrapped last line). All actual learning/crafting/damage checks completed; no false pass. Fixture had scrolled to the old content end before completion text reflow settled. Added a later supported ScrollWidgetIntoView request on the actual reward, then another paint wait. Runtime/menu code unchanged; rebuild and failed1440p replay required. One-client boundary run already launched before this verdict was surfaced; capture its evidence without beginning broader scope.
+
+Rendered720p EarnedWeaponLive PASSED1/1 M12EarnedWeapon720_20261010_051712800_53e9529c,136.17s,working/private3.168/5.342GiB,exact selector/all exits0/testseverity0/no timeout;290 personal saves/default settings unchanged. Actual normal205→250→270XP,child purchase/cancel/60damage/two-hit creature death checked. Fourteen screenshot review and1440p/network/Game remain pending; not human acceptance.
+
+Corrected live-fixture Editor build PASSED7.55s/no compiler warnings PFM12FieldWeaponsLiveEditorRetry.log. Actual rendered EarnedWeapon720p gate next, then1440p/private server restart if it passes.
+
+Rendered/network fixture build FAILED13.43s (PFM12FieldWeaponsLiveEditorBuild.log): C2027 incomplete UPFItemPicture type, with dependent C2661. Added the concrete UI/PFItemPicture.h include only. Rebuilding before any new live tests; native1+6 earlier passes retained, no live pass inferred.
+
+Six affected native regressions PASSED6/6 Automation_M12FieldWeaponRegression_20261010_050730009_161f6bcb,16.64s,working/private2.977/2.830GiB,exact selection/exits0/testseverity0/no timeout. Legacy V1 carried club works at zero knowledge while recreating remains locked. Opt-in network Knowledge/WeaponKnowledge fixture now prepared for trusted250XP parent/child purchases/private restart; uncompiled and unrun. Rendered earned route extension next.
+
+EarnedWeapon native PASSED1/1 Automation_M12EarnedWeapon_20261010_050620023_a715a354,34.16s,working/private3.133/3.044GiB,exact selector/exits0/testseverity0/no timeout/assertfatalensure. Real25gathers125XP+eight firstcrafts160XP=285XP/level3,FieldTools+FieldWeapons5points spent/1left,actual normal unused drops/default bag limits and unchanged8s sixty-damage club. No item/XP grants/player seeds. Six affected regressions next; rendered/network pending.
+
+Editor PASSED18.80s/no compiler warnings PFM12FieldWeaponsEditorBuild.log. Exact native EarnedWeapon route first; no XP/item seed or bag-limit override. Actual rendered/network gates remainpending.
+
+Fresh Programming/parent audit after01330fd selected https://trello.com/c/dbGxD7ov Doing. Added original level3/3point Tech_FieldWeapons prerequisite FieldTools, gating only optional existing BoundClub; basic wooden club/food/cord/tool/guard/building stay available and legacy carried club retains60damage. Existing boundary fixtures explicitly seed the learned graph; no earned route claimed yet. No item/recipe/assets/schema changes. Uncompiled/untested; native earned and access gates first, then actual rendered/one-/two-client private restart. FullM11/M12/Personal remainopen.
+
 ## 2026-10-10 M12 earned gathering timers — technical gate passed
 
 PF.Progression.GatherLifecycle now verifies genuinely earned wood XP through ordinary Unreal world ticks: normal20s node regrowth,40 actual paused ticks, exhausted finite yields,1800 active seconds, fresh5XP credit and cooldown conservation. Exact native1/1 plus GatherEvents/GatherClock2/2 passed; raw logs have0warnings/errors/assertfatalensure. Editor5.61s/Game23.59s clean. GATHER_LIFECYCLE_M12.md retains the first failed fixture tick-budget assertion, engine-clamp diagnosis, corrected replay paths and process peaks (up to3.028/2.905GiB). No production/reward/assets/settings/network change or wall-clock/human/FPS/minimum16GB certificate. Bounded https://trello.com/c/uoZQxtUs technically complete; fullM11/M12/Personal stayopen. Next: fresh Trello audit for an independent M11/M12 objective.

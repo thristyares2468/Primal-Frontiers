@@ -66,7 +66,8 @@ bool FPFRecipeAccessTest::RunTest(const FString&)
     auto* G=PS->Progression.Get();auto* I=PS->Inventory.Get();auto* C=PS->Crafting.Get();FString Error;
     C->Catalog=DuplicateObject<UPFCraftingCatalog>(C->Catalog,C);for(auto& R:C->Catalog->Recipes){R.Duration=0.5f;}
     auto Advance=[&](){for(int32 N=0;N<8;++N){Fixture.TickTestWorld(0.1f);}};
-    for(const TCHAR* Id:{TEXT("Recipe_Tool"),TEXT("Recipe_Cook"),TEXT("Recipe_Dry"),TEXT("Recipe_Cord"),TEXT("Recipe_Club"),TEXT("Recipe_BoundClub"),TEXT("Recipe_WovenGuard")}){TestTrue(TEXT("Baseline recipe access"),G->CanCraftRecipe(Id,Error));}
+    for(const TCHAR* Id:{TEXT("Recipe_Tool"),TEXT("Recipe_Cook"),TEXT("Recipe_Dry"),TEXT("Recipe_Cord"),TEXT("Recipe_Club"),TEXT("Recipe_WovenGuard")}){TestTrue(TEXT("Baseline recipe access"),G->CanCraftRecipe(Id,Error));}
+    TestFalse(TEXT("Optional bound weapon requires its own knowledge"),G->CanCraftRecipe(TEXT("Recipe_BoundClub"),Error));
     TestFalse(TEXT("Unknown recipe never available"),G->CanCraftRecipe(TEXT("Recipe_Unknown"),Error));
     TestTrue(TEXT("Trusted ingredients"),I->Grant(TEXT("Item_Tool"),1) && I->Grant(TEXT("Item_Cord"),1) && I->Grant(TEXT("Item_Wood"),2));
     const auto Batches=I->GetStacks();

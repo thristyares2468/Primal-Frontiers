@@ -2,6 +2,8 @@
 #include "Crafting/PFCraftingComponent.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFItemCatalog.h"
+#include "Inventory/PFInventoryPlayerState.h"
+#include "Progression/PFProgressionComponent.h"
 #include "Survival/PFSurvivalGameMode.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFSurvivorCharacter.h"
@@ -34,6 +36,10 @@ bool FPFWeaponProgressionTest::RunTest(const FString&)
        !TestNotNull(TEXT("Real loaded bound club recipe"),C->Catalog->Recipe(TEXT("Recipe_BoundClub"),I->Catalog))){return false;}
     TestEqual(TEXT("Authored club duration"),C->Catalog->Recipe(TEXT("Recipe_Club"),I->Catalog)->Duration,6.f);
     TestEqual(TEXT("Authored upgrade duration"),C->Catalog->Recipe(TEXT("Recipe_BoundClub"),I->Catalog)->Duration,8.f);
+    auto* G=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();FString KnowledgeError;
+    TestFalse(TEXT("Fresh survivor cannot craft optional bound weapon"),G->CanCraftRecipe(TEXT("Recipe_BoundClub"),KnowledgeError));
+    FPFProgressionRecord Seed;Seed.Experience=250;Seed.Knowledge={TEXT("Tech_FieldTools"),TEXT("Tech_FieldWeapons")};
+    TestTrue(TEXT("Explicit trusted level-three graph isolates weapon transaction checks"),G->Restore(Seed,KnowledgeError));
     C->Catalog=DuplicateObject<UPFCraftingCatalog>(C->Catalog,C);for(auto& R:C->Catalog->Recipes){R.Duration=0.5f;}
     auto Advance=[&](){for(int N=0;N<8;++N){F.TickTestWorld(0.1f);}};
     TestFalse(TEXT("Missing ingredients refused"),C->Start(TEXT("Recipe_Club"),P));
@@ -70,7 +76,10 @@ bool FPFWeaponProgressionTest::RunTest(const FString&)
     TestTrue(TEXT("Version1 accepts weapon IDs"),FPFPlayerSaveFormat::Encode(Saved,*I->Catalog,Limits,Bytes,Error));
     TestTrue(TEXT("Version1 decodes weapon IDs"),FPFPlayerSaveFormat::Decode(Bytes,*I->Catalog,Limits,Decoded,Error));
     I->RemoveItem(TEXT("Item_BoundClub"),1);Advance();TestEqual(TEXT("Removal falls back to carried tool"),I->MeleeDamage(),45.f);
+    TestTrue(TEXT("Legacy zero knowledge initializes normally"),G->Restore({},Error));
     TestTrue(TEXT("Restore weapon bag"),I->RestorePersistence(Decoded.Inventory,0,Error));Advance();TestEqual(TEXT("Restored weapon identity"),P->GetHeldMeleeItem(),FName(TEXT("Item_BoundClub")));
+    TestEqual(TEXT("Legacy carried weapon still works without retroactive knowledge"),I->MeleeDamage(),60.f);
+    TestFalse(TEXT("Legacy carried weapon does not grant crafting knowledge"),G->CanCraftRecipe(TEXT("Recipe_BoundClub"),Error));
     I->RemoveItem(TEXT("Item_BoundClub"),1);I->RemoveItem(TEXT("Item_BoundTool"),1);Advance();TestEqual(TEXT("Removal returns bare damage"),I->MeleeDamage(),20.f);
     TestEqual(TEXT("No stale public equipped identity"),P->GetHeldMeleeItem(),NAME_None);
     PC->PlayerState->SetRole(ROLE_AutonomousProxy);TestFalse(TEXT("Client direct craft denied"),C->Start(TEXT("Recipe_Club"),P));

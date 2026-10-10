@@ -7,6 +7,7 @@ param(
     [switch]$WeaponProgression,
     [switch]$Protection,
     [switch]$Knowledge,
+    [switch]$WeaponKnowledge,
     [ValidateRange(1024, 65535)][int]$Port = 17989,
     [ValidateRange(30, 600)][int]$TimeoutSeconds = 210,
     [string]$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8',
@@ -55,9 +56,11 @@ try {
 
     $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff') + '_' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
     if(@(@($ToolProgression,$WeaponProgression,$Protection,$Knowledge) | Where-Object {$_}).Count -gt 1){throw 'Choose one progression fixture per run'}
-    $prefix = $(if($Knowledge){'M12KnowledgeLive'}elseif($Protection){'M12ProtectionLive'}elseif($WeaponProgression){'M12WeaponLive'}elseif($ToolProgression){'M12ToolLive'}else{'M8Live'}) + $Players + '_' + $stamp
+    if($WeaponKnowledge -and !$Knowledge){throw 'WeaponKnowledge requires the Knowledge fixture'}
+    $prefix = $(if($WeaponKnowledge){'M12KnowledgeWeaponLive'}elseif($Knowledge){'M12KnowledgeLive'}elseif($Protection){'M12ProtectionLive'}elseif($WeaponProgression){'M12WeaponLive'}elseif($ToolProgression){'M12ToolLive'}else{'M8Live'}) + $Players + '_' + $stamp
     $testFilter = if($Knowledge){'PF.Progression.KnowledgeLive'}elseif($Protection){'PF.Crafting.ProtectionLive'}elseif($WeaponProgression){'PF.Crafting.WeaponProgressionLive'}elseif($ToolProgression){'PF.Crafting.ToolProgressionLive'}else{'PF.Persistence.Live'}
     $testFlag = if($Knowledge){'-PFRunKnowledgeTests'}elseif($Protection){'-PFRunProtectionTests'}elseif($WeaponProgression){'-PFRunWeaponProgressionTests'}elseif($ToolProgression){'-PFRunToolProgressionTests'}else{'-PFRunPersistenceLiveTests'}
+    if($WeaponKnowledge){$testFlag+=' -PFRunWeaponKnowledgeTests'}
     $slot = 'Automation' + $prefix
     # Profiles are private local test state. Same aliases and endpoint survive both phases.
     $profile = 'PF' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
