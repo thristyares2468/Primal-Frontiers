@@ -1,5 +1,29 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M11 knowledge captions — bounded technical gate passed
+
+The full original Learn caption now uses actual button content width with centered wrapped text, preserving font and controls. Editor41.02s/Game42.32s clean; native ProgressionDetails1/1, final rendered ProgressionFeedback720p/1440p1/1each and EarnedWeaponLive720p1/1 passed. All30PNG inspected; exact selectors/exits/testseverity0/no timeout,308/309/310personal saves/preferences unchanged,known raw26warning/14Pythonerror baseline unchanged/no assertfatalensure. KNOWLEDGE_CAPTION_M11.md retains the initial wrong-API compile failure and omitted-slot-padding measurement failure/corrected replay. Process peaks up to3.352/5.435GiB; busy31.93GiB host is not a16GB/FPS/human certificate. Bounded f8PqJjT7 complete; fullM11/M12/Personal gates remainopen. Next: immediate Trello evidence/Done,scoped Solpublication,then fresh eligible-task audit.
+
+## 2026-10-10 M11 knowledge caption layout — pending
+
+EarnedWeaponLive720p PASSED1/1 M12EarnedWeapon720_20261010_055019340_6f212ffc,141.55s,working/private3.323/5.393GiB,exact selector/all exits0/testseverity0/no timeout;310personal saves/default settings unchanged. Actual long child caption fits locked/available/learned, earned270XP/cancel/combat/default death/respawn checks retained. All16 Progression final PNG reviewed/rawbaseline unchanged;earned fourteen artifact review and Game gate next.
+
+Rendered1440p PASSED1/1 M11Progression1440_20261010_054856534_e30571e1,58.01s,working/private3.352/5.435GiB,exact selector/all exits0/testseverity0/no timeout;309personal saves/default settings unchanged. Final720p all eight PNG reviewed/raw baseline unchanged;1440p artifacts then earned child caption720p/Game gates next.
+
+Failed-only720p replay PASSED1/1 M11Progression720_20261010_054721892_f71e8802,58.90s,working/private3.329/5.107GiB,exact selector/all exits0/testseverity0/no timeout;308personal saves/default settings unchanged. Actual combined-padding width, text height, real purchase/crafting checks passed. Artifact/raw review and1440p/earned child/Game remainpending.
+
+Padding-fixture Editor PASSED41.02s/no compiler warnings PFM11KnowledgeCaptionPaddingEditorBuild.log. Replay failed720p gate before1440p/earned child. Busy host committed37.5GiB at build start; slower compilation is not a gameplay verdict.
+
+Rendered720p FAILED3 width assertions M11Progression720_20261010_054128969_c582a094,61.46s,engine0/strict1,no timeout/testwarnings0,working/private3.341/5.392GiB;307personal saves/settings unchanged. Actual available-caption PNG is readable and purchase succeeded. Assertion omitted actual UButtonSlot content padding; installed SButton::GetCombinedPadding combines slot and style margins. Corrected only test measurement to sum both actual margins, retaining inside-button/text-height checks. Rebuild and failed-only720p replay before further scope; failure retained.
+
+Native PF.UI.ProgressionDetails PASSED1/1 Automation_M11KnowledgeCaption_20261010_053946910_087be7e6,67.21s,working/private3.018/2.866GiB,exact selector/exits0/testrawseverity0/no timeout/fatalensure. Startup slower than earlier runs; no gameplay failure inferred. Actual rendered720p gate next.
+
+Corrected Editor PASSED34.26s/no compiler warnings PFM11KnowledgeCaptionEditorRetry.log. Actual button content uses UButtonSlot fill with centered wrapped caption; no reduced font or caption removal. Native ProgressionDetails then rendered geometric/purchase gate next.
+
+Initial Editor FAILED16.72s/C2039 PFM11KnowledgeCaptionEditorBuild.log: alignment setter belongs to UButtonSlot,not UButton. Confirmed installed supported header and changed only the content-slot call/include;geometry assertions compiled. Rebuild before any runtime test;retain exact failure.
+
+FieldWeapons ee2ad66 published/localremote equal/clean; fresh HUD/Programming Trello audit selected https://trello.com/c/f8PqJjT7 Doing. Reviewed earned weapon frames show narrow centered Learn caption despite wide button. Supported UMG fill content alignment plus centered wrapped text now uses available inner width; actual geometry assertions cover inside-button allocation/text height in both ProgressionFeedbackLive and EarnedWeaponLive. No authority/input/assets/save change. Uncompiled/untested; Editor,native view,rendered720p then1440p and earned child caption gate first. FullM11/M12/Personal unchanged.
+
 ## 2026-10-10 M12 field weapon knowledge — technical gate passed
 
 FieldWeapons now unlocks only optional BoundClub at250XP/level3,3points and learned FieldTools. Baseline survival/wooden weapon/guard/shelter remain accessible; legacy carried clubs keep60damage without retroactive knowledge. Native grant-free normal-limit earned285XP1/1+six regressions, rendered720p/corrected1440p earned270XP1/1each, advanced one-client4/two-clientlag-loss6 and shared baseKnowledge4 actual create/restart role reports passed. Editor7.41s/Game24.84s clean;28PNG reviewed/290+296personal saves/preferences unchanged,raw known baselines unchanged/no assertfatalensure. FIELD_WEAPONS_M12.md retains two fixture failures and exact paths/limits/memory (rendered up to3.244/5.651GiB,network1.809/1.747GiB). Bounded dbGxD7ov complete; parentM12/Personal remainopen. Next: immediate Trello evidence/status/guides,scoped Sol publication,then fresh eligible-task audit. No new human acceptance assumed.

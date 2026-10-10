@@ -6,6 +6,7 @@
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Border.h"
+#include "Components/ButtonSlot.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
@@ -63,6 +64,8 @@ void UPFCraftingHUD::NativeOnInitialized()
     LearnButton=WidgetTree->ConstructWidget<UPFRecipeChoiceButton>(UPFRecipeChoiceButton::StaticClass(),TEXT("PF_LearnKnowledge"));
     LearnButton->SetStyle(PFUITheme::NavigationButton(false));LearnButton->OnClicked.AddDynamic(this,&UPFCraftingHUD::LearnSelected);
     LearnLabel=Label(TEXT("PF_LearnKnowledge_Label"),PFUITheme::Text);LearnButton->SetContent(LearnLabel);
+    CastChecked<UButtonSlot>(LearnLabel->Slot)->SetHorizontalAlignment(HAlign_Fill);
+    LearnLabel->SetJustification(ETextJustify::Center);
     Details->AddChildToVerticalBox(LearnButton)->SetPadding(FMargin(0,0,0,10));
     auto* PictureSize=WidgetTree->ConstructWidget<USizeBox>();PictureSize->SetWidthOverride(108);PictureSize->SetHeightOverride(108);
     Picture=CreateWidget<UPFItemPicture>(GetOwningPlayer(),UPFItemPicture::StaticClass(),TEXT("PF_SelectedItemPicture"));PictureSize->SetContent(Picture);Details->AddChildToVerticalBox(PictureSize)->SetHorizontalAlignment(HAlign_Center);

@@ -18,6 +18,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/ButtonSlot.h"
 #include "Components/ScrollBox.h"
 #include "Components/InputComponent.h"
 #include "Framework/Application/SlateApplication.h"
@@ -36,6 +37,18 @@
 #include "HAL/FileManager.h"
 namespace
 {
+void CheckLearnCaption(FAutomationTestBase* Test,UPFCraftingHUD* Menu)
+{
+    auto* Button=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_LearnKnowledge")));
+    auto* Label=Cast<UTextBlock>(Menu->WidgetTree->FindWidget(TEXT("PF_LearnKnowledge_Label")));
+    if(!Test->TestTrue(TEXT("Actual knowledge caption widgets present"),Button && Label)){return;}
+    const auto BG=Button->GetCachedGeometry(),LG=Label->GetCachedGeometry();
+    const auto TL=BG.AbsoluteToLocal(LG.LocalToAbsolute(FVector2D::ZeroVector)),BR=BG.AbsoluteToLocal(LG.LocalToAbsolute(LG.GetLocalSize()));
+    const auto Padding=Button->GetStyle().NormalPadding+CastChecked<UButtonSlot>(Label->Slot)->GetPadding();
+    Test->TestTrue(TEXT("Knowledge caption uses actual available button width"),LG.GetLocalSize().X>=BG.GetLocalSize().X-Padding.Left-Padding.Right-1);
+    Test->TestTrue(TEXT("Knowledge caption stays inside button"),TL.X>=-1 && TL.Y>=-1 && BR.X<=BG.GetLocalSize().X+1 && BR.Y<=BG.GetLocalSize().Y+1);
+    Test->TestTrue(TEXT("Knowledge caption text fits allocated height"),Label->GetDesiredSize().Y<=LG.GetLocalSize().Y+1);
+}
 class FProgressionFeedbackExercise final : public IAutomationLatentCommand
 {
 public:
@@ -182,6 +195,7 @@ private:
     {auto* W=Menu->WidgetTree->FindWidget(Name);for(auto* P=W?W->GetParent():nullptr;P;P=P->GetParent()){if(auto* Scroll=Cast<UScrollBox>(P)){if(FString(Name)==TEXT("PF_CraftingProgression_Reward")){Scroll->ScrollToEnd();}else{Scroll->ScrollWidgetIntoView(W,false);}break;}}}
     void Bounds(bool bKnowledge=false)
     {
+        if(bKnowledge){CheckLearnCaption(Test,Menu.Get());}
         const auto Root=Menu->GetCachedGeometry();const auto Size=Root.GetLocalSize();
         TArray<const TCHAR*> Targets={TEXT("PF_CraftingPanel"),TEXT("PF_CraftingProgression_Summary"),TEXT("PF_CraftSelected"),TEXT("PF_CraftingHints")};
         if(bKnowledge){Targets.Append({TEXT("PF_KnowledgeRequirement"),TEXT("PF_LearnKnowledge"),TEXT("PF_LearnKnowledge_Label")});}else{Targets.Add(TEXT("PF_CraftingProgression_Reward"));}
@@ -554,6 +568,7 @@ private:
     void Scroll(bool End){auto* W=Menu->WidgetTree->FindWidget(End?TEXT("PF_CraftingProgression_Reward"):TEXT("PF_KnowledgeRequirement"));for(auto* P=W->GetParent();P;P=P->GetParent()){if(auto* S=Cast<UScrollBox>(P)){if(End){S->ScrollToEnd();}else{S->ScrollToStart();}break;}}}
     void Bounds(const TCHAR* Name)
     {
+        if(FString(Name)==TEXT("PF_KnowledgeRequirement")){CheckLearnCaption(Test,Menu.Get());}
         auto* W=Menu->WidgetTree->FindWidget(Name);const auto G=W->GetCachedGeometry();const auto Root=Menu->GetCachedGeometry();const auto TL=Root.AbsoluteToLocal(G.LocalToAbsolute(FVector2D::ZeroVector)),BR=Root.AbsoluteToLocal(G.LocalToAbsolute(G.GetLocalSize()));
         Test->TestTrue(TEXT("Earned selected feedback inside screen"),TL.X>=0 && TL.Y>=0 && BR.X<Root.GetLocalSize().X && BR.Y<Root.GetLocalSize().Y);Test->TestTrue(TEXT("Earned text fits allocated height"),W->GetDesiredSize().Y<=G.GetLocalSize().Y+1);
         for(auto* P=W->GetParent();P;P=P->GetParent()){if(auto* S=Cast<UScrollBox>(P)){const auto Clip=S->GetCachedGeometry();const auto T=Clip.AbsoluteToLocal(G.LocalToAbsolute(FVector2D::ZeroVector)),B=Clip.AbsoluteToLocal(G.LocalToAbsolute(G.GetLocalSize()));Test->TestTrue(TEXT("Earned feedback inside inner scroll"),T.Y>=-1 && B.Y<=Clip.GetLocalSize().Y+1);break;}}
