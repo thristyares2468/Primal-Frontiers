@@ -10,6 +10,7 @@
 #include "Progression/PFProgressionComponent.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
+#include "Survival/PFSurvivalHUD.h"
 #include "Survival/PFInteraction.h"
 #include "Settings/PFGameUserSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
@@ -21,6 +22,7 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Engine/DamageEvents.h"
 #include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
@@ -297,7 +299,7 @@ public:
             for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned-route screenshot written"),IFileManager::Get().FileSize(*Path)>0);}
             Test->AddInfo(TEXT("[PrimalAgentTools] Rendered earned upgrade:13real bare-hand interactions/60bounded gatherXP,7timed jobs/6unique craft credits,160XP/3points→owned2point Learn→180XP/one bound tool→185XP/1point after fifth fibre credit; no XP/item grants. Synthetic UI,not human route/controller/FPS acceptance."));return true;
         }
-        auto* Needs=PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();
+        auto* Needs=PC->GetPawn()?PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>():nullptr;
         if(Stage==20)
         {
             const float Before=Needs->GetVitals().Health;Creature->Think();if(!Test->TestEqual(TEXT("Actual unprotected default windup lands eight damage"),Before-Needs->GetVitals().Health,8.f)){return true;}
@@ -371,12 +373,66 @@ public:
         }
         if(Stage==35)
         {
-            for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned combat screenshot written"),IFileManager::Get().FileSize(*Path)>0);}Action(EKeys::Tab);
-            Test->AddInfo(TEXT("[PrimalAgentTools] Earned guard/default Prowler: real8→6damage via Think windup,205XP/onepoint,45damage/5stamina normal melee kills in3accepted swings, one3food batch/normal pickup/original freshness/no corpse duplication. No grants or default damage override; controlled positions/ticks,not navigation/human combat feel."));return true;
+            Action(EKeys::Tab);DeathAt=PC->GetWorld()->GetTimeSeconds();FString Error;
+            if(!Test->TestTrue(TEXT("Capture actual205XP before ordinary death"),G->Capture(BeforeDeath,Error))){return true;}
+            InventoryBeforeDeath=I->GetStacks();DeadPawn=PC->GetPawn();
+            if(!Test->TestTrue(TEXT("Normal lethal server TakeDamage enters death"),PC->GetPawn()->TakeDamage(1000,FDamageEvent(),PC.Get(),PC.Get())>0 && Needs && Needs->IsDead())){return true;}
+            Wait(Now,.4,37);return false;
+        }
+        if(Stage==37)
+        {
+            if(!Test->TestTrue(TEXT("Default respawn delay leaves real dead pawn for HUD"),DeadPawn.IsValid() && PC->GetPawn()==DeadPawn.Get() && Needs && Needs->IsDead() && Needs->GetVitals().Health==0)){return true;}
+            CheckSurvivalHUD(true);Shot(TEXT("earned_death"));Wait(Now,.6,38);return false;
+        }
+        if(Stage==38)
+        {
+            if(!PC->GetPawn() || PC->GetPawn()==DeadPawn.Get()){return false;}
+            auto* PS=PC->GetPlayerState<APFInventoryPlayerState>();FPFProgressionRecord AfterDeath;FString Error;
+            if(!Test->TestTrue(TEXT("Default respawn keeps real owner PlayerState and progression"),PS && PS->Progression==G && Needs && !Needs->IsDead() && Needs->GetVitals().Health==100 && G->Capture(AfterDeath,Error))){return true;}
+            bool SameInventory=I->GetStacks().Num()==InventoryBeforeDeath.Num();
+            for(const auto& Before:InventoryBeforeDeath){SameInventory&=I->GetStacks().ContainsByPredicate([&](const auto& After){return After.StackId==Before.StackId && After.ItemId==Before.ItemId && After.Quantity==Before.Quantity && After.ExpiresAt==Before.ExpiresAt;});}
+            Test->TestTrue(TEXT("Ordinary death preserves every earned stack ID quantity and original freshness"),SameInventory);
+            Test->TestTrue(TEXT("Respawn preserves205XP exact learned ledger and one point"),AfterDeath.Experience==205 && AfterDeath.Knowledge==BeforeDeath.Knowledge && AfterDeath.CreditedCrafts==BeforeDeath.CreditedCrafts && G->GetAvailablePoints()==1 && G->CanCraftRecipe(TEXT("Recipe_BoundTool"),Error));
+            Test->TestEqual(TEXT("Respawn category bucket cardinality unchanged"),AfterDeath.GatherWindows.Num(),BeforeDeath.GatherWindows.Num());
+            for(const auto& Before:BeforeDeath.GatherWindows){const auto* After=AfterDeath.GatherWindows.FindByPredicate([&](const auto& X){return X.Category==Before.Category;});Test->TestTrue(TEXT("Respawn retains earned counts and ages active clock without renewal"),After && After->Rewards==Before.Rewards && FMath::IsNearlyEqual(After->RemainingSeconds,Before.RemainingSeconds-(PC->GetWorld()->GetTimeSeconds()-DeathAt),.00001));}
+            Needs->HungerDrainPerSecond=0;Needs->ThirstDrainPerSecond=0;
+            if(auto* Character=Cast<ACharacter>(PC->GetPawn())){Character->GetCharacterMovement()->DisableMovement();}
+            Wait(Now,.4,39);return false;
+        }
+        if(Stage==39)
+        {
+            CheckSurvivalHUD(false);Shot(TEXT("earned_respawn"));Wait(Now,.6,42);return false;
+        }
+        if(Stage==42)
+        {
+            PC->SetCraftingMenuOpen(true);
+            TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFCraftingHUD::StaticClass(),false);
+            if(!Test->TestEqual(TEXT("Actual crafting menu reopens on new pawn"),Widgets.Num(),1)){return true;}
+            Menu=CastChecked<UPFCraftingHUD>(Widgets[0]);Menu->SelectRecipe(TEXT("Recipe_BoundTool"));Wait(Now,.6,40);return false;
+        }
+        if(Stage==40)
+        {
+            Menu->RefreshMenu();Test->TestTrue(TEXT("Postrespawn actual205XP one-point menu visible"),Text(TEXT("PF_CraftingProgression_Summary")).Contains(TEXT("Level 2 | 205 / 250 XP | 45 to next level | 1 knowledge point")));
+            Test->TestTrue(TEXT("Postrespawn earned knowledge stays learned"),Text(TEXT("PF_KnowledgeRequirement")).Contains(TEXT("learned. Recipe access available")) && !Button(TEXT("PF_LearnKnowledge"))->GetIsEnabled());
+            Bounds(TEXT("PF_CraftingProgression_Summary"));Shot(TEXT("earned_respawn_knowledge"));Wait(Now,.6,41);return false;
+        }
+        if(Stage==41)
+        {
+            for(const auto& Path:Shots){Test->TestTrue(TEXT("Earned combat/death/respawn screenshot written"),IFileManager::Get().FileSize(*Path)>0);}
+            Menu->SetKeyboardFocus();Press(EKeys::C);Test->TestFalse(TEXT("Reopened menu closes on new pawn"),PC->IsCraftingOpen());
+            Test->AddInfo(TEXT("[PrimalAgentTools] Earned guard/default Prowler,205XP/one point,normal melee/loot and ordinary lethal TakeDamage/default respawn checked: complete inventory IDs/original freshness,knowledge/firstcraft ledger,category counts and active-clock aging conserved; actual death/100HP/205XP HUD inspected. No grants, forced respawn or shortened delay; synthetic standalone,not new multiplayer/navigation/human/controller/FPS acceptance."));return true;
         }
         return false;
     }
 private:
+    void CheckSurvivalHUD(bool Dead)
+    {
+        TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFSurvivalHUD::StaticClass(),false);
+        if(!Test->TestEqual(TEXT("Actual survivor HUD survives possession lifecycle"),Widgets.Num(),1)){return;}
+        const auto* Health=Cast<UTextBlock>(Widgets[0]->WidgetTree->FindWidget(TEXT("PF_HealthLabel")));const auto* State=Cast<UTextBlock>(Widgets[0]->WidgetTree->FindWidget(TEXT("PF_StateLabel")));
+        Test->TestTrue(TEXT("Actual lifecycle health and state text truthful"),Health && State && Health->GetText().ToString()==(Dead?TEXT("HEALTH   0 / 100"):TEXT("HEALTH   100 / 100")) && State->GetText().ToString().Contains(TEXT("You died"))==Dead);
+        for(const auto* Label:{Health,State}){if(Label && Label->GetVisibility()!=ESlateVisibility::Collapsed){const auto Size=Label->GetCachedGeometry().GetLocalSize();Test->TestTrue(TEXT("Lifecycle HUD text allocated visibly"),Size.X>0 && Size.Y>0 && Label->GetDesiredSize().Y<=Size.Y+1);}}
+    }
     bool SpawnNode(FName Resource)
     {FVector Eye;FRotator Look;PC->GetPawn()->GetActorEyesViewPoint(Eye,Look);const FTransform At(FRotator::ZeroRotator,Eye+Look.Vector()*150);Node=PC->GetWorld()->SpawnActorDeferred<APFResourceNode>(APFResourceNode::StaticClass(),At,PC->GetPawn(),nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);if(!Node.IsValid()){Test->AddError(TEXT("Unable to spawn disposable node"));return false;}Node->ResourceId=Resource;Node->FinishSpawning(At);return true;}
     UButton* Button(const TCHAR* Name){return CastChecked<UButton>(Menu->WidgetTree->FindWidget(Name));}
@@ -394,6 +450,7 @@ private:
     void Wait(double Now,double Seconds,int32 Next){Until=Now+Seconds;Stage=Next;}
     FAutomationTestBase* Test;FString Directory;TArray<FString> Shots;TWeakObjectPtr<APFSurvivalPlayerController> PC;TWeakObjectPtr<UPFCraftingHUD> Menu;TWeakObjectPtr<UPFProgressionComponent> Progression;TWeakObjectPtr<APFResourceNode> Node;TWeakObjectPtr<APFCreature> Creature;TWeakObjectPtr<APFItemPickup> Loot;
     bool bCombat=false;int32 Swing=0;double LootExpiry=0;
+    FPFProgressionRecord BeforeDeath;TArray<FPFItemStack> InventoryBeforeDeath;TWeakObjectPtr<APawn> DeadPawn;double DeathAt=0;
     double Started=FPlatformTime::Seconds(),Until=0;int32 Stage=0,GatherIndex=0,GatherAction=0,CraftIndex=0,BeforeOutput=0;float OldScale=1;bool bScaleChanged=false;
     const FName Resources[6]={TEXT("Node_Wood"),TEXT("Node_Wood"),TEXT("Node_Stone"),TEXT("Node_Food"),TEXT("Node_Fibre"),TEXT("Node_Fibre")};const int32 Actions[6]={3,3,1,2,3,1};
     const TCHAR* Recipes[7]={TEXT("Recipe_Tool"),TEXT("Recipe_Cook"),TEXT("Recipe_Dry"),TEXT("Recipe_Cord"),TEXT("Recipe_Club"),TEXT("Recipe_Cord"),TEXT("Recipe_BoundTool")};

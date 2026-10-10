@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-10 M12 earned death/respawn conservation
+
+Earned native death/respawn conservation passed1/1 plus Component/GatherEvents/Survival.Lifecycle3/3; rendered EarnedCombat final1/1/default timer/205XP exact inventory+knowledge+ledger+window aging passed. Nine finalPNG inspected, personal287saves/default settings unchanged, known26warning/14Pythonerror baseline unchanged/no assertfatalensure. Editor7.54s/Game23.81s clean. EARNED_RESPAWN_M12.md records exact commands, paths, memory and retained initial test-only compile failure/capture-timing improvement. No production/network/assets changes or new multiplayer death certificate. Bounded https://trello.com/c/cUuBsCUy technically complete; fullM12/Personal remainopen. Next fresh Trello audit for current progression guidance; human pacing/combat/controller/persistence/FPS never assumed passed.
+
 ## 2026-10-10 M11 selected crafting row — bounded technical gate
 
 Layout-change-only supported scroll requests keep selected rows visible after initial wrapped-font growth and multi-line server footer, preserving stable manual scrolling. Final Editor6.48s/Game25.20s clean; CraftingScrollLive720p+1440p1/1each and ActionOverlaysLive720p1/1 passed exact selection/exits/testseverity0/no timeout. TwelvePNG inspected/raw baseline26warnings14Python unchanged/no fatalensure/personal hash guards preserved. CRAFTING_SCROLL_M11.md has exact evidence, process peaks and retained reproduction/compilerwarning/labelpreflight/culled-geometry fixture failures and successful replays. No assets/authority/input/save changes; synthetic inputs do not certify physical controller/human usability/FPS/minimum16GB. Bounded https://trello.com/c/lbTkhg0x Done; fullM11/M12/Personal remain open.

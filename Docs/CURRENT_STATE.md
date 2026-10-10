@@ -1,5 +1,27 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M12 earned death/respawn — bounded technical gate passed
+
+Earned native death/respawn conservation passed1/1 plus Component/GatherEvents/Survival.Lifecycle3/3; rendered EarnedCombat final1/1/default timer/205XP exact inventory+knowledge+ledger+window aging passed. Nine finalPNG inspected, personal287saves/default settings unchanged, known26warning/14Pythonerror baseline unchanged/no assertfatalensure. Editor7.54s/Game23.81s clean. EARNED_RESPAWN_M12.md records exact commands, paths, memory and retained initial test-only compile failure/capture-timing improvement. No production/network/assets changes or new multiplayer death certificate. Bounded https://trello.com/c/cUuBsCUy technically complete; fullM12/Personal remainopen. Next fresh Trello audit for current progression guidance; human pacing/combat/controller/persistence/FPS never assumed passed.
+
+## 2026-10-10 M12 earned death/respawn — verification pending
+
+Final rendered EarnedCombat PASSED1/1 M12EarnedCombat720_20261010_043006241_41861d27,109.88s,working/private3.090/5.289GiB;287personal saves/default settings hashes unchanged/exits0/no timeout. Actual0HP/dead→100HP/205XP knowledge images inspected; remaining6PNG/rawreview and Gamebuild next. FullM12/Personal remainopen.
+
+Capture-only fixture Editor PASSED7.54s clean; final same720p EarnedCombat replay next to show unobscured100HP before menu. No production/network change.
+
+Rendered assertions PASSED1/1 M12EarnedCombat720_20261010_042713479_28495d49,109.42s,working/private3.083/4.884GiB;286personal saves/default settings unchanged, raw26warnings same normalized baseline/no assertfatalensure. Actual death/menu screenshots inspected but respawn screenshot opened menu before capture, obscuring100HP; only fixture adds capture wait before menu. Rebuild/replay required for final artifact gate, retain original pass/evidence limitation.
+
+Rendered fixture Editor PASSED15.28s and final7.20s clean; corrected new205XP summary expectation to existing singular point/45to-next formatting before launch. Actual EarnedCombat720p/HUD1.5 now runs ordinary death/respawn and readable HUD with full conservation; no rendered pass yet.
+
+Related native PASSED3/3 Automation_M12RespawnRegression_20261010_042453978_7c1deb2f,16.55s,working/private2.974/2.805GiB; Component/GatherEvents/Survival.Lifecycle exact selectors/exits/test/raw0. Rendered EarnedCombat now extends real205XP through ordinary death/default respawn, original stack/freshness/knowledge/window aging and actual0HP/death→100HP/205XP HUD; uncompiled/untested next Editor, no new network certificate.
+
+EarnedUpgrade native PASSED1/1 Automation_M12EarnedRespawn_20261010_042319304_2b2f5cdc,16.57s,working/private2.957/2.828GiB; exact selector/exits/test/raw severity0/no timeout/fatalensure. Actual185XP/death/default respawn/pending craft cancel/complete inventory/knowledge/window-aging/exhausted finite yield passed. Related regressions and rendered extension next; fullM12/Personal unchanged.
+
+Retry Editor PASSED5.81s clean PFM12EarnedRespawnRetryEditorBuild.log; exact EarnedUpgrade native next. Initial Editor FAILED14.92s/exit6 PFM12EarnedRespawnEditorBuild.log: test C2678 array equality attempted FPFItemStack without operator==. Corrected only fixture to compare complete StackId/ItemId/Quantity/ExpiresAt and cardinality. Rebuild/failed-only earned native next; rendered not expanded yet.
+
+M11 scroll commit5c7d20b published/local-remoteequal/clean. Fresh Programming/parent audit selected https://trello.com/c/cUuBsCUy Doing. Extend real185XP earned route with pending repeat-craft cancellation, ordinary lethal TakeDamage/default respawn, exact inventory/knowledge/recipe/window-count and active-duration conservation, then exhausted-category yield without XP refresh. Native first, existing rendered EarnedCombat actual HUD/death/respawn next; no production change or new human task. FullM12/Personal remain open, no new pass yet.
+
 ## 2026-10-10 M11 selected crafting row — technical gate passed
 
 Final gate PASSED: Editor6.48s/Game25.20s clean; CraftingScrollLive1/1 at720p/HUD1.5 and1440p/HUD1.5 plus ActionOverlaysLive1/1. Twelve finalPNG inspected/full selected row visible; raw26/14baseline unchanged/no assert/fatalensure,personal save/default settings hashes unchanged. CRAFTING_SCROLL_M11.md retains original six-assertion reproduction, tolerance warnings, label preflight and stale-culled-geometry fixture failures/retries. Bounded lbTkhg0x technically complete; fullM11/M12/Personal remain open. Next fresh Trello audit before independently actionable M12 earned-death/respawn budget conservation; no human test presumed passed.

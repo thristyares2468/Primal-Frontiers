@@ -14,6 +14,7 @@
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "World/PFWorldClock.h"
 #include "Engine/World.h"
+#include "Engine/DamageEvents.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -124,6 +125,24 @@ bool FPFEarnedUpgradeTest::RunTest(const FString&)
     TestTrue(TEXT("Single earned upgrade and exact full-route conservation"),I->Count(TEXT("Item_BoundTool"))==1 && I->Count(TEXT("Item_Tool"))==0 && I->Count(TEXT("Item_Cord"))==0 && I->Count(TEXT("Item_Wood"))==1 && I->Count(TEXT("Item_Stone"))==0 && I->Count(TEXT("Item_Fibre"))==0 && I->Count(TEXT("Item_Food"))==1 && I->Count(TEXT("Item_CookedFood"))==1 && I->Count(TEXT("Item_DriedFood"))==1 && I->Count(TEXT("Item_Club"))==1);
     TestTrue(TEXT("Upgrade retains earned accounting and useful performance"),G->GetRecord().CreditedCrafts.Num()==6 && G->GetAvailablePoints()==1 && I->GatheringHits()==3);
     if(!Gather(TEXT("Node_Fibre"),1)){return false;}TestTrue(TEXT("Earned upgraded tool takes finite three-hit yield for one fifth fibre credit"),I->Count(TEXT("Item_Fibre"))==6 && G->GetExperience()==185);
-    Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Earned first upgrade: real bare-hand trace gathering, seven timed jobs/six unique credits,60gatherXP,160XP purchase boundary,185XP final,exact2point cost and three-hit benefit; no item/XP grants."));return true;
+    FPFProgressionRecord BeforeDeath;const double DeathAt=W->GetTimeSeconds();if(!TestTrue(TEXT("Actual earned snapshot before death"),G->Capture(BeforeDeath,Error))){return false;}
+    const auto InventoryBeforeDeath=I->GetStacks();const TWeakObjectPtr<APFSurvivorCharacter> DeadPawn(P);
+    TestTrue(TEXT("Start actual repeated Cord job before death"),C->Start(TEXT("Recipe_Cord"),P));
+    TestTrue(TEXT("Ordinary server damage kills earned survivor"),P->TakeDamage(1000,FDamageEvent(),PC,PC)>0 && P->Survival->IsDead());
+    auto* DeadNode=W->SpawnActor<APFResourceNode>(FVector(500,500,80),FRotator::ZeroRotator);if(!TestNotNull(TEXT("Actual dead-refusal node"),DeadNode)){return false;}
+    TestFalse(TEXT("Dead survivor cannot gather to renew earned budget"),DeadNode->Gather(P));DeadNode->Destroy();
+    Advance(35);P=Cast<APFSurvivorCharacter>(PC->GetPawn());
+    if(!TestTrue(TEXT("Default timer replaces dead pawn, retains same PlayerState"),P && P!=DeadPawn.Get() && PC->GetPlayerState<APFInventoryPlayerState>()==PS && PS->Progression==G)){return false;}
+    P->GetCharacterMovement()->DisableMovement();P->Survival->HungerDrainPerSecond=0;P->Survival->ThirstDrainPerSecond=0;
+    bool SameInventory=I->GetStacks().Num()==InventoryBeforeDeath.Num();
+    for(const auto& Before:InventoryBeforeDeath){SameInventory&=I->GetStacks().ContainsByPredicate([&](const auto& After){return After.StackId==Before.StackId && After.ItemId==Before.ItemId && After.Quantity==Before.Quantity && After.ExpiresAt==Before.ExpiresAt;});}
+    TestTrue(TEXT("Death cancels job without input/output duplication"),C->ActiveRecipe.IsNone() && C->Feedback.Contains(TEXT("died or changed")) && SameInventory);
+    FPFProgressionRecord AfterDeath;if(!TestTrue(TEXT("Actual earned snapshot after respawn"),G->Capture(AfterDeath,Error))){return false;}
+    TestTrue(TEXT("Earned XP, knowledge, points and first-craft ledger survive"),AfterDeath.Experience==185 && AfterDeath.Knowledge==BeforeDeath.Knowledge && AfterDeath.CreditedCrafts==BeforeDeath.CreditedCrafts && G->GetAvailablePoints()==1 && G->CanCraftRecipe(TEXT("Recipe_BoundTool"),Error));
+    TestEqual(TEXT("Death preserves category bucket count"),AfterDeath.GatherWindows.Num(),BeforeDeath.GatherWindows.Num());
+    for(const auto& Before:BeforeDeath.GatherWindows){const auto* After=AfterDeath.GatherWindows.FindByPredicate([&](const auto& X){return X.Category==Before.Category;});TestTrue(TEXT("Respawn never renews category counts/duration"),After && After->Rewards==Before.Rewards && FMath::IsNearlyEqual(After->RemainingSeconds,Before.RemainingSeconds-(W->GetTimeSeconds()-DeathAt),0.00001));}
+    PC->SetControlRotation(FRotator::ZeroRotator);if(!Gather(TEXT("Node_Fibre"),1)){return false;}
+    TestTrue(TEXT("Exhausted fibre budget still gathers after respawn without XP reset"),I->Count(TEXT("Item_Fibre"))==12 && G->GetExperience()==185);
+    Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Earned first upgrade: real bare-hand trace gathering, seven timed jobs/six unique credits,60gatherXP,160XP purchase boundary,185XP final,exact2point cost and three-hit benefit; ordinary damage/default respawn preserves earned inventory/ledger/aged budgets, pending repeat cancels, exhausted yield remains finite without XP refresh; no item/XP grants."));return true;
 }
 #endif
