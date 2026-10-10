@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Lazy active-time reward budget
+
+Use server UWorld game time and a nonreplicated component epoch for gather reward windows. Capture is a validated read-only elapsed snapshot; successful craft/purchase commit and trusted restore rebase the epoch. Paused/dilated game time controls this budget, with no UTC/offline aging, per-frame ticking or client countdown promises. Save remaining duration/count/category through existing bounded innerV1/V2, not absolute timestamps. Invalid/backward clocks refuse atomically. GATHER_CLOCK_M12.md records native boundaries; real gather event/private new-process network gates remain separate. Manual whole-world restore is an authoritative checkpoint rollback, not a client budget reset.
+
 ## 2026-10-10 — Persist bounded gather windows before connecting rewards
 
 Use one exact native GameplayTag category window for each of five ordinary gathered resources,5XP per confirmed success event/five events per1800active-server seconds. Save remaining duration and bounded count, not UTC/machine clocks or item/node event histories. Pure validated transactions commit candidates atomically; a separate future server hook must supply actual success and active elapsed. Preserve byte-compatible innerV1 writes when no windows exist, support innerV2 only for nonempty windows, and retain existing outer world owner binding. Decoder never interns unknown tag strings and rejects malformed counters/time/version/CRC without changing outputs. GATHER_WINDOWS_M12.md records adversarial/native/actual-file compatibility gates; pure budget arithmetic and trusted window seeds are not live earning or multiplayer acceptance.

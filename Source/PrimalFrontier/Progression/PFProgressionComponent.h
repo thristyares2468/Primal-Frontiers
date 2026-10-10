@@ -31,6 +31,9 @@ private:
     UPROPERTY(Replicated) FPFProgressionRecord Record;
     UPROPERTY(Replicated) FString KnowledgeFeedback;
     double NextKnowledgeRequestTime=0;
+    // Epoch for stored remaining durations. Capture is read-only; commits/restore rebase it.
+    // Unreal game time pauses with the world and never includes offline wall-clock time.
+    double RecordTime=0;
     bool Authority(const UPFCraftingCatalog*& Crafting,const UPFItemCatalog*& Items,FString& Error) const;
     // Only the actual timed crafting transaction can prepare/commit a first-craft award.
     friend class UPFCraftingComponent;

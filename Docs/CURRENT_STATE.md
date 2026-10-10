@@ -1,5 +1,17 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M12 active gather-window clock — technical lifecycle gate passed
+
+Final lifecycle gate PASSED: Editor25.14s/Game27.02s clean; exact native1+6 passed, both unique raw logs reviewed0severity/assert/fatalensure. GATHER_CLOCK_M12.md records behavior/evidence/limits; Trello https://trello.com/c/6JeKDMcU technically complete. No gathering XP or new-process/network window certificate yet. Next bounded actual server success hook/rendered/private restart gates; fullM12/Personal remainopen.
+
+Affected regressions PASSED6/6 Automation_M12GatherClockRegression_20261010_032937032_ec7be8cd,16.64s,working/private2.933/2.784GiB,exact selection/exits/test/raw severity0/no timeout. Codec,Component,GatherWindows,KnowledgeRequests,RecipeAccess,WorldCompatibility unchanged; unique raw review and Game build final gate next. No failure so far in this slice.
+
+PF.Progression.GatherClock PASSED1/1 Automation_M12GatherClock_20261010_032832686_3419961d,35.58s,working/private3.080/2.966GiB,exact selection/exits/test/raw severity0/no timeout/fatalensure. Real paused world tick, exact expiration/read-only captures, temporary file/rebased epoch and actual purchase/first/repeat craft clock conservation passed. No live gather reward or new-process/network certificate. Affected six regressions and Game build next.
+
+Editor build PASSED25.14s/no compiler warnings PFM12GatherClockEditorBuild.log. Exact PF.Progression.GatherClock failed-only-size initial gate next, then relevant component/purchase/craft/format regressions and Game. No clock test pass claimed yet.
+
+Fresh Trello Programming/parent audit selected https://trello.com/c/6JeKDMcU Doing. Server capture lazily derives remaining durations from paused/dilated Unreal game time; snapshots are read-only, valid restore/actual craft/purchase commits rebase their epoch. Invalid/backward/nonfinite clock and malformed/client restore refuse atomically. No component tick, UTC aging, save-format change, live gather XP or asset change. New PF.Progression.GatherClock uses disposable native Game worlds, a real paused tick, temporary record file and actual craft/purchase hooks with trusted window seeds; simulated new clock epoch is not a new-process certificate. Implementation uncompiled/untested. Next Editor/exact native clock/regression/Game gates; fullM12 and Personal gates unchanged.
+
 ## 2026-10-10 M12 bounded gather-window compatibility — technical record gate passed
 
 Pure five-category native GameplayTag windows now support5XP/event up to5credits/category/1800active-server seconds, exact expiry/cap/atomic refusal and bounded remaining-duration serialization. No live gather hook/running clock yet. Empty windows retain byte-compatible innerV1; nonempty use innerV2, oldV1defaults empty/no retrocredit, outer worldV2 owner binding unchanged. Native final5/5 Automation_M12GatherWindowsFinal_20261009_211952205_e63e1b0b (16.52s,3.025/2.861GiB) plus finalparser2/2 Automation_M12GatherWindowsParser_20261009_212045800_3aaacf59 (16.13s,2.938/2.801GiB) passed exactselection/exits/raw-testseverity0/no timeout/fatalensure. Actual Component temporary-file repeated load conserves trusted windows/XP/knowledge; mixed-owner old/new inner world records passed. Editor5.15s/Game25.20s clean. Retained initial test-only TArray-alias crash and failed-only1/1 retry, GATHER_WINDOWS_M12.md.
