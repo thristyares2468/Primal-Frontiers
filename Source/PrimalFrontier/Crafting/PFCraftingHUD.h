@@ -96,5 +96,8 @@ private:
     FName SelectedRecipe;
     FName SelectedKnowledge;
     bool bInitialChoiceMade=false;
+    FVector2D LastScrollViewport=FVector2D::ZeroVector;
+    FVector2D LastScrollRowSize=FVector2D::ZeroVector;
+    FName LastScrollRecipe;
     float Refresh=0;
 };

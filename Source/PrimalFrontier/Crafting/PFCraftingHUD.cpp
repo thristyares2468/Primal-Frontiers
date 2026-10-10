@@ -116,7 +116,25 @@ void UPFCraftingHUD::RebuildRecipes(const TArray<FName>& Ids)
     else if(!RecipeIds.Contains(SelectedRecipe)){SelectedRecipe=NAME_None;}
 }
 void UPFCraftingHUD::NativeTick(const FGeometry& G,float Delta)
-{Super::NativeTick(G,Delta);Refresh+=Delta;if(Refresh>=0.1f){RefreshMenu();}}
+{
+    Super::NativeTick(G,Delta);Refresh+=Delta;if(Refresh>=0.1f){RefreshMenu();}
+    // Initial fonts, wrapped rows and server feedback settle after selection's layout pass.
+    // Re-request only on selection/size changes; stable mouse scrolling must remain free.
+    const int32 Index=RecipeIds.IndexOfByKey(SelectedRecipe);
+    auto* Browser=Cast<UScrollBox>(RecipeList->GetParent());
+    if(Browser && RecipeButtons.IsValidIndex(Index))
+    {
+        const auto Viewport=Browser->GetCachedGeometry().GetLocalSize();
+        const auto RowSize=RecipeButtons[Index]->GetCachedGeometry().GetLocalSize();
+        if(Viewport.X>0 && Viewport.Y>0 && RowSize.Y>0)
+        {
+            if(LastScrollRecipe!=SelectedRecipe || !Viewport.Equals(LastScrollViewport,0.1f) || !RowSize.Equals(LastScrollRowSize,0.1f))
+            {Browser->ScrollWidgetIntoView(RecipeButtons[Index],false,EDescendantScrollDestination::IntoView,4);}
+            LastScrollRecipe=SelectedRecipe;LastScrollViewport=Viewport;LastScrollRowSize=RowSize;
+        }
+    }
+    else{LastScrollRecipe=NAME_None;}
+}
 void UPFCraftingHUD::RefreshMenu()
 {
     Refresh=0;

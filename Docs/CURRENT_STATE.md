@@ -1,5 +1,43 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M11 selected crafting row — technical gate passed
+
+Final gate PASSED: Editor6.48s/Game25.20s clean; CraftingScrollLive1/1 at720p/HUD1.5 and1440p/HUD1.5 plus ActionOverlaysLive1/1. Twelve finalPNG inspected/full selected row visible; raw26/14baseline unchanged/no assert/fatalensure,personal save/default settings hashes unchanged. CRAFTING_SCROLL_M11.md retains original six-assertion reproduction, tolerance warnings, label preflight and stale-culled-geometry fixture failures/retries. Bounded lbTkhg0x technically complete; fullM11/M12/Personal remain open. Next fresh Trello audit before independently actionable M12 earned-death/respawn budget conservation; no human test presumed passed.
+
+Final ActionOverlaysLive replay PASSED1/1 M11Overlays720_20261010_041327183_05bd47dd,30.29s,working/private3.112/5.340GiB,exact selector/exits/test severity0/no timeout;285personal saves/default settings unchanged. Craft/refusal/busy/cancel/normal focus/input/storage/build checks passed with corrected painted geometry and full selected-row bounds. Final six overlayPNG/raw review and Game build next; retain failures in CRAFTING_SCROLL_M11.md.
+
+Paint-aware fixture Editor PASSED6.48s clean PFM11CraftingScrollPaintEditorBuild.log; failed-only Overlays replay next. Runtime unchanged since720/1440 narrow pass.
+
+Remaining nine assertions inspect cached allocation of fully culled Recipe6/7 children, whose cached geometry is stale outside the painted scroll viewport. Fixture now measures text allocation only for painted/intersecting scroll children and all fixed controls; complete selected-row bounds remain mandatory, and narrow CraftingScroll checks those lower rows after actually selecting/painting them. No production change, no log suppression. Rebuild and failed-only Overlays next.
+
+Failed-only Overlays retry FAILED9assertions M11Overlays720_20261010_041119958_c3573741,30.24s,engine0/verdict1/no timeout;284personal saves/settings unchanged. Retain retry, inspect remaining allocation assertions rather than infer success from narrow cases; no scope expansion.
+
+Final Editor PASSED6.48s/no compiler warnings PFM11CraftingScrollFinalEditorBuild.log. Failed-only Overlays replay now; scroll production unchanged since successful720/1440, Game/artifact gates pending.
+
+Regression nine failures were only off-screen nonselected Recipe6/7 text positions: old CheckLayout assumed every scroll-list entry must fit the root viewport. Corrected fixture to require every text allocation, fixed controls inside screen, and strengthened complete selected button inside actual scroll viewport; legitimate off-screen nonselected rows/long details use their existing clipping. No production change or weakened selected-row assertion. Rebuild/failed-only Overlays next.
+
+Existing ActionOverlaysLive regression FAILED9assertions M11Overlays720_20261010_040841472_5b0dbb92,30.17s,engine0/verdict1/no timeout;283personal saves/settings unchanged. Stop scope expansion/Game publication, inspect failures and fix only current UI/fixture then replay. Final1440p threePNG reviewed/full selected row visible;raw baseline unchanged/no fatalensure. Both narrow scroll cases passed but regression gate still open.
+
+1440p replay PASSED1/1 M11Scroll1440_20261010_040753074_e2cbe7e7,29.58s,working/private3.262/5.638GiB,exact selector/exits/test severity0/no timeout;282personal saves/default settings unchanged.720p threePNG already inspected/full selected row visible,1440pPNG/raw review then existing Overlays regression and Game build next. No new manual acceptance.
+
+1440p exact error is fixture preflight "Supply bounded scroll evidence label": generated49characters exceeded48, so menu checks never ran. Shortened only this runner case prefix to M11Scroll; no source/assertion weakening, no rebuild required for launcher-only fix. Same1440p replay next, retained failed preflight evidence.
+
+1440p CraftingScrollLive FAILED1assertion M11CraftingScroll1440_20261010_040638214_a3f2d8fd,22.91s,engine0/verdict1/no timeout;281personal saves/default settings unchanged. Stop broader regressions, inspect exact assertion and fix only failed current fixture/layout before replay.720p finalraw baseline unchanged/no assert/fatalensure.
+
+Failed-only720p CraftingScrollLive replay PASSED1/1 M11CraftingScroll720_20261010_040535610_70d70cc3,29.35s,working/private3.088/5.031GiB,exact selector/exits/test severity0/no timeout;280personal saves/default settings unchanged. Full selected button/title/body/picture after footer growth, stable manual offset and keyboard/category/close passed.1440p/existing Overlays/raw/PNG/Game gates remain pending.
+
+Clean fix Editor PASSED6.90s/no compiler warnings PFM11CraftingScrollCleanEditorBuild.log. Failed-only CraftingScroll720p/HUD1.5 replay next;1440p/existing Overlays/Game only after replay passes.
+
+Fix build linked18.38s but two C4305 warnings: Equals tolerance used double literal for float geometry. Corrected only literal to0.1f; clean rebuild required before replay, retained PFM11CraftingScrollFixEditorBuild.log. No passing UI claim.
+
+Exact reproduced clipping: stage1 selected button bottom675.8 vs viewport581.2, stage3 after real footer growth viewport515.2; title/body also clipped. Layout-only fix now re-requests selected row after cached viewport/row size or selection changes; stable layout leaves deliberate manual offset alone. Strengthened actual picture/X/Y bounds without weakening original assertions. Uncompiled/untested; rebuild and failed-only720p replay next.
+
+Reproduction FAILED as expected: PF.UI.CraftingScrollLive six full-row/title/body clipping assertions, M11CraftingScroll720_20261010_040241709_03273643,29.73s,engine0/verdict1,no timeout;279personal saves/settings unchanged. Retain original screenshot/raw/report. Stop scope expansion; inspect exact assertion stages and correct only scroll lifecycle before replay.
+
+Reproduction fixture/runner compiled: Editor16.81s clean PFM11CraftingScrollReproEditorBuild.log. Real last-row geometry after actual knowledge/craft refusal footer growth, stable manual offset and keyboard/category checks next at720p/HUD1.5. Production layout remains unchanged until reproducer identifies exact clipping.
+
+M12 gathering commit1b33a8d published/local-remoteequal/clean; bounded cardDone. Fresh HUD/parent audit selected https://trello.com/c/lbTkhg0x Doing. Actual earned_guard.png shows selected last row clipped after multi-line footer shrinks its browser. Add narrow opt-in rendered reproduction before layout-only correction; verify complete row/picture/text, feedback height change, stable manual scroll, keyboard wrap/category empty selection at720p/HUD1.5 then1440p, existing overlay regression and Editor/Game/raw/hash gates. FullM11/M12/Personal remain open; no UI pass claimed yet.
+
 ## 2026-10-10 M12 actual gathering XP — technical gate passed
 
 Final gate passed: seven native tests, one rendered EarnedCombat, one-client4/4 and two-client lag/loss6/6 Create/Restart; latest Editor7.00s/Game25.91s clean. All ten network raw logs match prior24startupwarnings/14Python lines, zero new severity/assert/fatalensure; rendered baseline26/14 unchanged, six PNGs reviewed. GATHER_EVENTS_M12.md records exact evidence/limits. No failed build/test in this slice. Bounded xY9fEfpd technically complete; fullM12/Personal remain open. Next independently actionable M11 task: selected recipe row clipped at list bottom at720p/HUD1.5, separate layout/focus/rendered gate.
@@ -387,8 +425,8 @@ Prior broader regression:35distinct native cases passed in the October9 pre-menu
 | M7 | User reported Personal check completed October9 | No route/night/FPS measurements invented; broader production world remains future |
 | M8 | Native/live persistence implemented; latest network checks pass; **human rendered check failed/replay pending** | [Personal2 replay](https://trello.com/c/UZVTTPLE), GuideG3: actual gather/craft/build/store/Pause Save/close/relaunch/Load comparison |
 | M9 | Independent intake/provenance audit completed; candidate approval open | Exact local source/license mapping before integration |
-| M11 | Bounded UI/menu/item/recipe/building-details slices passed; full usability/physical controller/audio acceptance unverified | Human usability remains separate; next independent slice is audited M12 resource/recipe expansion |
-| M12 | First bounded cord/tool tier verified; full combat/progression remains incomplete | XP/knowledge and armor/weapon slices require their own build/playtest/save/network gates; no progression currency implemented |
+| M11 | Bounded menu/settings/crafting/inventory/feedback and selected-row layout slices passed; full usability/physical controller/audio acceptance unverified | Existing Personal usability stays separate; independent M12 verification can continue |
+| M12 | Tool/weapon/carried protection, first-craft and bounded gather XP, private knowledge purchase/recipe access/save restart technical slices passed; full progression/combat acceptance incomplete | Broader original knowledge/reward/discovery plans need separate gates; human pacing/combat/controller remains unverified |
 | M10,M13–M25 | Future plans, not accepted | World distribution M14; adaptation/biomod and tech-tree references remain design inputs |
 
 **Completed requested Editor Medium preset:** after menu/save task6571bc6 was published, supported Editor Scalability1/CLOSE_SLATE_MAINFRAME applied and saved all11quality groups=1 plus engine preset resolutionquality71. Actual disk readback: C:/Users/jackh/AppData/Local/UnrealEngine/5.8/Saved/Config/WindowsEditor/EditorSettings.ini. Game preferences hashes unchanged; no tracked assets/maps/source/project settings modified. This is the local UE5.8 Editor profile, kept out of Git. Report/log EditorMediumRetry_20261009_033618504_9a8391f0,16.11s,working/private2.903/2.718GiB,engine0,zero raw warning/error/ensure/fatal; Editor closed normally. NullRHI avoids rendering; actual FPS benefit unmeasured. [Trello task](https://trello.com/c/vfPfBayv) read back Done.

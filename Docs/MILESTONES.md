@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-10 M11 selected crafting row — bounded technical gate
+
+Layout-change-only supported scroll requests keep selected rows visible after initial wrapped-font growth and multi-line server footer, preserving stable manual scrolling. Final Editor6.48s/Game25.20s clean; CraftingScrollLive720p+1440p1/1each and ActionOverlaysLive720p1/1 passed exact selection/exits/testseverity0/no timeout. TwelvePNG inspected/raw baseline26warnings14Python unchanged/no fatalensure/personal hash guards preserved. CRAFTING_SCROLL_M11.md has exact evidence, process peaks and retained reproduction/compilerwarning/labelpreflight/culled-geometry fixture failures and successful replays. No assets/authority/input/save changes; synthetic inputs do not certify physical controller/human usability/FPS/minimum16GB. Bounded https://trello.com/c/lbTkhg0x Done; fullM11/M12/Personal remain open.
+
 ## 2026-10-10 M12 successful gathering XP — bounded technical gate
 
 Actual owned server gathering commits5XP only after successful inventory conversion, five credits/category/1800active seconds. Full/dead/client/foreign/cooldown/depleted/unknown requests earn nothing; exhausted/capped budgets still gather finite items. Grant-free route60gather→160firstcraft→180boundtool→185fibre→205guard passed native/rendered. Editor7.00s/Game25.91s clean; exact native7/7, rendered1/1, one-client4/4 and two-client75ms/1%loss6/6 new-server restart passed. Private independent70/40XP,2/1 crafts and saved category counts/durations conserve without refresh. Ten network rawlogs match24/14 baseline, rendered26/14 unchanged/no fatalensure; six PNGs inspected/268personal saves and default settings unchanged. GATHER_EVENTS_M12.md has exact paths/memory/limits. No failed gate; bounded https://trello.com/c/xY9fEfpd Done. FullM12/manual/controller/FPS/minimum16GB stayopen. Next M11 clipped selected recipe row at720p/HUD1.5; no higher milestone acceptance inferred.

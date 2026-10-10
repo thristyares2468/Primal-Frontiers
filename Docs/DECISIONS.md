@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-10 — Reconcile crafting selection after layout settles
+
+Request supported UMG ScrollWidgetIntoView when selected recipe, cached row size or browser dimensions change, rather than on every refresh. This handles accessibility wrapping and server-feedback footer growth while preserving stable manual scrolling. Rendered tests measure full selected-row button/title/body/picture bounds in its actual browser; fixed controls fit the screen, painted text fits allocation. Culled nonselected children retain stale cached geometry and are verified after selection/painting, not forced simultaneously onscreen. No gameplay/input/authority change. CRAFTING_SCROLL_M11.md records reproduction and narrow/regression replays.
+
 ## 2026-10-10 — Commit gathering rewards with successful inventory conversion
 
 Derive reward category from the loaded server node yield, verify the living owned pawn/controller/PlayerState and prepare an aged progression candidate before granting resources. Commit only after Grant succeeds on the same authoritative game thread. Reward one action regardless of tool hit count; exhausted/capped reward budgets permit normal finite gathering. Keep existing lazy active-game-time windows and private owner-only replication/save binding; no new client reward RPC or UTC clock. GATHER_EVENTS_M12.md records actual native/rendered and one-/two-client new-server duration conservation. No mutation of personal saves or world assets, and no human pacing certificate.

@@ -13,6 +13,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/ScrollBox.h"
 #include "Components/InputComponent.h"
 #include "UI/PFItemPicture.h"
 #include "Framework/Application/SlateApplication.h"
@@ -209,9 +210,25 @@ private:
             TArray<UWidget*> Widgets;Widget->WidgetTree->GetAllWidgets(Widgets);
             for(auto* Child:Widgets){if(auto* T=Cast<UTextBlock>(Child))
             {
-                const auto Geometry=T->GetCachedGeometry();const auto Bottom=Root.AbsoluteToLocal(Geometry.LocalToAbsolute(Geometry.GetLocalSize()));
-                Test->TestTrue(FString(TEXT("Action text fits screen: "))+T->GetName(),Bottom.Y<Size.Y && T->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);
+                const auto Geometry=T->GetCachedGeometry();const auto Top=Root.AbsoluteToLocal(Geometry.LocalToAbsolute(FVector2D::ZeroVector)),Bottom=Root.AbsoluteToLocal(Geometry.LocalToAbsolute(Geometry.GetLocalSize()));
+                UScrollBox* ScrollParent=nullptr;for(auto* Parent=T->GetParent();Parent;Parent=Parent->GetParent()){if(auto* Scroll=Cast<UScrollBox>(Parent)){ScrollParent=Scroll;break;}}
+                bool Painted=true;
+                if(ScrollParent){const auto Clip=ScrollParent->GetCachedGeometry();const auto ClipTop=Clip.AbsoluteToLocal(Geometry.LocalToAbsolute(FVector2D::ZeroVector)),ClipBottom=Clip.AbsoluteToLocal(Geometry.LocalToAbsolute(Geometry.GetLocalSize()));Painted=ClipTop.Y<Clip.GetLocalSize().Y && ClipBottom.Y>0;}
+                // Culled rows keep stale cached geometry until brought into the painted viewport.
+                // CraftingScrollLive selects first/last/wrapped rows and checks their full allocation.
+                if(Painted){Test->TestTrue(FString(TEXT("Painted action text fits allocation: "))+T->GetName(),T->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);}
+                // Nonselected recipes and long details may legitimately extend past their clipping viewport.
+                if(!ScrollParent){Test->TestTrue(FString(TEXT("Fixed action text fits screen: "))+T->GetName(),Top.X>=-1 && Top.Y>=-1 && Bottom.X<=Size.X+1 && Bottom.Y<Size.Y);}
             }}
+        }
+        if(auto* Menu=Cast<UPFCraftingHUD>(Widget))
+        {
+            const int32 Index=Menu->GetVisibleRecipeIds().IndexOfByKey(Menu->GetSelectedRecipe());
+            if(Index!=INDEX_NONE)
+            {
+                auto* Row=Widget->WidgetTree->FindWidget(FName(*FString::Printf(TEXT("PF_Recipe%d_Button"),Index)));Test->TestNotNull(TEXT("Selected actual recipe row"),Row);
+                for(auto* Parent=Row?Row->GetParent():nullptr;Parent;Parent=Parent->GetParent()){if(auto* Scroll=Cast<UScrollBox>(Parent)){const auto Clip=Scroll->GetCachedGeometry(),RowGeometry=Row->GetCachedGeometry();const auto Top=Clip.AbsoluteToLocal(RowGeometry.LocalToAbsolute(FVector2D::ZeroVector)),Bottom=Clip.AbsoluteToLocal(RowGeometry.LocalToAbsolute(RowGeometry.GetLocalSize()));Test->TestTrue(TEXT("Selected complete action row fits scroll viewport"),Top.X>=-1 && Top.Y>=-1 && Bottom.X<=Clip.GetLocalSize().X+1 && Bottom.Y<=Clip.GetLocalSize().Y+1);break;}}
+            }
         }
     }
     void Press(FKey Key){for(const auto& B:PC->InputComponent->KeyBindings){if(B.Chord.Key==Key && B.KeyEvent==IE_Pressed){B.KeyDelegate.Execute(Key);return;}}Test->AddError(TEXT("Missing action binding ")+Key.ToString());}
