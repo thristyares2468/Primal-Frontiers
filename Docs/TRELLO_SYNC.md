@@ -1,5 +1,11 @@
 # Trello task workflow
 
+## 2026-10-10 M11 settings restart — bounded technical gate passed
+
+Actual two-process Apply/startup/display/camera/renderer/HUD/Cancel checks passed720p+1440p (four exact live selectors), PF.Settings.Preferences1/1 and shared SettingsApplyLive720p1/1. Editor34.94s/Game40.51s clean. All17PNG inspected; exact exits/testseverity0/no timeout, default settings/private311–315save hashes unchanged, both source INIs unchanged; four expected negative preflight probes passed. SETTINGS_RESTART_M11.md contains exact paths/commands/limits. Raw Prepare/Apply26warning/14Pythonerror baseline retained; Verify24/14 removes two known CVar warnings,0new normalized severity/no assertfatalensure. Peaks up to3.443/5.643GiB on31.93GiB busy host; no FPS/minimum16GB/audio/controller/manual certificate. Bounded jeLo0isc complete; fullM11/M12/Personal remainopen. Immediate Trello evidence/Done, scoped Sol publication, then fresh eligible UI audit.
+
+
+
 October10 knowledge caption: fresh bounded f8PqJjT7/HUD/Programming/parent audit during Doing, retained failed width measurement and corrected supported-padding replay. Native1/rendered720p+1440p+earned720p1each/Editor41.02s/Game42.32s passed with30inspectedPNG/hashguards/rawbaseline; KNOWLEDGE_CAPTION_M11.md exact evidence. Immediately update/move/readback only boundedDone; fullM11/M12/Personal priorities/members/dates/guides unchanged. Scoped Solpublication then fresh board audit; no additional human task or inferred acceptance.
 
 October10 FieldWeapons: fresh bounded dbGxD7ov/parent audit and current docs selected level3 optional existing weapon knowledge. Technical native1+6/rendered720p+corrected1440p/network4+6/sharedbase4/Editor+Game passed, exact FIELD_WEAPONS_M12.md,28PNG/rawbaselines/hashguards reviewed. Immediately evidenceupdate/move/readback boundedDone;parentM12Doing and existing Personal priorities/members/dates remain. Copy revised G2 including3b into existing two Personal cards; retain prior near-limit descriptions as historical comments to avoid stale contradictory instructions. Scoped Solpublication follows; fresh board audit before further scope. No added human assignment/fullmilestone pass.

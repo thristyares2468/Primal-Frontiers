@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-10 M11 settings restart — bounded technical gate passed
+
+Actual two-process Apply/startup/display/camera/renderer/HUD/Cancel checks passed720p+1440p (four exact live selectors), PF.Settings.Preferences1/1 and shared SettingsApplyLive720p1/1. Editor34.94s/Game40.51s clean. All17PNG inspected; exact exits/testseverity0/no timeout, default settings/private311–315save hashes unchanged, both source INIs unchanged; four expected negative preflight probes passed. SETTINGS_RESTART_M11.md contains exact paths/commands/limits. Raw Prepare/Apply26warning/14Pythonerror baseline retained; Verify24/14 removes two known CVar warnings,0new normalized severity/no assertfatalensure. Peaks up to3.443/5.643GiB on31.93GiB busy host; no FPS/minimum16GB/audio/controller/manual certificate. Bounded jeLo0isc complete; fullM11/M12/Personal remainopen. Immediate Trello evidence/Done, scoped Sol publication, then fresh eligible UI audit.
+
+
+
 ## 2026-10-10 M11 knowledge captions — bounded technical gate passed
 
 Actual UButtonSlot fill and centered original text remove excessive wrapping without smaller fonts or changed purchase/input behavior. Editor41.02s/Game42.32s clean; native ProgressionDetails1/1, final rendered ProgressionFeedback720p/1440p1/1each and EarnedWeaponLive720p1/1 passed exact selection/exits/testseverity0/no timeout. All30PNG inspected,308/309/310personal saves/preferences hashes unchanged, known26warning/14Pythonerror raw baseline unchanged/no assertfatalensure. KNOWLEDGE_CAPTION_M11.md preserves initial C2039 and three fixture-padding failures plus corrected replays, exact paths and up to3.352/5.435GiB process peaks. Local presentation-only change; fullM11/M12/manual/controller/pacing/FPS/minimum16GB gates stayopen. Immediately update bounded https://trello.com/c/f8PqJjT7 Done/readback before scoped Solpublication and another independent task.

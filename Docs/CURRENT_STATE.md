@@ -1,5 +1,23 @@
 # Primal Frontier — current state
 
+## 2026-10-10 M11 settings restart — bounded technical gate passed
+
+Actual two-process Apply/startup/display/camera/renderer/HUD/Cancel checks passed720p+1440p (four exact live selectors), PF.Settings.Preferences1/1 and shared SettingsApplyLive720p1/1. Editor34.94s/Game40.51s clean. All17PNG inspected; exact exits/testseverity0/no timeout, default settings/private311–315save hashes unchanged, both source INIs unchanged; four expected negative preflight probes passed. SETTINGS_RESTART_M11.md contains exact paths/commands/limits. Raw Prepare/Apply26warning/14Pythonerror baseline retained; Verify24/14 removes two known CVar warnings,0new normalized severity/no assertfatalensure. Peaks up to3.443/5.643GiB on31.93GiB busy host; no FPS/minimum16GB/audio/controller/manual certificate. Bounded jeLo0isc complete; fullM11/M12/Personal remainopen. Immediate Trello evidence/Done, scoped Sol publication, then fresh eligible UI audit.
+
+
+
+## 2026-10-10 M11 fresh-process settings — pending
+
+Actual1440p Prepare/Verify PASSED2/2 M11RestartP1440_20261010_060535099_5c88c066 and M11RestartV1440_20261010_060606409_9a25b5ed,31.01/33.17s,working/private3.443/5.643 and3.361/4.665GiB. Exact selectors/exits/testseverity0/no timeout,313/314personal saves/default settings/source INI hashes unchanged. All720p sevenPNG reviewed; rawprepare26/14baseline unchanged,verify24/14only removes two known scalability warnings/no new severity/fatalensure. 1440p artifact/raw review,preflight guards/shared SettingsApply/Game pending.
+
+Actual720p Prepare/Verify PASSED2/2 M11RestartP720_20261010_060348761_bdc4f2b8 and M11RestartV720_20261010_060422026_57c66bef,32.94/33.81s,working/private3.272/5.224 and3.368/4.365GiB. Exact selectors/exits/testseverity0/no timeout,311/312personal saves/default settings unchanged, source INI SHA256 unchanged across fresh startup/Cancel. FOV95/blurOn/master90%/HUD125% loaded before fixture mutation and consumed by actual UI/camera/HUD. PNG/raw review then1440p/Game and existing shared-runner regression remainpending.
+
+PF.Settings.Preferences PASSED1/1 Automation_M11SettingsRestart_20261010_060227311_79e078a0,49.56s,working/private2.958/2.837GiB,exact selector/exits0/test/rawseverity0/no timeout/assertfatalensure. Sequential actual Prepare/Verify720p running; preparation alone cannot prove restart.
+
+Editor PASSED34.94s/no compiler warnings PFM11SettingsRestartEditorBuild.log; both PowerShell AST parses/diff check passed. Exact PF.Settings.Preferences first,then sequential actual Prepare/Verify720p; no fresh-process pass yet.
+
+Caption b13a68b published/clean/localremote equal and bounded TrelloDone. Fresh HUD/Programming/current-state/MILESTONES audit selected https://trello.com/c/jeLo0isc Doing for the documented separate-process settings gap. Added opt-in actual-menu preparation and read-only fresh startup verification with independent expected FOV95/blurOn/master90%/HUD125%,four visible categories/camera/renderer/HUD/Cancel/focus/inventory checks. Sequential guarded runner validates completed source report,actual config branch,source INI/default settings/private save hashes; unique profiles/report paths,no raw personal config edits. Uncompiled/untested; Editor/native and720p before1440p/Game. FullM11/M12/manual unchanged; -nosound is not audibility.
+
 ## 2026-10-10 M11 knowledge captions — bounded technical gate passed
 
 The full original Learn caption now uses actual button content width with centered wrapped text, preserving font and controls. Editor41.02s/Game42.32s clean; native ProgressionDetails1/1, final rendered ProgressionFeedback720p/1440p1/1each and EarnedWeaponLive720p1/1 passed. All30PNG inspected; exact selectors/exits/testseverity0/no timeout,308/309/310personal saves/preferences unchanged,known raw26warning/14Pythonerror baseline unchanged/no assertfatalensure. KNOWLEDGE_CAPTION_M11.md retains the initial wrong-API compile failure and omitted-slot-padding measurement failure/corrected replay. Process peaks up to3.352/5.435GiB; busy31.93GiB host is not a16GB/FPS/human certificate. Bounded f8PqJjT7 complete; fullM11/M12/Personal gates remainopen. Next: immediate Trello evidence/Done,scoped Solpublication,then fresh eligible-task audit.
