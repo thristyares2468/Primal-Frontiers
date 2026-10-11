@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 user-confirmed G8 preview
+
+Fresh personal card/Programming/current-state audit followed the user's “its working fine nothing to report.” Recorded that direct response as bounded G8 acceptance, preserved its guide/history and moved/read back 3V3BG6bZ Done. Full M13 remains open. Next independently actionable AI scope is authored open-world biome/policy activation with startup/restart verification; no additional Personal test is requested before implementation. No unrelated card priorities, dates or assignments changed.
+
 ## 2026-10-12 M13 opt-in runtime checkpoint
 
 Final review reopened the same AI card Doing to compare effective project/custom catalogs. Corrected source/native coverage passed Editor6.63s/Game14.20s/native6/one-client2/two-client3/rendered1 and inspected final screenshots/raw-baseline/hash guards. Updated current evidence and returned/read back Done before publication; original evidence remains historical. Personal G8 remains To Do, no human pass or new milestone scope.

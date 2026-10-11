@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-12 M13 G8 personal preview passed
+
+User response to the day/night/dawn/reset preview handoff: “its working fine nothing to report.” Recorded the bounded manual preview as passed and moved https://trello.com/c/3V3BG6bZ to Done. No source/assets changed or new automated build/test result claimed. Full M13 remains open; next AI step is authored open-world biome/policy activation and startup/save/restart verification. Existing M8/M11/M12 and device/performance gates are separate.
+
 ## 2026-10-12 M13 opt-in ecology — bounded technical gate passed
 
 Final source review tightened effective-catalog equality: default fallback cannot silently share a custom domain. Added refusal/output preservation and recovered common-domain coverage. Recheck Editor6.63s/Game14.20s clean; native6/6 Automation_M13CatalogReview_20261011_215516260_9ab02c6a; one-client2/2 M13EcologyEcology1_20261011_215643794_63576c0f; two-client75ms/1%3/3 M13EcologyEcology2_20261011_215733436_1b371547; rendered1/1 M11EcologyPreview720_20261011_215848791_128d9665/two final PNG inspected. Exact exits/testseverity0/no timeout/fatalensure, raw baseline unchanged and private/preference guards passed. Bounded task reopened Doing during this correction and returned Done only after replay; earlier gates below are retained history. Full M13/manual gates unchanged.

@@ -1,5 +1,7 @@
 # M13 authoritative ecology spawning checkpoint
 
+October12 user update: “its working fine nothing to report” after the G8 preview handoff. The bounded manual preview is accepted; https://trello.com/c/3V3BG6bZ is Done. No additional FPS, open-world activation or restart coverage is inferred. Remaining scope below still applies.
+
 October 12, 2026 (Brisbane). Bounded technical task: https://trello.com/c/lDtUfjgi. **This spawning integration passed its technical gates; full M13 is not complete.** Authored open-world activation, additional creatures/loot, predator/prey and human acceptance remain separate. Taming/companions require explicit approval. Installed engine reports 5.8.3 under UE_5.8; these results do not certify the requested 5.8.2 executable.
 
 ## Current behavior
@@ -70,7 +72,7 @@ Close Unreal Editor before isolated automation. Start here: project PowerShell. 
 5. `./Scripts/RunEcologyAutomation.ps1 -TestCase Lifecycle -Players 1` — exact PF.Creatures.Live on L_M6Creatures. No save-slot argument on this whitelist-excluded navigation fixture.
 6. Inspect generated summary/index/raw logs and actual screenshots, compare known startup severity, confirm save/preference guards and process exits; a reported engine exit alone is insufficient.
 
-Manual next step: **Guide G8 in [TRELLO_TEST_GUIDES.md](TRELLO_TEST_GUIDES.md)**. Use the existing small fixture, not the open-world map, for this disposable command. No new asset or source edit is needed from the user. After actual observations, the next AI scope is an explicitly authored open-world biome/policy activation with resident startup/restart checks. Future placement and policy asset are TBD; do not certify them with this fixture.
+Manual G8 in [TRELLO_TEST_GUIDES.md](TRELLO_TEST_GUIDES.md) is now user-confirmed passed; retain it for replay, do not request it again. Next AI scope is explicitly authored open-world biome/policy activation with resident startup/restart checks. Future placement and policy asset are TBD; this fixture does not certify them. No new asset or source edit is currently needed from the user.
 
 ## Changed files
 
