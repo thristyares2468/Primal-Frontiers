@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-12 M11 chest and building repair — bounded technical gate passed
+
+User-reported inaccessible storage/Foundation-only selection repaired with actual E-driven dual-column chest UI and B-driven eight-piece picker. Added Sort, filtered whole-batch Quick Store, per-chest allowed-item Apply/Cancel settings, native windows and exterior stairs. Authority, private replication, capacities/deadlines and validated legacy-compatible save metadata preserved. No binary assets/maps modified. BUILDING_MENUS_M11.md records exact changed systems, commands, logs/reports/screenshots and retained failures/replays.
+
+Final Editor6.77s/Game42.90s clean, native6/6, rendered menu720p+1440p/HUDScale1.5 2/2 plus shared-overlay1/1, one-client2/2 and two-client75ms/1%loss3/3 dedicated NullRHI roles passed14 final records. All16PNG reviewed; exact exits/testseverity0/no timeout/crash/fatal/ensure; raw known rendered26/14Python/network21/14baseline,0new severity. Private350–355save/default settings guards passed; peaks rendered3.309/5.298GiB across distinct runs,network1.814/1.787max on31.93GiB host. Not sustained FPS/minimum16GB/physical controller/human UI or rendered restart acceptance. Installed5.8.3 mismatch and unsupported packagedServer distribution remain. Bounded AI dUJskDzO completes after immediate Trello evidence/readback; existing Personal G2/G3 stay open with updated instructions. Full M11/M8/M12/M13 remain open. Next AI scope: authored ecology activation, only after fresh task audit.
+
 ## 2026-10-12 M13 G8 personal preview passed
 
 User response to the day/night/dawn/reset preview handoff: “its working fine nothing to report.” Recorded the bounded manual preview as passed and moved https://trello.com/c/3V3BG6bZ to Done. No source/assets changed or new automated build/test result claimed. Full M13 remains open; next AI step is authored open-world biome/policy activation and startup/save/restart verification. Existing M8/M11/M12 and device/performance gates are separate.

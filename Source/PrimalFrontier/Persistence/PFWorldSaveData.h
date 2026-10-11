@@ -26,6 +26,9 @@ struct FPFStructureSaveRecord
     UPROPERTY() float Health = 0;
     UPROPERTY() bool DoorOpen = false;
     UPROPERTY() FString Storage;
+    // Optional backward-compatible chest settings; legacy saves default to unrestricted.
+    UPROPERTY() bool StorageRestricted=false;
+    UPROPERTY() TArray<FString> AllowedStorageItems;
 };
 USTRUCT()
 struct FPFResourceSaveRecord

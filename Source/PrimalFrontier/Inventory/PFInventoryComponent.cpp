@@ -120,6 +120,22 @@ void UPFInventoryComponent::Changed(const TCHAR* Action)
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalInventory] %s %s slots=%d weight=%.2f"),*GetOwner()->GetName(),Action,Stacks.Num(),GetWeight());
 }
 
+bool UPFInventoryComponent::SortStacks()
+{
+    if(!Authority()){return false;}
+    PruneExpired();
+    Stacks.StableSort([this](const auto& A,const auto& B)
+    {
+        const auto* AD=Definition(A.ItemId);const auto* BD=Definition(B.ItemId);
+        const FString AN=AD?AD->DisplayName.ToString():A.ItemId.ToString(),BN=BD?BD->DisplayName.ToString():B.ItemId.ToString();
+        const int32 NameOrder=AN.Compare(BN,ESearchCase::IgnoreCase);if(NameOrder){return NameOrder<0;}
+        const int32 IdOrder=A.ItemId.ToString().Compare(B.ItemId.ToString());if(IdOrder){return IdOrder<0;}
+        if(A.ExpiresAt!=B.ExpiresAt){return A.ExpiresAt<B.ExpiresAt;}
+        return A.StackId.ToString().Compare(B.StackId.ToString())<0;
+    });
+    Changed(TEXT("sorted-storage"));return true;
+}
+
 void UPFInventoryComponent::PruneExpired()
 {
     if(!Authority()){ return; }

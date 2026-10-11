@@ -212,6 +212,7 @@ bool UPFWorldPersistence::Capture(FPFWorldSaveData& Out, FString& Error)
         FPFStructureSaveRecord S; S.Id = It->PersistentId; S.Owner = It->PersistentOwnerId;
         S.Support = It->Support ? It->Support->PersistentId : FGuid(); S.Definition = It->DefinitionId.ToString();
         S.Location = It->GetActorLocation(); S.Rotation = It->GetActorRotation().GetNormalized(); S.Health = It->Health; S.DoorOpen = It->bDoorOpen;
+        S.StorageRestricted=It->bRestrictStorageItems;for(FName Id:It->AllowedStorageItems){S.AllowedStorageItems.Add(Id.ToString());}
         FPFPlayerSaveData Bag; Bag.PlayerId = S.Id; Bag.Inventory = FPFPlayerSaveAdapter::CaptureInventory(*It->Storage);
         if (!PackPlayer(Bag, 60, S.Storage, Error)) { return false; } Data.Structures.Add(S);
     }
@@ -343,6 +344,7 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
         Staged.Add(Piece); Piece->SetActorHiddenInGame(true); Piece->SetActorEnableCollision(false);
         Piece->Initialize(*Buildings->Find(FName(*S.Definition, FNAME_Find)), nullptr, nullptr);
         Piece->PersistentId = S.Id; Piece->PersistentOwnerId = S.Owner; Piece->Health = S.Health; Piece->bDoorOpen = S.DoorOpen;
+        Piece->bRestrictStorageItems=S.StorageRestricted;for(const auto& Id:S.AllowedStorageItems){Piece->AllowedStorageItems.Add(FName(*Id,FNAME_Find));}
         Piece->FinishSpawning(T);
         FPFPlayerSaveData Bag;
         if (!UnpackPlayer(S.Storage, 60, Bag, Error) || !Piece->Storage->RestorePersistence(Bag.Inventory, Age, Error)) { return Abort(); }

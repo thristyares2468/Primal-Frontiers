@@ -35,7 +35,7 @@ public:
     /** Piece definitions; loaded from DA_BuildingCatalog at BeginPlay if unset. */
     UPROPERTY(EditAnywhere,BlueprintReadOnly) TObjectPtr<UPFBuildingCatalog> Catalog;
     /** Storage box currently opened with E (owner-only replicated); closes when out of reach. */
-    UPROPERTY(Replicated,BlueprintReadOnly) TObjectPtr<APFBuildPiece> OpenStorage;
+    UPROPERTY(ReplicatedUsing=OnRep_OpenStorage,BlueprintReadOnly) TObjectPtr<APFBuildPiece> OpenStorage;
 
     // ---- Local (client) UI state; not replicated ----
     bool bBuildMode=false;
@@ -61,6 +61,9 @@ public:
     bool Interact(APFBuildPiece* Piece);
     /** Move Quantity of a stack between the bag and OpenStorage (bDeposit = bag -> storage). */
     bool Transfer(bool bDeposit,FGuid StackId,int32 Quantity);
+    bool SetStorageFilter(bool bRestricted,const TArray<FName>& Allowed);
+    bool SortStorage();
+    bool QuickStore();
 
     /** The build piece under the player's view within 7 m (any owner), or nullptr. */
     APFBuildPiece* TracedPiece() const;
@@ -71,6 +74,11 @@ public:
     /** Action on the aimed-at piece (PFBuildAction in PFRequestCodes.h): 0 = demolish, 1 = interact (door/storage), 2 = 25 owner damage. */
     UFUNCTION(Server,Reliable) void ServerTargetAction(uint8 Action);
     UFUNCTION(Server,Reliable) void ServerTransfer(bool bDeposit,FGuid StackId,int32 Quantity);
+    /** Owning player can close their current chest without modifying contents. */
+    UFUNCTION(Server,Reliable) void ServerCloseStorage();
+    UFUNCTION(Server,Reliable) void ServerSetStorageFilter(bool bRestricted,const TArray<FName>& Allowed);
+    UFUNCTION(Server,Reliable) void ServerSortStorage();
+    UFUNCTION(Server,Reliable) void ServerQuickStore();
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -85,8 +93,10 @@ private:
     bool Living() const;
     /** Piece is valid, owned by this player and within 7 m. */
     bool InReach(APFBuildPiece* Piece) const;
+    bool CanUseStorage() const;
     /** Server-side request throttle; false if called too soon or without authority. */
     bool RateLimit();
     /** Server -> owning client result text. */
     UFUNCTION(Client,Reliable) void ClientResult(const FString& Message);
+    UFUNCTION() void OnRep_OpenStorage();
 };

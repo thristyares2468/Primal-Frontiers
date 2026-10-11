@@ -24,6 +24,7 @@
 #if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
 #include "Building/PFBuildingComponent.h"
 #include "Building/PFBuildPiece.h"
+#include "Components/StaticMeshComponent.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -70,6 +71,8 @@ public:
         APFBuildPiece* Wall=nullptr;
         APFBuildPiece* Chest=nullptr;
         APFBuildPiece* Roof=nullptr;
+        APFBuildPiece* Window=nullptr;
+        APFBuildPiece* Stairs=nullptr;
         int32 OtherCount=0;
         for(TActorIterator<APFBuildPiece> It(W);It;++It)
         {
@@ -79,6 +82,8 @@ public:
                 else if(It->Kind==EPFBuildKind::Wall){Wall=*It;}
                 else if(It->Kind==EPFBuildKind::Storage){Chest=*It;}
                 else if(It->Kind==EPFBuildKind::Ceiling){Roof=*It;}
+                else if(It->Kind==EPFBuildKind::Window){Window=*It;}
+                else if(It->Kind==EPFBuildKind::Stairs){Stairs=*It;}
             }
             else{++OtherCount;}
         }
@@ -124,6 +129,20 @@ public:
                 {
                     Test->TestEqual(TEXT("Server building costs"),P->GetInventory()->Count(TEXT("Item_Wood")),4);
                     Test->TestEqual(TEXT("Server deposit conservation"),P->GetInventory()->Count(TEXT("Item_Food")),1);
+                    auto* Store=P->Building->OpenStorage.Get();
+                    Test->TestTrue(TEXT("Server filter survived invalid client request"),Store && Store->bRestrictStorageItems && Store->AllowedStorageItems==TArray<FName>{FName(TEXT("Item_Food"))});
+                    // Native placement is covered separately. These two trusted fixtures
+                    // verify replicated kinds/support and collision reconstruction.
+                    APFBuildPiece* Platform=nullptr;
+                    for(TActorIterator<APFBuildPiece> It(W);It;++It){if(It->Builder==P->PlayerState && It->Kind==EPFBuildKind::Foundation){Platform=*It;break;}}
+                    if(!Platform){Test->AddError(TEXT("Missing owned fixture platform"));return true;}
+                    for(FName Id:{FName(TEXT("Build_Window")),FName(TEXT("Build_Stairs"))})
+                    {
+                        const auto* D=P->Building->Catalog->Find(Id);if(!D){Test->AddError(TEXT("Missing new replicated definition"));return true;}
+                        const FTransform T(FRotator::ZeroRotator,Platform->GetActorLocation()+(D->Kind==EPFBuildKind::Window?FVector(-200,0,160):FVector(400,0,150)));
+                        auto* Piece=W->SpawnActorDeferred<APFBuildPiece>(APFBuildPiece::StaticClass(),T,P,nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+                        Piece->Initialize(*D,P->PlayerState,Platform);Piece->FinishSpawning(T);
+                    }
                 }
                 Test->TestFalse(TEXT("Server structure validation"),PF::AgentTools::ExecuteCommand(TEXT("PF.TestBuildingPlacement"),{},W).HasErrors());
                 PF::AgentTools::ExecuteCommand(TEXT("PF.ExportTestReport"),{TEXT("M5LiveServer")},W);
@@ -194,6 +213,7 @@ public:
             {
                 const auto* Food=I->GetStacks().FindByPredicate([](const auto& S){return S.ItemId==TEXT("Item_Food");});
                 if(!Food){return false;}
+                Test->TestTrue(TEXT("Replicated open-storage notification opens real client menu"),PC->IsStorageMenuOpen());
                 Deadline=Food->ExpiresAt;
                 B->ServerTransfer(true,Food->StackId,1);
                 Advance(11);
@@ -201,8 +221,35 @@ public:
             else if(Stage==11 && Chest && Chest->Storage->Count(TEXT("Item_Food"))==1 && Now-Changed>0.7)
             {
                 Test->TestEqual(TEXT("Replicated freshness conserved"),Chest->Storage->GetStacks()[0].ExpiresAt,Deadline);
-                B->ServerTargetAction(0);  // demolish: must be refused (storage occupied)
-                Advance(12);
+                B->ServerSetStorageFilter(true,{FName(TEXT("Item_Food"))});
+                Advance(111);
+            }
+            else if(Stage==111 && Chest && Chest->bRestrictStorageItems && Now-Changed>0.7)
+            {
+                Test->TestTrue(TEXT("Owner-only allowed item metadata replicated"),Chest->AllowedStorageItems==TArray<FName>{FName(TEXT("Item_Food"))});
+                B->ServerSetStorageFilter(true,{FName(TEXT("Item_Unknown"))});Advance(112);
+            }
+            else if(Stage==112 && Now-Changed>0.7)
+            {
+                Test->TestTrue(TEXT("Malformed filter preserves authorized metadata"),Chest->AllowedStorageItems==TArray<FName>{FName(TEXT("Item_Food"))});
+                B->ServerQuickStore();Advance(113);
+            }
+            else if(Stage==113 && Chest->Storage->Count(TEXT("Item_Food"))==2 && Now-Changed>0.7)
+            {
+                Test->TestEqual(TEXT("Quick Store leaves filtered wood in bag"),I->Count(TEXT("Item_Wood")),4);
+                Test->TestEqual(TEXT("Quick Store moves food without duplication"),I->Count(TEXT("Item_Food")),0);
+                Test->TestEqual(TEXT("Quick Store retains freshness deadline"),Chest->Storage->GetStacks()[0].ExpiresAt,Deadline);
+                B->ServerSortStorage();Advance(114);
+            }
+            else if(Stage==114 && Now-Changed>0.7)
+            {
+                Test->TestEqual(TEXT("Network Sort preserves counts"),Chest->Storage->Count(TEXT("Item_Food")),2);
+                Test->TestEqual(TEXT("Network Sort preserves deadline"),Chest->Storage->GetStacks()[0].ExpiresAt,Deadline);
+                B->ServerTransfer(false,Chest->Storage->GetStacks()[0].StackId,1);Advance(115);
+            }
+            else if(Stage==115 && I->Count(TEXT("Item_Food"))==1 && Now-Changed>0.7)
+            {
+                B->ServerTargetAction(0);Advance(12); // occupied demolition remains refused
             }
             else if(Stage==12 && Now-Changed>0.7)
             {
@@ -211,7 +258,7 @@ public:
                 B->ServerTargetAction(2);  // owner hammer: 25 damage
                 Advance(13);
             }
-            else if(Stage==13 && Chest && Chest->Health==75 && OtherCount==4*(Expected-1))
+            else if(Stage==13 && Chest && Chest->Health==75 && OtherCount>=4*(Expected-1) && Window && Stairs)
             {
                 // Final checks once the other player's four pieces have replicated too.
                 Test->TestEqual(TEXT("Replicated bag conservation"),I->Count(TEXT("Item_Food")),1);
@@ -221,11 +268,19 @@ public:
                     if(It->Builder!=PC->PlayerState)
                     {
                         Test->TestFalse(TEXT("Client cannot demolish other structure"),B->Demolish(*It));
-                        if(It->Kind==EPFBuildKind::Storage){Test->TestTrue(TEXT("Other storage remains private"),It->Storage->GetStacks().IsEmpty());}
+                        if(It->Kind==EPFBuildKind::Storage){Test->TestTrue(TEXT("Other storage and filters remain private"),It->Storage->GetStacks().IsEmpty() && !It->bRestrictStorageItems && It->AllowedStorageItems.IsEmpty());}
                     }
                 }
                 const auto Denied=PF::AgentTools::ExecuteCommand(TEXT("PF.ResetBuildings"),{},W,false);
                 Test->TestTrue(TEXT("Client reset denied"),Denied.Issues.ContainsByPredicate([](const auto& E){return E.Code==TEXT("NotAuthority");}));
+                Test->TestEqual(TEXT("New window support replicated"),Window->Support.Get(),Base);
+                Test->TestEqual(TEXT("New stairs support replicated"),Stairs->Support.Get(),Base);
+                for(auto* Piece:{Window,Stairs})
+                {
+                    TArray<UStaticMeshComponent*> Shapes;Piece->GetComponents(Shapes);int32 Visible=0;
+                    for(auto* Shape:Shapes){if(Shape->IsVisible() && Shape->GetCollisionEnabled()!=ECollisionEnabled::NoCollision){++Visible;}}
+                    Test->TestEqual(TEXT("Replicated primitive shape reconstruction"),Visible,Piece==Window?4:8);
+                }
                 PF::AgentTools::ExecuteCommand(TEXT("PF.ExportTestReport"),{TEXT("M5LiveClient")},W);
                 Advance(99);
             }

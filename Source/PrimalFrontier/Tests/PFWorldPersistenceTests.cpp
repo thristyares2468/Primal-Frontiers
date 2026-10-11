@@ -25,6 +25,10 @@
 #include "Misc/DateTime.h"
 #include "Misc/ScopeExit.h"
 #include "Misc/CommandLine.h"
+#include "Dom/JsonObject.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
 #include <limits>
 #include "HAL/FileManager.h"
 #include "Engine/World.h"
@@ -58,13 +62,36 @@ bool FPFWorldRecordTest::RunTest(const FString&)
     const FGuid Base = Piece(TEXT("Build_Foundation"), {});
     const FGuid Wall = Piece(TEXT("Build_Wall"), Base);
     Piece(TEXT("Build_Ceiling"), Wall); Piece(TEXT("Build_Storage"), Base);
+    const FGuid Window=Piece(TEXT("Build_Window"),Base);
+    Piece(TEXT("Build_Ceiling"),Window);Piece(TEXT("Build_Stairs"),Base);
+    Data.Structures[3].StorageRestricted=true;Data.Structures[3].AllowedStorageItems={TEXT("Item_Wood")};
     auto Valid = [&](const FPFWorldSaveData& D) { return FPFWorldSaveFormat::Validate(D, *Items, *Buildings, *Crafting, *Creatures, Error); };
     if (!TestTrue(TEXT("Real foundation/wall/roof/storage graph"), Valid(Data))) { AddError(Error); return false; }
     TArray<uint8> Bytes; FPFWorldSaveData Decoded;
     TestTrue(TEXT("World metadata encode"), FPFWorldSaveFormat::Encode(Data, Bytes, Error));
     if (!TestTrue(TEXT("World metadata decode"), FPFWorldSaveFormat::Decode(Bytes, Decoded, Error))) { AddError(Error); return false; }
     TestTrue(TEXT("Decoded semantic validation"), Valid(Decoded));
+    const FUTF8ToTCHAR EncodedText(reinterpret_cast<const ANSICHAR*>(Bytes.GetData()),Bytes.Num());
+    TSharedPtr<FJsonObject> LegacyRoot;
+    if(!TestTrue(TEXT("Parse legacy fixture JSON"),FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(FString(EncodedText.Length(),EncodedText.Get())),LegacyRoot))){return false;}
+    for(const auto& Value:LegacyRoot->GetArrayField(TEXT("structures")))
+    {Value->AsObject()->RemoveField(TEXT("storageRestricted"));Value->AsObject()->RemoveField(TEXT("allowedStorageItems"));}
+    FString LegacyText;FJsonSerializer::Serialize(LegacyRoot.ToSharedRef(),TJsonWriterFactory<>::Create(&LegacyText));
+    const FTCHARToUTF8 LegacyUtf8(*LegacyText);TArray<uint8> LegacyBytes;LegacyBytes.Append(reinterpret_cast<const uint8*>(LegacyUtf8.Get()),LegacyUtf8.Length());FPFWorldSaveData LegacyDecoded;
+    TestTrue(TEXT("Pre-filter saves still decode and validate"),FPFWorldSaveFormat::DecodeValidated(LegacyBytes,*Items,*Buildings,*Crafting,*Creatures,LegacyDecoded,Error));
+    TestTrue(TEXT("Legacy chest defaults unrestricted"),LegacyDecoded.Structures.IsValidIndex(3) && !LegacyDecoded.Structures[3].StorageRestricted && LegacyDecoded.Structures[3].AllowedStorageItems.IsEmpty());
+    // A partially present extension is corrupt, not a legacy unrestricted chest.
+    LegacyRoot->GetArrayField(TEXT("structures"))[3]->AsObject()->SetBoolField(TEXT("storageRestricted"),true);
+    FString PartialText;FJsonSerializer::Serialize(LegacyRoot.ToSharedRef(),TJsonWriterFactory<>::Create(&PartialText));
+    const FTCHARToUTF8 PartialUtf8(*PartialText);TArray<uint8> PartialBytes;PartialBytes.Append(reinterpret_cast<const uint8*>(PartialUtf8.Get()),PartialUtf8.Length());
+    TestFalse(TEXT("Incomplete filter fields refused before conversion"),FPFWorldSaveFormat::DecodeValidated(PartialBytes,*Items,*Buildings,*Crafting,*Creatures,LegacyDecoded,Error));
+    TestTrue(TEXT("Failed decode preserves previous unrestricted output"),!LegacyDecoded.Structures[3].StorageRestricted && LegacyDecoded.Structures[3].AllowedStorageItems.IsEmpty());
     TestEqual(TEXT("Stable structure ID"), Decoded.Structures[0].Id, Base);
+    TestTrue(TEXT("Chest settings codec round trip"),Decoded.Structures[3].StorageRestricted && Decoded.Structures[3].AllowedStorageItems==Data.Structures[3].AllowedStorageItems);
+    auto BadFilter=Data;BadFilter.Structures[3].AllowedStorageItems.Add(TEXT("Item_Invalid"));TestFalse(TEXT("Unknown saved filter rejected"),Valid(BadFilter));
+    BadFilter=Data;BadFilter.Structures[3].AllowedStorageItems.Add(TEXT("Item_Wood"));TestFalse(TEXT("Duplicate saved filter rejected"),Valid(BadFilter));
+    BadFilter=Data;BadFilter.Structures[3].AllowedStorageItems.SetNum(65);TestFalse(TEXT("Oversized saved filter rejected"),Valid(BadFilter));
+    BadFilter=Data;BadFilter.Structures[0].StorageRestricted=true;TestFalse(TEXT("Non-chest filters rejected"),Valid(BadFilter));
     TestEqual(TEXT("Private credential round trip"), Decoded.Players[0].ReconnectCredential, Owner.ReconnectCredential);
     auto Bad = Data; Bad.Structures[1].Support = Bad.Structures[2].Id;
     TestFalse(TEXT("Support cycle rejected"), Valid(Bad));
@@ -130,9 +157,13 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
     };
     auto* Base = SpawnPiece(TEXT("Build_Foundation"), FVector(600, 600, 10), nullptr);
     auto* Chest = SpawnPiece(TEXT("Build_Storage"), FVector(600, 600, 60), Base);
+    auto* Window=SpawnPiece(TEXT("Build_Window"),FVector(800,600,170),Base);
+    auto* Stairs=SpawnPiece(TEXT("Build_Stairs"),FVector(1000,600,160),Base);
+    const FGuid WindowId=Window->PersistentId,StairsId=Stairs->PersistentId;
     const FGuid ChestId = Chest->PersistentId, OwnerId = Chest->PersistentOwnerId;
     TestTrue(TEXT("Player bag wood"), PC->GetInventory()->Grant(TEXT("Item_Wood"), 4));
     TestTrue(TEXT("Chest stone"), Chest->Storage->Grant(TEXT("Item_Stone"), 2));
+    Chest->bRestrictStorageItems=true;Chest->AllowedStorageItems={FName(TEXT("Item_Wood"))};
     const FGuid StorageBatchId = Chest->Storage->GetStacks()[0].StackId;
     auto* Pickup = W->SpawnActorDeferred<APFItemPickup>(APFItemPickup::StaticClass(), FTransform(FVector(300, 0, 30)));
     Pickup->Initialize(TEXT("Item_Fibre"), 2, 0); Pickup->FinishSpawning(FTransform(FVector(300, 0, 30)));
@@ -180,10 +211,14 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
         int32 PieceCount = 0, PickupCount = 0, CreatureCount = 0;
         for (TActorIterator<APFBuildPiece> It(W); It; ++It)
         {
-            ++PieceCount; if (It->PersistentId != ChestId) { continue; }
+            ++PieceCount;
+            if(It->PersistentId==WindowId){TestEqual(TEXT("Window definition restored"),It->Kind,EPFBuildKind::Window);TestTrue(TEXT("Window support restored"),IsValid(It->Support));}
+            if(It->PersistentId==StairsId){TestEqual(TEXT("Stair definition restored"),It->Kind,EPFBuildKind::Stairs);TestTrue(TEXT("Stair support restored"),IsValid(It->Support));}
+            if (It->PersistentId != ChestId) { continue; }
             TestEqual(TEXT("Chest owner key restored"), It->PersistentOwnerId, OwnerId);
             TestTrue(TEXT("Connected owner rebound"), It->IsOwnedBy(PC->PlayerState) && It->Builder == PC->PlayerState);
             TestEqual(TEXT("Stored quantity restored once"), It->Storage->Count(TEXT("Item_Stone")), 2);
+            TestTrue(TEXT("Chest filter restored without deleting old disallowed contents"),It->bRestrictStorageItems && It->AllowedStorageItems==TArray<FName>{FName(TEXT("Item_Wood"))});
             TestEqual(TEXT("Storage stable batch ID"), It->Storage->GetStacks()[0].StackId, StorageBatchId);
         }
         for (TActorIterator<APFItemPickup> It(W); It; ++It) { ++PickupCount; TestEqual(TEXT("Dropped batch ID preserved"), It->GetContents().StackId, PickupId); }
@@ -192,7 +227,7 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
             ++CreatureCount; TestEqual(TEXT("Creature ID preserved"), It->PersistentId, CreatureId);
             TestTrue(TEXT("Living creature retains collision"), !It->IsDead() && It->GetCapsuleComponent()->GetCollisionEnabled() != ECollisionEnabled::NoCollision);
         }
-        TestEqual(TEXT("No duplicate structures"), PieceCount, 2); TestEqual(TEXT("No duplicate pickups"), PickupCount, 1);
+        TestEqual(TEXT("No duplicate structures including windows/stairs"), PieceCount, 4); TestEqual(TEXT("No duplicate pickups"), PickupCount, 1);
         TestEqual(TEXT("No duplicate creatures"), CreatureCount, 1);
         TestTrue(TEXT("Spawner rebound to restored resident"), IsValid(SpawnPoint->Resident) && SpawnPoint->Resident->PersistentId == CreatureId);
     }

@@ -7,9 +7,9 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Structure,"Structure.Greybox");
 UPFBuildingCatalog::UPFBuildingCatalog()
 {
     // Parallel arrays in EPFBuildKind order; each piece uses the struct defaults for cost/health.
-    const TCHAR* Ids[]={TEXT("Build_Foundation"),TEXT("Build_Wall"),TEXT("Build_Floor"),TEXT("Build_Ceiling"),TEXT("Build_Door"),TEXT("Build_Storage")};
-    const TCHAR* Names[]={TEXT("Foundation"),TEXT("Wall"),TEXT("Floor"),TEXT("Ceiling"),TEXT("Door and frame"),TEXT("Storage")};
-    for(int32 N=0;N<6;++N)
+    const TCHAR* Ids[]={TEXT("Build_Foundation"),TEXT("Build_Wall"),TEXT("Build_Floor"),TEXT("Build_Ceiling"),TEXT("Build_Door"),TEXT("Build_Storage"),TEXT("Build_Window"),TEXT("Build_Stairs")};
+    const TCHAR* Names[]={TEXT("Foundation"),TEXT("Wall"),TEXT("Floor"),TEXT("Roof / ceiling"),TEXT("Door and frame"),TEXT("Chest"),TEXT("Window wall"),TEXT("Stairs")};
+    for(int32 N=0;N<8;++N)
     {
         FPFBuildingDefinition D;
         D.Id=Ids[N];
@@ -27,7 +27,7 @@ const FPFBuildingDefinition* UPFBuildingCatalog::Find(FName Id) const
     {
         if(D.Id==Id)
         {
-            if(Found || Id.IsNone() || uint8(D.Kind)>5 || !D.Category.IsValid() || D.WoodCost<1 || D.WoodCost>20 || !FMath::IsFinite(D.MaxHealth) || D.MaxHealth<=0 || D.MaxHealth>10000){return nullptr;}
+            if(Found || Id.IsNone() || uint8(D.Kind)>uint8(EPFBuildKind::Stairs) || !D.Category.IsValid() || D.WoodCost<1 || D.WoodCost>20 || !FMath::IsFinite(D.MaxHealth) || D.MaxHealth<=0 || D.MaxHealth>10000){return nullptr;}
             Found=&D;
         }
     }
@@ -36,7 +36,8 @@ const FPFBuildingDefinition* UPFBuildingCatalog::Find(FName Id) const
 
 FVector UPFBuildingCatalog::Size(EPFBuildKind K)
 {
-    if(K==EPFBuildKind::Wall || K==EPFBuildKind::Door){return FVector(20,380,300);}
+    if(K==EPFBuildKind::Wall || K==EPFBuildKind::Door || K==EPFBuildKind::Window){return FVector(20,380,300);}
+    if(K==EPFBuildKind::Stairs){return FVector(380,380,320);}
     if(K==EPFBuildKind::Storage){return FVector(70,70,80);}
     return FVector(400,400,20);  // Foundation, Floor, Ceiling: one 400 cm grid cell
 }

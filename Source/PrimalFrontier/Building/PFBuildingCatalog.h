@@ -14,7 +14,7 @@
 
 /** Shape/snapping family. Order matters: the constructor maps index N to kind N. */
 UENUM(BlueprintType)
-enum class EPFBuildKind : uint8 { Foundation, Wall, Floor, Ceiling, Door, Storage };
+enum class EPFBuildKind : uint8 { Foundation, Wall, Floor, Ceiling, Door, Storage, Window, Stairs };
 
 USTRUCT(BlueprintType)
 struct FPFBuildingDefinition
@@ -36,7 +36,7 @@ class PRIMALFRONTIER_API UPFBuildingCatalog : public UDataAsset
     GENERATED_BODY()
 
 public:
-    /** Creates the six greybox pieces (2 wood, 100 health each). */
+    /** Creates eight greybox pieces (2 wood, 100 health each); existing enum values/IDs stay stable. */
     UPFBuildingCatalog();
     UPROPERTY(EditAnywhere,BlueprintReadOnly) TArray<FPFBuildingDefinition> Pieces;
     /** Validated lookup; nullptr for unknown/duplicate/invalid pieces. */

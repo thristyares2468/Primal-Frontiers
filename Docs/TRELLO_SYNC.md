@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 chest/building repair
+
+After user-reported missing storage UI/Foundation-only selection, created/read back dUJskDzO HUD & UI Doing, temporarily deferring M13. Added authorized Sort/Quick Store/item filters to this bounded repair. Final Editor/Game/native6/rendered3/network5 gates passed14records;16PNG/rawbaseline/hash guards reviewed. Immediately updated exact evidence, moved/read back Done before publication/another task. BUILDING_MENUS_M11.md retains failures/replays and exact commands/paths. Existing Personal1 iH8I2Qfc G2 and Personal2 UZVTTPLE G3 descriptions now use eight-piece picker and real Store/Take/filter GUI with full exact-level/launch/actions/expected/refusal/evidence guides. Previous descriptions/user failures retained verbatim as comments; members/deadlines/priorities/Doing statuses preserved. No human/full-milestone pass inferred. Scoped Sol publication follows; next independent task requires fresh Trello audit.
+
 ## 2026-10-12 user-confirmed G8 preview
 
 Fresh personal card/Programming/current-state audit followed the user's “its working fine nothing to report.” Recorded that direct response as bounded G8 acceptance, preserved its guide/history and moved/read back 3V3BG6bZ Done. Full M13 remains open. Next independently actionable AI scope is authored open-world biome/policy activation with startup/restart verification; no additional Personal test is requested before implementation. No unrelated card priorities, dates or assignments changed.

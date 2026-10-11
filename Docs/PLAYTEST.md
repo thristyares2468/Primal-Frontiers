@@ -70,9 +70,9 @@ M11 bag readability: only four rows are visible at once. The displayed row range
 | Pause | P opens/resumes; Esc also works in a standalone game window |
 | Inventory | Tab open/close; Up/Down select; X split half; G drop one; Q consume one |
 | Crafting | C open/close; Up/Down select; Enter craft selected; 1 tool; 2 cook; 3 dry; R cancel; clickable row/action buttons |
-| Building | B open/close; N next; T rotate; left click place |
+| Building | B opens eight-piece picker; click/1–8 chooses; T rotate; left click place; B exits placement, B again reopens picker; N optional next while placing |
 | Owned structures | E door/storage; H demolish in build mode; J debug damage in build mode |
-| Storage | Select bag item, close bag, open build mode and storage with E; U stores one selected item, O takes one from first stored stack |
+| Storage | Aim at owned chest, E opens its window; Store/Take1 or whole stack; Sort chest; Quick Store; Chest settings item filters then Apply/Cancel; Close/E/Tab returns to first person |
 | Console | Backtick/tilde, type command, Enter, close console |
 
 ## Controller controls
@@ -90,8 +90,8 @@ Xbox button names are used below: A bottom, B right, X left, Y top. Connect befo
 | Attack / place | RT |
 | Inventory | View/Back open/close; D-pad Up/Down select; Left split; Right drop one; X consume |
 | Crafting | Y open/close; D-pad Up/Down select recipe; A/X craft selected; Left cancel; B close |
-| Building | RB open/close; D-pad Up next, Down rotate; RT place; LB demolish aimed owned piece |
-| Storage transfers | In building mode, D-pad Left stores selected bag item, Right takes first stored item |
+| Building | RB opens picker; D-pad/A navigation needs physical-device verification; B closes; after choosing, D-pad Up next/Down rotate, RT place, LB demolish |
+| Storage transfers | X opens aimed owned chest outside overlays; use Store/Take/Sort/Quick Store/settings buttons; B closes; physical navigation remains a manual gate |
 | Close gameplay overlays | B |
 
 Inventory, crafting and building overlays are mutually exclusive. A remains jump outside modal menus. Crafting captures movement/look but the world continues; Pause remains separate. Console/debug structure damage use keyboard. Look sensitivity and inversion are in P → Settings → Game. Remapping, rumble and device glyphs are deferred. If sticks work but survival buttons do not, check the map and latest compiled module.

@@ -49,6 +49,10 @@ public:
     UPROPERTY(ReplicatedUsing=OnRepShape,BlueprintReadOnly) bool bDoorOpen=false;
     /** Private storage (8 slots / 60 kg); contents replicate only to the owner. */
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly) TObjectPtr<UPFInventoryComponent> Storage;
+    /** Owner-private filter applies to new deposits only; never deletes existing contents. */
+    UPROPERTY(Replicated,BlueprintReadOnly) bool bRestrictStorageItems=false;
+    UPROPERTY(Replicated,BlueprintReadOnly) TArray<FName> AllowedStorageItems;
+    bool AcceptsStoredItem(FName Id) const {return !bRestrictStorageItems || AllowedStorageItems.Contains(Id);}
 
     /** Server, before FinishSpawning: copy definition, owner and support. */
     void Initialize(const FPFBuildingDefinition& D,APlayerState* OwnerState,APFBuildPiece* Parent);
@@ -69,7 +73,7 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    /** Four reusable cube parts; OnRepShape decides which are visible/solid. */
+    /** Eight reusable cube parts; OnRepShape decides which are visible/solid. */
     UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> Shapes;
     /** Rebuild the visible/collidable shape from Kind and bDoorOpen. */
     UFUNCTION() void OnRepShape();

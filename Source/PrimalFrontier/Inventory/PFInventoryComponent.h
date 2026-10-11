@@ -67,6 +67,8 @@ public:
     /** Synchronized server world time used for all freshness deadlines. */
     static double ServerTime(const UWorld* World);
     float GetWeight() const;
+    /** Server-only stable ordering; preserves quantities, batch IDs and freshness deadlines. */
+    bool SortStacks();
     /** Total quantity of Id across all stacks. */
     int32 Count(FName Id) const;
     /** Best valid still-fresh owned tool benefit; defaults to bare hands (1 hit/20 damage). */

@@ -16,9 +16,9 @@ APFBuildPiece::APFBuildPiece()
     bReplicates=true;
     SetReplicateMovement(true);
     SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
-    // Four cube parts (Shape0..Shape3), configured per kind in OnRepShape.
+    // Eight reusable cubes allow walkable 40cm stair risers; unused parts have no collision.
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
-    for(int32 N=0;N<4;++N)
+    for(int32 N=0;N<8;++N)
     {
         auto* M=CreateDefaultSubobject<UStaticMeshComponent>(*FString::Printf(TEXT("Shape%d"),N));
         M->SetupAttachment(RootComponent);
@@ -96,6 +96,21 @@ void APFBuildPiece::OnRepShape()
         Set(2,FVector(20,140,50),FVector(0,0,125));
         if(!bDoorOpen){Set(3,FVector(20,130,250),FVector(0,0,-25));}
     }
+    else if(Kind==EPFBuildKind::Window)
+    {
+        Set(0,FVector(20,100,300),FVector(0,-140,0));
+        Set(1,FVector(20,100,300),FVector(0,140,0));
+        Set(2,FVector(20,180,80),FVector(0,0,110));
+        Set(3,FVector(20,180,80),FVector(0,0,-110));
+    }
+    else if(Kind==EPFBuildKind::Stairs)
+    {
+        for(int32 N=0;N<8;++N)
+        {
+            const double Height=40.0*(8-N);
+            Set(N,FVector(47.5,380,Height),FVector(-166.25+47.5*N,0,-160+Height*0.5));
+        }
+    }
     else{Set(0,UPFBuildingCatalog::Size(Kind),FVector::ZeroVector);}
 }
 
@@ -143,4 +158,6 @@ void APFBuildPiece::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
     DOREPLIFETIME(APFBuildPiece,Support);
     DOREPLIFETIME(APFBuildPiece,Health);
     DOREPLIFETIME(APFBuildPiece,bDoorOpen);
+    DOREPLIFETIME_CONDITION(APFBuildPiece,bRestrictStorageItems,COND_OwnerOnly);
+    DOREPLIFETIME_CONDITION(APFBuildPiece,AllowedStorageItems,COND_OwnerOnly);
 }

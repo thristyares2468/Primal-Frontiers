@@ -57,6 +57,9 @@ bool UPFBuildingComponent::InReach(APFBuildPiece* Piece) const
     return Living() && IsValid(Piece) && Piece->GetWorld()==GetWorld() && Piece->IsOwnedBy(Controller()->PlayerState) && FVector::DistSquared(Controller()->GetPawn()->GetActorLocation(),Piece->GetActorLocation())<FMath::Square(700.0);
 }
 
+bool UPFBuildingComponent::CanUseStorage() const
+{return GetOwner() && GetOwner()->HasAuthority() && GetWorld() && GetWorld()->IsGameWorld() && GetWorld()->GetNetMode()!=NM_Client && InReach(OpenStorage) && OpenStorage->Kind==EPFBuildKind::Storage && TracedPiece()==OpenStorage;}
+
 bool UPFBuildingComponent::Candidate(FName Id,int32 Q,FTransform& Out,APFBuildPiece*& Parent,FString& Reason) const
 {
     // Reason is updated before each check, so on failure it explains the first rule that failed.
@@ -107,7 +110,7 @@ bool UPFBuildingComponent::Candidate(FName Id,int32 Q,FTransform& Out,APFBuildPi
         // Everything else must rest on a piece this player owns, within reach.
         Reason=TEXT("Requires your compatible support");
         if(!InReach(Parent)){return false;}
-        if(D->Kind==EPFBuildKind::Wall || D->Kind==EPFBuildKind::Door)
+        if(D->Kind==EPFBuildKind::Wall || D->Kind==EPFBuildKind::Door || D->Kind==EPFBuildKind::Window)
         {
             // On the platform edge chosen by the quarter turn (200 cm out, 160 cm up).
             if(!Parent->IsPlatform()){return false;}
@@ -119,10 +122,17 @@ bool UPFBuildingComponent::Candidate(FName Id,int32 Q,FTransform& Out,APFBuildPi
             if(!Parent->IsPlatform()){return false;}
             Location=Parent->GetActorLocation()+FVector(FMath::Clamp(FMath::GridSnap(Hit.ImpactPoint.X-Parent->GetActorLocation().X,100.0),-100.0,100.0),FMath::Clamp(FMath::GridSnap(Hit.ImpactPoint.Y-Parent->GetActorLocation().Y,100.0),-100.0,100.0),50);
         }
+        else if(D->Kind==EPFBuildKind::Stairs)
+        {
+            if(!Parent->IsPlatform()){return false;}
+            // Exterior flight reaches the next floor at this platform's edge without
+            // intersecting its solid roof/floor slab. The top tread is nearest the support.
+            Location=Parent->GetActorLocation()+RotationValue.RotateVector(FVector(400,0,150));
+        }
         else
         {
             // Floor/Ceiling: aim at a wall/door; the new platform sits 320 cm above that wall's platform.
-            if((Parent->Kind!=EPFBuildKind::Wall && Parent->Kind!=EPFBuildKind::Door) || !IsValid(Parent->Support)){return false;}
+            if((Parent->Kind!=EPFBuildKind::Wall && Parent->Kind!=EPFBuildKind::Door && Parent->Kind!=EPFBuildKind::Window) || !IsValid(Parent->Support)){return false;}
             Location=Parent->Support->GetActorLocation()+FVector(0,0,320);
         }
     }
@@ -191,6 +201,7 @@ bool UPFBuildingComponent::Interact(APFBuildPiece* Piece)
     if(Piece->Kind!=EPFBuildKind::Storage){return false;}
     // E on the open box closes it; on another box switches to it.
     OpenStorage=(OpenStorage==Piece?nullptr:Piece);
+    OnRep_OpenStorage();
     GetOwner()->ForceNetUpdate();
     return true;
 }
@@ -198,11 +209,40 @@ bool UPFBuildingComponent::Interact(APFBuildPiece* Piece)
 bool UPFBuildingComponent::Transfer(bool Deposit,FGuid Id,int32 Quantity)
 {
     // Storage must still be open, owned, in reach and aimed at.
-    if(!GetOwner()->HasAuthority() || !InReach(OpenStorage) || TracedPiece()!=OpenStorage || Quantity<1 || Quantity>100){return false;}
+    if(!CanUseStorage() || Quantity<1 || Quantity>1000){return false;}
     auto* Bag=Controller()->GetInventory();
     if(!Bag){return false;}
+    if(Deposit)
+    {
+        const auto* Stack=Bag->GetStacks().FindByPredicate([&](const auto& S){return S.StackId==Id;});
+        if(!Stack || !OpenStorage->AcceptsStoredItem(Stack->ItemId)){return false;}
+    }
     // TransferTo is atomic and keeps freshness deadlines exactly.
     return Deposit?Bag->TransferTo(OpenStorage->Storage,Id,Quantity):OpenStorage->Storage->TransferTo(Bag,Id,Quantity);
+}
+
+bool UPFBuildingComponent::SetStorageFilter(bool Restricted,const TArray<FName>& Allowed)
+{
+    if(!CanUseStorage() || Allowed.Num()>64){return false;}
+    TSet<FName> Seen;
+    for(FName Id:Allowed){if(!OpenStorage->Storage->Definition(Id) || Seen.Contains(Id)){return false;}Seen.Add(Id);}
+    OpenStorage->bRestrictStorageItems=Restricted;OpenStorage->AllowedStorageItems=Allowed;
+    OpenStorage->ForceNetUpdate();return true;
+}
+bool UPFBuildingComponent::SortStorage()
+{return CanUseStorage() && OpenStorage->Storage->SortStacks();}
+bool UPFBuildingComponent::QuickStore()
+{
+    if(!CanUseStorage()){return false;}
+    auto* Bag=Controller()->GetInventory();if(!Bag){return false;}
+    Bag->PruneExpired();const auto Batch=Bag->GetStacks();int32 Moved=0,Skipped=0;
+    for(const auto& S:Batch)
+    {
+        if(OpenStorage->AcceptsStoredItem(S.ItemId) && Bag->TransferTo(OpenStorage->Storage,S.StackId,S.Quantity)){Moved+=S.Quantity;}
+        else{++Skipped;}
+    }
+    Feedback=FString::Printf(TEXT("Quick stored %d items; %d batches stayed in your bag (filter or capacity)."),Moved,Skipped);
+    return true;
 }
 
 bool UPFBuildingComponent::RateLimit()
@@ -246,6 +286,18 @@ void UPFBuildingComponent::ServerTransfer_Implementation(bool Deposit,FGuid Id,i
 
 void UPFBuildingComponent::ClientResult_Implementation(const FString& Message){Feedback=Message;}
 
+void UPFBuildingComponent::OnRep_OpenStorage()
+{if(auto* PC=Controller()){PC->SetStorageMenuOpen(IsValid(OpenStorage));}}
+
+void UPFBuildingComponent::ServerCloseStorage_Implementation()
+{OpenStorage=nullptr;GetOwner()->ForceNetUpdate();OnRep_OpenStorage();}
+void UPFBuildingComponent::ServerSetStorageFilter_Implementation(bool Restricted,const TArray<FName>& Allowed)
+{if(RateLimit()){ClientResult(SetStorageFilter(Restricted,Allowed)?TEXT("Chest filter updated. Existing contents are unchanged."):TEXT("Filter refused: ownership, reach or invalid item list"));}}
+void UPFBuildingComponent::ServerSortStorage_Implementation()
+{if(RateLimit()){ClientResult(SortStorage()?TEXT("Chest sorted by item name and freshness."):TEXT("Sort refused"));}}
+void UPFBuildingComponent::ServerQuickStore_Implementation()
+{if(RateLimit()){const bool Accepted=QuickStore();ClientResult(Accepted?Feedback:TEXT("Quick Store refused"));}}
+
 void UPFBuildingComponent::TickComponent(float Delta,ELevelTick Type,FActorComponentTickFunction* Tick)
 {
     Super::TickComponent(Delta,Type,Tick);
@@ -255,10 +307,11 @@ void UPFBuildingComponent::TickComponent(float Delta,ELevelTick Type,FActorCompo
     if(PC->HasAuthority() && OpenStorage && !InReach(OpenStorage))
     {
         OpenStorage=nullptr;
+        OnRep_OpenStorage();
         PC->ForceNetUpdate();
     }
     // Local player in build mode: draw the advisory green/red wireframe preview.
-    if(PC->IsLocalController() && bBuildMode)
+    if(PC->IsLocalController() && bBuildMode && !PC->IsBuildingMenuOpen())
     {
         FTransform T;
         APFBuildPiece* Parent=nullptr;

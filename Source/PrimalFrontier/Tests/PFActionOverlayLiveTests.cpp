@@ -3,6 +3,7 @@
 #include "Crafting/PFCraftingHUD.h"
 #include "Crafting/PFCraftingComponent.h"
 #include "Building/PFBuildingHUD.h"
+#include "Building/PFBuildingMenus.h"
 #include "Building/PFBuildingComponent.h"
 #include "Building/PFBuildPiece.h"
 #include "Inventory/PFInventoryComponent.h"
@@ -144,6 +145,7 @@ public:
         {
             Test->TestFalse(TEXT("Button Close restores gameplay input and hides cursor"),PC->IsCraftingOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored() || PC->bShowMouseCursor);
             Press(EKeys::B);
+            PC->SelectBuildingPiece(TEXT("Build_Foundation")); // Picker selection returns to the advisory overlay.
             PC->Building->ServerPlace(NAME_None,0);Wait(Now,0.4,8);return false;
         }
         if(Phase==8)

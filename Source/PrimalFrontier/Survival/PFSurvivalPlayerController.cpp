@@ -25,6 +25,7 @@
 #include "Crafting/PFResourceNode.h"
 #include "Building/PFBuildingComponent.h"
 #include "Building/PFBuildingHUD.h"
+#include "Building/PFBuildingMenus.h"
 #include "Building/PFBuildPiece.h"
 #include "Creatures/PFCreature.h"
 #include "Engine/DamageEvents.h"
@@ -116,6 +117,10 @@ void APFSurvivalPlayerController::BeginPlay()
         if(CraftingHUD){CraftingHUD->AddToPlayerScreen(50);}
         BuildingHUD=CreateWidget<UPFBuildingHUD>(this,UPFBuildingHUD::StaticClass());
         if(BuildingHUD){BuildingHUD->AddToPlayerScreen();}
+        BuildingMenu=CreateWidget<UPFBuildingMenu>(this,UPFBuildingMenu::StaticClass());
+        if(BuildingMenu){BuildingMenu->AddToPlayerScreen(50);}
+        StorageMenu=CreateWidget<UPFStorageMenu>(this,UPFStorageMenu::StaticClass());
+        if(StorageMenu){StorageMenu->AddToPlayerScreen(50);}
         // Travel from the main menu must release its UI-only viewport input mode.
         FInputModeGameOnly Mode;Mode.SetConsumeCaptureMouseDown(false);SetInputMode(Mode);
         bShowMouseCursor=false;
@@ -220,7 +225,11 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
         UE_LOG(LogPFSurvival,Warning,TEXT("[PrimalUI] Pause menu could not be added to the local viewport; gameplay was not paused"));
         return;
     }
-    if(bOpen){SetCraftingMenuOpen(false);}
+    if(bOpen)
+    {
+        SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);SetStorageMenuOpen(false);
+        if(Building->OpenStorage){Building->ServerCloseStorage();}
+    }
     bPauseMenuOpen=bOpen;
     SetIgnoreMoveInput(bOpen);
     SetIgnoreLookInput(bOpen);
@@ -435,6 +444,7 @@ void APFSurvivalPlayerController::ToggleCrafting()
 void APFSurvivalPlayerController::SetCraftingMenuOpen(bool bOpen)
 {
     if((bOpen && bPauseMenuOpen) || bOpen==bCraftingOpen){return;}
+    if(bOpen){SetBuildingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}}
     bCraftingOpen=bOpen;
     if(bOpen)
     {
@@ -491,6 +501,45 @@ void APFSurvivalPlayerController::ToggleBuilding()
         SetCraftingMenuOpen(false);
         bInventoryOpen=false;
     }
+    SetBuildingMenuOpen(Building->bBuildMode);
+}
+
+void APFSurvivalPlayerController::SetBuildingMenuOpen(bool bOpen)
+{
+    if(!IsLocalController() || !GetLocalPlayer() || !BuildingMenu || (bOpen && bPauseMenuOpen) || bBuildingMenuOpen==bOpen){return;}
+    if(bOpen){SetCraftingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}bInventoryOpen=false;Building->bBuildMode=true;BuildingMenu->RefreshMenu();}
+    bBuildingMenuOpen=bOpen;BuildingMenu->SetVisibility(bOpen?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
+    SetIgnoreMoveInput(bOpen);SetIgnoreLookInput(bOpen);bShowMouseCursor=bOpen;
+    if(PlayerInput){PlayerInput->FlushPressedKeys();}
+    if(bOpen)
+    {FInputModeUIOnly Mode;Mode.SetWidgetToFocus(BuildingMenu->TakeWidget());Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);SetInputMode(Mode);BuildingMenu->SetKeyboardFocus();}
+    else{FInputModeGameOnly Mode;Mode.SetConsumeCaptureMouseDown(false);SetInputMode(Mode);}
+}
+
+bool APFSurvivalPlayerController::SelectBuildingPiece(FName Id)
+{
+    if(!Building || !Building->Catalog || !Building->Catalog->Find(Id) || bPauseMenuOpen){return false;}
+    const int32 Index=Building->Catalog->Pieces.IndexOfByPredicate([&](const auto& D){return D.Id==Id;});
+    if(Index==INDEX_NONE){return false;}
+    Building->Selection=Index;Building->bBuildMode=true;SetBuildingMenuOpen(false);return true;
+}
+
+void APFSurvivalPlayerController::SetStorageMenuOpen(bool bOpen)
+{
+    if(!IsLocalController() || !GetLocalPlayer() || !StorageMenu || (bOpen && bPauseMenuOpen) || bStorageMenuOpen==bOpen){return;}
+    if(bOpen)
+    {
+        if(!IsValid(Building->OpenStorage)){return;}
+        SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);Building->bBuildMode=false;bInventoryOpen=false;StorageMenu->RefreshMenu();
+    }
+    if(!bOpen){StorageMenu->ResetView();}
+    bStorageMenuOpen=bOpen;StorageMenu->SetVisibility(bOpen?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
+    SetIgnoreMoveInput(bOpen);SetIgnoreLookInput(bOpen);bShowMouseCursor=bOpen;
+    if(PlayerInput){PlayerInput->FlushPressedKeys();}
+    if(bOpen)
+    {FInputModeUIOnly Mode;Mode.SetWidgetToFocus(StorageMenu->TakeWidget());Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);SetInputMode(Mode);StorageMenu->SetKeyboardFocus();}
+    else{FInputModeGameOnly Mode;Mode.SetConsumeCaptureMouseDown(false);SetInputMode(Mode);}
+    UE_LOG(LogPFSurvival,Display,TEXT("[PrimalUI] Chest menu open=%d; world continues running"),bOpen);
 }
 
 void APFSurvivalPlayerController::NextBuilding()

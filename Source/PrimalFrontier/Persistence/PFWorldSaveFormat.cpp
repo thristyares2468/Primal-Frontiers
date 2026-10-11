@@ -87,6 +87,15 @@ bool FPFWorldSaveFormat::Validate(const FPFWorldSaveData& Data, const UPFItemCat
         if (!Batches(S.Storage, 60, S.Id, false)) { return false; }
         FPFPlayerSaveData Bag; UnpackPlayer(S.Storage, Items, 60, Bag, Error);
         if (D->Kind != EPFBuildKind::Storage && !Bag.Inventory.IsEmpty()) { return RefuseWorldRecord(Error, TEXT("Non-storage piece contains items")); }
+        if(S.AllowedStorageItems.Num()>64 || (D->Kind!=EPFBuildKind::Storage && (S.StorageRestricted || !S.AllowedStorageItems.IsEmpty())))
+        {return RefuseWorldRecord(Error,TEXT("Invalid chest filter scope or size"));}
+        TSet<FName> Allowed;
+        for(const auto& Id:S.AllowedStorageItems)
+        {
+            const FName Name(*Id,FNAME_Find);
+            if(Id.Len()>64 || !Items.Find(Name) || Allowed.Contains(Name)){return RefuseWorldRecord(Error,TEXT("Unknown or duplicate chest filter item"));}
+            Allowed.Add(Name);
+        }
         if ((D->Kind == EPFBuildKind::Foundation) == S.Support.IsValid()) { return RefuseWorldRecord(Error, TEXT("Invalid foundation/support rule")); }
     }
     for (const auto& S : Data.Structures)
@@ -103,7 +112,7 @@ bool FPFWorldSaveFormat::Validate(const FPFWorldSaveData& Data, const UPFItemCat
             if (!Parent) { return RefuseWorldRecord(Error, TEXT("Missing support piece")); }
             const auto* D = Buildings.Find(FName(*Parent->Definition, FNAME_Find));
             const bool bRoof = ChildDefinition->Kind == EPFBuildKind::Floor || ChildDefinition->Kind == EPFBuildKind::Ceiling;
-            const bool bCompatible = bRoof ? (D->Kind == EPFBuildKind::Wall || D->Kind == EPFBuildKind::Door) :
+            const bool bCompatible = bRoof ? (D->Kind == EPFBuildKind::Wall || D->Kind == EPFBuildKind::Door || D->Kind == EPFBuildKind::Window) :
                 (D->Kind == EPFBuildKind::Foundation || D->Kind == EPFBuildKind::Floor || D->Kind == EPFBuildKind::Ceiling);
             if (Parent->Owner != ChildOwner || !bCompatible)
             { return RefuseWorldRecord(Error, TEXT("Support ownership or piece kind mismatch")); }
@@ -196,6 +205,21 @@ bool FPFWorldSaveFormat::Decode(const TArray<uint8>& Bytes, FPFWorldSaveData& Ou
         }
         else if(!Player->TryGetStringField(TEXT("progression"),Progression) || Progression.IsEmpty() || Progression.Len()>(FPFProgressionSaveFormat::MaximumBytes+18)/3*4)
         {return RefuseWorldRecord(Error,TEXT("Missing or oversized V2 progression record"));}
+    }
+    const TArray<TSharedPtr<FJsonValue>>* Structures=nullptr;Root->TryGetArrayField(TEXT("structures"),Structures);
+    for(const auto& Value:*Structures)
+    {
+        if(Value->Type!=EJson::Object){return RefuseWorldRecord(Error,TEXT("Invalid structure record"));}
+        auto Object=Value->AsObject();
+        if(!Object->HasField(TEXT("storageRestricted")) && !Object->HasField(TEXT("allowedStorageItems")))
+        {Object->SetBoolField(TEXT("storageRestricted"),false);Object->SetArrayField(TEXT("allowedStorageItems"),{});}
+        else
+        {
+            bool Restricted=false;const TArray<TSharedPtr<FJsonValue>>* Allowed=nullptr;
+            if(!Object->TryGetBoolField(TEXT("storageRestricted"),Restricted) || !Object->TryGetArrayField(TEXT("allowedStorageItems"),Allowed) || Allowed->Num()>64)
+            {return RefuseWorldRecord(Error,TEXT("Malformed or oversized chest filter"));}
+            for(const auto& Id:*Allowed){FString TextId;if(!Id->TryGetString(TextId) || TextId.Len()>64){return RefuseWorldRecord(Error,TEXT("Malformed chest filter item"));}}
+        }
     }
     if (!FJsonObjectConverter::JsonObjectToUStruct(Root.ToSharedRef(), &Candidate, 0, 0, true, &Why))
     { return RefuseWorldRecord(Error, TEXT("Invalid world metadata fields")); }

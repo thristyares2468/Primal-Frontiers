@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-12 — Visible building selection and owner-private chest transactions
+
+Replace the implicit cycling/storage shortcuts as the primary UX with a local eight-piece picker and owned E-driven chest UMG window. Stable stack GUIDs and bounded quantities go through existing server RPC validation; the server recomputes view/reach/ownership/living state. Sort preserves batch identities/deadlines; Quick Store attempts whole eligible batches atomically and leaves filtered/capacity-refused batches in the bag. Chest filters restrict future deposits only, retain existing contents/withdrawal and replicate only to the owner. Apply sends validated known unique item IDs (max64); Cancel never sends a request. Optional validated structure metadata defaults legacy saves to unrestricted, without modifying private saves. Append Window/Stairs enum IDs; cube windows support platforms, eight40cm exterior risers reach a solid upper platform without requiring slab cuts. Actual character traversal and owner/private replication are tested separately. BUILDING_MENUS_M11.md records bounded evidence; full human M11/M8 acceptance remains separate.
+
 ## 2026-10-12 — Opt into authoritative ecology without changing existing maps
 
 Keep fixed-ID spawner defaults and add explicit map-owned policy/biome configuration. Require a server game world, one replicated clock, whole-catalog validation and one shared policy/catalog domain; disabled-point residents and corpses still consume biome budgets. Use existing nav/clearance/global-eight checks. Dormant phases refuse new spawning, while existing residents survive phase/configuration changes. Failed attempts retry every three seconds with change-only refusal logs. Existing save records retain resident identity/cooldown; dynamic policy configuration is not a new save field.

@@ -29,6 +29,8 @@ class UPFCraftingComponent;
 class UPFCraftingHUD;
 class UPFBuildingComponent;
 class UPFBuildingHUD;
+class UPFBuildingMenu;
+class UPFStorageMenu;
 class UPFPauseMenu;
 
 /** Local credential write outcome only; never a server/world restoration verdict. */
@@ -65,6 +67,11 @@ public:
 
     /** E / Pad X: pick up, gather or use a recovery pickup in reach; otherwise open owned door/storage. */
     UFUNCTION(BlueprintCallable, Category="Survival") void Interact();
+    void SetBuildingMenuOpen(bool bOpen);
+    bool IsBuildingMenuOpen() const {return bBuildingMenuOpen;}
+    bool SelectBuildingPiece(FName Id);
+    void SetStorageMenuOpen(bool bOpen);
+    bool IsStorageMenuOpen() const {return bStorageMenuOpen;}
 
     // ---- Pause menu (local UI only; world pauses only in Standalone) ----
     void SetPauseMenuOpen(bool bOpen);
@@ -140,6 +147,10 @@ private:
 
     // ---- Building input (forwards to UPFBuildingComponent RPCs) ----
     UPROPERTY() TObjectPtr<UPFBuildingHUD> BuildingHUD;
+    UPROPERTY() TObjectPtr<UPFBuildingMenu> BuildingMenu;
+    UPROPERTY() TObjectPtr<UPFStorageMenu> StorageMenu;
+    bool bBuildingMenuOpen=false;
+    bool bStorageMenuOpen=false;
     void ToggleBuilding();
     void NextBuilding();
     void RotateBuilding();

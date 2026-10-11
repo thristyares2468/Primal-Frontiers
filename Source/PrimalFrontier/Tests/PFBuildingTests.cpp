@@ -54,6 +54,9 @@ bool FPFBuildingTest::RunTest(const FString&)
     P->GetCharacterMovement()->DisableMovement();
     // Fresh in-memory catalogs so the test doesn't depend on saved asset edits.
     B->Catalog=NewObject<UPFBuildingCatalog>(B);
+    TestEqual(TEXT("Eight selectable greybox definitions"),B->Catalog->Pieces.Num(),8);
+    TestNotNull(TEXT("Window wall definition"),B->Catalog->Find(TEXT("Build_Window")));
+    TestNotNull(TEXT("Stair definition"),B->Catalog->Find(TEXT("Build_Stairs")));
     I->Catalog=NewObject<UPFItemCatalog>(I);
     // Aim the survivor's view at a world point (placement is derived from the view).
     auto Aim=[&](FVector At)
@@ -102,10 +105,44 @@ bool FPFBuildingTest::RunTest(const FString&)
 
     // Storage: open, deposit, conservation and freshness.
     Aim(FVector(0,0,20));
+    auto* Window=B->Place(TEXT("Build_Window"),2);
+    if(!TestNotNull(TEXT("Window wall uses platform edge"),Window)){AddError(B->Feedback);return false;}
+    Aim(Window->GetActorLocation()+FVector(0,140,0));
+    auto* WindowRoof=B->Place(TEXT("Build_Ceiling"),0);
+    TestNotNull(TEXT("Window supports roof"),WindowRoof);
+    if(WindowRoof){TestEqual(TEXT("Roof records window support"),WindowRoof->Support.Get(),Window);WindowRoof->Destroy();}
+    // Walk around the west window so the support trace sees the foundation.
+    P->SetActorLocation(FVector(0,-450,100));
+    Aim(FVector(0,0,20));
+    auto* Stairs=B->Place(TEXT("Build_Stairs"),0);
+    if(!TestNotNull(TEXT("Exterior stairs use visible platform support"),Stairs)){AddError(B->Feedback);return false;}
+    TestEqual(TEXT("Exterior stair landing elevation"),Stairs->GetActorLocation().Z,160.0);
+    TestEqual(TEXT("Exterior flight keeps upper floor clear"),Stairs->GetActorLocation().X,400.0);
+    TArray<UStaticMeshComponent*> StairShapes;Stairs->GetComponents(StairShapes);
+    int32 Treads=0;
+    for(auto* Shape:StairShapes){if(Shape->IsVisible() && Shape->GetCollisionEnabled()!=ECollisionEnabled::NoCollision){++Treads;TestTrue(TEXT("Each stair tread has positive dimensions"),Shape->GetRelativeScale3D().GetMin()>0);}}
+    TestEqual(TEXT("Eight solid 40cm stair risers"),Treads,8);
+    Stairs->Destroy();
+    Aim(FVector(0,0,20));
     auto* Chest=B->Place(TEXT("Build_Storage"),0);
     if(!TestNotNull(TEXT("Storage on foundation"),Chest)){AddError(B->Feedback);return false;}
     Aim(Chest->GetActorLocation());
     TestTrue(TEXT("Open owned storage"),B->Interact(Chest));
+    I->Grant(TEXT("Item_Stone"),3);
+    const int32 WoodBeforeQuick=I->Count(TEXT("Item_Wood"));
+    TestTrue(TEXT("Owner configures wood-only chest"),B->SetStorageFilter(true,{FName(TEXT("Item_Wood"))}));
+    TestFalse(TEXT("Unknown filter refused atomically"),B->SetStorageFilter(true,{FName(TEXT("Item_Invalid"))}));
+    TestTrue(TEXT("Original valid filter preserved"),Chest->bRestrictStorageItems && Chest->AllowedStorageItems==TArray<FName>{FName(TEXT("Item_Wood"))});
+    TestFalse(TEXT("Duplicate filter rejected"),B->SetStorageFilter(true,{FName(TEXT("Item_Wood")),FName(TEXT("Item_Wood"))}));
+    TestTrue(TEXT("Quick store respects filter"),B->QuickStore());
+    TestEqual(TEXT("All allowed wood moved"),Chest->Storage->Count(TEXT("Item_Wood")),WoodBeforeQuick);
+    TestEqual(TEXT("Disallowed stone stays in bag"),I->Count(TEXT("Item_Stone")),3);
+    TestTrue(TEXT("Filtered item explicitly refused"),!B->Transfer(true,I->GetStacks()[0].StackId,1));
+    TestTrue(TEXT("Withdraw still works with filter"),B->Transfer(false,Chest->Storage->GetStacks()[0].StackId,WoodBeforeQuick));
+    TestTrue(TEXT("Empty selection blocks every deposit"),B->SetStorageFilter(true,{}));
+    TestTrue(TEXT("Zero-move Quick Store safely completes"),B->QuickStore());
+    TestTrue(TEXT("No contents lost from empty filter"),Chest->Storage->GetStacks().IsEmpty());
+    TestTrue(TEXT("Restore unrestricted chest"),B->SetStorageFilter(false,{}));
     I->Grant(TEXT("Item_Food"),2);
     const auto Food=*I->GetStacks().FindByPredicate([](const auto& S){return S.ItemId==TEXT("Item_Food");});
     TestFalse(TEXT("Invalid quantity"),B->Transfer(true,Food.StackId,-1));
@@ -113,6 +150,29 @@ bool FPFBuildingTest::RunTest(const FString&)
     TestEqual(TEXT("No duplication bag"),I->Count(TEXT("Item_Food")),1);
     TestEqual(TEXT("No duplication storage"),Chest->Storage->Count(TEXT("Item_Food")),1);
     TestEqual(TEXT("Freshness unchanged"),Chest->Storage->GetStacks()[0].ExpiresAt,Food.ExpiresAt);
+    for(FName Id:{FName(TEXT("Item_Wood")),FName(TEXT("Item_Stone"))})
+    {
+        const auto Stack=*I->GetStacks().FindByPredicate([Id](const auto& S){return S.ItemId==Id;});
+        TestTrue(TEXT("Deposit additional sort batch"),B->Transfer(true,Stack.StackId,1));
+    }
+    const auto BeforeSort=Chest->Storage->GetStacks();
+    const FGuid SortId=Chest->Storage->GetStacks()[0].StackId;
+    TestTrue(TEXT("Server sorts existing batches"),B->SortStorage());
+    TestEqual(TEXT("Sort keeps all three batches"),Chest->Storage->GetStacks().Num(),3);
+    for(const auto& Before:BeforeSort)
+    {
+        const auto* After=Chest->Storage->GetStacks().FindByPredicate([&](const auto& S){return S.StackId==Before.StackId;});
+        if(TestNotNull(TEXT("Sort keeps stable batch ID"),After))
+        {TestEqual(TEXT("Sort keeps quantity"),After->Quantity,Before.Quantity);TestEqual(TEXT("Sort keeps freshness"),After->ExpiresAt,Before.ExpiresAt);}
+    }
+    for(int32 N=1;N<Chest->Storage->GetStacks().Num();++N)
+    {
+        const FString Previous=Chest->Storage->Definition(Chest->Storage->GetStacks()[N-1].ItemId)->DisplayName.ToString();
+        const FString Next=Chest->Storage->Definition(Chest->Storage->GetStacks()[N].ItemId)->DisplayName.ToString();
+        TestTrue(TEXT("Display names sorted alphabetically"),Previous.Compare(Next,ESearchCase::IgnoreCase)<=0);
+    }
+    for(const auto& Before:BeforeSort){if(Before.ItemId!=TEXT("Item_Food")){TestTrue(TEXT("Withdraw extra sort batch"),B->Transfer(false,Before.StackId,1));}}
+    TestEqual(TEXT("Food batch identity survives sorting"),Chest->Storage->GetStacks()[0].StackId,SortId);
     TestFalse(TEXT("Occupied storage cannot demolish"),B->Demolish(Chest));
 
     // Withdraw: a full bag refuses without losing the stored item; replay is rejected.
@@ -130,6 +190,9 @@ bool FPFBuildingTest::RunTest(const FString&)
     Chest->PersistentOwnerId=Other->PersistentPlayerId;
     TestFalse(TEXT("Unauthorized demolition"),B->Demolish(Chest));
     TestFalse(TEXT("Unauthorized storage"),B->Transfer(true,Food.StackId,1));
+    TestFalse(TEXT("Unauthorized quick store"),B->QuickStore());
+    TestFalse(TEXT("Unauthorized sorting"),B->SortStorage());
+    TestFalse(TEXT("Unauthorized filter changes"),B->SetStorageFilter(true,{}));
     TestEqual(TEXT("Unauthorized damage"),Chest->TakeDamage(25,FDamageEvent(),PC,P),0.f);
     Chest->Builder=PC->PlayerState;
     Chest->PersistentOwnerId=OriginalOwnerId;
@@ -156,6 +219,8 @@ bool FPFBuildingTest::RunTest(const FString&)
     PC->SetRole(ROLE_AutonomousProxy);
     TestNull(TEXT("Client placement denied"),B->Place(TEXT("Build_Foundation"),0));
     TestFalse(TEXT("Client demolition denied"),B->Demolish(Wall));
+    TestFalse(TEXT("Client quick store denied"),B->QuickStore());
+    TestFalse(TEXT("Client filters denied"),B->SetStorageFilter(true,{}));
     PC->SetRole(ROLE_Authority);
     Aim(FVector(1500,0,0));
     TestNull(TEXT("Out of range denied"),B->Place(TEXT("Build_Foundation"),0));

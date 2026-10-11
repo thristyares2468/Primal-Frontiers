@@ -39,7 +39,7 @@ void UPFBuildingHUD::NativeTick(const FGeometry& Geometry,float Delta)
     Super::NativeTick(Geometry,Delta);
     auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
     auto* B=PC?PC->Building.Get():nullptr;
-    const bool bOpen=B && B->bBuildMode && !PC->IsPauseMenuOpen();
+    const bool bOpen=B && B->bBuildMode && !PC->IsPauseMenuOpen() && !PC->IsBuildingMenuOpen() && !PC->IsStorageMenuOpen();
     Panel->SetVisibility(bOpen?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);
     Refresh+=Delta;
     if(!bOpen){bWasOpen=false;return;}
