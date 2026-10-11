@@ -85,6 +85,7 @@ bool FPFMissingSystemsTest::RunTest(const FString&)
     }
     TestTrue(TEXT("Item grant without authoritative world rejected"), ExecuteCommand(TEXT("PF.GiveItem"), {TEXT("Item_Unknown"), TEXT("1")}, nullptr, false).HasErrors());
     TestTrue(TEXT("Creature spawning requires authoritative world"), ExecuteCommand(TEXT("PF.SpawnCreature"), {TEXT("UnknownCreature")}, nullptr, false).HasErrors());
+    TestTrue(TEXT("Ecology preview requires authoritative world"), ExecuteCommand(TEXT("PF.PreviewEcology"), {}, nullptr, false).HasErrors());
     TestTrue(TEXT("Null gameplay world cannot teleport"), ExecuteCommand(TEXT("PF.Teleport"), {TEXT("0"), TEXT("0"), TEXT("200")}, nullptr, false).HasErrors());
     for (const TCHAR* Name : {TEXT("PF.SaveWorld"), TEXT("PF.LoadWorld"), TEXT("PF.TestPersistence")})
     { TestTrue(TEXT("Persistence requires authoritative world"), ExecuteCommand(Name, {}, nullptr, false).HasErrors()); }

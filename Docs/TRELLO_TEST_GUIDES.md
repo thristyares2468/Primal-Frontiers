@@ -169,6 +169,30 @@ Logs/screenshots: project-local Saved/Logs (PrimalFrontier.log for ordinary PIE;
 
 Keep this card open until actual observations are recorded. Automation and this guide are not a manual pass. Related cards may cite the same playtest report; no need to repeat the same route for every board.
 
+## G8 — M13 disposable ecology preview
+
+Guide G8 — M13 disposable day/night spawning preview (Personal 2)
+
+Level: /Game/PrimalFrontier/Maps/L_M7SurvivalArena.
+Content Drawer: Content > PrimalFrontier > Maps > L_M7SurvivalArena. This small existing fixture is intentional; PF.PreviewEcology refuses on the usual open-world map.
+
+Prerequisites: latest built source, one Editor instance, fresh PIE without loading a saved world. No server, second rendered client or asset/settings editing needed. Do not use Save World or save the editor map during this preview.
+Start here: open PrimalFrontier.uproject and double-click L_M7SurvivalArena.
+
+Launch: Play dropdown > Number of Players = 1 > Net Mode = Play Standalone > Selected Viewport. Click Play, click the game view; F11 optional. Play Standalone is the net mode, Selected Viewport is the presentation mode. WASD/mouse/Space move/look/jump; P opens Pause. Esc may stop PIE. Keep the game running while waiting for spawns. ~ opens/closes console.
+
+1. Run PF.PreviewEcology, close console and wait at least 3 seconds. Expected: explicit PASS with [PrimalAgentTools], time reset to 09:00, one Forager in the resource area, no Prowler in the danger area. Previous runtime creatures are removed without loot; bag is not refilled; .umap unchanged. If refused, stop and report the reason; do not edit assets to bypass it.
+2. Short viewing route: run PF.Teleport -1800 1300 100; look toward the resource area (north/+Y, then right/east/+X). Forager point is near (-1500,1700); it may flee when approached. If Teleport refuses, record its message rather than guessing coordinates. Developer teleports skip travel for this check only.
+3. Run PF.Teleport 1000 3900 100, then PF.SetTimeOfDay 21. Close console, wait at least 4 seconds and look north/+Y toward the tall danger landmark; Prowler point is near (1300,4400). Expected: night lighting and a Prowler placeholder label; existing Forager remains. Prowler can chase/attack: stay back and do not kill it for the dawn check. Record stutter; it alone is not failure.
+4. While that Prowler is alive, run PF.SetTimeOfDay 9. Expected: daylight, existing Prowler stays rather than vanishing/replacing or granting loot. Run PF.PreviewEcology again, wait at least 3 seconds: daytime Forager-only preview, no loot/bag grant. A dead resident's later replacement is a different lifecycle, not this dawn check.
+5. Optional evidence: PF.ExportTestReport M13PersonalPreview exports command history under Saved/AutomationReports; shot showui captures Saved/Screenshots/WindowsEditor. Stop PIE with Editor Stop (Shift+F1 releases mouse). Do not save this disposable world.
+
+PASS: day/night/dawn/reset match above, no new gameplay error/crash or unexpected bag change. FAIL: refusal on intended fresh fixture, wrong populations, disappearing dawn resident, duplicate spawns, crash or unexpected player reset. Report PASS / FAIL / NOT TESTED, step number, exact message and actual observation. If a creature moved out of view, mark unverified rather than guessing.
+
+Evidence: ordinary PIE Saved/Logs/PrimalFrontier.log, exported Saved/AutomationReports history, optional Saved/Screenshots/WindowsEditor. AI reference: Docs/ECOLOGY_RUNTIME_M13.md; ControlsUI/M11EcologyPreview720_20261011_215848791_128d9665/night_resident.png and day_retained_resident.png. Do not share private save/identity files.
+
+This requires your visual/first-person observations; automation already passed state/authority checks. Full M13 remains open. It does not activate authored open-world policy tables or certify ecology restart/reconnect, balance, sustained FPS/minimum-16GB, physical controller/audio or remaining M8/M11/M12 gates. Keep card open until actual observations.
+
 ## Card-description contract
 
 Every new/updated test card starts with exact map package path (or NONE for non-gameplay work), launch/net mode, prerequisites and one Start here action. Follow with numbered steps, inputs, expected state/counters, pass/refusal conditions, evidence paths and remaining limits. Name future/TBD maps honestly. Copy the appropriate guide into the card rather than only linking this document; retain earlier evidence below it. Personal priorities/members/deadlines/status stay unchanged unless actual observations resolve them. Do not mark current generated guides as manual test passes.

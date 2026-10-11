@@ -1,5 +1,7 @@
 # M13 biome/day-night spawn policy prerequisite
 
+Current follow-up (October12): [ECOLOGY_RUNTIME_M13.md](ECOLOGY_RUNTIME_M13.md) records the opt-in authoritative consumer, technical passes and disposable rendered preview. The October10 data-only statements below describe that historical checkpoint; authored open-world activation/full M13 remain open.
+
 October 10, 2026. Trello https://trello.com/c/MGOxKJEE. **Data-only technical gate passed; no live spawning change or full M13 acceptance.** The user permits independent work while M11 usability/M12 pacing remain unverified.
 
 ## Implemented contract

@@ -14,6 +14,7 @@
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFSurvivorCharacter.h"
 #include "Inventory/PFItemPickup.h"
+#include "World/PFWorldClock.h"
 #if WITH_DEV_AUTOMATION_TESTS
 #include <limits>
 #include "Components/BoxComponent.h"
@@ -26,6 +27,93 @@
 #include "Tests/AutomationCommon.h"
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFCreatureTest,"PF.Creatures.Lifecycle",EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFCreatureSpawnPolicyTest,"PF.Creatures.SpawnPolicy",EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEcologySpawnerTest,"PF.Creatures.EcologySpawner",EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FPFEcologySpawnerTest::RunTest(const FString&)
+{
+    FTestWorldWrapper Fixture;
+    if(!Fixture.CreateTestWorld(EWorldType::Game)){return false;}
+    auto* W=Fixture.GetTestWorld();
+    W->SetGameMode(FURL(nullptr,TEXT("/Engine/Maps/Entry?game=/Script/PrimalFrontier.PFSurvivalGameMode"),TRAVEL_Absolute));
+    if(!Fixture.BeginPlayInTestWorld()){return false;}
+    auto* Definitions=NewObject<UPFCreatureCatalog>(W);
+    auto* Policies=NewObject<UPFCreatureSpawnCatalog>(W);
+    const auto Ridge=FGameplayTag::RequestGameplayTag(TEXT("Ecology.Biome.Ridge"));
+    const auto Shore=FGameplayTag::RequestGameplayTag(TEXT("Ecology.Biome.Shore"));
+    const auto Point=[&](FGameplayTag Biome)
+    {
+        auto* S=W->SpawnActor<APFCreatureSpawner>();
+        S->bAutoSpawn=false; S->bUseSpawnPolicy=true; S->Biome=Biome; S->SpawnPolicies=Policies; S->Catalog=Definitions;
+        S->RestorePersistence(nullptr,0,true); return S;
+    };
+    auto* S=Point(Ridge); FString Error;
+    const FName Sentinel(TEXT("Unchanged")); FName Id=Sentinel; float Delay=123;
+    const auto Refuse=[&]()
+    {
+        Id=Sentinel; Delay=123;
+        TestFalse(TEXT("Invalid ecology request refused"),S->ResolveEcologyRequest(0,Id,Delay,Error));
+        TestFalse(TEXT("Reason is explicit"),Error.IsEmpty());
+        TestEqual(TEXT("Failed selection preserves ID"),Id,Sentinel);
+        TestEqual(TEXT("Failed selection preserves delay"),Delay,123.f);
+    };
+    Refuse(); // Missing clock.
+    auto* Clock=W->SpawnActor<APFWorldClock>(); Clock->SetActorTickEnabled(false); Clock->SetHour(9);
+    Refuse(); TestNull(TEXT("Dormant phase does not create a resident"),S->Resident.Get());
+    Clock->SetHour(21);
+    TestTrue(TEXT("Authoritative night selection"),S->ResolveEcologyRequest(0,Id,Delay,Error));
+    TestEqual(TEXT("Ridge selects only prowler"),Id,FName(TEXT("Creature_Prowler")));
+    TestEqual(TEXT("Policy respawn delay"),Delay,30.f);
+    S->SetRole(ROLE_SimulatedProxy); Refuse();
+    TestFalse(TEXT("Client role cannot call actual spawn"),S->TrySpawnEcology(Error));
+    S->SetRole(ROLE_Authority);
+    auto* ExtraClock=W->SpawnActor<APFWorldClock>(); Refuse(); ExtraClock->Destroy();
+    S->bAutoSpawn=false; Refuse(); S->bAutoSpawn=true;
+    S->bUseSpawnPolicy=false; Refuse(); S->bUseSpawnPolicy=true;
+    S->SpawnPolicies=nullptr; Refuse(); S->SpawnPolicies=Policies;
+    Clock->Phase=Shore; Refuse(); Clock->SetHour(21);
+    S->Biome=FGameplayTag(); Refuse(); S->Biome=Ridge;
+    Id=Sentinel; Delay=123;
+    TestFalse(TEXT("Out-of-range ticket refused"),S->ResolveEcologyRequest(1,Id,Delay,Error));
+    TestEqual(TEXT("Bad ticket preserves both outputs"),Delay,123.f);
+    const auto Make=[&]()
+    {
+        const FTransform T(FVector(0,0,100));
+        auto* C=W->SpawnActorDeferred<APFCreature>(APFCreature::StaticClass(),T,nullptr,nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+        C->Catalog=Definitions; C->CreatureId=TEXT("Creature_Prowler"); C->FinishSpawning(T);
+        C->SetActorTickEnabled(false); C->GetCharacterMovement()->DisableMovement(); return C;
+    };
+    auto* Existing=Make(); S->Resident=Existing; Refuse();
+    Clock->SetHour(9); Refuse();
+    TestEqual(TEXT("Phase change preserves existing resident"),S->Resident.Get(),Existing);
+    Clock->SetHour(21); S->Resident=nullptr;
+    auto* Other=Point(Ridge); Other->bAutoSpawn=false; Other->Resident=Existing;
+    Policies->Policies[2].MaximumResidents=1; Refuse();
+    Existing->TakeDamage(1000,FDamageEvent(),nullptr,nullptr); Refuse();
+    TestTrue(TEXT("Corpse on disabled point still counts"),Existing->IsDead());
+    Policies->Policies[2].MaximumResidents=2;
+    TestTrue(TEXT("Remaining biome capacity permits selection"),S->ResolveEcologyRequest(0,Id,Delay,Error));
+    auto* Third=Point(Shore); Third->Resident=Existing; Refuse(); // Duplicated ownership.
+    Third->Resident=nullptr; Third->SpawnPolicies=NewObject<UPFCreatureSpawnCatalog>(W); Refuse();
+    Third->SpawnPolicies=Policies; Third->Biome=FGameplayTag(); Refuse(); Third->Biome=Shore;
+    Third->Catalog=NewObject<UPFCreatureCatalog>(W); Refuse();
+    TestTrue(TEXT("Explicit mixed catalog domain refused"),Error.Contains(TEXT("catalog")));
+    Third->Catalog=nullptr; Refuse();
+    TestTrue(TEXT("Project-catalog fallback cannot share a custom domain"),Error.Contains(TEXT("catalog")));
+    Third->Catalog=Definitions;
+    TestTrue(TEXT("Restored common catalog permits selection"),S->ResolveEcologyRequest(0,Id,Delay,Error));
+    Policies->Policies[0].RespawnSeconds=std::numeric_limits<float>::quiet_NaN(); Refuse(); Policies->Policies[0].RespawnSeconds=30;
+    TestFalse(TEXT("Actual spawn without navmesh refuses safely"),S->TrySpawnEcology(Error));
+    TestTrue(TEXT("Explicit navigation refusal"),Error.Contains(TEXT("navigation")));
+    TestNull(TEXT("No resident assigned after failed navigation"),S->Resident.Get());
+    TestEqual(TEXT("No accidental creature or duplicate loot from refusal"),APFCreatureSpawner::Count(W),1);
+    for(int32 N=1;N<8;++N){Make();}
+    Refuse();
+    TestTrue(TEXT("Global cap remains eight including corpse"),Error.Contains(TEXT("Global")));
+    auto* Legacy=W->SpawnActor<APFCreatureSpawner>(); Legacy->bAutoSpawn=false;
+    TestFalse(TEXT("Legacy points are not opted in"),Legacy->bUseSpawnPolicy);
+    TestEqual(TEXT("Legacy ID preserved"),Legacy->CreatureId,FName(TEXT("Creature_Forager")));
+    AddInfo(TEXT("[PrimalAgentTools] Ecology authority, exact clock, dormant phase, atomic outputs, catalog domain, resident/corpse budgets and navigation/global refusals verified."));
+    Fixture.ForwardErrorMessages(this); return !HasAnyErrors();
+}
 bool FPFCreatureSpawnPolicyTest::RunTest(const FString&)
 {
     auto* Creatures=NewObject<UPFCreatureCatalog>();

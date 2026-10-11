@@ -4,6 +4,10 @@ UE 5.8.2 C++ developer plugin. A non-Shipping runtime module owns command regist
 
 See [DEVELOPER_COMMANDS.md](DEVELOPER_COMMANDS.md) for the current commands, integration blockers and multiplayer verification. Milestone 2 adds real hunger/thirst/exposure and recovery adapters; [SURVIVAL_M2.md](../../Docs/SURVIVAL_M2.md) describes their gameplay and test contracts. All tooling commands remain excluded from Shipping.
 
+## M13 disposable ecology preview
+
+`PF.PreviewEcology` is a non-Shipping developer command for fresh standalone `/Game/PrimalFrontier/Maps/L_M7SurvivalArena` only. It configures runtime Shore/Ridge day-night spawning, resets creatures without loot and refuses personal loaded saves. No asset save or open-world activation; Stop PIE discards it. [Ecology evidence](../../Docs/ECOLOGY_RUNTIME_M13.md) and [manual guide G8](../../Docs/TRELLO_TEST_GUIDES.md) separate technical passes from human acceptance.
+
 ## M8 persistence adapters
 
 PF.SaveWorld [slot] and PF.LoadWorld [slot] call real server-only world-save APIs (default Survival); PF.TestPersistence validates a read-only record round-trip. These commands never save editor assets or forward client requests. Slots use 1–64 ASCII letters/digits/underscore. Opt-in PF.Persistence.Live exercises a disposable NullRHI create/save/load and separate restart/reconnect, for one/two clients. PF.Help and all commands remain non-Shipping. See [persistence contract](../../Docs/PERSISTENCE_M8.md) and DEVELOPER_COMMANDS.md for flags/evidence and pending manual gates.

@@ -1,4 +1,4 @@
-// Data-only M13 prerequisite. No live spawner consumes these policies yet.
+// Validated M13 spawn policies; runtime use is explicitly opt-in on each spawn point.
 #pragma once
 
 #include "Engine/DataAsset.h"
@@ -41,7 +41,10 @@ public:
 
     /** Validate the entire policy catalog against known creature definitions. */
     bool Validate(const UPFCreatureCatalog& Creatures, FString& Error) const;
-    /** Pure selection. Future authority supplies a zero-based roll; invalid input preserves OutId. */
+    /** Validated phase data; zero tickets means dormant. Preserves OutTickets on refusal. */
+    const FPFCreatureSpawnPolicy* ResolvePhase(const UPFCreatureCatalog& Creatures, FGameplayTag Biome,
+        FGameplayTag Phase, int32& OutTickets, FString& Error) const;
+    /** Pure selection. Authority supplies a zero-based roll; invalid input preserves OutId. */
     bool Choose(const UPFCreatureCatalog& Creatures, FGameplayTag Biome, FGameplayTag Phase,
         int32 Roll, FName& OutId, FString& Error) const;
 };

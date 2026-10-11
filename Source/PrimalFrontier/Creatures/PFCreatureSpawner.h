@@ -13,6 +13,7 @@
 #pragma once
 #include "GameFramework/Actor.h"
 #include "Creatures/PFCreatureCatalog.h"
+#include "Creatures/PFCreatureSpawnCatalog.h"
 #include "PFCreatureSpawner.generated.h"
 class APFCreature;
 UCLASS(Blueprintable)
@@ -30,6 +31,10 @@ public:
     /** Delay after the resident is gone before spawning another (5..300 s). */
     UPROPERTY(EditAnywhere,BlueprintReadOnly,meta=(ClampMin="5",ClampMax="300")) float RespawnSeconds=30;
     UPROPERTY(EditAnywhere,BlueprintReadOnly) TObjectPtr<UPFCreatureCatalog> Catalog;
+    /** False preserves existing fixed-ID points. Opt-in configuration is map-owned, not save-owned. */
+    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Ecology") bool bUseSpawnPolicy=false;
+    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Ecology") TObjectPtr<UPFCreatureSpawnCatalog> SpawnPolicies;
+    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Ecology") FGameplayTag Biome;
     /** The creature currently owned by this point (may be dead/corpse). */
     UPROPERTY(Transient) TObjectPtr<APFCreature> Resident;
 
@@ -39,6 +44,10 @@ public:
     static int32 Count(UWorld* World);
     double PersistenceRespawnRemaining() const;
     void RestorePersistence(APFCreature* Creature, double Remaining, bool bEnabled);
+    /** Read-only server validation/selection. A refusal preserves both outputs. */
+    bool ResolveEcologyRequest(int32 Roll, FName& OutId, float& OutDelay, FString& Error) const;
+    /** Server-only, due/enabled/empty opt-in point. Uses the same nav/clearance/global cap as Spawn(). */
+    bool TrySpawnEcology(FString& Error);
 
 protected:
     /** Clients disable ticking; first spawn attempt happens 2 s after start. */
@@ -48,4 +57,7 @@ protected:
 
 private:
     double NextSpawn=0;
+    FString LastEcologyRefusal;
+    const FPFCreatureSpawnPolicy* EcologyContext(UPFCreatureCatalog*& OutCreatures,
+        FGameplayTag& OutPhase, int32& OutTickets, FString& Error) const;
 };

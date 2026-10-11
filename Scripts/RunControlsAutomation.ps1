@@ -1,7 +1,7 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [string]$SettingsSourceRun='',
       [switch]$LowShadowDiagnostic,
@@ -39,6 +39,7 @@ $log=Join-Path $projectRoot ('Saved\Logs\'+$run+'.log')
 $width=if($Resolution -eq '720'){1280}else{2560}
 $height=if($Resolution -eq '720'){720}else{1440}
 $filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'} 'Overlays'{'PF.UI.ActionOverlaysLive'} 'Reconnect'{'PF.UI.ReconnectProfileLive'} 'Settings'{'PF.UI.SettingsCancelLive'} 'SettingsApply'{'PF.UI.SettingsApplyLive'} 'Display'{'PF.UI.SettingsDisplayLive'} 'WorldMenu'{'PF.UI.WorldMenuLive'} 'ToolProgression'{'PF.Crafting.ToolProgressionLive'} 'WeaponProgression'{'PF.Crafting.WeaponProgressionLive'} 'Protection'{'PF.Crafting.ProtectionLive'} 'Progression'{'PF.UI.ProgressionFeedbackLive'} 'EarnedProgression'{'PF.Progression.EarnedUpgradeLive'} 'EarnedCombat'{'PF.Progression.EarnedCombatLive'} 'EarnedWeapon'{'PF.Progression.EarnedWeaponLive'} 'CraftingScroll'{'PF.UI.CraftingScrollLive'}}
+if($TestCase -eq 'EcologyPreview'){$filter='PF.Creatures.EcologyPreviewLive'}
 if($TestCase -eq 'SettingsRestartPrepare'){$filter='PF.UI.SettingsRestartPrepareLive'}
 if($TestCase -eq 'SettingsRestartVerify'){$filter='PF.UI.SettingsRestartVerifyLive'}
 # Every game login saves a server-issued credential, including ordinary UI fixtures.
@@ -66,6 +67,7 @@ $writesSettings=$TestCase -in @('SettingsApply','Display','SettingsRestartPrepar
 $vsyncCommand=if($writesSettings -or $TestCase -in @('WorldMenu','SettingsRestartVerify')){''}else{'r.VSync 0,'}
 $arguments='"{0}" /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld -game -windowed -ForceRes -ResX={1} -ResY={2} -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig -PFRunControlsUITest -PFControlsEvidence={3} -PFHUDScale={7} -ExecCmds="t.MaxFPS 0,{9}{8}Automation RunTests {6}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{4}" -abslog="{5}"' -f (Join-Path $projectRoot 'PrimalFrontier.uproject'),$width,$height,$run,$report,$log,$filter,([string]$HUDScale),$shadowCommands,$vsyncCommand
 $arguments+=$profileArgument
+if($TestCase -eq 'EcologyPreview'){$arguments=$arguments.Replace(' /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld',' /Game/PrimalFrontier/Maps/L_M7SurvivalArena');$arguments+=' -PFRunEcologyPreviewTest'}
 if($TestCase -eq 'CraftingScroll'){$arguments+=' -PFRunCraftingScrollTest'}
 if($TestCase -eq 'EarnedCombat'){$arguments+=' -PFRunEarnedCombatTest'}
 if($TestCase -eq 'EarnedWeapon'){$arguments+=' -PFRunEarnedWeaponTest'}

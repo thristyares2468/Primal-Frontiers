@@ -82,11 +82,11 @@ bool UPFCreatureSpawnCatalog::Validate(const UPFCreatureCatalog& Creatures, FStr
     return true;
 }
 
-bool UPFCreatureSpawnCatalog::Choose(const UPFCreatureCatalog& Creatures, FGameplayTag Biome,
-    FGameplayTag Phase, int32 Roll, FName& OutId, FString& Error) const
+const FPFCreatureSpawnPolicy* UPFCreatureSpawnCatalog::ResolvePhase(const UPFCreatureCatalog& Creatures,
+    FGameplayTag Biome, FGameplayTag Phase, int32& OutTickets, FString& Error) const
 {
-    if(!Validate(Creatures,Error)){return false;}
-    const auto Refuse=[&Error](const TCHAR* Reason){Error=Reason;return false;};
+    if(!Validate(Creatures,Error)){return nullptr;}
+    const auto Refuse=[&Error](const TCHAR* Reason)->const FPFCreatureSpawnPolicy*{Error=Reason;return nullptr;};
     const auto Day=FGameplayTag::RequestGameplayTag(TEXT("World.Time.Day"));
     const auto Night=FGameplayTag::RequestGameplayTag(TEXT("World.Time.Night"));
     if(Phase!=Day && Phase!=Night){return Refuse(TEXT("Spawn phase must be World.Time.Day or World.Time.Night"));}
@@ -94,8 +94,19 @@ bool UPFCreatureSpawnCatalog::Choose(const UPFCreatureCatalog& Creatures, FGamep
     if(!Policy){return Refuse(TEXT("Spawn biome has no policy"));}
     int32 Total=0;
     for(const auto& Entry:Policy->Entries){Total+=Phase==Day?Entry.DayWeight:Entry.NightWeight;}
+    OutTickets=Total; Error.Reset(); return Policy;
+}
+
+bool UPFCreatureSpawnCatalog::Choose(const UPFCreatureCatalog& Creatures, FGameplayTag Biome,
+    FGameplayTag Phase, int32 Roll, FName& OutId, FString& Error) const
+{
+    int32 Total=0;
+    const auto* Policy=ResolvePhase(Creatures,Biome,Phase,Total,Error);
+    if(!Policy){return false;}
+    const auto Refuse=[&Error](const TCHAR* Reason){Error=Reason;return false;};
     if(Total==0){return Refuse(TEXT("No creature is eligible in this biome and phase"));}
     if(Roll<0 || Roll>=Total){return Refuse(TEXT("Spawn roll is outside eligible weight range"));}
+    const auto Day=FGameplayTag::RequestGameplayTag(TEXT("World.Time.Day"));
     for(const auto& Entry:Policy->Entries)
     {
         const int32 Weight=Phase==Day?Entry.DayWeight:Entry.NightWeight;

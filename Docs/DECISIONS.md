@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## 2026-10-12 — Opt into authoritative ecology without changing existing maps
+
+Keep fixed-ID spawner defaults and add explicit map-owned policy/biome configuration. Require a server game world, one replicated clock, whole-catalog validation and one shared policy/catalog domain; disabled-point residents and corpses still consume biome budgets. Use existing nav/clearance/global-eight checks. Dormant phases refuse new spawning, while existing residents survive phase/configuration changes. Failed attempts retry every three seconds with change-only refusal logs. Existing save records retain resident identity/cooldown; dynamic policy configuration is not a new save field.
+
+PF.PreviewEcology is a non-Shipping, fresh standalone L_M7SurvivalArena runtime preview, with complete layout/catalog preflight, personal-save refusal, no damage/loot grants and no asset save. Stop PIE discards it. Native/rendered and one-/two-client technical tests passed; ECOLOGY_RUNTIME_M13.md distinguishes same-process restoration from untested authored startup/reconnect and human acceptance. No new art, dependency, population increase, taming or full M13 completion.
+
 ## 2026-10-10 — Separate ecology policy validation from live spawning
 
 Prepare a focused Unreal data-asset type with native Ecology.Biome tags, existing creature IDs, bounded day/night weights, finite respawn tuning and combined resident budgets no greater than eight. Validate the entire catalog before selection, including unrelated malformed rows. A pure zero-based ticket choice returns one eligible ID or an explicit refusal without modifying the output; no client seed, RNG state, actor creation, class loading or world mutation. A zero-total phase is valid dormant data and must never silently fall back to another phase/creature.

@@ -30,6 +30,7 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.RemoveItem ItemId Quantity` | M3 server-only removal from the sole player's inventory; insufficient quantity is rejected atomically. |
 | `PF.SpawnCreature CreatureId` | M6 server-only catalog spawn near the sole player, with navigation, clearance and an eight-creature cap. IDs: Creature_Forager, Creature_Prowler. |
 | `PF.ResetCreatures` | M6 standalone L_M6Creatures only: pause spawn points and clear creature actors without loot or saved-map mutation. |
+| `PF.PreviewEcology` | M13 fresh standalone L_M7SurvivalArena only: preflight two points/one clock, clear runtime creatures without loot, enable Shore/Ridge day-night preview at09:00. Refuses personal loaded saves and clients. Stop PIE to discard; do not Save World. See Docs/TRELLO_TEST_GUIDES.md G8 and ECOLOGY_RUNTIME_M13.md. |
 | `PF.SetHealth Value` | Server-only: set living survivor Health, clamped to its configured maximum. |
 | `PF.SetStamina Value` | Server-only: set clamped Stamina; depletion delays recovery. |
 | `PF.Damage Amount` | Server-only: positive finite damage through the survivor damage pipeline. |

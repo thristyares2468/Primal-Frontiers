@@ -53,6 +53,7 @@
 #include "World/PFWorldClock.h"
 #include "Persistence/PFWorldPersistence.h"
 #include "Persistence/PFSaveFileStore.h"
+#include "PFAssetPaths.h"
 
 namespace PF::AgentTools
 {
@@ -86,6 +87,7 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.RemoveItem"), TEXT("ItemId Quantity: server-only removal from sole player's inventory."), TEXT(""), 2, 2, false, true},
         {TEXT("PF.SpawnCreature"), TEXT("CreatureId: server spawn near sole player, validated catalog/navigation/collision and world cap."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.ResetCreatures"), TEXT("Server: clear test creatures and pause spawn points only in standalone L_M6Creatures."), TEXT(""), 0, 0, false, true},
+        {TEXT("PF.PreviewEcology"), TEXT("Standalone L_M7SurvivalArena only: reset runtime creatures to Shore/Ridge day-night preview at 09:00; no map save. Stop PIE to discard."), TEXT(""), 0, 0, false, true},
         // Survival vitals (M1) and needs (M2).
         {TEXT("PF.SetHealth"), TEXT("Value: server-only survivor health, clamped to limits; cannot revive a dead pawn."), TEXT(""), 1, 1, false, true},
         {TEXT("PF.SetStamina"), TEXT("Value: server-only survivor stamina, clamped to limits."), TEXT(""), 1, 1, false, true},
@@ -195,6 +197,41 @@ static FResult CreatureCommand(const FString& Name,const TArray<FString>& Args,U
         int32 Count=0;
         for(TActorIterator<APFCreature> It(World);It;++It){It->Destroy();++Count;}
         R.Add(TEXT("Info"),TEXT("CreaturesReset"),FString(),FString::Printf(TEXT("Removed %d runtime test creatures, paused spawners, no loot or map save."),Count));
+        return R;
+    }
+    if(Name==TEXT("PF.PreviewEcology"))
+    {
+        if(World->GetNetMode()!=NM_Standalone || UWorld::RemovePIEPrefix(World->GetMapName())!=TEXT("L_M7SurvivalArena"))
+        {Fail(R,TEXT("PreviewScope"),TEXT("Requires standalone L_M7SurvivalArena (PIE or isolated game)."));return R;}
+        const auto* Saves=World->GetSubsystem<UPFWorldPersistence>();
+        if(Saves && !Saves->ActiveSlot.IsEmpty() && !Saves->ActiveSlot.StartsWith(TEXT("AutomationM13Ecology")))
+        {Fail(R,TEXT("PreviewSaveScope"),TEXT("Preview refused in a personal saved world; use fresh standalone PIE without a loaded save."));return R;}
+        TArray<APFCreatureSpawner*> Points; APFWorldClock* Clock=nullptr; int32 Clocks=0;
+        for(TActorIterator<APFCreatureSpawner> It(World);It;++It){Points.Add(*It);}
+        for(TActorIterator<APFWorldClock> It(World);It;++It){Clock=*It;++Clocks;}
+        if(Points.Num()!=2 || Clocks!=1 || !Clock->HasAuthority())
+        {Fail(R,TEXT("PreviewLayout"),TEXT("Preview requires the existing two spawn points and one server clock."));return R;}
+        auto* Definitions=LoadObject<UPFCreatureCatalog>(nullptr,PFAssetPaths::CreatureCatalog);
+        auto* Policies=NewObject<UPFCreatureSpawnCatalog>(World); FString Error; TSet<FName> Ids;
+        if(!Definitions || !Policies->Validate(*Definitions,Error))
+        {Fail(R,TEXT("PreviewCatalog"),Error.IsEmpty()?TEXT("Creature catalog unavailable."):Error);return R;}
+        for(auto* Point:Points)
+        {
+            if((Point->CreatureId!=TEXT("Creature_Forager") && Point->CreatureId!=TEXT("Creature_Prowler")) || Ids.Contains(Point->CreatureId) ||
+                (Point->Catalog && Point->Catalog!=Definitions))
+            {Fail(R,TEXT("PreviewLayout"),TEXT("Preview requires one existing Forager/Prowler point using the project creature catalog."));return R;}
+            Ids.Add(Point->CreatureId);
+        }
+        // Entire layout/catalog preflight precedes any mutation; never destroys via damage or grants loot.
+        Clock->SetHour(9);
+        for(TActorIterator<APFCreature> It(World);It;++It){It->Destroy();}
+        for(auto* Point:Points)
+        {
+            Point->bUseSpawnPolicy=true; Point->SpawnPolicies=Policies; Point->Catalog=Definitions;
+            Point->Biome=Policies->Policies[Point->CreatureId==TEXT("Creature_Forager")?0:2].Biome;
+            Point->RestorePersistence(nullptr,0,true);
+        }
+        R.Add(TEXT("Info"),TEXT("EcologyPreview"),FString(),TEXT("Temporary preview at 09:00: Shore Forager active, Ridge Prowler dormant. Use PF.SetTimeOfDay 21 for night. Existing residents survive dawn. Runtime creatures reset without loot; player/items/resources unchanged. Stop PIE to discard; do not save this preview world."));
         return R;
     }
     if(Name==TEXT("PF.SpawnCreature"))
@@ -506,7 +543,7 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
             else{R.Add(TEXT("Info"),TEXT("TimeChanged"),Clock->GetName(),FString::Printf(TEXT("Server time %.2f"),Clock->Hour));}
         }
     }
-    else if(Name==TEXT("PF.SpawnCreature") || Name==TEXT("PF.ResetCreatures") || Name==TEXT("PF.TestCreatureAI")) { R=CreatureCommand(Name,Args,World); }
+    else if(Name==TEXT("PF.SpawnCreature") || Name==TEXT("PF.ResetCreatures") || Name==TEXT("PF.PreviewEcology") || Name==TEXT("PF.TestCreatureAI")) { R=CreatureCommand(Name,Args,World); }
     else if(Name==TEXT("PF.TestGathering") || Name==TEXT("PF.TestCrafting") || Name==TEXT("PF.Craft") || Name==TEXT("PF.CancelCraft"))
     {R=CraftingCommand(Name,Args,World);}
     else if (Name == TEXT("PF.Teleport"))
