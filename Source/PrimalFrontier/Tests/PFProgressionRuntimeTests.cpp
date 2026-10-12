@@ -44,7 +44,7 @@ bool FPFProgressionComponentTest::RunTest(const FString&)
     if(!TestTrue(TEXT("Grant fixtures"),I->Grant(TEXT("Item_Wood"),6) && I->Grant(TEXT("Item_Stone"),4) && I->Grant(TEXT("Item_Tool"),1))){return false;}
     TestEqual(TEXT("Developer grants never reward"),G->GetExperience(),0);
     TestTrue(TEXT("Start then cancel"),C->Start(TEXT("Recipe_Tool"),P));C->Cancel();Advance();TestEqual(TEXT("Cancel zero reward"),G->GetExperience(),0);
-    TestTrue(TEXT("Start failed output capacity"),C->Start(TEXT("Recipe_Tool"),P));I->WeightLimit=0.1f;Advance();I->WeightLimit=30;TestEqual(TEXT("Failed conversion zero reward"),G->GetExperience(),0);
+    TestTrue(TEXT("Start failed output capacity"),C->Start(TEXT("Recipe_Tool"),P));I->bEnforceWeightLimit=true;I->WeightLimit=0.1f;Advance();I->WeightLimit=30;TestEqual(TEXT("Failed conversion zero reward"),G->GetExperience(),0);
     TestTrue(TEXT("Start then change input"),C->Start(TEXT("Recipe_Tool"),P));I->RemoveItem(TEXT("Item_Stone"),4);Advance();TestEqual(TEXT("Changed ingredients zero reward"),G->GetExperience(),0);I->Grant(TEXT("Item_Stone"),4);
     TestTrue(TEXT("First actual successful craft"),C->Start(TEXT("Recipe_Tool"),P));Advance();TestEqual(TEXT("Successful conversion output"),I->Count(TEXT("Item_Tool")),2);
     TestTrue(TEXT("Actual first craft grants20 once"),G->GetExperience()==20 && G->GetRecord().CreditedCrafts==TArray<FName>{FName(TEXT("Recipe_Tool"))});

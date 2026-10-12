@@ -46,7 +46,7 @@ bool FPFWeaponProgressionTest::RunTest(const FString&)
     I->Grant(TEXT("Item_Wood"),5);I->Grant(TEXT("Item_Cord"),2);I->Grant(TEXT("Item_Stone"),2);
     TestTrue(TEXT("Club starts"),C->Start(TEXT("Recipe_Club"),P));TestFalse(TEXT("Duplicate refused"),C->Start(TEXT("Recipe_Club"),P));
     TestTrue(TEXT("Cancel accepted"),C->Cancel());Advance();TestEqual(TEXT("Cancel no wood charged"),I->Count(TEXT("Item_Wood")),5);
-    TestTrue(TEXT("Capacity probe starts"),C->Start(TEXT("Recipe_Club"),P));I->WeightLimit=.1f;Advance();I->WeightLimit=30;
+    TestTrue(TEXT("Capacity probe starts"),C->Start(TEXT("Recipe_Club"),P));I->bEnforceWeightLimit=true;I->WeightLimit=.1f;Advance();I->WeightLimit=30;
     TestEqual(TEXT("Failed capacity creates no club"),I->Count(TEXT("Item_Club")),0);TestEqual(TEXT("Failed capacity preserves inputs"),I->Count(TEXT("Item_Cord")),2);
     TestTrue(TEXT("Club restarts"),C->Start(TEXT("Recipe_Club"),P));Advance();
     TestEqual(TEXT("One wooden club"),I->Count(TEXT("Item_Club")),1);TestEqual(TEXT("Exact wood cost"),I->Count(TEXT("Item_Wood")),2);

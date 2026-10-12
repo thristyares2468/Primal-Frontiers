@@ -59,6 +59,8 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") int32 SlotLimit=8;
     /** Maximum total weight in kg. Bags 30, storage 60. */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") float WeightLimit=30;
+    /** Player carry threshold is soft; chest/container capacity is hard. Trusted configuration. */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") bool bEnforceWeightLimit=true;
 
     // ---- Queries ----
     const TArray<FPFItemStack>& GetStacks() const { return Stacks; }

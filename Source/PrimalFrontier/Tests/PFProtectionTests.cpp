@@ -35,7 +35,7 @@ bool FPFProtectionTest::RunTest(const FString&)
     TestFalse(TEXT("Missing inputs refused"),C->Start(TEXT("Recipe_WovenGuard"),P));I->Grant(TEXT("Item_Fibre"),8);I->Grant(TEXT("Item_Cord"),1);I->Grant(TEXT("Item_Wood"),2);
     TestTrue(TEXT("Guard starts"),C->Start(TEXT("Recipe_WovenGuard"),P));TestFalse(TEXT("Duplicate refused"),C->Start(TEXT("Recipe_WovenGuard"),P));TestTrue(TEXT("Cancel"),C->Cancel());Advance();
     TestEqual(TEXT("Cancel preserves fibre"),I->Count(TEXT("Item_Fibre")),8);TestEqual(TEXT("Cancel no protection"),I->CreatureHitReduction(),0.f);
-    TestTrue(TEXT("Capacity probe"),C->Start(TEXT("Recipe_WovenGuard"),P));I->WeightLimit=.1f;Advance();I->WeightLimit=30;
+    TestTrue(TEXT("Capacity probe"),C->Start(TEXT("Recipe_WovenGuard"),P));I->bEnforceWeightLimit=true;I->WeightLimit=.1f;Advance();I->WeightLimit=30;
     TestEqual(TEXT("Capacity refusal preserves inputs"),I->Count(TEXT("Item_Cord")),1);TestEqual(TEXT("Capacity refusal no output"),I->Count(TEXT("Item_WovenGuard")),0);
     TestTrue(TEXT("Guard restarts"),C->Start(TEXT("Recipe_WovenGuard"),P));Advance();TestEqual(TEXT("One guard"),I->Count(TEXT("Item_WovenGuard")),1);
     for(const TCHAR* Id:{TEXT("Item_Fibre"),TEXT("Item_Cord"),TEXT("Item_Wood")}){TestEqual(TEXT("Exact input cost"),I->Count(Id),0);}

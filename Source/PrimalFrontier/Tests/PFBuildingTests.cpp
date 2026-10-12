@@ -201,7 +201,7 @@ bool FPFBuildingTest::RunTest(const FString&)
 
     // Withdraw: a full bag refuses without losing the stored item; replay is rejected.
     const auto Stored=Chest->Storage->GetStacks()[0];
-    I->WeightLimit=0.1f;
+    I->bEnforceWeightLimit=true;I->WeightLimit=0.1f;
     TestFalse(TEXT("Full bag leaves storage intact"),B->Transfer(false,Stored.StackId,1));
     I->WeightLimit=30;
     TestEqual(TEXT("Failed transfer conserves item"),Chest->Storage->Count(TEXT("Item_Food")),1);

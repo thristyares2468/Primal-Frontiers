@@ -101,7 +101,7 @@ bool FPFPlayerSaveFormat::Validate(const FPFPlayerSaveData& Data, const UPFItemC
         }
         Weight += static_cast<double>(Definition->Weight) * Stack.Quantity;
     }
-    if (!FMath::IsFinite(Weight) || Weight > Limits.Weight + 1.e-4)
+    if (!FMath::IsFinite(Weight) || Weight > MAX_flt || (Limits.bEnforceWeightLimit && Weight > Limits.Weight + 1.e-4))
     {
         return Refuse(Error, TEXT("Inventory exceeds weight capacity"));
     }

@@ -160,7 +160,7 @@ public:
         {
             Test->TestEqual(TEXT("Sort conserves stored food"),Chest->Storage->Count(TEXT("Item_Food")),2);
             Test->TestEqual(TEXT("Sort conserves freshness"),Chest->Storage->GetStacks()[0].ExpiresAt,Deadline);
-            I->WeightLimit=0.1f;Activate(ChestUI.Get(),TEXT("PF_Withdraw_0_Stack"));Wait(Now,0.4,17);return false;
+            I->bEnforceWeightLimit=true;I->WeightLimit=0.1f;Activate(ChestUI.Get(),TEXT("PF_Withdraw_0_Stack"));Wait(Now,0.4,17);return false;
         }
         if(Stage==17)
         {

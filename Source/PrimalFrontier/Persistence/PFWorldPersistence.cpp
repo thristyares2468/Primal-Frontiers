@@ -49,10 +49,10 @@ bool UPFWorldPersistence::Authority(FString& Error)
     if (!Items || !Buildings || !Crafting || !Creatures) { Error = TEXT("Missing persistence catalogs"); return false; }
     return true;
 }
-bool UPFWorldPersistence::PackPlayer(const FPFPlayerSaveData& Player, double Weight, FString& Out, FString& Error)
-{ return FPFWorldSaveFormat::PackPlayer(Player, *Items, Weight, Out, Error); }
-bool UPFWorldPersistence::UnpackPlayer(const FString& Text, double Weight, FPFPlayerSaveData& Out, FString& Error)
-{ return FPFWorldSaveFormat::UnpackPlayer(Text, *Items, Weight, Out, Error); }
+bool UPFWorldPersistence::PackPlayer(const FPFPlayerSaveData& Player, double Weight, FString& Out, FString& Error, bool bEnforceWeight)
+{ return FPFWorldSaveFormat::PackPlayer(Player, *Items, Weight, Out, Error,bEnforceWeight); }
+bool UPFWorldPersistence::UnpackPlayer(const FString& Text, double Weight, FPFPlayerSaveData& Out, FString& Error, bool bEnforceWeight)
+{ return FPFWorldSaveFormat::UnpackPlayer(Text, *Items, Weight, Out, Error,bEnforceWeight); }
 bool UPFWorldPersistence::Validate(const FPFWorldSaveData& Data, FString& Error)
 { return Authority(Error) && FPFWorldSaveFormat::Validate(Data, *Items, *Buildings, *Crafting, *Creatures, Error); }
 bool UPFWorldPersistence::Encode(const FPFWorldSaveData& Data, TArray<uint8>& Out, FString& Error)
@@ -141,7 +141,7 @@ bool UPFWorldPersistence::RestorePlayer(APFSurvivalPlayerController* PC, bool* b
     FPFPlayerSaveData Data;
     FPFProgressionRecord Progress;auto* Component=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();
     if (!Component || !UnpackProgression(Roster.Version,*Entry,Progress,Error) || !Component->CanRestore(Progress,Error) ||
-        !UnpackPlayer(Entry->Data, 30, Data, Error) || !FPFPlayerSaveAdapter::Restore(PC, Data, FMath::Max<int64>(0, PersistenceUtcNow() - Entry->CapturedUtc), Error) || !Component->Restore(Progress,Error))
+        !UnpackPlayer(Entry->Data, 30, Data, Error,false) || !FPFPlayerSaveAdapter::Restore(PC, Data, FMath::Max<int64>(0, PersistenceUtcNow() - Entry->CapturedUtc), Error) || !Component->Restore(Progress,Error))
     {
         UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Reconnect restoration refused: %s"), *Error); return false;
     }
@@ -162,7 +162,7 @@ void UPFWorldPersistence::Logout(APFSurvivalPlayerController* PC)
     if (!Authority(Error) || !FPFPlayerSaveAdapter::Capture(PC, Player, Error)) { return; }
     auto* Entry = Roster.Players.FindByPredicate([&](const auto& P) { return P.PlayerId == Player.PlayerId; });
     if (!Entry || !PS->Progression) { return; }auto Candidate=*Entry;FPFProgressionRecord Progress;
-    if(!PS->Progression->Capture(Progress,Error) || !PackPlayer(Player,30,Candidate.Data,Error) ||
+    if(!PS->Progression->Capture(Progress,Error) || !PackPlayer(Player,30,Candidate.Data,Error,false) ||
         !FPFWorldSaveFormat::PackProgression(Player.PlayerId,Progress,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Candidate.Progression,Error)){return;}
     Candidate.CapturedUtc=PersistenceUtcNow();auto UpdatedRoster=Roster;
     *UpdatedRoster.Players.FindByPredicate([&](const auto& P){return P.PlayerId==Player.PlayerId;})=MoveTemp(Candidate);
@@ -204,7 +204,7 @@ bool UPFWorldPersistence::Capture(FPFWorldSaveData& Out, FString& Error)
         auto* Entry = Data.Players.FindByPredicate([&](const auto& P) { return P.PlayerId == Player.PlayerId; });
         if (!Entry) { Error = TEXT("Player has no server-issued reconnect registration"); return false; }
         FPFProgressionRecord Progress;
-        if (!PS || !PS->Progression || !PS->Progression->Capture(Progress,Error) || !PackPlayer(Player, 30, Entry->Data, Error) ||
+        if (!PS || !PS->Progression || !PS->Progression->Capture(Progress,Error) || !PackPlayer(Player, 30, Entry->Data, Error,false) ||
             !FPFWorldSaveFormat::PackProgression(Player.PlayerId,Progress,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Entry->Progression,Error)) { return false; } Entry->CapturedUtc = PersistenceUtcNow();
     }
     for (TActorIterator<APFBuildPiece> It(GetWorld()); It; ++It)
@@ -237,7 +237,7 @@ bool UPFWorldPersistence::Capture(FPFWorldSaveData& Out, FString& Error)
         const auto& Contents = It->GetContents(); if (Contents.ExpiresAt > 0 && Contents.ExpiresAt <= Now) { continue; }
         FPFPickupSaveRecord P; P.Location = It->GetActorLocation(); FPFPlayerSaveData Bag; Bag.PlayerId = Contents.StackId;
         Bag.Inventory.Add({Contents.StackId, Contents.ItemId, Contents.Quantity, Contents.ExpiresAt > 0 ? Contents.ExpiresAt - Now : 0});
-        if (!PackPlayer(Bag, 100000, P.Data, Error)) { return false; } Data.Pickups.Add(P);
+        if (!PackPlayer(Bag, 100000, P.Data, Error,false)) { return false; } Data.Pickups.Add(P);
     }
     if (!Validate(Data, Error)) { return false; } Out = MoveTemp(Data); return true;
 }
@@ -326,7 +326,7 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
         if (!Record) { Error = TEXT("Connected player absent from save; restart with load enabled before joining"); return false; }
         FPlayerRestore Restore; Restore.PC = PC; Restore.Age = FMath::Max<int64>(0, PersistenceUtcNow() - Record->CapturedUtc);
         if (!PS->Progression || !UnpackProgression(Data.Version,*Record,Restore.Progression,Error) || !PS->Progression->CanRestore(Restore.Progression,Error) ||
-            !UnpackPlayer(Record->Data, 30, Restore.Data, Error) || !FPFPlayerSaveAdapter::CanRestore(PC, Restore.Data, Restore.Age, Error)) { return false; }
+            !UnpackPlayer(Record->Data, 30, Restore.Data, Error,false) || !FPFPlayerSaveAdapter::CanRestore(PC, Restore.Data, Restore.Age, Error)) { return false; }
         Players.Add(MoveTemp(Restore));
     }
     for (TActorIterator<APFBuildPiece> It(GetWorld()); It; ++It) { OldPieces.Add(*It); }
@@ -363,7 +363,7 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
     }
     for (const auto& P : Data.Pickups)
     {
-        FPFPlayerSaveData Bag; UnpackPlayer(P.Data, 100000, Bag, Error); const auto& S = Bag.Inventory[0];
+        FPFPlayerSaveData Bag; UnpackPlayer(P.Data, 100000, Bag, Error,false); const auto& S = Bag.Inventory[0];
         if (S.RemainingFreshnessSeconds > 0 && S.RemainingFreshnessSeconds <= Age) { continue; }
         const FTransform T(P.Location);
         auto* Pickup = GetWorld()->SpawnActorDeferred<APFItemPickup>(APFItemPickup::StaticClass(), T, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);

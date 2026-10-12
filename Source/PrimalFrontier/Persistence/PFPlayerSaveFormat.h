@@ -33,6 +33,7 @@ struct PRIMALFRONTIER_API FPFPlayerSaveLimits
 {
     int32 Slots = 8;
     double Weight = 30;
+    bool bEnforceWeightLimit = true; // trusted runtime policy; never encoded
     float MaxHealth = 100;
     float MaxStamina = 100;
 };

@@ -25,19 +25,19 @@ namespace
 }
 
 bool FPFWorldSaveFormat::PackPlayer(const FPFPlayerSaveData& Data, const UPFItemCatalog& Items,
-    double Weight, FString& Out, FString& Error)
+    double Weight, FString& Out, FString& Error, bool bEnforceWeight)
 {
-    TArray<uint8> Bytes; FPFPlayerSaveLimits Limits; Limits.Weight = Weight;
+    TArray<uint8> Bytes; FPFPlayerSaveLimits Limits; Limits.Weight = Weight; Limits.bEnforceWeightLimit=bEnforceWeight;
     if (!FPFPlayerSaveFormat::Encode(Data, Items, Limits, Bytes, Error)) { return false; }
     Out = FBase64::Encode(Bytes); return true;
 }
 bool FPFWorldSaveFormat::UnpackPlayer(const FString& Text, const UPFItemCatalog& Items,
-    double Weight, FPFPlayerSaveData& Out, FString& Error)
+    double Weight, FPFPlayerSaveData& Out, FString& Error, bool bEnforceWeight)
 {
     if (Text.Len() > (FPFPlayerSaveFormat::MaxEncodedBytes + 2) / 3 * 4) { return RefuseWorldRecord(Error, TEXT("Player record too large")); }
     TArray<uint8> Bytes;
     if (!FBase64::Decode(Text, Bytes)) { return RefuseWorldRecord(Error, TEXT("Invalid player encoding")); }
-    FPFPlayerSaveLimits Limits; Limits.Weight = Weight;
+    FPFPlayerSaveLimits Limits; Limits.Weight = Weight; Limits.bEnforceWeightLimit=bEnforceWeight;
     return FPFPlayerSaveFormat::Decode(Bytes, Items, Limits, Out, Error);
 }
 
@@ -51,10 +51,10 @@ bool FPFWorldSaveFormat::Validate(const FPFWorldSaveData& Data, const UPFItemCat
         Data.Creatures.Num() > 8 || Data.Spawners.Num() > 32 || Data.Pickups.Num() > 128)
     { return RefuseWorldRecord(Error, TEXT("Invalid world version/map/clock/record limits")); }
     TSet<FGuid> Players, Credentials, Stacks, Structures, CreatureIds;
-    auto Batches = [&](const FString& Text, double Weight, FGuid Expected, bool bSingle)
+    auto Batches = [&](const FString& Text, double Weight, FGuid Expected, bool bSingle, bool bEnforceWeight=true)
     {
         FPFPlayerSaveData Record;
-        if (!UnpackPlayer(Text, Items, Weight, Record, Error)) { return false; }
+        if (!UnpackPlayer(Text, Items, Weight, Record, Error,bEnforceWeight)) { return false; }
         if (Record.PlayerId != Expected || (bSingle && Record.Inventory.Num() != 1)) { return RefuseWorldRecord(Error, TEXT("Invalid inventory identity or pickup count")); }
         for (const auto& S : Record.Inventory)
         {
@@ -69,7 +69,7 @@ bool FPFWorldSaveFormat::Validate(const FPFWorldSaveData& Data, const UPFItemCat
             P.CapturedUtc <= 0 || P.CapturedUtc > FDateTime::UtcNow().ToUnixTimestamp() + 60)
         { return RefuseWorldRecord(Error, TEXT("Invalid/duplicate player identity or capture time")); }
         Players.Add(P.PlayerId); Credentials.Add(P.ReconnectCredential);
-        if (!Batches(P.Data, 30, P.PlayerId, false)) { return false; }
+        if (!Batches(P.Data, 30, P.PlayerId, false,false)) { return false; }
         if(Data.Version==1 && !P.Progression.IsEmpty()){return RefuseWorldRecord(Error,TEXT("V1 cannot contain progression"));}
         if(Data.Version==2)
         {
@@ -146,9 +146,9 @@ bool FPFWorldSaveFormat::Validate(const FPFWorldSaveData& Data, const UPFItemCat
     {
         FPFPlayerSaveData Bag;
         if (!ValidWorldPoint(P.Location)) { return RefuseWorldRecord(Error, TEXT("Invalid pickup location")); }
-        if (!UnpackPlayer(P.Data, Items, 100000, Bag, Error)) { return false; }
+        if (!UnpackPlayer(P.Data, Items, 100000, Bag, Error,false)) { return false; }
         if (Bag.Inventory.Num() != 1 || Bag.PlayerId != Bag.Inventory[0].StackId) { return RefuseWorldRecord(Error, TEXT("Invalid pickup inventory")); }
-        if (!Batches(P.Data, 100000, Bag.PlayerId, true)) { return false; }
+        if (!Batches(P.Data, 100000, Bag.PlayerId, true,false)) { return false; }
     }
     return true;
 }

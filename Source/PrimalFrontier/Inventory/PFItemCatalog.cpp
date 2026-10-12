@@ -29,7 +29,7 @@ UPFItemCatalog::UPFItemCatalog()
 
     // Found food: short 5-minute life so spoilage is visible in tests.
     Add(TEXT("Item_Food"),TEXT("Found food"),0.2f,TAG_PF_Food);
-    Items.Last().StackLimit=10; Items.Last().ShelfLifeSeconds=300; Items.Last().FoodRecovery=35; Items.Last().WaterRecovery=10;
+     Items.Last().ShelfLifeSeconds=300; Items.Last().FoodRecovery=35; Items.Last().WaterRecovery=10;
 
     // The primitive gathering tool: carrying one doubles gathering speed and raises melee damage.
     Add(TEXT("Item_Tool"),TEXT("Stone gathering tool"),2.f,TAG_PF_Tool);
@@ -38,14 +38,14 @@ UPFItemCatalog::UPFItemCatalog()
 
     // Processed food (M4 recipes): more nutrition and longer shelf life than raw food.
     Add(TEXT("Item_CookedFood"),TEXT("Cooked food"),0.2f,TAG_PF_Food);
-    Items.Last().StackLimit=10;Items.Last().ShelfLifeSeconds=900;Items.Last().FoodRecovery=55;Items.Last().WaterRecovery=10;
+    Items.Last().ShelfLifeSeconds=900;Items.Last().FoodRecovery=55;Items.Last().WaterRecovery=10;
     Add(TEXT("Item_DriedFood"),TEXT("Dried food"),0.15f,TAG_PF_Food);
-    Items.Last().StackLimit=10;Items.Last().ShelfLifeSeconds=1800;Items.Last().FoodRecovery=45;
+    Items.Last().ShelfLifeSeconds=1800;Items.Last().FoodRecovery=45;
 
     // M7 world resources: water is gathered and spent one portion at a time.
     Add(TEXT("Item_Fibre"),TEXT("Plant fibre"),0.1f,TAG_PF_Resource);
     Add(TEXT("Item_Water"),TEXT("Water portion (placeholder)"),0.5f,TAG_PF_Resource);
-    Items.Last().StackLimit=10;Items.Last().WaterRecovery=35;
+    Items.Last().WaterRecovery=35;
 
     // M12: existing plant fibre becomes a useful intermediate, then a better tool.
     Add(TEXT("Item_Cord"),TEXT("Fibre cord"),0.15f,TAG_PF_Resource);

@@ -121,7 +121,7 @@ bool FPFSaveValidationTest::RunTest(const FString&)
     Bad = ExamplePlayer(); Bad.Inventory[1].StackId = Bad.Inventory[0].StackId; Reject(TEXT("Duplicate stack ID"), Bad);
     Bad = ExamplePlayer(); Bad.Inventory[0].StackId.Invalidate(); Reject(TEXT("Missing stack ID"), Bad);
     Bad = ExamplePlayer(); Bad.Inventory[0].ItemId = TEXT("Item_Missing"); Reject(TEXT("Unknown item"), Bad);
-    for (const int32 Value : {0, -1, 21, MAX_int32})
+    for (const int32 Value : {0, -1, 999001, MAX_int32})
     {
         Bad = ExamplePlayer(); Bad.Inventory[0].Quantity = Value; Reject(TEXT("Invalid quantity"), Bad);
     }

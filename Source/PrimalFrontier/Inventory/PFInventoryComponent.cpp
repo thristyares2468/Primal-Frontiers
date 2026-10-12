@@ -33,7 +33,7 @@ bool UPFInventoryComponent::PreparePersistence(const TArray<FPFSavedItemStack>& 
         Error = TEXT("Persistence requires authority, catalog and finite nonnegative age"); return false;
     }
     FPFPlayerSaveData Check; Check.PlayerId = FGuid(1, 1, 1, 1); Check.Inventory = Saved;
-    FPFPlayerSaveLimits Limits; Limits.Slots = SlotLimit; Limits.Weight = WeightLimit;
+    FPFPlayerSaveLimits Limits; Limits.Slots = SlotLimit; Limits.Weight = WeightLimit; Limits.bEnforceWeightLimit=bEnforceWeightLimit;
     if (!FPFPlayerSaveFormat::Validate(Check, *Catalog, Limits, Error)) { return false; }
     TArray<FPFItemStack> Proposed;
     const double Now = ServerTime(GetWorld());
@@ -165,7 +165,7 @@ bool UPFInventoryComponent::AddExisting(FName Id,int32 Quantity,double Deadline)
     // Perishables need a future deadline; nonperishables must have none.
     if(!D || (D->ShelfLifeSeconds>0 ? Deadline<=ServerTime(GetWorld()) : Deadline!=0)){ return false; }
     PruneExpired();
-    if(SlotLimit<1 || SlotLimit>64 || !FMath::IsFinite(WeightLimit) || WeightLimit<=0 || double(GetWeight())+double(D->Weight)*Quantity>WeightLimit+0.0001){ return false; }
+    if(SlotLimit<1 || SlotLimit>64 || !FMath::IsFinite(WeightLimit) || WeightLimit<=0 || !FMath::IsFinite(double(GetWeight())+double(D->Weight)*Quantity) || double(GetWeight())+double(D->Weight)*Quantity>MAX_flt || (bEnforceWeightLimit && double(GetWeight())+double(D->Weight)*Quantity>WeightLimit+0.0001)){ return false; }
 
     // Work on a copy so a capacity failure part-way through changes nothing.
     auto Proposed=Stacks;
@@ -294,7 +294,7 @@ bool UPFInventoryComponent::Transform(const TArray<FPFItemStack>& Inputs,FName O
         if(!Item){return false;}
         Weight+=double(Item->Weight)*S.Quantity;
     }
-    if(SlotLimit<1 || SlotLimit>64 || !FMath::IsFinite(WeightLimit) || WeightLimit<=0 || !FMath::IsFinite(Weight) || Weight>WeightLimit+0.0001){return false;}
+    if(SlotLimit<1 || SlotLimit>64 || !FMath::IsFinite(WeightLimit) || WeightLimit<=0 || !FMath::IsFinite(Weight) || Weight>MAX_flt || (bEnforceWeightLimit && Weight>WeightLimit+0.0001)){return false;}
 
     // 3) Insert the output with a fresh deadline (crafted food starts its own shelf life).
     const double Deadline=D->ShelfLifeSeconds>0 ? ServerTime(GetWorld())+D->ShelfLifeSeconds : 0;

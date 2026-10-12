@@ -66,7 +66,7 @@ bool FPFCraftingTest::RunTest(const FString&)
 
     // Output doesn't fit (weight) -> nothing converts.
     TestTrue(TEXT("Start output-capacity test"),C->Start(TEXT("Recipe_Tool"),P));
-    I->WeightLimit=0.1f;
+    I->bEnforceWeightLimit=true;I->WeightLimit=0.1f;
     Advance();
     I->WeightLimit=30;
     TestEqual(TEXT("Output failure preserves ingredients"),I->Count(TEXT("Item_Wood")),3);
@@ -152,7 +152,7 @@ bool FPFGatheringTest::RunTest(const FString&)
     TestEqual(TEXT("Yield received"),I->Count(TEXT("Item_Wood")),2);
     TestFalse(TEXT("Spam rejected"),N->Gather(P));
     Advance(6);
-    I->WeightLimit=1;
+    I->bEnforceWeightLimit=true;I->WeightLimit=1;
     TestFalse(TEXT("Capacity failure"),N->Gather(P));
     TestEqual(TEXT("Capacity failure leaves resource"),N->HitsRemaining,2);
     I->WeightLimit=30;

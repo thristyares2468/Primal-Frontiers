@@ -22,7 +22,7 @@ bool FPFInventoryTest::RunTest(const FString&)
     FTestWorldWrapper Fixture; if(!Fixture.CreateTestWorld(EWorldType::Game)){return false;}
     auto* Owner=Fixture.GetTestWorld()->SpawnActor<AActor>(); Owner->SetReplicates(true);
     auto* I=NewObject<UPFInventoryComponent>(Owner); Owner->AddInstanceComponent(I);
-    I->Catalog=NewObject<UPFItemCatalog>(I); I->RegisterComponent();
+    I->Catalog=NewObject<UPFItemCatalog>(I); I->Catalog->Items[0].StackLimit=20; I->RegisterComponent();
     if(!Fixture.BeginPlayInTestWorld()){return false;}
     TestEqual(TEXT("Starts empty"),I->GetStacks().Num(),0);
     TestTrue(TEXT("Grant wood"),I->Grant(TEXT("Item_Wood"),15));

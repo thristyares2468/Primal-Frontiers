@@ -47,7 +47,7 @@ bool FPFToolProgressionTest::RunTest(const FString&)
     TestTrue(TEXT("Cord restart"),C->Start(TEXT("Recipe_Cord"),P));Advance();
     TestEqual(TEXT("Single cord output"),I->Count(TEXT("Item_Cord")),1);TestEqual(TEXT("Exact fibre cost"),I->Count(TEXT("Item_Fibre")),4);
     Advance();TestEqual(TEXT("No repeated output"),I->Count(TEXT("Item_Cord")),1);
-    TestTrue(TEXT("Second cord for capacity probe"),C->Start(TEXT("Recipe_Cord"),P));I->WeightLimit=0.1f;Advance();I->WeightLimit=30;
+    TestTrue(TEXT("Second cord for capacity probe"),C->Start(TEXT("Recipe_Cord"),P));I->bEnforceWeightLimit=true;I->WeightLimit=0.1f;Advance();I->WeightLimit=30;
     TestEqual(TEXT("Capacity refusal preserves fibre"),I->Count(TEXT("Item_Fibre")),4);TestEqual(TEXT("Capacity refusal no output"),I->Count(TEXT("Item_Cord")),1);
     I->Grant(TEXT("Item_Tool"),1);I->Grant(TEXT("Item_Wood"),2);
     TestEqual(TEXT("Baseline tier gathering"),I->GatheringHits(),2);TestEqual(TEXT("Baseline tier melee"),I->MeleeDamage(),35.f);

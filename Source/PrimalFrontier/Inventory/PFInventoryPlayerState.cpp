@@ -9,6 +9,7 @@
 APFInventoryPlayerState::APFInventoryPlayerState()
 {
     Inventory=CreateDefaultSubobject<UPFInventoryComponent>(TEXT("Inventory"));
+    Inventory->bEnforceWeightLimit=false;
     Crafting=CreateDefaultSubobject<UPFCraftingComponent>(TEXT("Crafting"));
     Progression=CreateDefaultSubobject<UPFProgressionComponent>(TEXT("Progression"));
 }

@@ -42,7 +42,7 @@ bool FPFInventoryWorldTest::RunTest(const FString&)
     if(!TestNotNull(TEXT("Dropped food actor"),Dropped)){return false;}
     TestEqual(TEXT("Drop conserves count"),I->Count(TEXT("Item_Food"))+Dropped->GetContents().Quantity,4);
     TestEqual(TEXT("Drop retains freshness"),Dropped->GetContents().ExpiresAt,Source.ExpiresAt);
-    I->WeightLimit=0.5;
+    I->bEnforceWeightLimit=true;I->WeightLimit=0.5;
     TestFalse(TEXT("Full inventory refuses pickup"),Dropped->TryPickup(Pawn));
     TestTrue(TEXT("Failed pickup leaves actor"),IsValid(Dropped));
     I->WeightLimit=30;

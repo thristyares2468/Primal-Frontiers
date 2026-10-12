@@ -26,6 +26,7 @@ namespace
     {
         FPFPlayerSaveLimits Result;
         Result.Slots = PC->GetInventory()->SlotLimit; Result.Weight = PC->GetInventory()->WeightLimit;
+        Result.bEnforceWeightLimit = PC->GetInventory()->bEnforceWeightLimit;
         const auto V = CastChecked<APFSurvivorCharacter>(PC->GetPawn())->Survival->GetVitals();
         Result.MaxHealth = V.MaxHealth; Result.MaxStamina = V.MaxStamina; return Result;
     }

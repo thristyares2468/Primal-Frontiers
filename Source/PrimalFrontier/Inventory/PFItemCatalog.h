@@ -39,7 +39,7 @@ struct FPFItemDefinition
     /** Item.Category.Resource / Food / Tool / Weapon / Protection. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FGameplayTag Category;
     /** Maximum quantity in one inventory slot (1..999000); individual items may tune lower. */
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="1",ClampMax="999000")) int32 StackLimit = 20;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="1",ClampMax="999000")) int32 StackLimit = PFItemLimits::MaxStackQuantity;
     /** Kilograms per unit; counts against UPFInventoryComponent::WeightLimit. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0.001")) float Weight = 0.5f;
     /** Soft reference so the catalog doesn't force-load every icon. Placeholder white square for now. */
