@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-12 M8/M11 basic close/relaunch Load — user-confirmed PASS
+
+User replied “Load PASS” after Save PASS, following the supplied close-game/relaunch/same-world Load test. Accept restoration of saved location, foundation/chest, nonperishable bag/chest wood totals and E access/ownership. Guide /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld in a separate rendered -game process. No exact world ID/new logs/screenshots/FPS or automated result supplied. Chest/basic Save/Load checks need no repeat. Crafted-item/survival-stat/filter retention and broader rendered full-loop/multiplayer remain unverified, optional rename not required for this result; G3 stays Doing for remaining scope. No new Personal task or full M8/M11 acceptance inferred. Docs-only acknowledgment, no rebuild necessary.
+
 ## 2026-10-12 M8/M11 Pause Save — user-confirmed partial PASS
 
 User replied “Save PASS” to the focused rendered standalone Save-without-reset test following the seven-step chest PASS. Accept Pause Save success and preservation of live location, inventory and foundation/chest/storage for that observation. Guide /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld, separate -game process, unused test world. No new build/log/screenshot/performance run or world ID recorded. Closing/relaunching and loading the same save is the next Personal action; saved filter, rename, crafted/full-loop state, rendered multiplayer and full M8/M11 gates remain separate. G3 stays Doing; no repeated save-only test requested.

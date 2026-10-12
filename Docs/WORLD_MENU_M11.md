@@ -2,7 +2,7 @@
 
 ## October12 manual checkpoint
 
-User reported “Save PASS” after the focused standalone Pause > Save world test: acknowledged success without resetting live location, bag, placed foundation/chest or contents. Bounded chest GUI/filter/Sort/Quick Store/conservation/closure was previously reported PASS. This accepts the save-only observation; no new engine/automation/log/screenshot/FPS evidence or exact world ID was supplied. Next check is close the game, relaunch the same menu command, select the same saved world and Load selected world; compare the saved nonperishable bag/chest totals, structures/ownership and location. Full close/relaunch restoration, filter persistence, rename, crafted state and multiplayer remain unverified. Existing G3 card stays Doing; do not repeat already accepted save-only/chest tests.
+User reported “Save PASS,” then “Load PASS” to the focused separate rendered standalone tests. Saving acknowledged success without live reset; after closing/relaunching the game and selecting the same saved world, location, foundation/chest, nonperishable bag/chest wood totals and owned E access were confirmed. Chest GUI/filter/Sort/Quick Store/conservation/closure was previously reported PASS. Accept this bounded basic save/restart/load result; do not repeat it. No new engine/automation/log/screenshot/FPS evidence or exact world ID was supplied. Crafted-item, survival-stat and saved-filter retention, optional rename and rendered multiplayer/full-loop acceptance remain separate; broader G3 stays Doing. No extra Personal task created.
 
 ## Current implementation and reference direction
 

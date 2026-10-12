@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 user-confirmed Load checkpoint
+
+Fresh UZVTTPLE G3 Doing readback after “Load PASS.” Immediately record basic close/relaunch/same-world restoration (location, foundation/chest, conserved wood counts and owned E access), following accepted Save/no-reset and chest tests. Correct stale next-Load text; no repeat of passed portions. Broader card stays Doing for remaining crafted/stats/filter/full-loop scope; rename stays optional and no additional Personal task is created. Preserve prior failures/guide/history, membership/priority/deadline. No new engine/build/artifact/FPS or full milestone pass. Scoped docs-only Sol publication follows.
+
 ## 2026-10-12 user-confirmed Save checkpoint
 
 Fresh UZVTTPLE G3 Doing readback after user “Save PASS.” Immediately record the bounded standalone Save-success/no-live-reset observation in card history/current preface and evidence docs. Preserve earlier failed observations as history; next Personal action is same-world close/relaunch Load. Keep G3 Doing for remaining restore/full-loop requirements, no new task/priority/membership/deadline change or full M8/M11 pass. No engine/build/test run occurred. Docs-only Sol publication follows.
