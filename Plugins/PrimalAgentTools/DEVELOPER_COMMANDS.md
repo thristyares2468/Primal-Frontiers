@@ -26,7 +26,7 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.CaptureTestScreenshot [label]` | Editor: synchronous rendered viewport PNG. Runtime/PIE unavailable. |
 | `PF.ExportTestReport [label]` | JSON command history to project-local `Saved/AutomationReports`. |
 | `PF.Teleport X Y Z [PlayerId]` | Real server-side possessed-character teleport. See safety contract below. |
-| `PF.GiveItem ItemId Quantity` | M3 server-only grant to the sole player, respecting catalog and capacity. Syntax requires an `Item_` identifier and positive int32 quantity. |
+| `PF.GiveItem ItemId Quantity` | M3 server-only grant to the sole player, respecting catalog and hard slots. Runtime quantities1..999,000; stackable resources/food999k, gear1. Player30kg is a soft movement threshold; chests retain hard capacity. Syntax requires an `Item_` identifier and positive int32 quantity. |
 | `PF.RemoveItem ItemId Quantity` | M3 server-only removal from the sole player's inventory; insufficient quantity is rejected atomically. |
 | `PF.SpawnCreature CreatureId` | M6 server-only catalog spawn near the sole player, with navigation, clearance and an eight-creature cap. IDs: Creature_Forager, Creature_Prowler. |
 | `PF.ResetCreatures` | M6 standalone L_M6Creatures only: pause spawn points and clear creature actors without loot or saved-map mutation. |

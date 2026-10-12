@@ -22,13 +22,16 @@
 // These buttons share the keyboard paths and their server-validated RPCs.
 void APFSurvivalPlayerController::BindGamepadControls()
 {
+    BindControl(EKeys::Gamepad_LeftThumbstick,&APFSurvivalPlayerController::StartSprint,TEXT("Traversal"),TEXT("Hold left stick click: sprint within weight/stamina limit"));
+    InputComponent->BindKey(EKeys::Gamepad_LeftThumbstick,IE_Released,this,&APFSurvivalPlayerController::StopSprint);
+    BindControl(EKeys::Gamepad_RightThumbstick,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Right stick click: climb a low clear ledge"));
     BindControl(EKeys::Gamepad_Special_Right,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Menu: pause / resume"),true);
     BindControl(EKeys::Gamepad_Special_Left,&APFSurvivalPlayerController::ToggleInventory,TEXT("General"),TEXT("View: open / close inventory"));
     BindControl(EKeys::Gamepad_FaceButton_Top,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Y: open / close crafting"));
     BindControl(EKeys::Gamepad_RightShoulder,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("RB: open picker / return to picker while placing"));
     BindControl(EKeys::Gamepad_FaceButton_Left,&APFSurvivalPlayerController::GamepadPrimary,TEXT("Contextual"),TEXT("X: inventory consume; craft selected recipe; otherwise interact"));
     BindControl(EKeys::Gamepad_FaceButton_Right,&APFSurvivalPlayerController::GamepadBack,TEXT("General"),TEXT("B: close overlay / resume"));
-    BindControl(EKeys::Gamepad_DPad_Up,&APFSurvivalPlayerController::GamepadUp,TEXT("Contextual"),TEXT("Inventory previous; crafting previous recipe; building next piece"));
+    BindControl(EKeys::Gamepad_DPad_Up,&APFSurvivalPlayerController::GamepadUp,TEXT("Contextual"),TEXT("Inventory previous; crafting previous recipe; building next piece; otherwise toggle falling glide"));
     BindControl(EKeys::Gamepad_DPad_Down,&APFSurvivalPlayerController::GamepadDown,TEXT("Contextual"),TEXT("Inventory next; crafting next recipe; building rotate"));
     BindControl(EKeys::Gamepad_DPad_Left,&APFSurvivalPlayerController::GamepadLeft,TEXT("Contextual"),TEXT("Inventory split; crafting cancel; building store one"));
     BindControl(EKeys::Gamepad_DPad_Right,&APFSurvivalPlayerController::GamepadRight,TEXT("Contextual"),TEXT("Inventory drop one; building take one"));
@@ -65,6 +68,7 @@ void APFSurvivalPlayerController::GamepadUp()
     if(bInventoryOpen){InventoryPrevious();}
     else if(bCraftingOpen && CraftingHUD){CraftingHUD->MoveSelection(-1);}
     else if(Building->bBuildMode){NextBuilding();}
+    else{Glide();}
 }
 
 /** D-down: next stack | dry | rotate piece. */

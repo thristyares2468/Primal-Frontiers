@@ -12,7 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PrimalFrontier.h"
 
-APrimalFrontierCharacter::APrimalFrontierCharacter()
+APrimalFrontierCharacter::APrimalFrontierCharacter(const FObjectInitializer& ObjectInitializer):Super(ObjectInitializer)
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);

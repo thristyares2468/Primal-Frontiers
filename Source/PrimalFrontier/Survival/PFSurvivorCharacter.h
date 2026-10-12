@@ -20,6 +20,7 @@
 #include "PFSurvivorCharacter.generated.h"
 class UPFPlayerSurvivalComponent;
 class UStaticMeshComponent;
+class UPFTraversalMovement;
 
 UCLASS()
 class PRIMALFRONTIER_API APFSurvivorCharacter : public APrimalFrontierCharacter
@@ -31,7 +32,22 @@ public:
     UFUNCTION(BlueprintPure,Category="Presentation") bool HasGatheringTool() const {return bHasGatheringTool;}
     /** Only the publicly held item identity replicates; the full inventory stays private. */
     UFUNCTION(BlueprintPure,Category="Presentation") FName GetHeldMeleeItem() const {return HeldMeleeItem;}
-    APFSurvivorCharacter();
+    APFSurvivorCharacter(const FObjectInitializer& ObjectInitializer=FObjectInitializer::Get());
+    UPFTraversalMovement* Traversal() const;
+    /** Public server-confirmed glide for remote physics/presentation; no bag contents. */
+    bool IsRemoteGliding() const {return bRemoteGliding;}
+    bool IsTraversalInputBlocked() const;
+    /** Own-pawn intentions. Movement replicates through Unreal saved moves. */
+    void SetSprintHeld(bool bHeld);
+    void ToggleGlide();
+    void CancelTraversal();
+    UFUNCTION(Server,Reliable) void ServerCancelTraversal();
+    UFUNCTION(Server,Reliable) void ServerClimb();
+    /** Server derives a <=120cm ledge and swept capsule clearance; never takes a target. */
+    bool TryClimb(FString& Reason);
+    UFUNCTION(Client,Reliable) void ClientClimbImpulse(FVector_NetQuantize100 Impulse);
+    UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="50",ClampMax="150")) float MaxClimbHeight=120;
+    UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="1",ClampMax="100")) float ClimbStaminaCost=15;
 
     /** Authoritative vitals. Recreated with each respawned pawn. */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Survival") TObjectPtr<UPFPlayerSurvivalComponent> Survival;
@@ -66,6 +82,8 @@ protected:
     UFUNCTION() void HandleDeath();
 
 private:
+    UPROPERTY(Replicated) bool bRemoteGliding=false;
+    double NextClimbTime=0;
     /** Server-derived gathering benefit, independently replicated from held melee identity. */
     UPROPERTY(Replicated) bool bHasGatheringTool=false;
     UPROPERTY(Replicated) FName HeldMeleeItem;

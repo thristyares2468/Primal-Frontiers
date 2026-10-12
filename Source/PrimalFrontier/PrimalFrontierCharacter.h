@@ -55,7 +55,7 @@ protected:
 	class UInputAction* MouseLookAction;
 	
 public:
-	APrimalFrontierCharacter();
+	APrimalFrontierCharacter(const FObjectInitializer& ObjectInitializer=FObjectInitializer::Get());
 
 protected:
 

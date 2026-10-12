@@ -1,5 +1,15 @@
 # Architecture and Design Decisions
 
+## 2026-10-12 — Soft player carrying and bounded first-person traversal
+
+Keep per-unit item weights. Stackable resources and food use a999,000 ceiling; independent tools/weapons/protection stay single items. Player30kg is a movement threshold, slots remain hard, and chests retain hard60kg capacity. Trusted runtime codec policy permits legal overweight player/pickup records, never a capacity supplied by a save/client. Preserve V1 inventory and V1–V2 world formats, GUID/freshness/strict finite validation and legacy reads.
+
+Use a focused CharacterMovement subclass installed through the standard FObjectInitializer default-subobject override; the template constructor accepts that initializer without changing its meshes/input. Sprint/glide intentions use custom saved-move bits, combination boundaries and correction replay. Server speed is derived from the owned bag/life/stamina; client intentions never include speed, weight or target transforms. Walk multiplier is max(0.1,1/max(1,weight/limit)^2); any excess prevents sprint/glide, >=110% prevents jumping/ledge climbing. Grounded sprint multiplies configured walk speed by1.5 and spends10stamina/sec; glide reduces gravity to15%, caps downward speed220cm/sec and spends8/sec.
+
+Climb is a short45–120cm ledge assist: server-derived forward/down traces, walkable top, full capsule/overhead sweeps,15stamina and1.5s cooldown. Server computes the bounded launch; reliable owner acknowledgment uses the same impulse and standard movement correction. Scoped falling braking/air-control guards restore normal values automatically. Clear intentions on modal menus/death and glide on landing; clear queued launch on death and refuse late corpse acknowledgment. Replicate only server-confirmed glide to simulated proxies for matching gravity; owner prediction stays independent and bag contents stay private. These are greybox abilities without external assets, equipment visuals, free wall climbing or third-person mode.
+
+Rendered tests remain uncapped. NullRHI movement transport diagnostics use a process-only120FPS configuration override to avoid startup saved-move queue exhaustion; personal settings are not persisted. This is not a FPS benchmark. Dedicated uncooked runs remain supported; installed packaged Server restriction and human/controller/16GB acceptance stay separate.
+
 ## 2026-10-12 — Separate build selection from Back/Pause
 
 B in placement returns to the picker instead of disabling building; B on picker closes it. Esc uses an explicit local BackOrPause binding for gameplay overlays and Pause only when none is open; focused modal widgets handle their own one-layer Back, with repeat guards on picker/chest/settings. Closing craft does not cancel the server job. P remains global secondary Pause. Keep existing authoritative close-storage RPC/placement and standalone-versus-multiplayer pause policy. User explicitly clarified standalone Esc is fine: no PIE input preprocessor, Editor shortcut interception or machine preferences change. MENU_NAVIGATION_M11.md distinguishes registered/Slate tests from human/device acceptance.

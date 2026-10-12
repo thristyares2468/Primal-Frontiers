@@ -5,6 +5,8 @@
 
 #include "Survival/PFSurvivalHUD.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
+#include "Survival/PFSurvivorCharacter.h"
+#include "Survival/PFTraversalMovement.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/CanvasPanel.h"
@@ -158,6 +160,13 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
     if(bDead){Warnings.Add(TEXT("You died - waiting for server respawn..."));}
     else
     {
+        if(const auto* P=Cast<APFSurvivorCharacter>(Pawn))
+        {
+            const auto* M=P->Traversal();
+            if(M->CarryRatio()>1){Warnings.Add(M->CanCarryJump()?TEXT("OVERWEIGHT - slower; sprint unavailable"):TEXT("OVERWEIGHT - slower; sprint/jump/climb unavailable"));}
+            else if(M->IsGliding()){Warnings.Add(TEXT("GLIDING - V / D-up to stop"));}
+            else if(M->IsSprinting()){Warnings.Add(TEXT("SPRINTING - uses stamina"));}
+        }
         if(V.Health<=V.MaxHealth*0.25f){Warnings.Add(TEXT("CRITICAL HEALTH"));}
         if(V.Hunger<=0){Warnings.Add(TEXT("STARVING - eat fresh food"));}
         else if(V.Hunger<=25){Warnings.Add(TEXT("LOW FOOD - find food"));}

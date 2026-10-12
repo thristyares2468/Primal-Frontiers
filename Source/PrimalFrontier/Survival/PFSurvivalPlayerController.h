@@ -123,6 +123,11 @@ protected:
     UFUNCTION(Server, Reliable) void ServerInteract();
 
 private:
+    void StartSprint();
+    void StopSprint();
+    void Climb();
+    void Glide();
+    void ClearTraversalInput();
     UPROPERTY(Transient) EPFLocalReconnectStatus LocalReconnectStatus=EPFLocalReconnectStatus::Unknown;
     UPROPERTY(Transient) EPFPlayerSetupStatus PlayerSetupStatus=EPFPlayerSetupStatus::Unconfirmed;
     void BindControl(FKey Key,void (APFSurvivalPlayerController::*Handler)(),const TCHAR* Context,const TCHAR* Action,bool bWhenPaused=false);

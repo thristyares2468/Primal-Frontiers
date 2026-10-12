@@ -56,11 +56,11 @@ public:
     /** Item definitions. Loaded from DA_ItemCatalog at BeginPlay if not assigned (tests assign their own). */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory") TObjectPtr<UPFItemCatalog> Catalog;
     /** Maximum number of stacks (valid range 1..64). Bags default to 8, storage sets 8. */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") int32 SlotLimit=8;
-    /** Maximum total weight in kg. Bags 30, storage 60. */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") float WeightLimit=30;
+    UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") int32 SlotLimit=8;
+    /** Carry threshold in kg (soft player bag30); hard container capacity (storage60). */
+    UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") float WeightLimit=30;
     /** Player carry threshold is soft; chest/container capacity is hard. Trusted configuration. */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") bool bEnforceWeightLimit=true;
+    UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category="Inventory") bool bEnforceWeightLimit=true;
 
     // ---- Queries ----
     const TArray<FPFItemStack>& GetStacks() const { return Stacks; }

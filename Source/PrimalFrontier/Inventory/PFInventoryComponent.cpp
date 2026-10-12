@@ -64,6 +64,9 @@ void UPFInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME_CONDITION(UPFInventoryComponent,Stacks,COND_OwnerOnly);
+    DOREPLIFETIME_CONDITION(UPFInventoryComponent,SlotLimit,COND_OwnerOnly);
+    DOREPLIFETIME_CONDITION(UPFInventoryComponent,WeightLimit,COND_OwnerOnly);
+    DOREPLIFETIME_CONDITION(UPFInventoryComponent,bEnforceWeightLimit,COND_OwnerOnly);
 }
 
 bool UPFInventoryComponent::Authority() const { return GetOwner() && GetOwner()->HasAuthority(); }

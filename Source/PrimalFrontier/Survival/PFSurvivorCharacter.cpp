@@ -4,6 +4,8 @@
 // GameMode; this file wires input/movement/presentation to those rules.
 
 #include "Survival/PFSurvivorCharacter.h"
+#include "Survival/PFTraversalMovement.h"
+#include "Survival/PFSurvivalPlayerController.h"
 #include "Settings/PFGameUserSettings.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Survival/PFSurvivalGameMode.h"
@@ -19,7 +21,8 @@
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
 
-APFSurvivorCharacter::APFSurvivorCharacter()
+APFSurvivorCharacter::APFSurvivorCharacter(const FObjectInitializer& ObjectInitializer)
+    :Super(ObjectInitializer.SetDefaultSubobjectClass<UPFTraversalMovement>(ACharacter::CharacterMovementComponentName))
 {
     bReplicates = true;
     Survival = CreateDefaultSubobject<UPFPlayerSurvivalComponent>(TEXT("Survival"));
@@ -60,6 +63,7 @@ void APFSurvivorCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(APFSurvivorCharacter,bHasGatheringTool);
     DOREPLIFETIME(APFSurvivorCharacter,HeldMeleeItem);
+    DOREPLIFETIME_CONDITION(APFSurvivorCharacter,bRemoteGliding,COND_SimulatedOnly);
 }
 
 void APFSurvivorCharacter::Tick(float DeltaSeconds)
@@ -79,6 +83,8 @@ void APFSurvivorCharacter::Tick(float DeltaSeconds)
     // Server derives the flag from the authoritative inventory (on PlayerState).
     if(HasAuthority())
     {
+        const bool Gliding=Traversal()->IsGliding();
+        if(bRemoteGliding!=Gliding){bRemoteGliding=Gliding;ForceNetUpdate();}
         const auto* I=GetPlayerState()?GetPlayerState()->FindComponentByClass<UPFInventoryComponent>():nullptr;
         const bool Equipped=I && I->GatheringHits()>1 && !Survival->IsDead();
         if(bHasGatheringTool!=Equipped)
@@ -150,7 +156,7 @@ float APFSurvivorCharacter::TakeDamage(float Amount, const FDamageEvent& Event, 
 
 bool APFSurvivorCharacter::CanJumpInternal_Implementation() const
 {
-    return Survival->CanSpendStamina(JumpStaminaCost) && Super::CanJumpInternal_Implementation();
+    return !IsTraversalInputBlocked() && Traversal()->CanCarryJump() && Survival->CanSpendStamina(JumpStaminaCost) && Super::CanJumpInternal_Implementation();
 }
 
 void APFSurvivorCharacter::OnJumped_Implementation()
@@ -166,9 +172,11 @@ void APFSurvivorCharacter::DoMove(float Right, float Forward)
 
 void APFSurvivorCharacter::HandleDeath()
 {
+    Traversal()->ClearTraversal();
     // Runs on server and clients so the corpse stops everywhere at once.
     StopJumping();
     GetCharacterMovement()->StopMovementImmediately();
+    GetCharacterMovement()->ClearAccumulatedForces(); // a queued climb must not relaunch a corpse
     GetCharacterMovement()->DisableMovement();
     SetActorEnableCollision(false);
     if (HasAuthority())

@@ -1,5 +1,11 @@
 # M1/M3 extension — Weight, large stacks and traversal
 
+## Final bounded checkpoint - October12
+
+All five implementation/verification slices below are complete within technical scope. Stack/archive3121657 and softcarryfb69157 published. Traversal final Editor/Game/native5, inspected720p1, finaldedicatedone-client2/two-client3 passed; exact paths/controls/failures/limits in [TRAVERSAL_M1.md](TRAVERSAL_M1.md). Default30kgsoft/33kgjump cutoff, Shift sprint/F lowledge/V glide and controller equivalents implemented. Original audit/intended behavior below is historical planning, not current missing implementation.
+
+1440p readiness failed in windowed/offscreen attempts and is explicitly pending by user choice. No new retry/application closure; physical feel/hot-plug, sustainedFPS,16GB and remaining full human milestones separate. No new assets or next milestone started.
+
 User-authorized October12,2026; parent Trello https://trello.com/c/DMKjODqr. B/Esc M11 repair fb2b403 is published/checked off first. This request does not complete remaining manual gates or authorize unrelated art/world expansion.
 
 ## Audit and intended behavior

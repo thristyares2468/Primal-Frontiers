@@ -1,5 +1,11 @@
 # Trello task workflow
 
+## 2026-10-12 weight and traversal technical completion
+
+Fresh Programming/Testing/card reads reconciled current request before closing bounded PsPTp8Oq and parent DMKjODqr. Retained original descriptions as history; exact final Editor/Game/native5/rendered720p1/networkone2/two3 evidence and failures/limits copied. Both moved/marked/read back Done complete=true for technical implementation only. Earlier stack5JX9gnCr3121657 and carryPRleHRMhfb69157 remain complete. No full manual/milestone/FPS certificate.
+
+User explicitly leaves1440p pending after windowed/offscreen readiness timeouts. Created separate Testing ToDo incomplete https://trello.com/c/3jhJPMGF (Personal2) GPU availability/deferred with exact level, launch, one later Start action, AI commands, expectations, report paths and limits; no deadline/immediate action/application closure. Prefix changes toAI only after user frees GPU. Existing DctLv1lR Personal3 physical-controller/hot-plug card remains ToDo incomplete; current G4 traversal/menus guide copied earlier with historical description retained. Unrelated deadlines/assignments/priorities/manual acceptance preserved. Docs/TRAVERSAL_M1.md retains complete evidence. Scoped Sol publication follows; no next milestone begun.
+
 ## 2026-10-12 B/Esc navigation completion
 
 Fresh current AI Ieu24Nin/G2/G3 reads before writes. Final Editor/Game/native2/rendered4,19PNG/raw baseline and private guards passed. Immediately evidenceupdated, moved and marked complete Ieu24Nin Done; readback complete=true. Current G2 B/Esc/R guide copied (15,654chars), preserved Personal1/Doing/member/deadline/history and previous accepted checks. G3 accepted Done retained with current B/Esc controls. No manual/full-M11 checkbox assumed. User's subsequent weight/999k/encumbrance/sprint/climb/glide request is the next independent task after scoped Sol publication, requiring a fresh implementation audit/Doing card. MENU_NAVIGATION_M11.md retains exact tests/limits.

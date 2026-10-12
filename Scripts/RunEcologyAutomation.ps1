@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet(1,2)][int]$Players=1,
-    [ValidateSet('Ecology','Lifecycle','Building')][string]$TestCase='Ecology',
+    [ValidateSet('Ecology','Lifecycle','Building','Traversal')][string]$TestCase='Ecology',
     [switch]$SimulateLagLoss,
     [ValidateRange(1024,65535)][int]$Port=17993,
     [ValidateRange(60,300)][int]$TimeoutSeconds=150,
@@ -16,7 +16,7 @@ if(!(Test-Path -LiteralPath $editor)){throw 'Editor executable unavailable'}
 if(Get-Process UnrealEditor,UnrealEditor-Cmd -ErrorAction SilentlyContinue){throw 'Close the existing Unreal process before isolated ecology automation'}
 if(Get-NetUDPEndpoint -LocalPort $Port -ErrorAction SilentlyContinue){throw 'Diagnostic port already occupied'}
 foreach($path in @($root,$EngineRoot)){if($path -match '["\x00-\x1f]'){throw 'Unsupported path quote/control character'}}
-$run=$(if($TestCase -eq 'Building'){'M11Building'}else{'M13Ecology'})+$TestCase+$Players+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
+$run=$(if($TestCase -eq 'Building'){'M11Building'}elseif($TestCase -eq 'Traversal'){'M1Traverse'}else{'M13Ecology'})+$TestCase+$Players+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
 $slot='AutomationM13Ecology'+[Guid]::NewGuid().ToString('N')
 $profile='Eco'+[Guid]::NewGuid().ToString('N').Substring(0,12)
 $reports=Join-Path $root 'Saved\AutomationReports'
@@ -41,11 +41,11 @@ function Get-SettingsSnapshot {
 foreach($generation in @('a','b')){if(Test-Path -LiteralPath (Join-Path $persistence ($slot+'.'+$generation+'.pfs'))){throw 'Refusing reused diagnostic slot'}}
 $before=@(Get-PersonalSnapshot);$settingsBefore=@(Get-SettingsSnapshot)
 $null=New-Item -ItemType Directory -Path $report
-$filter=if($TestCase -eq 'Ecology'){'PF.Creatures.EcologyLive'}elseif($TestCase -eq 'Building'){'PF.Building.Live'}else{'PF.Creatures.Live'}
-$flag=if($TestCase -eq 'Ecology'){'-PFRunEcologyLiveTests'}elseif($TestCase -eq 'Building'){'-PFRunBuildingLiveTests'}else{'-PFRunCreatureLiveTests'}
+$filter=if($TestCase -eq 'Ecology'){'PF.Creatures.EcologyLive'}elseif($TestCase -eq 'Building'){'PF.Building.Live'}elseif($TestCase -eq 'Traversal'){'PF.Traversal.Live'}else{'PF.Creatures.Live'}
+$flag=if($TestCase -eq 'Ecology'){'-PFRunEcologyLiveTests'}elseif($TestCase -eq 'Building'){'-PFRunBuildingLiveTests'}elseif($TestCase -eq 'Traversal'){'-PFRunTraversalLiveTests'}else{'-PFRunCreatureLiveTests'}
 $lag=if($SimulateLagLoss){75}else{0};$loss=if($SimulateLagLoss){1}else{0}
-$map=if($TestCase -eq 'Ecology'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}elseif($TestCase -eq 'Building'){'/Game/PrimalFrontier/Maps/L_M5Building'}else{'/Game/PrimalFrontier/Maps/L_M6Creatures'}
-$summary=[ordered]@{Run=$run;Map=$map;TestCase=$TestCase;Players=$Players;NullRHI=$true;ExpectedFilter=$filter;Slot=$slot;ProfilePrefix=$profile;Port=$Port;OutgoingLagMs=$lag;OutgoingLossPercent=$loss;Passed=$false;TimedOut=$false;Processes=@();CleanupFailures=@();Failure=$null}
+$map=if($TestCase -eq 'Ecology'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}elseif($TestCase -eq 'Building'){'/Game/PrimalFrontier/Maps/L_M5Building'}elseif($TestCase -eq 'Traversal'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}else{'/Game/PrimalFrontier/Maps/L_M6Creatures'}
+$summary=[ordered]@{Run=$run;Map=$map;TestCase=$TestCase;Players=$Players;NullRHI=$true;HeadlessFrameRate=$(if($TestCase -eq 'Traversal'){120}else{0});ExpectedFilter=$filter;Slot=$slot;ProfilePrefix=$profile;Port=$Port;OutgoingLagMs=$lag;OutgoingLossPercent=$loss;Passed=$false;TimedOut=$false;Processes=@();CleanupFailures=@();Failure=$null}
 $runs=@();$watch=[Diagnostics.Stopwatch]::StartNew();$exitCode=1
 function Sample-Memory($taskRun) {
     if(!$taskRun.Process.HasExited){
@@ -61,6 +61,9 @@ try {
         $url=if($i -eq 0){$summary.Map}else{'127.0.0.1:'+$Port}
         $mode=if($i -eq 0){'-server -game -port='+$Port}else{'-game'}
         $arguments='"{0}" {1} {2} -nullrhi -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig -PktLag={3} -PktLoss={4} {5} -PFExpectedPlayers={6} -PFSaveSlot={7} -PFIdentityProfile={8} -ExecCmds="Automation RunTests {9}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{10}" -abslog="{11}"' -f (Join-Path $root 'PrimalFrontier.uproject'),$url,$mode,$lag,$loss,$flag,$Players,$slot,($profile+$i),$filter,$taskReport,$log
+        # Headless movement transport diagnostic: prevent unbounded NullRHI loops
+        # exhausting saved moves. Rendered FPS tests remain uncapped.
+        if($TestCase -eq 'Traversal'){$arguments=$arguments.Replace('Automation RunTests '+$filter,'t.MaxFPS 120,Automation RunTests '+$filter);$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120'}
         # M6 navigation-only regression is deliberately outside the persistence map whitelist.
         if($TestCase -ne 'Ecology'){$arguments=$arguments.Replace(' -PFSaveSlot='+$slot,'')}
         $process=Start-Process -FilePath $editor -ArgumentList $arguments -WorkingDirectory $root -WindowStyle Hidden -PassThru

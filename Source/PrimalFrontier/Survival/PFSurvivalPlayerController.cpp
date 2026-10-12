@@ -7,6 +7,7 @@
 // Gamepad bindings are in PFGamepadInput.cpp and reuse the same handlers.
 
 #include "Survival/PFSurvivalPlayerController.h"
+#include "Survival/PFSurvivorCharacter.h"
 #include "PFRequestCodes.h"
 #include "Survival/PFSurvivalHUD.h"
 #include "Survival/PFRecoveryPickup.h"
@@ -132,6 +133,10 @@ void APFSurvivalPlayerController::SetupInputComponent()
     Super::SetupInputComponent();
     RegisteredControlHints.Reset();
     BindGamepadControls();
+    BindControl(EKeys::LeftShift,&APFSurvivalPlayerController::StartSprint,TEXT("Traversal"),TEXT("Hold to sprint; requires stamina and weight within carry limit"));
+    InputComponent->BindKey(EKeys::LeftShift,IE_Released,this,&APFSurvivalPlayerController::StopSprint);
+    BindControl(EKeys::F,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Climb a clear low ledge ahead (45-120 cm), costs stamina"));
+    BindControl(EKeys::V,&APFSurvivalPlayerController::Glide,TEXT("Traversal"),TEXT("Toggle glide while falling; uses stamina, unavailable overweight"));
     // Legacy key bindings for the greybox survival actions. Movement/look/jump come
     // from the template Enhanced Input context (IMC_Default) via the base class.
     // P is the reliable pause key in PIE, where Esc may end the Play session.
@@ -222,6 +227,7 @@ bool APFSurvivalPlayerController::SaveWorldFromMenu()
 
 void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
 {
+    if(bOpen){ClearTraversalInput();}
     if(!IsLocalController() || bOpen==bPauseMenuOpen){return;}
     if(bOpen && !PauseMenu)
     {
@@ -345,6 +351,7 @@ UPFInventoryComponent* APFSurvivalPlayerController::GetInventory() const
 
 void APFSurvivalPlayerController::ToggleInventory()
 {
+    ClearTraversalInput();
     if(!bPauseMenuOpen)
     {
         bInventoryOpen=!bInventoryOpen;
@@ -453,6 +460,7 @@ void APFSurvivalPlayerController::ToggleCrafting()
 }
 void APFSurvivalPlayerController::SetCraftingMenuOpen(bool bOpen)
 {
+    if(bOpen){ClearTraversalInput();}
     if((bOpen && bPauseMenuOpen) || bOpen==bCraftingOpen){return;}
     if(bOpen){SetBuildingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}}
     bCraftingOpen=bOpen;
@@ -512,6 +520,7 @@ void APFSurvivalPlayerController::ToggleBuilding()
 
 void APFSurvivalPlayerController::SetBuildingMenuOpen(bool bOpen)
 {
+    if(bOpen){ClearTraversalInput();}
     if(!IsLocalController() || !GetLocalPlayer() || !BuildingMenu || (bOpen && bPauseMenuOpen) || bBuildingMenuOpen==bOpen){return;}
     if(bOpen){SetCraftingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}bInventoryOpen=false;Building->bBuildMode=true;BuildingMenu->RefreshMenu();}
     bBuildingMenuOpen=bOpen;BuildingMenu->SetVisibility(bOpen?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
@@ -532,6 +541,7 @@ bool APFSurvivalPlayerController::SelectBuildingPiece(FName Id)
 
 void APFSurvivalPlayerController::SetStorageMenuOpen(bool bOpen)
 {
+    if(bOpen){ClearTraversalInput();}
     if(!IsLocalController() || !GetLocalPlayer() || !StorageMenu || (bOpen && bPauseMenuOpen) || bStorageMenuOpen==bOpen){return;}
     if(bOpen)
     {
