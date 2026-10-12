@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-12 M11 forward walls and R rotation — technical PASS
+
+Reported sideways-only walls used fixed world-axis default edges. Wall/Door/Window now derive the cardinal ahead edge from pawn view, with clockwise R offset; one contextual R cancels only in crafting, T removed. Shared server recomputation/ownership/reach/collision/cost and actual saved transforms remain; no assets/private preferences/saves changed. Standard non-Shipping InputCore dependency supports actual-key network fixture. Final Editor8.89s/Game42.68s clean; native4/rendered720p+1440p2/shared-overlay1/one-client2/two-client75ms1%3 passed12 final records, no testseverity/timeout/fatal/ensure/assertion, all20finalPNG inspected. Raw known rendered26warning14Pythonerror/network21/14 match baseline, no new categories. Snapshot guards pass; maxrendered3.382working5.609privateGiB, host31.93GiB; no sustainedFPS/minimum16GB/human pass. [WALL_ROTATION_M11.md](WALL_ROTATION_M11.md) has exact names/commands/reports, retained linker failures/capture correction and limits. Bounded AI https://trello.com/c/Kz0bGzDT Done/readback; Personal G2 remains Doing with focused R/ahead retest, accepted chest/persistence/Pause/Settings preserved. Full M11 and next M13 authored ecology stay separately gated.
+
 ## 2026-10-12 M11 settings transactions — user-confirmed PASS
 
 User replied “Settings Pass” to Accessibility HUD-size Cancel/Apply/Resume/original-value restoration in the same standalone open-world game. Accept draft cancellation, visible applied HUD size and restored input. No fresh engine/build/automation/log/FPS evidence; display safety, audio, other settings/device/restart/full-M11 acceptance remain separate. Do not repeat this test. Existing G2 stays Doing for remaining scope; no new Personal card.

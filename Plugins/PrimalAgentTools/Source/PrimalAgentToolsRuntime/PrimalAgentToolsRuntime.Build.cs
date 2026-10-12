@@ -12,6 +12,7 @@ public class PrimalAgentToolsRuntime : ModuleRules
             throw new BuildException("PrimalAgentToolsRuntime must never be built for Shipping.");
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine" });
-        PrivateDependencyModuleNames.AddRange(new[] { "Json", "PrimalFrontier", "NavigationSystem" });
+        // InputCore is required by development-only live tests of registered keys.
+        PrivateDependencyModuleNames.AddRange(new[] { "Json", "PrimalFrontier", "NavigationSystem", "InputCore" });
     }
 }

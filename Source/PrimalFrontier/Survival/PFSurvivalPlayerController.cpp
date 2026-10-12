@@ -150,11 +150,10 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindControl(EKeys::One,&APFSurvivalPlayerController::CraftTool,TEXT("Crafting"),TEXT("Craft primitive tool"));
     BindControl(EKeys::Two,&APFSurvivalPlayerController::CookFood,TEXT("Crafting"),TEXT("Cook food"));
     BindControl(EKeys::Three,&APFSurvivalPlayerController::DryFood,TEXT("Crafting"),TEXT("Dry food"));
-    BindControl(EKeys::R,&APFSurvivalPlayerController::CancelCraft,TEXT("Crafting"),TEXT("Cancel craft; ingredients are not consumed"));
+    BindControl(EKeys::R,&APFSurvivalPlayerController::RotateOrCancelCraft,TEXT("Crafting / Building"),TEXT("Rotate building clockwise; in crafting, cancel without consuming ingredients"));
     // Building (M5) and attack (M6, left click outside overlays)
     BindControl(EKeys::B,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("Open / close building"));
     BindControl(EKeys::N,&APFSurvivalPlayerController::NextBuilding,TEXT("Building"),TEXT("Select next piece"));
-    BindControl(EKeys::T,&APFSurvivalPlayerController::RotateBuilding,TEXT("Building"),TEXT("Rotate preview"));
     BindControl(EKeys::LeftMouseButton,&APFSurvivalPlayerController::PlaceBuilding,TEXT("Building / world"),TEXT("Place preview; attack when overlays are closed"));
     BindControl(EKeys::H,&APFSurvivalPlayerController::DemolishBuilding,TEXT("Building"),TEXT("Demolish owned targeted piece"));
     BindControl(EKeys::J,&APFSurvivalPlayerController::DamageBuilding,TEXT("Building"),TEXT("Developer damage to targeted piece"));
@@ -548,6 +547,11 @@ void APFSurvivalPlayerController::NextBuilding()
 }
 
 void APFSurvivalPlayerController::RotateBuilding(){if(Building->bBuildMode){Building->Rotation=(Building->Rotation+1)%4;}}
+void APFSurvivalPlayerController::RotateOrCancelCraft()
+{
+    if(bCraftingOpen){CancelCraft();}
+    else if(Building->bBuildMode){RotateBuilding();}
+}
 
 // Left click / RT: place in build mode; otherwise (no overlay open) attack.
 void APFSurvivalPlayerController::PlaceBuilding()

@@ -79,6 +79,30 @@ bool FPFBuildingTest::RunTest(const FString&)
     if(!TestNotNull(TEXT("Grounded foundation placed"),Base)){AddError(B->Feedback);return false;}
     TestEqual(TEXT("Cost paid exactly"),I->Count(TEXT("Item_Wood")),28);
     TestNull(TEXT("Duplicate footprint rejected"),B->Place(TEXT("Build_Foundation"),0));
+    const FVector OriginalPosition=P->GetActorLocation();
+    P->SetActorLocation(Base->GetActorLocation()+FVector(0,0,100));
+    for(FName PieceId:{FName(TEXT("Build_Wall")),FName(TEXT("Build_Door")),FName(TEXT("Build_Window"))})
+    {
+        for(int32 Heading=0;Heading<4;++Heading)
+        {
+            const FVector Forward=FRotator(0,Heading*90,0).Vector();
+            Aim(Base->GetActorLocation()+Forward*100+FVector(0,0,10));
+            for(int32 Quarter=0;Quarter<4;++Quarter)
+            {
+                FTransform Candidate;APFBuildPiece* Parent=nullptr;FString Why;
+                if(TestTrue(TEXT("All view headings and clockwise offsets remain valid"),B->Candidate(PieceId,Quarter,Candidate,Parent,Why)))
+                {
+                    const FVector Edge=FRotator(0,(Heading+Quarter)*90,0).Vector();
+                    TestTrue(TEXT("Zero offset places ahead, R offsets cycle platform edges"),Candidate.GetLocation().Equals(Base->GetActorLocation()+Edge*200+FVector(0,0,160),0.01));
+                    TestTrue(TEXT("Frame normal faces selected edge"),Candidate.GetRotation().GetForwardVector().Equals(Edge,0.01));
+                    TestEqual(TEXT("Aimed owned platform remains support"),Parent,Base);
+                }
+                else{AddError(Why);}
+            }
+        }
+    }
+    TestEqual(TEXT("Previewing every heading never charges wood"),I->Count(TEXT("Item_Wood")),28);
+    P->SetActorLocation(OriginalPosition);
     Aim(FVector(0,0,20));
     auto* Wall=B->Place(TEXT("Build_Wall"),0);
     if(!TestNotNull(TEXT("Supported wall placed"),Wall)){AddError(B->Feedback);return false;}

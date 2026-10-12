@@ -91,6 +91,12 @@ bool FPFGamepadTest::RunTest(const FString&)
     // 3) Contextual routing.
     Press(EKeys::Gamepad_RightShoulder);
     TestTrue(TEXT("RB opens building"),PC->Building->bBuildMode);
+    const int32 InitialRotation=PC->Building->Rotation;
+    Press(EKeys::R);
+    TestEqual(TEXT("R rotates in building context"),PC->Building->Rotation,(InitialRotation+1)%4);
+    TestFalse(TEXT("Old T rotation key removed from help"),Described.Contains(EKeys::T));
+    const int32 RBindings=PC->InputComponent->KeyBindings.FilterByPredicate([](const auto& B){return B.Chord.Key==EKeys::R && B.KeyEvent==IE_Pressed;}).Num();
+    TestEqual(TEXT("One contextual R binding, no cancel/rotate ambiguity"),RBindings,1);
     FVector Eye;
     FRotator Look;
     P->GetActorEyesViewPoint(Eye,Look);
@@ -100,6 +106,8 @@ bool FPFGamepadTest::RunTest(const FString&)
     Press(EKeys::Gamepad_Special_Left);
     TestTrue(TEXT("View opens bag"),PC->IsInventoryOpen());
     TestFalse(TEXT("Bag closes build overlay"),PC->Building->bBuildMode);
+    const int32 IdleRotation=PC->Building->Rotation;Press(EKeys::R);
+    TestEqual(TEXT("R does not rotate while bag is open"),PC->Building->Rotation,IdleRotation);
     Press(EKeys::Gamepad_DPad_Left);
     TestEqual(TEXT("D-left splits without duplicating"),PC->GetInventory()->Count(TEXT("Item_Wood")),5);
     TestEqual(TEXT("Split makes two stacks"),PC->GetInventory()->GetStacks().Num(),2);
@@ -111,6 +119,8 @@ bool FPFGamepadTest::RunTest(const FString&)
     Press(EKeys::Gamepad_FaceButton_Top);
     TestTrue(TEXT("Y opens crafting"),PC->IsCraftingOpen());
     TestFalse(TEXT("Craft closes bag"),PC->IsInventoryOpen());
+    Press(EKeys::R);
+    TestEqual(TEXT("Craft cancel context never rotates building"),PC->Building->Rotation,IdleRotation);
     Press(EKeys::Gamepad_FaceButton_Right);
     TestFalse(TEXT("B closes crafting"),PC->IsCraftingOpen());
 

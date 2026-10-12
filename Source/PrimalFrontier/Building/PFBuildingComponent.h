@@ -12,7 +12,7 @@
 //
 // Snapping rules (400 cm grid):
 //  - Foundation: grid-snapped on flat ground (centre + four corners checked).
-//  - Wall/Door:  on an owned platform's edge, facing the chosen quarter turn.
+//  - Wall/Door/Window: cardinal edge ahead of the view, plus clockwise quarter turns.
 //  - Floor/Ceiling: 320 cm above the platform that holds the wall/door you aim at.
 //  - Storage:    on an owned platform, snapped to a 100 cm sub-grid.
 //

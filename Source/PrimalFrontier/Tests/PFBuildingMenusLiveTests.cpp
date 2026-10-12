@@ -50,7 +50,7 @@ public:
             float Scale=1;FParse::Value(FCommandLine::Get(),TEXT("PFHUDScale="),Scale);UPFGameUserSettings::Get()->Preferences.HUDScale=FMath::Clamp(Scale,0.75f,1.5f);
             auto* V=PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();V->HungerDrainPerSecond=0;V->ThirstDrainPerSecond=0;
             PC->GetPawn()->SetActorLocation(FVector(-1200,-1100,100));
-            Test->TestTrue(TEXT("Fixture wood grant"),PC->GetInventory()->Grant(TEXT("Item_Wood"),12));
+            Test->TestTrue(TEXT("Fixture wood grant"),PC->GetInventory()->Grant(TEXT("Item_Wood"),14));
             Test->TestTrue(TEXT("Fixture stone grant"),PC->GetInventory()->Grant(TEXT("Item_Stone"),3));
             Test->TestTrue(TEXT("Fixture fresh food"),PC->GetInventory()->AddExisting(TEXT("Item_Food"),2,UPFInventoryComponent::ServerTime(PC->GetWorld())+90));
             for(const auto& S:PC->GetInventory()->GetStacks()){if(S.ItemId==TEXT("Item_Food")){Deadline=S.ExpiresAt;}}
@@ -74,13 +74,38 @@ public:
             Test->TestEqual(TEXT("UI selects requested piece"),B->SelectedId(),Id);
             Test->TestFalse(TEXT("Choice releases modal input"),PC->IsBuildingMenuOpen() || PC->bShowMouseCursor || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
             if(++Choice<8){Press(EKeys::B);Press(EKeys::B);Wait(Now,0.2,2);return false;}
-            Test->TestEqual(TEXT("Selection alone consumes no wood"),I->Count(TEXT("Item_Wood")),12);
+            Test->TestEqual(TEXT("Selection alone consumes no wood"),I->Count(TEXT("Item_Wood")),14);
             PC->SelectBuildingPiece(TEXT("Build_Foundation"));Aim(FVector(-800,-1200,0));Press(EKeys::LeftMouseButton);Wait(Now,0.4,3);return false;
         }
         if(Stage==3)
         {
             for(TActorIterator<APFBuildPiece> It(PC->GetWorld());It;++It){if(It->Kind==EPFBuildKind::Foundation && It->IsOwnedBy(PC->PlayerState)){Base=*It;break;}}
             if(!Base.IsValid()){Test->AddError(TEXT("Bound placement did not create foundation: ")+B->Feedback);return true;}
+            PC->GetPawn()->SetActorLocation(Base->GetActorLocation()+FVector(0,-350,90));
+            PC->SelectBuildingPiece(TEXT("Build_Wall"));B->Rotation=0;Aim(Base->GetActorLocation()+FVector(0,50,10));
+            Press(EKeys::R);Test->TestEqual(TEXT("Bound R rotates preview once"),B->Rotation,1);
+            for(int32 N=0;N<3;++N){Press(EKeys::R);}Test->TestEqual(TEXT("Four R presses return to forward edge"),B->Rotation,0);
+            Test->TestEqual(TEXT("Rotation alone spends no wood"),I->Count(TEXT("Item_Wood")),12);
+            Wait(Now,0.3,300);return false;
+        }
+        if(Stage==300){Capture(TEXT("wall_ahead_preview"));Wait(Now,0.5,301);return false;}
+        if(Stage==301){if(!ShotExists()){return false;}Press(EKeys::LeftMouseButton);Wait(Now,0.4,302);return false;}
+        if(Stage==302)
+        {
+            APFBuildPiece* Ahead=nullptr;
+            for(TActorIterator<APFBuildPiece> It(PC->GetWorld());It;++It){if(It->Kind==EPFBuildKind::Wall && It->IsOwnedBy(PC->PlayerState)){Ahead=*It;break;}}
+            if(!Ahead){Test->AddError(TEXT("Actual forward wall request failed: ")+B->Feedback);return true;}
+            Test->TestTrue(TEXT("Wall is ahead on +Y, not at sideways world +X"),Ahead->GetActorLocation().Equals(Base->GetActorLocation()+FVector(0,200,160),0.01));
+            Test->TestEqual(TEXT("Real forward wall charges two wood"),I->Count(TEXT("Item_Wood")),10);
+            PC->GetPawn()->SetActorLocation(Base->GetActorLocation()+FVector(0,-450,90));
+            Aim(Ahead->GetActorLocation());Wait(Now,0.3,3025);return false;
+        }
+        if(Stage==3025){Capture(TEXT("wall_ahead_placed"));Wait(Now,0.5,303);return false;}
+        if(Stage==303)
+        {
+            if(!ShotExists()){return false;}
+            for(TActorIterator<APFBuildPiece> It(PC->GetWorld());It;++It){if(It->Kind==EPFBuildKind::Wall && It->IsOwnedBy(PC->PlayerState)){It->Destroy();break;}}
+            PC->GetPawn()->SetActorLocation(FVector(-1200,-1100,100));
             Press(EKeys::B);Press(EKeys::B);Activate(Picker.Get(),TEXT("PF_BuildChoice_Build_Storage"));Aim(Base->GetActorLocation()+FVector(0,0,10));Press(EKeys::LeftMouseButton);Wait(Now,0.4,4);return false;
         }
         if(Stage==4)

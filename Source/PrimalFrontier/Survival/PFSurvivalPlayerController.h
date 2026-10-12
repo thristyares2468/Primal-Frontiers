@@ -154,6 +154,7 @@ private:
     void ToggleBuilding();
     void NextBuilding();
     void RotateBuilding();
+    void RotateOrCancelCraft();
     void PlaceBuilding();         // also performs the melee attack when no overlay is open
     void DemolishBuilding();
     void DamageBuilding();

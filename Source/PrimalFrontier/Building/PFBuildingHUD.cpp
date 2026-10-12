@@ -52,12 +52,12 @@ void UPFBuildingHUD::NativeTick(const FGeometry& Geometry,float Delta)
     Font(Heading,20);Font(Text,18);Font(Result,16);Font(Controls,14);
     Heading->SetText(FText::FromString(TEXT("BUILDING & STORAGE")));
     Controls->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?
-        TEXT("B / RB close | N / D-up next\nT / D-down rotate | Click / RT place\nH / LB demolish | J debug damage\nE / X door/storage | U / D-left store\nO / D-right take first stored item"):TEXT("")));
+        TEXT("B / RB close | N / D-up next\nR / D-down rotate | Click / RT place\nH / LB demolish | J debug damage\nE / X door/storage | U / D-left store\nO / D-right take first stored item"):TEXT("")));
 
     FString Lines;
     // Selected piece, its cost, rotation and the preview's validity message.
     const auto* D=B->Catalog?B->Catalog->Find(B->SelectedId()):nullptr;
-    if(D){Lines+=FString::Printf(TEXT("%s | %d wood | %d degrees\nPreview (advisory): %s\n"),*D->Name.ToString(),D->WoodCost,B->Rotation*90,*B->PreviewMessage);}
+    if(D){Lines+=FString::Printf(TEXT("%s | %d wood | R offset %d degrees\nPreview (advisory): %s\n"),*D->Name.ToString(),D->WoodCost,B->Rotation*90,*B->PreviewMessage);}
     else{Lines+=TEXT("Building definition unavailable\n");}
     if(auto* Target=B->TracedPiece()){Lines+=FString::Printf(TEXT("Target: %s | Health %.0f\n"),*Target->DefinitionId.ToString(),Target->Health);}
     // Open storage contents (owner-only replicated); food keeps ageing inside.

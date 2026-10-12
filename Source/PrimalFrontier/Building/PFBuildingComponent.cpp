@@ -112,8 +112,13 @@ bool UPFBuildingComponent::Candidate(FName Id,int32 Q,FTransform& Out,APFBuildPi
         if(!InReach(Parent)){return false;}
         if(D->Kind==EPFBuildKind::Wall || D->Kind==EPFBuildKind::Door || D->Kind==EPFBuildKind::Window)
         {
-            // On the platform edge chosen by the quarter turn (200 cm out, 160 cm up).
+            // Start on the cardinal platform edge ahead of the player's view.
+            // Quarter turns cycle clockwise from that heading, rather than starting
+            // on world +X (which appears sideways when the player faces +Y).
+            // Preview and server placement both derive the heading from this pawn.
             if(!Parent->IsPlatform()){return false;}
+            const int32 Facing=FMath::RoundToInt(FRotator::NormalizeAxis(Look.Yaw)/90.0);
+            RotationValue.Yaw=((Facing+Q)%4+4)%4*90.0;
             Location=Parent->GetActorLocation()+RotationValue.RotateVector(FVector(200,0,160));
         }
         else if(D->Kind==EPFBuildKind::Storage)

@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 wall orientation and R repair
+
+Fresh bounded Kz0bGzDT and Personal iH8I2Qfc readback before mutations. AI wall/input technical repair passed final Editor/Game, native4/rendered3/network5 and all20PNG/log baseline/hash guards. Immediately updated evidence, moved and read back Kz0bGzDT Done before another task. G2 current description copied from revised exact guide (R/ahead placement and one small retest), preserved title/priority/Doing/member/deadline/history and accepted chest/solo persistence/Pause/Settings. User requested continued Trello checkoffs; only verified scope was closed. WALL_ROTATION_M11.md retains exact evidence/limits; Sol scoped publication follows. Do not infer full M11 or close manual window/stair/device gates.
+
 ## 2026-10-12 user-confirmed settings transactions
 
 Fresh iH8I2Qfc G2 Doing readback after “Settings Pass.” Immediately record bounded HUD-size Cancel/Apply/Resume/restored-original preference acceptance and remove stale next-settings instructions. Preserve broad G2 Doing for remaining building/UI/device scope, all priority/member/deadline/history and already accepted chest/Pause/solo-persistence portions. No new card or full milestone pass. Docs-only Sol publication; no engine/build result inferred.

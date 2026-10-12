@@ -1,10 +1,12 @@
 # Playing and testing Primal Frontier
 
+October12 building controls: R rotates the first-person placement preview clockwise; T is no longer bound. Wall/Door/Window offset0 chooses the cardinal platform edge ahead of your current view. Keep looking the same way while cycling R; turning changes that starting edge. Aim down at your visible foundation/floor to attach a frame. R remains Cancel inside crafting; it does not cancel a job while you are rotating a building. Other pieces keep their existing world-grid rules. [WALL_ROTATION_M11.md](WALL_ROTATION_M11.md) records technical evidence; remaining human building acceptance is separate.
+
 Updated 2026-10-09. Use **L_PrimalFrontier_OpenWorld** for current open-world/M8 manual acceptance; **L_M7SurvivalArena** remains the small integration regression map. All 35 intended native regressions passed in 32+3 supported batches on df648eb; this is not one combined run or a claim about every later source change. One-/two-client NullRHI checks passed within their recorded scope. Settings were checked in rendered play; sustained walking, overnight survival and rendered full-loop persistence remain unverified. Exact current evidence and next action: [CURRENT_STATE.md](CURRENT_STATE.md). **L_M6Creatures** is the earlier creature fixture. Installed engine reports **5.8.3**, despite the requested 5.8.2 baseline.
 
 For numbered steps copied into Trello, use [TRELLO_TEST_GUIDES.md](TRELLO_TEST_GUIDES.md). G1 is route/overnight, G2 UI/storage/settings, G3 rendered save/restart, G4 physical controller, G5 distribution, G6 source details (no level), G7 listening. Related cards may cite one actual session rather than ask for repeat playtests. A guide is not a passed test.
 
-Building/storage now shares the original theme: selected piece/preview/storage countdown in an inset, separate last server result, controls below. Existing B/N/T/Click/E/U/O behavior and no-preservation storage remain unchanged. Use the same G2 building/storage checks; [BUILDING_THEME_M11.md](BUILDING_THEME_M11.md) records exact bounded automated/screenshot evidence. No full human shelter/storage acceptance inferred.
+Building/storage now shares the original theme: selected piece/preview/storage countdown in an inset, separate last server result, controls below. Existing B/N/R/Click/E/U/O behavior and no-preservation storage remain unchanged. Use the same G2 building/storage checks; [BUILDING_THEME_M11.md](BUILDING_THEME_M11.md) records exact bounded automated/screenshot evidence. No full human shelter/storage acceptance inferred.
 
 ## Open the game
 
@@ -70,7 +72,7 @@ M11 bag readability: only four rows are visible at once. The displayed row range
 | Pause | P opens/resumes; Esc also works in a standalone game window |
 | Inventory | Tab open/close; Up/Down select; X split half; G drop one; Q consume one |
 | Crafting | C open/close; Up/Down select; Enter craft selected; 1 tool; 2 cook; 3 dry; R cancel; clickable row/action buttons |
-| Building | B opens eight-piece picker; click/1–8 chooses; T rotate; left click place; B exits placement, B again reopens picker; N optional next while placing |
+| Building | B opens eight-piece picker; click/1–8 chooses; R rotate; left click place; B exits placement, B again reopens picker; N optional next while placing |
 | Owned structures | E door/storage; H demolish in build mode; J debug damage in build mode |
 | Storage | Aim at owned chest, E opens its window; Store/Take1 or whole stack; Sort chest; Quick Store; Chest settings item filters then Apply/Cancel; Close/E/Tab returns to first person |
 | Console | Backtick/tilde, type command, Enter, close console |

@@ -25,6 +25,8 @@
 #include "Building/PFBuildingComponent.h"
 #include "Building/PFBuildPiece.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/InputComponent.h"
+#include "InputCoreTypes.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -121,6 +123,20 @@ public:
             }
             else if(Stage==1)
             {
+                // Move each player to the south of its new platform once. This
+                // exercises a +Y view rather than accidentally relying on world +X.
+                for(TActorIterator<APFBuildPiece> It(W);It;++It)
+                {
+                    if(It->Kind!=EPFBuildKind::Foundation || PositionedPlatforms.Contains(It->PersistentId)){continue;}
+                    for(auto* P:Players)
+                    {
+                        if(It->Builder!=P->PlayerState){continue;}
+                        P->GetPawn()->SetActorLocation(It->GetActorLocation()+FVector(0,-350,90));
+                        P->GetPawn()->ForceNetUpdate();
+                        PositionedPlatforms.Add(It->PersistentId);
+                        break;
+                    }
+                }
                 // Wait until every client has finished its sequence (chest damaged to 75, one food inside).
                 int32 Ready=0;
                 for(TActorIterator<APFBuildPiece> It(W);It;++It){if(It->Kind==EPFBuildKind::Storage && It->Health==75 && It->Storage->Count(TEXT("Item_Food"))==1){++Ready;}}
@@ -169,18 +185,34 @@ public:
             }
             else if(Stage==2 && Base)
             {
+                if(!PC->GetPawn()->GetActorLocation().Equals(Base->GetActorLocation()+FVector(0,-350,90),30)){return false;}
                 Test->TestEqual(TEXT("Replicated owner"),Base->Builder.Get(),PC->PlayerState.Get());
-                Aim(Base->GetActorLocation());
+                Aim(Base->GetActorLocation()+FVector(0,50,10));
                 Advance(3);
             }
             else if(Stage==3 && Now-Changed>0.7)
             {
-                B->ServerPlace(TEXT("Build_Wall"),0);
+                PC->SelectBuildingPiece(TEXT("Build_Wall"));B->Rotation=0;
+                int32 BoundR=0;
+                for(auto& Binding:PC->InputComponent->KeyBindings)
+                {
+                    if(Binding.Chord.Key==EKeys::R && Binding.KeyEvent==IE_Pressed)
+                    {
+                        ++BoundR;Binding.KeyDelegate.Execute(Binding.Chord.Key);
+                        Test->TestEqual(TEXT("Client R rotates once"),B->Rotation,1);
+                        for(int32 Turn=0;Turn<3;++Turn){Binding.KeyDelegate.Execute(Binding.Chord.Key);}
+                    }
+                }
+                Test->TestEqual(TEXT("Client has one contextual R binding"),BoundR,1);
+                Test->TestEqual(TEXT("Client four R turns wrap ahead"),B->Rotation,0);
+                B->ServerPlace(TEXT("Build_Wall"),B->Rotation);
                 Advance(4);
             }
             else if(Stage==4 && Wall)
             {
                 Test->TestEqual(TEXT("Replicated support"),Wall->Support.Get(),Base);
+                Test->TestTrue(TEXT("Server placed wall ahead of +Y client view"),Wall->GetActorLocation().Equals(Base->GetActorLocation()+FVector(0,200,160),1));
+                Test->TestTrue(TEXT("Replicated wall rotation follows +Y view"),Wall->GetActorForwardVector().Equals(FVector(0,1,0),0.01));
                 Aim(Wall->GetActorLocation());
                 Advance(5);
             }
@@ -293,6 +325,7 @@ private:
     double Started,Changed=0,Deadline=0;
     int32 Stage=0,Expected=1;
     bool bClient=false;
+    TSet<FGuid> PositionedPlatforms;
 };
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFBuildingLiveTest,"PF.Building.Live",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)
