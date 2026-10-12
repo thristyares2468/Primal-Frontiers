@@ -67,6 +67,10 @@ public:
         }
         for (TActorIterator<APFBuildPiece> It(W); It; ++It) { ++Buildings; }
         for (TActorIterator<APFCreature> It(W); It; ++It) { ++Creatures; }
+        // The authored open world now has a dormant daytime ridge. This legacy
+        // full-loop fixture needs both existing residents; select night on the
+        // server without overriding map-owned policy or creating fake actors.
+        if(!bClient && !bRestore && Stage==0 && Clock && Creatures!=2){Clock->SetHour(21);}
         if (!V || !Clock || Wood.Num() < 3 || Stone.Num() < Expected || Food.IsEmpty() || Creatures != 2) { return false; }
         Wood.Sort([](const auto& A, const auto& B) { return A.GetActorLocation().Y < B.GetActorLocation().Y; });
         Stone.Sort([](const auto& A, const auto& B) { return A.GetActorLocation().X < B.GetActorLocation().X; });

@@ -8,6 +8,7 @@ param(
     [switch]$Protection,
     [switch]$Knowledge,
     [switch]$WeaponKnowledge,
+    [switch]$AuthoredEcology,
     [ValidateRange(1024, 65535)][int]$Port = 17989,
     [ValidateRange(30, 600)][int]$TimeoutSeconds = 210,
     [string]$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8',
@@ -55,15 +56,27 @@ try {
     }
 
     $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff') + '_' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
-    if(@(@($ToolProgression,$WeaponProgression,$Protection,$Knowledge) | Where-Object {$_}).Count -gt 1){throw 'Choose one progression fixture per run'}
+    if(@(@($ToolProgression,$WeaponProgression,$Protection,$Knowledge,$AuthoredEcology) | Where-Object {$_}).Count -gt 1){throw 'Choose one fixture per run'}
     if($WeaponKnowledge -and !$Knowledge){throw 'WeaponKnowledge requires the Knowledge fixture'}
     $prefix = $(if($WeaponKnowledge){'M12KnowledgeWeaponLive'}elseif($Knowledge){'M12KnowledgeLive'}elseif($Protection){'M12ProtectionLive'}elseif($WeaponProgression){'M12WeaponLive'}elseif($ToolProgression){'M12ToolLive'}else{'M8Live'}) + $Players + '_' + $stamp
     $testFilter = if($Knowledge){'PF.Progression.KnowledgeLive'}elseif($Protection){'PF.Crafting.ProtectionLive'}elseif($WeaponProgression){'PF.Crafting.WeaponProgressionLive'}elseif($ToolProgression){'PF.Crafting.ToolProgressionLive'}else{'PF.Persistence.Live'}
     $testFlag = if($Knowledge){'-PFRunKnowledgeTests'}elseif($Protection){'-PFRunProtectionTests'}elseif($WeaponProgression){'-PFRunWeaponProgressionTests'}elseif($ToolProgression){'-PFRunToolProgressionTests'}else{'-PFRunPersistenceLiveTests'}
     if($WeaponKnowledge){$testFlag+=' -PFRunWeaponKnowledgeTests'}
+    if($AuthoredEcology){$prefix='M13AuthoredLive'+$Players+'_'+$stamp;$testFilter='PF.Creatures.AuthoredLive';$testFlag='-PFRunAuthoredEcologyTests'}
     $slot = 'Automation' + $prefix
     # Profiles are private local test state. Same aliases and endpoint survive both phases.
     $profile = 'PF' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
+    function Get-PrivateSnapshot {
+        $saveRoot=Join-Path $root 'Saved\Persistence'
+        if(Test-Path -LiteralPath $saveRoot){Get-ChildItem -LiteralPath $saveRoot -File -Filter '*.pfs' |
+            Where-Object {!$_.Name.StartsWith($slot+'.') -and !$_.Name.StartsWith('Identity_'+$profile)} |
+            Sort-Object FullName | ForEach-Object {$_.FullName+':'+(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}}
+        $configRoot=Join-Path $root 'Saved\Config'
+        if(Test-Path -LiteralPath $configRoot){Get-ChildItem -LiteralPath $configRoot -Recurse -File |
+            Where-Object {$_.Name -in @('GameUserSettings.ini','Scalability.ini')} |
+            Sort-Object FullName | ForEach-Object {$_.FullName+':'+(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}}
+    }
+    $privateBefore=@(Get-PrivateSnapshot)
     $reportRoot = Join-Path $root 'Saved\AutomationReports'
     $logRoot = Join-Path $root 'Saved\Logs'
     $summaryDirectory = Join-Path $reportRoot $prefix
@@ -76,6 +89,7 @@ try {
         SimulatedOutgoingLagMs = $(if ($SimulateLagLoss) { 75 } else { 0 })
         SimulatedOutgoingLossPercent = $(if ($SimulateLagLoss) { 1 } else { 0 })
         PhaseTimeoutSeconds = $TimeoutSeconds; Phases = @(); Failure = $null
+        PrivateFileCount=$privateBefore.Count; PrivateFilesUnchanged=$false
         Limit = 'Automation only; raw log review, rendering, manual gameplay, packaged server and 16GB certification remain separate'
     }
     $exitCode = 1
@@ -96,6 +110,7 @@ try {
                 $load = if ($phase -eq 'Restart') { '-PFLoadSave' } else { '' }
                 $network = if ($SimulateLagLoss) { '-PktLag=75 -PktLoss=1' } else { '-PktLag=0 -PktLoss=0' }
                 $arguments = '"{0}" {1} {2} -nullrhi -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig {3} {9} -PFExpectedPlayers={4} -PFSaveSlot={5} {6} -ExecCmds="Automation RunTests {10}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{7}" -abslog="{8}"' -f $projectFile, $url, $mode, $network, $Players, $slot, $load, $report, $log, $testFlag, $testFilter
+                if($AuthoredEcology){$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120';$arguments=$arguments.Replace('Automation RunTests '+$testFilter,'t.MaxFPS 120,Automation RunTests '+$testFilter)}
                 $process = Start-Process -FilePath $editor -ArgumentList $arguments -WorkingDirectory $root -WindowStyle Hidden -PassThru
                 $run = [pscustomobject]@{ Name = $name; Role = $role; Process = $process; Report = $report; Log = $log; Working = 0L; Private = 0L }
                 $runs += $run
@@ -163,6 +178,7 @@ try {
                     if($WeaponProgression){$contract=if($run.Role -eq 'Server'){$text -match $(if($phase -eq 'Restart'){'Weapon restart server restored every owner'}else{'Weapon server conservation and save verified'})}else{$text -match $(if($phase -eq 'Restart'){'Weapon restart client identity, tier and privacy verified'}else{'Weapon owned RPC loop, tier and privacy verified'})}}
                     if($Protection){$contract=if($run.Role -eq 'Server'){$text -match $(if($phase -eq 'Restart'){'Protection restart server restored every owner'}else{'Protection server damage, conservation and save verified'})}else{$text -match $(if($phase -eq 'Restart'){'Protection restart client identity, health and privacy verified'}else{'Protection owned RPC loop, health and privacy verified'})}}
                     if($Knowledge){$contract=if($run.Role -eq 'Server'){$text -match $(if($phase -eq 'Restart'){'Knowledge restart server restored independent records'}else{'Knowledge server exact owned purchase,private record and save verified'})}else{$text -match $(if($phase -eq 'Restart'){'Knowledge restart client identity,spent points,private records and refusal verified'}else{'Knowledge owned RPC,deduplicated spending,independent privacy and client refusal verified'})}}
+                    if($AuthoredEcology){$contract=$text -match $(if($run.Role -eq 'Server'){'Authored ecology server day/night, stable residents and real save/restart verified'}else{'Authored ecology client replicated dawn residents, reconnect and authority refusal verified'})}
                     $exactTest = $verdict.TestCount -eq 1 -and @($verdict.Tests | Where-Object { $_.Name -eq $testFilter }).Count -eq 1
                     $entry = [ordered]@{
                         Run = $run.Name; Role = $run.Role; Passed = ($reportExit -eq 0 -and $verdict.Passed -and $exactTest -and $fatal -eq 0 -and $contract -and $networkApplied)
@@ -186,11 +202,13 @@ try {
             $summary | ConvertTo-Json -Depth 9 | Set-Content -LiteralPath (Join-Path $summaryDirectory 'run-summary.json') -Encoding UTF8
         }
         $allPassed = $phaseRecord.Processes.Count -eq ($Players + 1) -and @($phaseRecord.Processes | Where-Object { -not $_.Passed }).Count -eq 0
-        $rolesCovered = $Knowledge -or $Protection -or $WeaponProgression -or $ToolProgression -or (@($phaseRecord.Processes | Where-Object { $_.StorageOwnerRole }).Count -eq 1 -and
+        $rolesCovered = $AuthoredEcology -or $Knowledge -or $Protection -or $WeaponProgression -or $ToolProgression -or (@($phaseRecord.Processes | Where-Object { $_.StorageOwnerRole }).Count -eq 1 -and
             @($phaseRecord.Processes | Where-Object { $_.StorageForeignRole }).Count -eq ($Players - 1))
         if ($phaseRecord.CleanupFailures.Count -or -not $allPassed -or -not $rolesCovered) { throw 'Live report, cleanup or RPC/privacy/profile evidence failed' }
         $phaseRecord.Passed = $true
     }
+    $summary.PrivateFilesUnchanged=@(Compare-Object $privateBefore @(Get-PrivateSnapshot)).Count -eq 0
+    if(!$summary.PrivateFilesUnchanged){throw 'Private saves or default settings changed'}
     $summary.Passed = $true
     $exitCode = 0
 }

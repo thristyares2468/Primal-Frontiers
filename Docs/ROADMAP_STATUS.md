@@ -1,5 +1,9 @@
 # Roadmap and open-world direction
 
+## Current delivery update - October 13, 2026
+
+Authored open-world biome/day-night spawning passed its bounded Editor/Game/native/rendered/restart gate; exact21 successful records and limits in AUTHORED_ECOLOGY_M13.md. Stable existing point identities/save layout and private state preserved. Full M13 remains open for creature/loot variety and actual human ecology/performance acceptance; original adaptation proposals remain unimplemented. M7/G8/solo persistence/chest/Pause/Settings user acceptance retained; stale duplicate solo cards corrected. Full M11/device/rendered multiplayer/provenance remain separate. Weight/traversal fb2667a published,1440 explicitly deferred. No next full milestone or art integration certified.
+
 ## Current delivery state — October 12, 2026
 
 The user's [FULL_PROJECT_ROADMAP.md](FULL_PROJECT_ROADMAP.md) is the M0–M25 delivery sequence. This section supersedes the dated historical statements below. [CURRENT_STATE.md](CURRENT_STATE.md) contains the current resume point; [MILESTONES.md](MILESTONES.md) retains each verification result.

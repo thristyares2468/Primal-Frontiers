@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-13 M13 authored open-world ecology - bounded technical PASS
+
+Supported Editor Python creates DA_OpenWorldSpawnPolicies and narrowly assigns Shore/Ridge to existing nonstreamed PFCreatureSpawner_0/_1 in /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld. Names/positions/clock/navigation/resources/save layout preserved. Real daytime dormancy/night spawn/dawn retention/new-server GUIDs verified. Final Editor11.31s/Game34.39s clean; native6, oneclient Create/Restart4, twoclient75ms1%6, rendered720/HUD1.5 one and old full persistence replay4 passed21records. Two PNG/raw baseline/private guards reviewed. [AUTHORED_ECOLOGY_M13.md](AUTHORED_ECOLOGY_M13.md) has exact selectors/paths/failures/memory.
+
+Accepted G8/solo persistence retained; stale duplicate Trello cards reconciled. Full M13/additional types/loot/human ecology/device/rendered multiplayer/FPS stay open.1440 traversal explicitly deferred. No new point/art/unrelated asset or production package certification. Next independent AI scope: original creature/loot definitions, no full milestone completion inferred.
+
 ## 2026-10-12 M1/M3 weight, sprint, ledge climb and glide - bounded technical PASS
 
 999k stackable defaults/strict archives and soft player carrying slices3121657/fb69157 published first. New predicted CharacterMovement derives slowdown from server-owned weight, disables sprint/glide immediately overweight and jump/climb at110%limit. Shift/F/V and contextual stick/D-pad bindings, server-checked45-120cmledge, stamina drain/recovery, glide descent/remote gravity and menu/death/landing guards implemented. No binary assets/private saves changed. Final Editor34.00s/Game65.98s clean; final native5, corrected720p/HUD1.5 rendered1, finalone-client2 and two-client3 role records passed. Three corrected PNG inspected; baseline raw severity/private file guards checked. [TRAVERSAL_M1.md](TRAVERSAL_M1.md) records every selector/path/failure/replay/memory/authority limit.

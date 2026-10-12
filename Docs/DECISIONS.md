@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-13 - Map-owned open-world ecology configuration
+
+Assign the tested biome/day-night data asset to the two existing always-loaded open-world points through supported Editor APIs. Keep point names/positions and world-save schema stable: adding points would invalidate existing layout checks. Shore is active by day/night; Ridge is dormant by day but retains an already living/corpse resident at dawn. Server nav/clearance/global and per-biome budgets remain authoritative. Saves restore GUIDs/enabled state/delay, never arbitrary policy paths. Regression maps retain fixed-ID defaults. Real separate-process restart and authored rendered proof precede this technical completion; no full-human/FPS acceptance is inferred. See AUTHORED_ECOLOGY_M13.md.
+
 ## 2026-10-12 — Soft player carrying and bounded first-person traversal
 
 Keep per-unit item weights. Stackable resources and food use a999,000 ceiling; independent tools/weapons/protection stay single items. Player30kg is a movement threshold, slots remain hard, and chests retain hard60kg capacity. Trusted runtime codec policy permits legal overweight player/pickup records, never a capacity supplied by a save/client. Preserve V1 inventory and V1–V2 world formats, GUID/freshness/strict finite validation and legacy reads.

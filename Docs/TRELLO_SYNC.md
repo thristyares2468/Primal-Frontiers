@@ -1,5 +1,11 @@
 # Trello task workflow
 
+## 2026-10-13 authored ecology and stale-card reconciliation
+
+Fresh four-board/current-state audit selected cxsdL4TJ Programming Doing and M13 Bc3tb6yW Main Doing. Original M13/M8/M11 descriptions retained before current-status update. Duplicate Programming solo persistence5puadD9g closes only accepted solo scope, canonical UZVTTPLE Done retained. Parent M8 now clearly remaining rendered-multiplayer Personal2; main M11 copies actual current G2; no fake full milestone/device/FPS acceptance or deadline/member changes.1440 remains deferred.
+
+Authored technical scope passed final Editor/Game/native6/authoredrestart4+6/render1/legacyrestart4; exact evidence in AUTHORED_ECOLOGY_M13.md. Immediately update/close bounded cxsdL4TJ before next task; parent M13 remains Doing with creature/loot variety next. No new immediate Personal assignment or asset-source permission bypass. Scoped Sol publication follows, four related binary packages through supported APIs/LFS only.
+
 ## 2026-10-12 weight and traversal technical completion
 
 Fresh Programming/Testing/card reads reconciled current request before closing bounded PsPTp8Oq and parent DMKjODqr. Retained original descriptions as history; exact final Editor/Game/native5/rendered720p1/networkone2/two3 evidence and failures/limits copied. Both moved/marked/read back Done complete=true for technical implementation only. Earlier stack5JX9gnCr3121657 and carryPRleHRMhfb69157 remain complete. No full manual/milestone/FPS certificate.
