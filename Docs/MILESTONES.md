@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - M18 current save-contract reconciliation
+
+[SAVE_COMPATIBILITY_PLAN.md](SAVE_COMPATIBILITY_PLAN.md) reconciled with current source after M15 d510927/c2890ee publication. Known compatible V1/default and worldV2/innerprogressionV1V2 paths distinguished from absent general content/layout migration/permanent-backup/archived-old-writer fixtures. Native4/4 compatibility/codec/worldrecords/largestacks PASS16.56s,2.956/2.794GiB,raw/testseverity0. No source/schema/asset/private save/new build/rendered/manual result. MainM18 future/ToDo remains; bounded audit only can close. M13G9 beforeM14 remains unverified,1440 deferred.
+
 ## October13 - M15 known foreign stack and malformed inventory requests
 
 [INVENTORY_OWNERSHIP_M15.md](INVENTORY_OWNERSHIP_M15.md): Editor5.68s, oneclient2/twoclient3/sharedrace3 PASS. Refreshed foreign live GUID requests refuse, valid-owner malformed codes/quantities refuse, all11food/expiry/hunger/privacy preserved. Fixture-only adversarial disclosure, no production change/fullM15 or manual acceptance.

@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## October13 - M18 current compatibility contract audit
+
+After c2890ee publication/fresh MainM18 read, bounded rlak115e Doing documented source/current contract reconciliation, no general migration or source/private rewrite. Native4/4 exact record tests/raw0 passed; evidenceupdated/moved/marked/read back Donecomplete immediately. MainM18 comment corrected current layers/gaps while retaining ToDo/full future dependencies. MainM15 Doing with bounded tests Done; M13G9 PersonalDoing and1440/provenance preserved. No new Personal burden or unrelated assignment/deadline changes.
+
 ## October13 - independent M15 known foreign inventory identity
 
 After d510927 verified publication, fresh hardening parent/MainM15 reads: MainM15 Doing with technical evidence/remaining full gates; 3NxxG6Ww bounded Doing. Gated ownership malformed extension passed Editor/Game/one2/two3/sharedrace3, actual refreshed foreignID/input refusal/private hash and rawbaseline verified. Immediately evidenceupdated/moved/marked/read back Donecomplete before next task. No PersonalG9 acceptance, M14 expansion or production disclosure. Guide/evidence INVENTORY_OWNERSHIP_M15.md.

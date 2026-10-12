@@ -1,22 +1,34 @@
 # Save compatibility and migration plan — M18
 
-October 8, 2026. **Planning complete; migration is not implemented.** Full M18 remains To Do. This independent source/document contract prepares for future progression/content changes. It does not close M7/M8 manual gates, change a version, rewrite saves or certify production authentication/crash durability.
+Current contracts reconciled October13,2026 against published c2890ee. **General content/layout migration and permanent original-backup publication are not implemented.** Specific backwards-compatible readers/defaults below already exist; this distinction supersedes the original October8 planning-only overview. Full M18 remains To Do. This document audit changes no source, schema, assets or private saves and certifies no production authentication/crash durability. Accepted M7 and solo M8 observations remain accepted; rendered multiplayer, M13 G9 and deferred1440 remain separate open gates.
 
 ## Current contracts checked in source
 
 | Layer | Version and bounds | Present behavior |
 | --- | --- | --- |
 | File store | V1, 32-byte header, at most 4 MiB payload | Magic/version, generation, UTC, length and CRC; verified A/B inactive-generation publication. |
-| World metadata | `FPFWorldSaveData.Version=1`, JSON | Approved maps, bounded arrays, strict field conversion and semantic validation. |
+| World metadata | Normal runtime writer V2; reader supports V1/V2 JSON (plain struct still defaults V1) | V1 player records omit/default zero progression; V2 requires owner-bound progression for every player. Approved maps, bounded arrays, strict fields and whole-candidate validation. |
 | Player/container codec | `CurrentVersion=1`, 16-byte envelope, at most 64 KiB | Explicit scalar/GUID/ASCII item fields, CRC, trusted catalog/capacity checks; no arbitrary object loading. |
+| Progression codec | Inner V1/V2, 16-byte envelope, maximum16 KiB, owner GUID wrapper | No gather windows writes byte-compatible V1; active windows use V2. Preserve XP, learned/credited history and bounded active-time windows; future/corrupt/foreign owner refuses. |
 | Local reconnect profile | File-store V1, 16-byte GUID payload | Endpoint/profile-specific capability, separate from public player ID; no independent profile schema field yet. |
 | Content/world compatibility | Catalog IDs and authored resource/spawner names | Unknown definitions/layouts and invalid owner/support/batch identities refuse load; no revision/mapping system yet. |
 
-Sources: `PFSaveFileStore.{h,cpp}`, `PFWorldSaveData.h`, `PFWorldSaveFormat.cpp`, `PFPlayerSaveFormat.{h,cpp}`, `PFPlayerSaveAdapter.cpp`, `PFWorldPersistence.cpp`, `PFLocalPlayer.cpp`. Current world limits: 32 players, 128 structures/resources/pickups each, eight creatures and 32 spawners. Bags/storage have eight slots and trusted weight limits 30/60 respectively. Future expansion must change and test codec/runtime limits together, never trust capacity from the save.
+Sources: `PFSaveFileStore.{h,cpp}`, `PFWorldSaveData.h`, `PFWorldSaveFormat.cpp`, `PFPlayerSaveFormat.{h,cpp}`, `PFPlayerSaveAdapter.cpp`, `PFWorldPersistence.cpp`, `PFLocalPlayer.cpp`. Current world limits: 32 players, 128 structures/resources/pickups each, eight creatures and 32 spawners. Player bags/storage have eight slots. Bag30kg is a trusted soft carry threshold (overweight can save/load); storage60kg remains a hard capacity. Stack quantity is bounded999000, gear stacks1, freshness batches still separate. Capacity/enforcement comes from trusted runtime configuration, never a save. Future expansion must change and test codec/runtime limits together.
 
-These version layers are independent. Adding a world field does not itself justify replacing the file envelope or reconnect profile. Engine patch numbers are not save versions. Installed engine is 5.8.3; originally requested 5.8.2.
+These version layers are independent. Current worldV2 can contain either valid inner progression version. Adding a world field does not itself justify replacing the file envelope or reconnect profile. Engine patch numbers are not save versions. Installed engine is 5.8.3; originally requested 5.8.2.
 
 Current fallback checks **file integrity**, not semantic migration: Read chooses the highest valid checksummed generation and explicitly reports an invalid sibling as backup recovery. Unsupported selected world semantics refuse Load; no silent older-version fallback occurs. Write refuses existing corrupt generations. Failed startup restoration blocks login/capture/save until deliberate recovery and restart.
+
+## Implemented compatibility and remaining gaps
+
+- V1 world/player load gives zero XP/empty knowledge/credit/window records; inventory is not proof of an earned craft. No retrospective reward or free unlock. Current capture/disconnect roster upgrades all owner records together to worldV2 before ordinary save. This is a known compatible edge, not a general migration registry or permanent-original archive.
+- Old chest records missing BOTH filter fields default unrestricted/empty allowed list. Partial/malformed fields refuse. Existing filters retain exact permitted item IDs, ownership and stored quantities; no rename guessing.
+- Four native original creature IDs now validate, including Scrabbler/DuskPouncer; weighted authored policies retain the same two point names/count/positions. Old saved residents retain type/GUID/enabled/cooldown and do not respawn duplicate loot. Same schema number does not promise an older engine/catalog can read newly introduced creature/item IDs.
+- Live apply still requires exactly one clock and exact resource/spawner record counts/names/definitions. A new M14 node/point/renamed object is a content-layout migration, even when JSON version is unchanged. Do not bypass this refusal, delete records or overwrite a failed restored world with defaults. No content revision/ID mapping registry exists yet.
+- Existing A/B publication protects bounded current generations/integrity. It does NOT retain a permanent V1 original: subsequent ordinary V2 saves can rotate both generations. The original-backup policy proposed below belongs to a future explicit migration transaction; do not claim it already protects every compatible V1 upgrade.
+- Existing native compatibility tests generate synthetic V1/V2 records using current codecs and mutate fields. They verify known semantics, but are NOT immutable fixtures produced by an archived previous executable. Frozen previous-writer fixtures, content mappings, permanent backups and adversarial publication/rollback still need their own future gates.
+
+Current scope is a source/document reconciliation plus four existing native tests; no load/migration is run on a private world. Latest evidence is appended below after execution. The original October8 future transaction/proposals remain guidance, not completed implementation.
 
 ## Proposed compatibility policy
 
@@ -48,7 +60,7 @@ Restoration cancels crafting; transient AI targets are not serialized. Migration
 
 Food time needs special care: player bags age from each `CapturedUtc`; storage/pickups age from file `SavedUtc`. Publishing at a newer UTC cannot renew food. Preserve the old anchor until age is consumed, or subtract age once and establish a matching new anchor. Offline-expired batches may be omitted under existing spoilage policy, with a reported count. Other world timers currently pause offline. Repeated conversion/load must not age twice, extend deadlines, append items or reset cooldowns.
 
-For planned progression, [PROGRESSION_PLAN.md](PROGRESSION_PLAN.md) initializes V1 players with zero XP/credits, baseline knowledge and empty modifier loadout; existing inventory/structures never grant retrospective XP. Add the record/version extension only with that runtime component and tests. No V2 schema is introduced here.
+Current implemented progression, documented in [PROGRESSION_PLAN.md](PROGRESSION_PLAN.md), initializes V1 players with zero XP/credits and empty earned-knowledge/window records; baseline recipes remain available. Existing inventory/structures never grant retrospective XP. WorldV2 and the owner-bound progression runtime already exist. Adaptation/modifier loadouts remain proposed/unimplemented; no record or new version is introduced by this audit.
 
 Reconnect-profile conversion remains separate: preserve server roster identity/capability relationships. Endpoint spelling already affects profile selection. A client public ID is not authentication; token rotation needs an explicit server/profile handover. Production accounts are outside M8.
 
@@ -66,6 +78,12 @@ Use deterministic **synthetic** fixtures with clearly fake public GUIDs and prim
 | Live authority | One client first, actual server restart, then two NullRHI clients where practical; wrong identity/authority, join/leave and separate owners. |
 | Manual | Rendered first-person gather/craft/build/store/save/restart/reconnect and freshness comparison; logs and uncapped frame-time/memory evidence. |
 
-Existing M8 anchors under `PF.Persistence`: PlayerRoundTrip, PlayerValidation, CorruptPlayerData, FileGenerations, ServerPlayerAdapter, WorldRecords, WorldRuntime, StartupFailurePreservesSave and RejectedLoadPreservesWorld. PF.Persistence.Live remains opt-in/separate. Latest rejected-load run passed 1/1 in Automation_M8RejectedLoad_20261008_044007915_1b40fffb. These prove current behavior, **not an implemented migration suite or M18 acceptance**. See [AUTOMATION_VERIFICATION.md](AUTOMATION_VERIFICATION.md).
+Historical October8 test anchor inventory (new current evidence below): existing M8 anchors under `PF.Persistence`: PlayerRoundTrip, PlayerValidation, CorruptPlayerData, FileGenerations, ServerPlayerAdapter, WorldRecords, WorldRuntime, StartupFailurePreservesSave and RejectedLoadPreservesWorld. PF.Persistence.Live remains opt-in/separate. Latest rejected-load run passed 1/1 in Automation_M8RejectedLoad_20261008_044007915_1b40fffb. These prove current behavior, **not an implemented migration suite or M18 acceptance**. See [AUTOMATION_VERIFICATION.md](AUTOMATION_VERIFICATION.md).
 
-Planning checked against actual fields/versions/limits, offline anchors, backup/lookup behavior, tests and installed JSON converter source. No runtime/schema/assets/saves/settings changed; no new build/test/FPS measurement is claimed. Full M18 still depends on preceding acceptance. M7/M8 manual and packaged Server gates remain open.
+Original October8 planning evidence: source/limits/offline anchors/backup behavior and installed JSON converter checked without a new runtime build/test then. Its old M7/M8-unverified status is historical; M7 and solo M8 are now accepted. FullM18/current remaining gates are stated in the overview, not completed by this document.
+
+## October13 current-contract verification
+
+Four exact native tests PASSED4/4: PF.Progression.WorldCompatibility, PF.Progression.Codec, PF.Persistence.WorldRecords, PF.Inventory.LargeStacks. Report Saved/AutomationReports/Automation_M18ContractAudit_20261012_225130102_75a16a93/run-summary.json and index.json; log Saved/Logs/PFAutomation_M18ContractAudit_20261012_225130102_75a16a93.log.16.56s,2.956working/2.794privateGiB; exact selection/exit0/raw and testseverity0/no timeout/fatal/ensure. These exercise known V1 defaults/V2 owner/window preservation, future/corrupt refusal, chest filters/ownership/batch validation and large-stack/trusted carry limits. Current-generated synthetic values are not archived old-writer fixtures.
+
+No source/asset/schema/settings/private save changes, no new build needed for this documentation-only scope; preceding Editor5.68s/Game13.76s passed for c2890ee. No disk restart, content migration, rendering/FPS or human acceptance added here. Conventional PrimalFrontier.log remains the previously closed Editor log; unique native abslog was reviewed. Trello bounded rlak115e closes this audit only; MainM18 stays ToDo/full migration absent. Required M13 encounter G9 before M14 remains unverified,1440 explicitly deferred, permanent backups/content mappings/frozen previous-writer fixtures remain future independently scoped work.
