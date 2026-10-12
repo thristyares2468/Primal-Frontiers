@@ -66,7 +66,7 @@ const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
     {
         if (D.Id!=Id) { continue; }
         // A second match (duplicate ID) or any out-of-range field invalidates the item entirely.
-        if (Result || Id.IsNone() || !D.Category.IsValid() || D.StackLimit<1 || D.StackLimit>1000 ||
+        if (Result || Id.IsNone() || !D.Category.IsValid() || D.StackLimit<1 || D.StackLimit>PFItemLimits::MaxStackQuantity ||
             !FMath::IsFinite(D.Weight) || D.Weight<=0 || !FMath::IsFinite(D.ShelfLifeSeconds) || D.ShelfLifeSeconds<0 || D.ShelfLifeSeconds>86400 ||
             !FMath::IsFinite(D.FoodRecovery) || D.FoodRecovery<0 || D.FoodRecovery>100 ||
             !FMath::IsFinite(D.WaterRecovery) || D.WaterRecovery<0 || D.WaterRecovery>100 ||

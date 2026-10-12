@@ -420,7 +420,7 @@ void APFSurvivalPlayerController::ServerInventoryAction_Implementation(FGuid Sta
     auto* I=GetInventory();
     const auto* S=GetPawn() ? GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>() : nullptr;
     bool Accepted=false;
-    if(HasAuthority() && I && S && !S->IsDead() && Quantity>0 && Quantity<=1000)
+    if(HasAuthority() && I && S && !S->IsDead() && Quantity>0 && Quantity<=PFItemLimits::MaxStackQuantity)
     {
         if(Action==PFInventoryAction::Split){Accepted=I->Split(StackId,Quantity);}
         else if(Action==PFInventoryAction::Drop){Accepted=I->Drop(StackId,Quantity,GetPawn())!=nullptr;}

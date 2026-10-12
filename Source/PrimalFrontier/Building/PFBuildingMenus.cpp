@@ -100,7 +100,7 @@ FReply UPFBuildingMenu::NativeOnKeyDown(const FGeometry& G,const FKeyEvent& E)
 }
 
 void UPFStorageTransferButton::InitializeTransfer(APFSurvivalPlayerController* PC,bool Deposit,FGuid Id,int32 Amount)
-{Controller=PC;bDeposit=Deposit;Stack=Id;Quantity=FMath::Clamp(Amount,1,1000);SetStyle(PFUITheme::NavigationButton(false));OnClicked.AddDynamic(this,&UPFStorageTransferButton::Transfer);}
+{Controller=PC;bDeposit=Deposit;Stack=Id;Quantity=FMath::Clamp(Amount,1,PFItemLimits::MaxStackQuantity);SetStyle(PFUITheme::NavigationButton(false));OnClicked.AddDynamic(this,&UPFStorageTransferButton::Transfer);}
 void UPFStorageTransferButton::Transfer()
 {if(Controller.IsValid() && Controller->IsStorageMenuOpen()){Controller->Building->ServerTransfer(bDeposit,Stack,Quantity);}}
 

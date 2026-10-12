@@ -7,6 +7,7 @@
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFItemCatalog.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Engine/World.h"
@@ -214,7 +215,7 @@ bool UPFBuildingComponent::Interact(APFBuildPiece* Piece)
 bool UPFBuildingComponent::Transfer(bool Deposit,FGuid Id,int32 Quantity)
 {
     // Storage must still be open, owned, in reach and aimed at.
-    if(!CanUseStorage() || Quantity<1 || Quantity>1000){return false;}
+    if(!CanUseStorage() || Quantity<1 || Quantity>PFItemLimits::MaxStackQuantity){return false;}
     auto* Bag=Controller()->GetInventory();
     if(!Bag){return false;}
     if(Deposit)

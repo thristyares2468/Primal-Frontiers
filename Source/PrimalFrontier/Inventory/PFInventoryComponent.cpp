@@ -103,7 +103,7 @@ FName UPFInventoryComponent::MeleeItem() const
 float UPFInventoryComponent::GetWeight() const
 {
     double Total=0;
-    for(const auto& S:Stacks){ if(const auto* D=Definition(S.ItemId)){ Total+=D->Weight*S.Quantity; } }
+    for(const auto& S:Stacks){ if(const auto* D=Definition(S.ItemId)){ Total+=double(D->Weight)*S.Quantity; } }
     return float(Total);
 }
 
@@ -160,7 +160,7 @@ bool UPFInventoryComponent::Grant(FName Id,int32 Quantity)
 
 bool UPFInventoryComponent::AddExisting(FName Id,int32 Quantity,double Deadline)
 {
-    if(!Authority() || Quantity<=0 || Quantity>10000 || !FMath::IsFinite(Deadline)){ return false; }
+    if(!Authority() || Quantity<=0 || Quantity>PFItemLimits::MaxStackQuantity || !FMath::IsFinite(Deadline)){ return false; }
     const auto* D=Definition(Id);
     // Perishables need a future deadline; nonperishables must have none.
     if(!D || (D->ShelfLifeSeconds>0 ? Deadline<=ServerTime(GetWorld()) : Deadline!=0)){ return false; }
@@ -267,7 +267,7 @@ bool UPFInventoryComponent::TransferTo(UPFInventoryComponent* Destination,FGuid 
 
 bool UPFInventoryComponent::Transform(const TArray<FPFItemStack>& Inputs,FName Output,int32 Quantity)
 {
-    if(!Authority() || Inputs.IsEmpty() || Inputs.Num()>64 || Quantity<1 || Quantity>10000){return false;}
+    if(!Authority() || Inputs.IsEmpty() || Inputs.Num()>64 || Quantity<1 || Quantity>PFItemLimits::MaxStackQuantity){return false;}
     const auto* D=Definition(Output);
     if(!D){return false;}
     PruneExpired();
@@ -294,7 +294,7 @@ bool UPFInventoryComponent::Transform(const TArray<FPFItemStack>& Inputs,FName O
         if(!Item){return false;}
         Weight+=double(Item->Weight)*S.Quantity;
     }
-    if(SlotLimit<1 || SlotLimit>64 || !FMath::IsFinite(WeightLimit) || WeightLimit<=0 || Weight>WeightLimit+0.0001){return false;}
+    if(SlotLimit<1 || SlotLimit>64 || !FMath::IsFinite(WeightLimit) || WeightLimit<=0 || !FMath::IsFinite(Weight) || Weight>WeightLimit+0.0001){return false;}
 
     // 3) Insert the output with a fresh deadline (crafted food starts its own shelf life).
     const double Deadline=D->ShelfLifeSeconds>0 ? ServerTime(GetWorld())+D->ShelfLifeSeconds : 0;

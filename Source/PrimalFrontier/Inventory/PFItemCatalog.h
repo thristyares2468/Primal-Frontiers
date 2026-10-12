@@ -21,6 +21,12 @@
 #include "PFItemCatalog.generated.h"
 class UTexture2D;
 
+namespace PFItemLimits
+{
+    // 64 bounded slots keep even the maximum aggregate count within int32.
+    inline constexpr int32 MaxStackQuantity = 999000;
+}
+
 /** Static description of one item type. Runtime quantities live in FPFItemStack. */
 USTRUCT(BlueprintType)
 struct FPFItemDefinition
@@ -32,8 +38,8 @@ struct FPFItemDefinition
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FText DisplayName;
     /** Item.Category.Resource / Food / Tool / Weapon / Protection. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FGameplayTag Category;
-    /** Maximum quantity in one inventory slot (1..1000). */
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="1",ClampMax="1000")) int32 StackLimit = 20;
+    /** Maximum quantity in one inventory slot (1..999000); individual items may tune lower. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="1",ClampMax="999000")) int32 StackLimit = 20;
     /** Kilograms per unit; counts against UPFInventoryComponent::WeightLimit. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0.001")) float Weight = 0.5f;
     /** Soft reference so the catalog doesn't force-load every icon. Placeholder white square for now. */
