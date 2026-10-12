@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 extended solo persistence accepted
+
+User reports correct restored quantities and wood-only filter, with lower vitals after time passed. Read-only logs confirm Recipe_Tool completion and Health32.7 before save/restored32.7; earlier thirst depletion during Health-first commands caused damage. Fresh G3/Testing list readback verified scope and Done destination. Immediately record supported solo acceptance and limitations; move/read back UZVTTPLE Done. Optional rename/rendered multiplayer/full M8/M11 and other Personal cards remain separate. No repeated user test required. Correct vitals guide to needs-first/health-last/P-pause and actual save-time snapshot. Preserve full historical descriptions/observations, priorities/members/deadlines; publish docs-only Sol commit.
+
 ## 2026-10-12 user-confirmed Load checkpoint
 
 Fresh UZVTTPLE G3 Doing readback after “Load PASS.” Immediately record basic close/relaunch/same-world restoration (location, foundation/chest, conserved wood counts and owned E access), following accepted Save/no-reset and chest tests. Correct stale next-Load text; no repeat of passed portions. Broader card stays Doing for remaining crafted/stats/filter/full-loop scope; rename stays optional and no additional Personal task is created. Preserve prior failures/guide/history, membership/priority/deadline. No new engine/build/artifact/FPS or full milestone pass. Scoped docs-only Sol publication follows.

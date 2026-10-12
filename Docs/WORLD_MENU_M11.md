@@ -2,7 +2,7 @@
 
 ## October12 manual checkpoint
 
-User reported “Save PASS,” then “Load PASS” to the focused separate rendered standalone tests. Saving acknowledged success without live reset; after closing/relaunching the game and selecting the same saved world, location, foundation/chest, nonperishable bag/chest wood totals and owned E access were confirmed. Chest GUI/filter/Sort/Quick Store/conservation/closure was previously reported PASS. Accept this bounded basic save/restart/load result; do not repeat it. No new engine/automation/log/screenshot/FPS evidence or exact world ID was supplied. Crafted-item, survival-stat and saved-filter retention, optional rename and rendered multiplayer/full-loop acceptance remain separate; broader G3 stays Doing. No extra Personal task created.
+User confirmed chest and basic Save/Load, then reported correct restored item quantities and wood-only filter with Health33/Food47/Water27 after elapsed live time. The local command log shows Health32.7 already before saving because thirst hit zero while the earlier Health-first instructions were entered; next load explicitly restored32.7. Recipe_Tool completion and restored player setup are logged. Accept the supported rendered solo persistence scenario; timing explains the discrepancy, no health-save defect demonstrated. Exact paused Food/Water equality, optional rename, rendered multiplayer and full milestone acceptance remain separate. G3 solo Personal card is Done, no repeat needed. Safe future check: set Food/Water first, Health last, promptly P-pause and save actual displayed values; immediately P-pause after reload for comparison. Pause while away from standalone gameplay.
 
 ## Current implementation and reference direction
 
