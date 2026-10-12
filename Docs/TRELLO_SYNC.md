@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## October13 - independent M15 known foreign inventory identity
+
+After d510927 verified publication, fresh hardening parent/MainM15 reads: MainM15 Doing with technical evidence/remaining full gates; 3NxxG6Ww bounded Doing. Gated ownership malformed extension passed Editor/Game/one2/two3/sharedrace3, actual refreshed foreignID/input refusal/private hash and rawbaseline verified. Immediately evidenceupdated/moved/marked/read back Donecomplete before next task. No PersonalG9 acceptance, M14 expansion or production disclosure. Guide/evidence INVENTORY_OWNERSHIP_M15.md.
+
 ## October13 - independent M15 inventory race
 
 Fresh Main/Programming reads reconciled PersonalM13G9 open with explicit independent-continuation authorization. Created b0NYwBFb Doing for narrow real owning-client pickup/stale-ID verification, no M14 world expansion. Editor/Game/native3/liveone2/livetwo3 passed, raw known baseline/private guards checked. Immediately evidenceupdated/moved/marked/read back Donecomplete before next task; no parent/manual/fullM15 acceptance inferred or unrelated assignment/deadline change. Exact guide/evidence INVENTORY_RACE_M15.md.

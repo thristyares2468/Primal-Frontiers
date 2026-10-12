@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - M15 known foreign stack and malformed inventory requests
+
+[INVENTORY_OWNERSHIP_M15.md](INVENTORY_OWNERSHIP_M15.md): Editor5.68s, oneclient2/twoclient3/sharedrace3 PASS. Refreshed foreign live GUID requests refuse, valid-owner malformed codes/quantities refuse, all11food/expiry/hunger/privacy preserved. Fixture-only adversarial disclosure, no production change/fullM15 or manual acceptance.
+
 ## October13 - M15 independent inventory race checkpoint
 
 [INVENTORY_RACE_M15.md](INVENTORY_RACE_M15.md) records Editor/native3/liveone2/livetwo3 PASS using real owning-client RPCs,75ms/1% network profile, exact all11food/expiry conservation, owner privacy/private hash guards. Development fixture only; no production bug found. Full M15 and M13 PersonalG9 not accepted; no M14 expansion.

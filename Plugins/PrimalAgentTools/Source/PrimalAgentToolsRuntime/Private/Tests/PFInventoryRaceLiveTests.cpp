@@ -34,8 +34,8 @@ namespace PFInventoryRace
 class FPFInventoryRaceExercise : public IAutomationLatentCommand
 {
 public:
-    FPFInventoryRaceExercise(FAutomationTestBase* InTest,int32 InExpected)
-        :Test(InTest),Expected(InExpected),Started(FPlatformTime::Seconds()){}
+    FPFInventoryRaceExercise(FAutomationTestBase* InTest,int32 InExpected,bool InOwnership=false)
+        :Test(InTest),Expected(InExpected),Started(FPlatformTime::Seconds()),Ownership(InOwnership){}
 
     bool Update() override
     {
@@ -93,7 +93,7 @@ private:
                 CastChecked<ACharacter>(PC->GetPawn())->GetCharacterMovement()->DisableMovement();
                 auto* V=PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();
                 V->HungerDrainPerSecond=0;V->ThirstDrainPerSecond=0;V->SetHunger(50);
-                if(!Check(PC->GetInventory()->Grant(PFInventoryRace::Water,5),TEXT("Ready barrier plus four private acknowledgements per participant")))
+                if(!Check(PC->GetInventory()->Grant(PFInventoryRace::Water,Ownership?6:5),TEXT("Ready barrier and private acknowledgements per participant")))
                 {Finish(Now);return false;}
             }
             FVector Eye;FRotator Look;Players[0]->GetPawn()->GetActorEyesViewPoint(Eye,Look);
@@ -110,7 +110,7 @@ private:
             }
             Phase(Clock,Players,9,Now);return false;
         }
-        const int32 ExpectedWater=13-Stage; // phase10 ->3, 11 ->2, 12 ->1, 13 ->0
+        const int32 ExpectedWater=(Ownership?14:13)-Stage;
         for(auto* PC:Players){if(PC->GetInventory()->Count(PFInventoryRace::Water)!=ExpectedWater){return false;}}
         if(Now-Changed<2){return false;}
         if(Stage==9){Phase(Clock,Players,10,Now);return false;}
@@ -145,6 +145,7 @@ private:
         {
             if(!Check(FoodSlots==1 && WorldBatches==0 && Winner->GetInventory()->Count(PFInventoryRace::Food)==11,TEXT("Competing E requests take contested pickup exactly once")))
             {Finish(Now);return false;}
+            if(Ownership){PublishBorrowedId(Winner.Get());}
             Phase(Clock,Players,11,Now);return false;
         }
         if(Stage==11)
@@ -158,9 +159,16 @@ private:
         }
         if(!Check(FoodSlots==1 && WorldBatches==1 && WorldFood==7 && Winner->GetInventory()->Count(PFInventoryRace::Food)==4,TEXT("Repeated drop/stale requests preserve four bag plus seven world")))
         {Finish(Now);return false;}
-        if(Stage==12){Phase(Clock,Players,13,Now);return false;}
+        if(Stage==12)
+        {
+            if(Ownership){PublishBorrowedId(Winner.Get());}
+            Phase(Clock,Players,13,Now);return false;
+        }
+        if(Ownership && Stage==13)
+        {Phase(Clock,Players,14,Now);return false;}
         Clock->SetHour(15);Clock->ForceNetUpdate();
         Test->AddInfo(TEXT("[PrimalAgentTools] Inventory race server verified all client acknowledgements, single winner, split cooldown, stale IDs, unique batches and eleven-food deadline conservation"));
+        if(Ownership){Test->AddInfo(TEXT("[PrimalAgentTools] Inventory ownership server verified foreign live GUID and malformed action/quantity refusal"));}
         Finish(Now);return false;
     }
 
@@ -181,15 +189,16 @@ private:
                 Check(Bag && Bag->GetStacks().IsEmpty(),TEXT("Peer inventory contents remain owner-private"));
             }
             Test->AddInfo(TEXT("[PrimalAgentTools] Inventory race client verified owned RPC phases, direct mutation refusal, final private inventory and public drop expiry"));
+            if(Ownership){Test->AddInfo(TEXT("[PrimalAgentTools] Inventory ownership client verified known foreign IDs or valid-owner malformed requests"));}
             Finish(Now);return false;
         }
-        if(PhaseNumber<9 || PhaseNumber>13){return false;}
+        if(PhaseNumber<9 || PhaseNumber>(Ownership?14:13)){return false;}
         if(Stage!=PhaseNumber)
         {
             if(PhaseNumber==9)
             {
                 auto* Pickup=PFInventoryRace::FindFood(W);
-                if(!Pickup || Pickup->GetContents().Quantity!=11 || PC->GetInventory()->Count(PFInventoryRace::Water)!=5){return false;}
+                if(!Pickup || Pickup->GetContents().Quantity!=11 || PC->GetInventory()->Count(PFInventoryRace::Water)!=(Ownership?6:5)){return false;}
                 Deadline=Pickup->GetContents().ExpiresAt;
                 for(const auto& S:PC->GetInventory()->GetStacks()){if(S.ItemId==PFInventoryRace::Water){WaterId=S.StackId;}}
                 FVector Eye;FRotator Look;PC->GetPawn()->GetActorEyesViewPoint(Eye,Look);PC->SetControlRotation((Pickup->GetActorLocation()-Eye).Rotation());
@@ -213,8 +222,14 @@ private:
                     PC->ServerInventoryAction(OriginalId,PFInventoryAction::Split,4);
                     PC->ServerInventoryAction(OriginalId,PFInventoryAction::Split,4);
                 }
+                else if(Ownership)
+                {
+                    if(!ReadBorrowedId(W,PC,OriginalId)){return false;}
+                    PC->ServerInventoryAction(OriginalId,PFInventoryAction::Split,4);
+                    PC->ServerInventoryAction(OriginalId,PFInventoryAction::Split,4);
+                }
             }
-            else if(Stage==12 && Won)
+            else if(Stage==12 && (Won || Ownership))
             {
                 PC->ServerInventoryAction(OriginalId,PFInventoryAction::Drop,7);
                 PC->ServerInventoryAction(OriginalId,PFInventoryAction::Drop,7);
@@ -222,8 +237,25 @@ private:
             else if(Stage==13)
             {
                 Check(!PC->GetInventory()->GetStacks().ContainsByPredicate([&](const auto& S){return S.StackId==OriginalId;}),TEXT("Removed stack is absent before stale requests"));
-                if(!Won){OriginalId=FGuid::NewGuid();}
+                if(!Won)
+                {
+                    if(Ownership)
+                    {
+                        FGuid Current;
+                        if(!ReadBorrowedId(W,PC,Current) || Current==OriginalId){return false;}
+                        OriginalId=Current;
+                        Test->AddInfo(TEXT("[PrimalAgentTools] Client submits known foreign remaining live stack after marker refresh"));
+                    }
+                    else{OriginalId=FGuid::NewGuid();}
+                }
                 PC->ServerInventoryAction(OriginalId,PFInventoryAction::Split,1);
+            }
+            else if(Stage==14)
+            {
+                if(Won)
+                {for(const auto& S:PC->GetInventory()->GetStacks()){if(S.ItemId==PFInventoryRace::Food){OriginalId=S.StackId;}}}
+                else if(!ReadBorrowedId(W,PC,OriginalId)){return false;}
+                PC->ServerInventoryAction(OriginalId,255,1);
             }
             Action=1;Changed=Now;return false;
         }
@@ -233,15 +265,44 @@ private:
             PC->ServerInventoryAction(OriginalId,Action==1?PFInventoryAction::Drop:PFInventoryAction::Consume,1);
             ++Action;Changed=Now;return false;
         }
-        if(Action==4 || Now-Changed<0.5){return false;}
-        PC->ServerInventoryAction(WaterId,PFInventoryAction::Consume,1);Action=4;
+        if(Stage==14 && Action<4)
+        {
+            if(Now-Changed<0.5){return false;}
+            if(Action==1){PC->ServerInventoryAction(OriginalId,PFInventoryAction::Split,0);}
+            else if(Action==2){PC->ServerInventoryAction(OriginalId,PFInventoryAction::Drop,MAX_int32);}
+            else{PC->ServerInventoryAction(OriginalId,PFInventoryAction::Consume,2);}
+            ++Action;Changed=Now;return false;
+        }
+        if(Action==5 || Now-Changed<0.5){return false;}
+        PC->ServerInventoryAction(WaterId,PFInventoryAction::Consume,1);Action=5;
         Test->AddInfo(FString::Printf(TEXT("[PrimalAgentTools] Inventory race client acknowledged phase=%d winner=%d"),Stage,Won));
+        return false;
+    }
+    void PublishBorrowedId(APFSurvivalPlayerController* PC)
+    {
+        // Deliberate adversarial fixture disclosure only. Production never exposes
+        // peer stack fields. This supplies a known ID to test server ownership even
+        // if an attacker learned it elsewhere; no credential/private save involved.
+        for(const auto& S:PC->GetInventory()->GetStacks())
+        {
+            if(S.ItemId==PFInventoryRace::Food)
+            {PC->PlayerState->SetPlayerName(TEXT("RaceBorrow_")+S.StackId.ToString(EGuidFormats::Digits));PC->PlayerState->ForceNetUpdate();return;}
+        }
+    }
+    bool ReadBorrowedId(UWorld* W,APFSurvivalPlayerController* PC,FGuid& Out)
+    {
+        for(TActorIterator<APlayerState> It(W);It;++It)
+        {
+            const FString Name=It->GetPlayerName();
+            if(*It!=PC->PlayerState && Name.StartsWith(TEXT("RaceBorrow_")) && FGuid::ParseExact(Name.Mid(11),EGuidFormats::Digits,Out))
+            {return Out.IsValid();}
+        }
         return false;
     }
     FAutomationTestBase* Test;
     int32 Expected,Stage=0,Action=0;
     double Started,Changed=0,Deadline=0;
-    bool Client=false,Won=false;
+    bool Client=false,Won=false,Ownership=false;
     FGuid WaterId,OriginalId;
     TWeakObjectPtr<APFSurvivalPlayerController> Winner;
 };
@@ -253,5 +314,14 @@ bool FPFInventoryRaceLiveTest::RunTest(const FString&)
     if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunInventoryRaceLiveTests")) || (Players!=1 && Players!=2))
     {AddError(TEXT("[PrimalAgentTools] Requires isolated inventory race runner, real dedicated L_M6Creatures and PFExpectedPlayers=1|2"));return false;}
     ADD_LATENT_AUTOMATION_COMMAND(FPFInventoryRaceExercise(this,Players));return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFInventoryOwnershipLiveTest,"PF.Inventory.OwnershipLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)
+bool FPFInventoryOwnershipLiveTest::RunTest(const FString&)
+{
+    int32 Players=0;FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Players);
+    if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunInventoryOwnershipLiveTests")) || (Players!=1 && Players!=2))
+    {AddError(TEXT("[PrimalAgentTools] Requires isolated inventory ownership runner and PFExpectedPlayers=1|2"));return false;}
+    ADD_LATENT_AUTOMATION_COMMAND(FPFInventoryRaceExercise(this,Players,true));return true;
 }
 #endif
