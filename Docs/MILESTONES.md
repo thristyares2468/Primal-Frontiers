@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - M15 independent inventory race checkpoint
+
+[INVENTORY_RACE_M15.md](INVENTORY_RACE_M15.md) records Editor/native3/liveone2/livetwo3 PASS using real owning-client RPCs,75ms/1% network profile, exact all11food/expiry conservation, owner privacy/private hash guards. Development fixture only; no production bug found. Full M15 and M13 PersonalG9 not accepted; no M14 expansion.
+
 ## 2026-10-13 M13 weighted ordinary-world integration - technical PASS, human gate open
 
 Known Scrabbler/DuskPouncer alternate tickets added through supported Editor API to the existing policy asset; same two point identities, old residents/save layout preserved. Final Editor5.52s/Game13.64s clean; native5/oneclient newserverrestart4/twoclient75ms1%6/corrected720pHUD1.5 one passed16records. Actual oneclient server selected and restored new DuskPouncer; two-client retained baseline species; deterministic native ticket1 provesScrabbler. Two final caption-correct PNG/log baseline/private guards reviewed. [WEIGHTED_ECOLOGY_M13.md](WEIGHTED_ECOLOGY_M13.md) exact results/paths/staged failures/memory.

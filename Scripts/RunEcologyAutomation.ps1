@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet(1,2)][int]$Players=1,
-    [ValidateSet('Ecology','Lifecycle','Building','Traversal','Variety')][string]$TestCase='Ecology',
+    [ValidateSet('Ecology','Lifecycle','Building','Traversal','Variety','InventoryRace')][string]$TestCase='Ecology',
     [switch]$SimulateLagLoss,
     [ValidateRange(1024,65535)][int]$Port=17993,
     [ValidateRange(60,300)][int]$TimeoutSeconds=150,
@@ -16,7 +16,7 @@ if(!(Test-Path -LiteralPath $editor)){throw 'Editor executable unavailable'}
 if(Get-Process UnrealEditor,UnrealEditor-Cmd -ErrorAction SilentlyContinue){throw 'Close the existing Unreal process before isolated ecology automation'}
 if(Get-NetUDPEndpoint -LocalPort $Port -ErrorAction SilentlyContinue){throw 'Diagnostic port already occupied'}
 foreach($path in @($root,$EngineRoot)){if($path -match '["\x00-\x1f]'){throw 'Unsupported path quote/control character'}}
-$run=$(if($TestCase -eq 'Building'){'M11Building'}elseif($TestCase -eq 'Traversal'){'M1Traverse'}else{'M13Ecology'})+$TestCase+$Players+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
+$run=$(if($TestCase -eq 'InventoryRace'){'M15'}elseif($TestCase -eq 'Building'){'M11Building'}elseif($TestCase -eq 'Traversal'){'M1Traverse'}else{'M13Ecology'})+$TestCase+$Players+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
 $slot='AutomationM13Ecology'+[Guid]::NewGuid().ToString('N')
 $profile='Eco'+[Guid]::NewGuid().ToString('N').Substring(0,12)
 $reports=Join-Path $root 'Saved\AutomationReports'
@@ -43,8 +43,10 @@ $before=@(Get-PersonalSnapshot);$settingsBefore=@(Get-SettingsSnapshot)
 $null=New-Item -ItemType Directory -Path $report
 $filter=if($TestCase -eq 'Ecology'){'PF.Creatures.EcologyLive'}elseif($TestCase -eq 'Building'){'PF.Building.Live'}elseif($TestCase -eq 'Traversal'){'PF.Traversal.Live'}else{'PF.Creatures.Live'}
 if($TestCase -eq 'Variety'){$filter='PF.Creatures.VarietyLive'}
+if($TestCase -eq 'InventoryRace'){$filter='PF.Inventory.RaceLive'}
 $flag=if($TestCase -eq 'Ecology'){'-PFRunEcologyLiveTests'}elseif($TestCase -eq 'Building'){'-PFRunBuildingLiveTests'}elseif($TestCase -eq 'Traversal'){'-PFRunTraversalLiveTests'}else{'-PFRunCreatureLiveTests'}
 if($TestCase -eq 'Variety'){$flag='-PFRunCreatureVarietyLiveTests'}
+if($TestCase -eq 'InventoryRace'){$flag='-PFRunInventoryRaceLiveTests'}
 $lag=if($SimulateLagLoss){75}else{0};$loss=if($SimulateLagLoss){1}else{0}
 $map=if($TestCase -eq 'Ecology'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}elseif($TestCase -eq 'Building'){'/Game/PrimalFrontier/Maps/L_M5Building'}elseif($TestCase -eq 'Traversal'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}else{'/Game/PrimalFrontier/Maps/L_M6Creatures'}
 $summary=[ordered]@{Run=$run;Map=$map;TestCase=$TestCase;Players=$Players;NullRHI=$true;HeadlessFrameRate=$(if($TestCase -eq 'Traversal'){120}else{0});ExpectedFilter=$filter;Slot=$slot;ProfilePrefix=$profile;Port=$Port;OutgoingLagMs=$lag;OutgoingLossPercent=$loss;Passed=$false;TimedOut=$false;Processes=@();CleanupFailures=@();Failure=$null}
@@ -113,6 +115,12 @@ finally {
             $text=if(Test-Path -LiteralPath $taskRun.Log){Get-Content -LiteralPath $taskRun.Log -Raw}else{''}
             $fatal=[regex]::Matches($text,'(?im)\bFatal error:|\bEnsure condition failed:|\bAssertion failed:').Count
             $contract=if($TestCase -ne 'Ecology'){$true}elseif($taskRun.Role -eq 'Server'){$text.Contains('Ecology server real navigation, dormant/night/day resident and twice-loaded stable save identity verified')}else{$text.Contains('Ecology client authority, restored resident and day phase verified')}
+            if($TestCase -eq 'InventoryRace'){
+                $contract=if($taskRun.Role -eq 'Server'){$text.Contains('Inventory race server verified all client acknowledgements, single winner, split cooldown, stale IDs, unique batches and eleven-food deadline conservation')}else{$text.Contains('Inventory race client verified owned RPC phases, direct mutation refusal, final private inventory and public drop expiry')}
+                if($taskRun.Role -ne 'Server'){
+                    foreach($phase in 9..13){$contract=$contract -and $text.Contains('Inventory race client acknowledged phase='+$phase+' ')}
+                }
+            }
             $network=($text -match ('PktLag set to '+$lag+'\b')) -and ($text -match ('PktLoss set to '+$loss+'\b'))
             $passed=$verdictCode -eq 0 -and $verdict.Passed -and $verdict.TestCount -eq 1 -and $fatal -eq 0 -and $contract -and $network
             $summary.Processes+= [ordered]@{Role=$taskRun.Role;Passed=$passed;EngineExit=$taskRun.Process.ExitCode;VerdictExit=$verdictCode;Verdict=$verdict;Contract=$contract;NetworkApplied=$network;FatalEnsureAssertion=$fatal;WorkingGiB=[Math]::Round($taskRun.Working/1GB,3);PrivateGiB=[Math]::Round($taskRun.Private/1GB,3);LogWarnings=[regex]::Matches($text,'(?im)^.*\bWarning:').Count;LogErrors=[regex]::Matches($text,'(?im)^.*\bError:').Count;Log=$taskRun.Log;Report=(Join-Path $taskRun.Report 'index.json')}

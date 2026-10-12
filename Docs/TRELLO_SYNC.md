@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## October13 - independent M15 inventory race
+
+Fresh Main/Programming reads reconciled PersonalM13G9 open with explicit independent-continuation authorization. Created b0NYwBFb Doing for narrow real owning-client pickup/stale-ID verification, no M14 world expansion. Editor/Game/native3/liveone2/livetwo3 passed, raw known baseline/private guards checked. Immediately evidenceupdated/moved/marked/read back Donecomplete before next task; no parent/manual/fullM15 acceptance inferred or unrelated assignment/deadline change. Exact guide/evidence INVENTORY_RACE_M15.md.
+
 ## 2026-10-13 weighted integration and mandatory encounter handoff
 
 After67dbfd2 publication/fresh card-parent reads, xreGLCJP Doing scoped one policy asset/ticket1/allowed-role fixture updates. Final Editor/Game/native5/authoredone4/two6/correctedrender1, two PNG/raw/hash evidence passed. Immediately move/mark technical card Done; parent M13 next actor becomes Personal2/Doing/incomplete with full copied G9. Historical AI description retained as comment, no deadline/member/privacy changes. Optional predator/prey/taming/adaptation not silently accepted; accepted earlier personal checks retained,1440 explicitly deferred. Stop at actual M13 encounter/usability gate before M14. HTTP429 updates respect stated retry windows and require readback; no fake publication/status claim. WEIGHTED_ECOLOGY_M13.md exact evidence; scoped Sol publication follows.
