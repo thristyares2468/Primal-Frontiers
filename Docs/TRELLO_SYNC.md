@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 user-confirmed Save checkpoint
+
+Fresh UZVTTPLE G3 Doing readback after user “Save PASS.” Immediately record the bounded standalone Save-success/no-live-reset observation in card history/current preface and evidence docs. Preserve earlier failed observations as history; next Personal action is same-world close/relaunch Load. Keep G3 Doing for remaining restore/full-loop requirements, no new task/priority/membership/deadline change or full M8/M11 pass. No engine/build/test run occurred. Docs-only Sol publication follows.
+
 ## 2026-10-12 user-confirmed chest test
 
 Fresh iH8I2Qfc G2 Doing and dUJskDzO repair Done readback after the user's seven-step chest test “PASS.” Record the bounded GUI/filter/Quick Store/Cancel/unrestricted/Sort/conservation/closure acceptance immediately on both cards and current milestone/evidence docs. Keep the broader G2 Doing for remaining UI checks, and G3 open for rendered persistence; no new card/extra repeat test, changed priority/assignment/date or full-milestone pass. No engine/build/artifact/FPS result added. Docs-only Sol publication follows.

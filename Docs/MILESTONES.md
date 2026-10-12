@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-12 M8/M11 Pause Save — user-confirmed partial PASS
+
+User replied “Save PASS” to the focused rendered standalone Save-without-reset test following the seven-step chest PASS. Accept Pause Save success and preservation of live location, inventory and foundation/chest/storage for that observation. Guide /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld, separate -game process, unused test world. No new build/log/screenshot/performance run or world ID recorded. Closing/relaunching and loading the same save is the next Personal action; saved filter, rename, crafted/full-loop state, rendered multiplayer and full M8/M11 gates remain separate. G3 stays Doing; no repeated save-only test requested.
+
 ## 2026-10-12 M11 chest usability — user-confirmed PASS
 
 User replied “PASS” to the supplied seven-step test: owned E-open chest GUI, wood-only Apply, filtered Quick Store, cancelled Stone draft, unrestricted deposits, alphabetical Sort, full retrieval/conserved totals and closure restoring movement/look. Guide level /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld, one player/Play Standalone net mode/Selected Viewport. Accept this bounded chest repair and do not request its repetition. No new build/engine run/screenshot/FPS evidence; no full eight-piece/stair, food expiry, save/restart, controller, full G2/M11/M8 acceptance inferred. Existing broader Personal cards stay open with this partial result. Code remains the verified0a61a46 repair.

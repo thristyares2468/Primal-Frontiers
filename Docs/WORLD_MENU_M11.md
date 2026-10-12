@@ -1,5 +1,9 @@
 # Main menu, world selection and Pause Save — M8/M11
 
+## October12 manual checkpoint
+
+User reported “Save PASS” after the focused standalone Pause > Save world test: acknowledged success without resetting live location, bag, placed foundation/chest or contents. Bounded chest GUI/filter/Sort/Quick Store/conservation/closure was previously reported PASS. This accepts the save-only observation; no new engine/automation/log/screenshot/FPS evidence or exact world ID was supplied. Next check is close the game, relaunch the same menu command, select the same saved world and Load selected world; compare the saved nonperishable bag/chest totals, structures/ownership and location. Full close/relaunch restoration, filter persistence, rename, crafted state and multiplayer remain unverified. Existing G3 card stays Doing; do not repeat already accepted save-only/chest tests.
+
 ## Current implementation and reference direction
 
 The user's Palworld/Subnautica screenshots and their Florpy Runners menus inform clear navigation, prominent typography, separate single-player/multiplayer screens and an obvious Back action. Their artwork, characters, branding, UI assets and backgrounds are not imported. Primal Frontier uses its own texture-free Slate/UMG theme and existing fonts. Background artwork and thumbnails can follow after source/provenance and performance review; no new asset is required for this slice.
