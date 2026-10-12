@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 user-confirmed chest test
+
+Fresh iH8I2Qfc G2 Doing and dUJskDzO repair Done readback after the user's seven-step chest test “PASS.” Record the bounded GUI/filter/Quick Store/Cancel/unrestricted/Sort/conservation/closure acceptance immediately on both cards and current milestone/evidence docs. Keep the broader G2 Doing for remaining UI checks, and G3 open for rendered persistence; no new card/extra repeat test, changed priority/assignment/date or full-milestone pass. No engine/build/artifact/FPS result added. Docs-only Sol publication follows.
+
 ## 2026-10-12 chest/building repair
 
 After user-reported missing storage UI/Foundation-only selection, created/read back dUJskDzO HUD & UI Doing, temporarily deferring M13. Added authorized Sort/Quick Store/item filters to this bounded repair. Final Editor/Game/native6/rendered3/network5 gates passed14records;16PNG/rawbaseline/hash guards reviewed. Immediately updated exact evidence, moved/read back Done before publication/another task. BUILDING_MENUS_M11.md retains failures/replays and exact commands/paths. Existing Personal1 iH8I2Qfc G2 and Personal2 UZVTTPLE G3 descriptions now use eight-piece picker and real Store/Take/filter GUI with full exact-level/launch/actions/expected/refusal/evidence guides. Previous descriptions/user failures retained verbatim as comments; members/deadlines/priorities/Doing statuses preserved. No human/full-milestone pass inferred. Scoped Sol publication follows; next independent task requires fresh Trello audit.

@@ -4,6 +4,8 @@ October12,2026. Bounded repair for user-reported inaccessible storage and Founda
 
 ## Play it
 
+October12 personal result: user replied “PASS” to the seven-step chest test supplied in chat (open, wood filter/Apply, Quick Store, cancelled Stone draft, unrestricted mode, alphabetical Sort, retrieve conserved totals, close/resume movement/look). Bounded chest usability is accepted; no repeat needed. Broader building/stair, food-expiry, save/restart, controller/FPS and full M11/M8 gates remain separate. The detailed guide below remains for reference/reproduction; no new automated run or measurement was performed for this acknowledgment.
+
 Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Start here: open that level, Play > one player > Play Standalone net mode > Selected Viewport, click the game view and F11. P opens Pause; Esc may stop PIE. No map saving required. G2 in TRELLO_TEST_GUIDES.md is the complete same-session guide; use steps4–5 for this repair.
 
 1. Gather wood normally with E. Each current piece costs2wood. B opens all eight choices: Foundation, Wall, Floor, Roof/ceiling, Door and frame, Chest, Window wall, Stairs. Click a choice or press1–8; preview returns to first person. T rotates90degrees; left click requests placement. N optionally cycles during preview. B exits placement; B again opens the picker.
