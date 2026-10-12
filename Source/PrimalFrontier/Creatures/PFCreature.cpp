@@ -56,6 +56,9 @@ void APFCreature::BeginPlay()
         DefinitionId=CreatureId;
         const auto* D=Definition();
         if(!D){UE_LOG(LogPFSurvival,Error,TEXT("[PrimalCreatures] Invalid definition %s"),*CreatureId.ToString());Destroy();return;}
+        const auto* LootItems=LoadObject<UPFItemCatalog>(nullptr,PFAssetPaths::ItemCatalog);
+        if(!LootItems || !Catalog->HasValidLoot(DefinitionId,*LootItems))
+        {UE_LOG(LogPFSurvival,Error,TEXT("[PrimalCreatures] Invalid loot references for %s"),*CreatureId.ToString());Destroy();return;}
         Health=D->Health;
         if (!PersistentId.IsValid()) { PersistentId=FGuid::NewGuid(); }
         bHostile=D->bHostile;
@@ -264,18 +267,22 @@ void APFCreature::Die()
     if(auto* AI=Cast<AAIController>(GetController())){AI->StopMovement();}
     GetCharacterMovement()->DisableMovement();
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    // Exactly one perishable food pickup, using the normal pickup/expiry rules.
+    // Legacy food plus up to three bounded, catalog-validated supplemental drops.
     const auto* D=Definition();
     const auto* Items=LoadObject<UPFItemCatalog>(nullptr,PFAssetPaths::ItemCatalog);
-    const auto* Food=Items?Items->Find(TEXT("Item_Food")):nullptr;
-    if(D && Food)
+    if(D && Items)
     {
-        const FTransform T(GetActorLocation()-FVector(0,0,25));
-        auto* Loot=GetWorld()->SpawnActorDeferred<APFItemPickup>(APFItemPickup::StaticClass(),T,nullptr,nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-        if(Loot)
+        TArray<FPFCreatureLootEntry> Rewards=D->ExtraLoot;Rewards.Insert({TEXT("Item_Food"),D->FoodLoot},0);
+        for(int32 Index=0;Index<Rewards.Num();++Index)
         {
-            Loot->Initialize(Food->Id,D->FoodLoot,UPFInventoryComponent::ServerTime(GetWorld())+Food->ShelfLifeSeconds);
-            Loot->FinishSpawning(T);
+            const auto* Item=Items->Find(Rewards[Index].ItemId);if(!Item){continue;}
+            const FTransform T(GetActorLocation()-FVector(0,0,25)+FVector(Index*35,0,0));
+            auto* Loot=GetWorld()->SpawnActorDeferred<APFItemPickup>(APFItemPickup::StaticClass(),T,nullptr,nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+            if(Loot)
+            {
+                const double Expiry=Item->ShelfLifeSeconds>0?UPFInventoryComponent::ServerTime(GetWorld())+Item->ShelfLifeSeconds:0;
+                Loot->Initialize(Item->Id,Rewards[Index].Quantity,Expiry);Loot->FinishSpawning(T);
+            }
         }
     }
     // The corpse counts towards the 8-creature cap until it is removed.

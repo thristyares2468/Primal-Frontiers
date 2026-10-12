@@ -269,9 +269,10 @@ bool FPFEcologyLiveTest::RunTest(const FString&)
 class FPFCreatureLiveExercise : public IAutomationLatentCommand
 {
 public:
-    explicit FPFCreatureLiveExercise(FAutomationTestBase* InTest):Test(InTest),Started(FPlatformTime::Seconds())
+    explicit FPFCreatureLiveExercise(FAutomationTestBase* InTest,bool InVariety=false):Test(InTest),Started(FPlatformTime::Seconds()),Variety(InVariety)
     {
         FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);
+        if(Variety){PassiveId=TEXT("Creature_Scrabbler");HostileId=TEXT("Creature_DuskPouncer");FoodCount=4;}
     }
 
     virtual bool Update() override
@@ -318,8 +319,8 @@ public:
             }
             auto* Path=UNavigationSystemV1::FindPathToLocationSynchronously(W,FVector(-500,4400,10),FVector(500,4400,10));
             if(!Test->TestTrue(TEXT("Real nav path detours around obstacle"),Path && Path->IsValid() && !Path->IsPartial() && Path->PathPoints.Num()>2)){Advance(99);return false;}
-            auto* P=APFCreatureSpawner::Spawn(W,TEXT("Creature_Forager"),FVector(-1000,4500,50));
-            auto* H=APFCreatureSpawner::Spawn(W,TEXT("Creature_Prowler"),FVector(-800,4200,50));
+            auto* P=APFCreatureSpawner::Spawn(W,PassiveId,FVector(-1000,4500,50));
+            auto* H=APFCreatureSpawner::Spawn(W,HostileId,FVector(-800,4200,50));
             if(!Test->TestNotNull(TEXT("Navigation-valid passive spawn"),P) || !Test->TestNotNull(TEXT("Navigation-valid hostile spawn"),H)){Advance(99);return false;}
             PassiveStart=P->GetActorLocation();
             HostileStart=H->GetActorLocation();
@@ -332,8 +333,8 @@ public:
         APFCreature* Hostile=nullptr;
         for(TActorIterator<APFCreature> It(W);It;++It)
         {
-            if(It->DefinitionId==TEXT("Creature_Forager")){Passive=*It;}
-            if(It->DefinitionId==TEXT("Creature_Prowler")){Hostile=*It;}
+            if(It->DefinitionId==PassiveId){Passive=*It;}
+            if(It->DefinitionId==HostileId){Hostile=*It;}
         }
         if(!Passive || !Hostile){return false;}
 
@@ -346,8 +347,8 @@ public:
             PassiveStart=FVector(-1000,4500,52);
             HostileStart=FVector(-800,4200,52);
             Test->TestEqual(TEXT("Direct client damage rejected"),Hostile->TakeDamage(99,FDamageEvent(),PC,PC->GetPawn()),0.f);
-            Test->TestNull(TEXT("Direct client spawning rejected"),APFCreatureSpawner::Spawn(W,TEXT("Creature_Forager"),FVector(-500,4000,0)));
-            Test->TestTrue(TEXT("Client developer spawn denied"),PF::AgentTools::ExecuteCommand(TEXT("PF.SpawnCreature"),{TEXT("Creature_Forager")},W,false).Issues.ContainsByPredicate([](const auto& E){return E.Code==TEXT("NotAuthority");}));
+            Test->TestNull(TEXT("Direct client spawning rejected"),APFCreatureSpawner::Spawn(W,PassiveId,FVector(-500,4000,0)));
+            Test->TestTrue(TEXT("Client developer spawn denied"),PF::AgentTools::ExecuteCommand(TEXT("PF.SpawnCreature"),{PassiveId.ToString()},W,false).Issues.ContainsByPredicate([](const auto& E){return E.Code==TEXT("NotAuthority");}));
             Advance(1);
         }
 
@@ -369,11 +370,11 @@ public:
             if(Hostile->IsDead())
             {
                 // This client fought: collect the prowler's food drop through Interact.
-                if(V->GetVitals().Health<100 && PC->GetInventory()->Count(TEXT("Item_Food"))==0)
+                if(V->GetVitals().Health<100 && (PC->GetInventory()->Count(TEXT("Item_Food"))==0 || (Variety && PC->GetInventory()->Count(TEXT("Item_Fibre"))==0)))
                 {
                     for(TActorIterator<APFItemPickup> It(W);It;++It)
                     {
-                        if(It->GetContents().ItemId==TEXT("Item_Food") && FVector::Dist(It->GetActorLocation(),PC->GetPawn()->GetActorLocation())<250)
+                        if(It->GetContents().ItemId==(PC->GetInventory()->Count(TEXT("Item_Food"))==0?FName(TEXT("Item_Food")):FName(TEXT("Item_Fibre"))) && FVector::Dist(It->GetActorLocation(),PC->GetPawn()->GetActorLocation())<250)
                         {
                             FVector Eye;
                             FRotator Look;
@@ -387,7 +388,7 @@ public:
                 Test->TestTrue(TEXT("Replicated passive movement"),bPassiveMoved);
                 Test->TestTrue(TEXT("Replicated hostile movement"),bHostileMoved);
                 Test->TestEqual(TEXT("Replicated death tag"),Hostile->State.ToString(),FString(TEXT("Creature.State.Dead")));
-                if(V->GetVitals().Health<100){Test->TestEqual(TEXT("Loot recovered through interaction RPC"),PC->GetInventory()->Count(TEXT("Item_Food")),3);}
+                if(V->GetVitals().Health<100){Test->TestEqual(TEXT("Loot recovered through interaction RPC"),PC->GetInventory()->Count(TEXT("Item_Food")),FoodCount);if(Variety && V->GetVitals().Health<100){Test->TestEqual(TEXT("Supplemental loot recovered through owned interaction"),PC->GetInventory()->Count(TEXT("Item_Fibre")),2);}}
                 PF::AgentTools::ExecuteCommand(TEXT("PF.ExportTestReport"),{TEXT("M6LiveClient")},W);
                 Advance(99);
             }
@@ -399,7 +400,7 @@ public:
             bool SurvivorDamaged=false;
             for(auto* Player:Players)
             {
-                LootRecovered|=Player->GetInventory()->Count(TEXT("Item_Food"))==3;
+                LootRecovered|=Player->GetInventory()->Count(TEXT("Item_Food"))==FoodCount && (!Variety || Player->GetInventory()->Count(TEXT("Item_Fibre"))==2);
                 SurvivorDamaged|=Player->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>()->GetVitals().Health<100;
             }
             if(Hostile->IsDead() && LootRecovered)
@@ -418,7 +419,9 @@ public:
 private:
     FAutomationTestBase* Test;
     double Started,Changed=0,LastRequest=0;
-    int32 Stage=0,Expected=1;
+    int32 Stage=0,Expected=1,FoodCount=3;
+    bool Variety=false;
+    FName PassiveId=TEXT("Creature_Forager"),HostileId=TEXT("Creature_Prowler");
     bool bClient=false,bPassiveMoved=false,bHostileMoved=false;
     FVector PassiveStart,HostileStart;
 };
@@ -429,5 +432,12 @@ bool FPFCreatureLiveTest::RunTest(const FString&)
     if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunCreatureLiveTests"))){AddError(TEXT("Requires isolated L_M6Creatures -PFRunCreatureLiveTests -PFExpectedPlayers=1|2"));return false;}
     ADD_LATENT_AUTOMATION_COMMAND(FPFCreatureLiveExercise(this));
     return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFCreatureVarietyLiveTest,"PF.Creatures.VarietyLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)
+bool FPFCreatureVarietyLiveTest::RunTest(const FString&)
+{
+    if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunCreatureVarietyLiveTests"))){AddError(TEXT("Requires isolated creature variety runner"));return false;}
+    ADD_LATENT_AUTOMATION_COMMAND(FPFCreatureLiveExercise(this,true));return true;
 }
 #endif

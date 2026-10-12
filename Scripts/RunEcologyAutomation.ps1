@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet(1,2)][int]$Players=1,
-    [ValidateSet('Ecology','Lifecycle','Building','Traversal')][string]$TestCase='Ecology',
+    [ValidateSet('Ecology','Lifecycle','Building','Traversal','Variety')][string]$TestCase='Ecology',
     [switch]$SimulateLagLoss,
     [ValidateRange(1024,65535)][int]$Port=17993,
     [ValidateRange(60,300)][int]$TimeoutSeconds=150,
@@ -42,7 +42,9 @@ foreach($generation in @('a','b')){if(Test-Path -LiteralPath (Join-Path $persist
 $before=@(Get-PersonalSnapshot);$settingsBefore=@(Get-SettingsSnapshot)
 $null=New-Item -ItemType Directory -Path $report
 $filter=if($TestCase -eq 'Ecology'){'PF.Creatures.EcologyLive'}elseif($TestCase -eq 'Building'){'PF.Building.Live'}elseif($TestCase -eq 'Traversal'){'PF.Traversal.Live'}else{'PF.Creatures.Live'}
+if($TestCase -eq 'Variety'){$filter='PF.Creatures.VarietyLive'}
 $flag=if($TestCase -eq 'Ecology'){'-PFRunEcologyLiveTests'}elseif($TestCase -eq 'Building'){'-PFRunBuildingLiveTests'}elseif($TestCase -eq 'Traversal'){'-PFRunTraversalLiveTests'}else{'-PFRunCreatureLiveTests'}
+if($TestCase -eq 'Variety'){$flag='-PFRunCreatureVarietyLiveTests'}
 $lag=if($SimulateLagLoss){75}else{0};$loss=if($SimulateLagLoss){1}else{0}
 $map=if($TestCase -eq 'Ecology'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}elseif($TestCase -eq 'Building'){'/Game/PrimalFrontier/Maps/L_M5Building'}elseif($TestCase -eq 'Traversal'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}else{'/Game/PrimalFrontier/Maps/L_M6Creatures'}
 $summary=[ordered]@{Run=$run;Map=$map;TestCase=$TestCase;Players=$Players;NullRHI=$true;HeadlessFrameRate=$(if($TestCase -eq 'Traversal'){120}else{0});ExpectedFilter=$filter;Slot=$slot;ProfilePrefix=$profile;Port=$Port;OutgoingLagMs=$lag;OutgoingLossPercent=$loss;Passed=$false;TimedOut=$false;Processes=@();CleanupFailures=@();Failure=$null}

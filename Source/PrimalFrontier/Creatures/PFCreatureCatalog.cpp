@@ -2,6 +2,7 @@
 
 #include "Creatures/PFCreatureCatalog.h"
 #include "Creatures/PFCreatureSpawnCatalog.h"
+#include "Inventory/PFItemCatalog.h"
 #include "NativeGameplayTags.h"
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_EcologyBiome, "Ecology.Biome");
@@ -20,6 +21,14 @@ UPFCreatureCatalog::UPFCreatureCatalog()
     Hostile.Id=TEXT("Creature_Prowler"); Hostile.Name=FText::FromString(TEXT("Greybox Prowler"));
     Hostile.bHostile=true; Hostile.Health=100; Hostile.Speed=220; Hostile.FoodLoot=3;
     Creatures.Add(Hostile);
+    FPFCreatureDefinition Scrabbler;
+    Scrabbler.Id=TEXT("Creature_Scrabbler");Scrabbler.Name=FText::FromString(TEXT("Greybox Scrabbler"));
+    Scrabbler.Health=40;Scrabbler.Speed=260;Scrabbler.SightRange=900;Scrabbler.FoodLoot=1;
+    Scrabbler.ExtraLoot={{TEXT("Item_Fibre"),1}};Creatures.Add(Scrabbler);
+    FPFCreatureDefinition Pouncer;
+    Pouncer.Id=TEXT("Creature_DuskPouncer");Pouncer.Name=FText::FromString(TEXT("Greybox Dusk Pouncer"));Pouncer.bHostile=true;
+    Pouncer.Health=140;Pouncer.Speed=240;Pouncer.SightRange=1100;Pouncer.Damage=12;Pouncer.FoodLoot=4;
+    Pouncer.ExtraLoot={{TEXT("Item_Fibre"),2}};Creatures.Add(Pouncer);
 }
 
 const FPFCreatureDefinition* UPFCreatureCatalog::Find(FName Id) const
@@ -31,9 +40,21 @@ const FPFCreatureDefinition* UPFCreatureCatalog::Find(FName Id) const
         if(Found || Id.IsNone() || D.Name.IsEmpty() || !FMath::IsFinite(D.Health) || D.Health<=0 || D.Health>1000 ||
             !FMath::IsFinite(D.Speed) || D.Speed<=0 || D.Speed>500 || !FMath::IsFinite(D.SightRange) || D.SightRange<100 || D.SightRange>2000 ||
             !FMath::IsFinite(D.Damage) || D.Damage<=0 || D.Damage>100 || D.FoodLoot<1 || D.FoodLoot>10){return nullptr;}
+        if(D.ExtraLoot.Num()>3){return nullptr;}
+        TSet<FName> LootIds;
+        for(const auto& L:D.ExtraLoot)
+        {if(L.ItemId.IsNone() || L.ItemId==TEXT("Item_Food") || L.Quantity<1 || L.Quantity>10 || LootIds.Contains(L.ItemId)){return nullptr;}LootIds.Add(L.ItemId);}
         Found=&D;
     }
     return Found;
+}
+
+bool UPFCreatureCatalog::HasValidLoot(FName Id,const UPFItemCatalog& Items) const
+{
+    const auto* D=Find(Id);const auto* Food=Items.Find(TEXT("Item_Food"));
+    if(!D || !Food || D->FoodLoot>Food->StackLimit){return false;}
+    for(const auto& L:D->ExtraLoot){const auto* Item=Items.Find(L.ItemId);if(!Item || L.Quantity>Item->StackLimit){return false;}}
+    return true;
 }
 
 UPFCreatureSpawnCatalog::UPFCreatureSpawnCatalog()

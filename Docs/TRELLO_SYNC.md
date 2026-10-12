@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-13 original creature and loot checkpoint
+
+After897638b authored publication/readback, fresh parent audit created NNvdhSKr Programming Doing. Native5/oneclient2/two3/render1, final Editor/Game and actual PNG/raw/hash guards verified. Final reference/stack preflight validated native after earlier live/render execution; no false final-source claim. Immediately record/close bounded definition/loot scope before weighted integration. Parent M13 remains Doing; historical failures/notes and accepted personal checks retained. No new Personal task, membership/deadline change, binary asset/rights bypass or1440 retry. Evidence CREATURE_VARIETY_M13.md; scoped Sol publication follows.
+
 ## 2026-10-13 authored ecology and stale-card reconciliation
 
 Fresh four-board/current-state audit selected cxsdL4TJ Programming Doing and M13 Bc3tb6yW Main Doing. Original M13/M8/M11 descriptions retained before current-status update. Duplicate Programming solo persistence5puadD9g closes only accepted solo scope, canonical UZVTTPLE Done retained. Parent M8 now clearly remaining rendered-multiplayer Personal2; main M11 copies actual current G2; no fake full milestone/device/FPS acceptance or deadline/member changes.1440 remains deferred.

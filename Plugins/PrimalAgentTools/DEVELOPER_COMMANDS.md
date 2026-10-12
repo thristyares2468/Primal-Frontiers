@@ -28,7 +28,7 @@ All commands have console help, appear in `PF.Help`, and log with `[PrimalAgentT
 | `PF.Teleport X Y Z [PlayerId]` | Real server-side possessed-character teleport. See safety contract below. |
 | `PF.GiveItem ItemId Quantity` | M3 server-only grant to the sole player, respecting catalog and hard slots. Runtime quantities1..999,000; stackable resources/food999k, gear1. Player30kg is a soft movement threshold; chests retain hard capacity. Syntax requires an `Item_` identifier and positive int32 quantity. |
 | `PF.RemoveItem ItemId Quantity` | M3 server-only removal from the sole player's inventory; insufficient quantity is rejected atomically. |
-| `PF.SpawnCreature CreatureId` | M6 server-only catalog spawn near the sole player, with navigation, clearance and an eight-creature cap. IDs: Creature_Forager, Creature_Prowler. |
+| `PF.SpawnCreature CreatureId` | Server-only catalog spawn near the sole player, with navigation, clearance and an eight-creature cap. IDs: Creature_Forager, Creature_Prowler, Creature_Scrabbler, Creature_DuskPouncer. |
 | `PF.ResetCreatures` | M6 standalone L_M6Creatures only: pause spawn points and clear creature actors without loot or saved-map mutation. |
 | `PF.PreviewEcology` | M13 fresh standalone L_M7SurvivalArena only: preflight two points/one clock, clear runtime creatures without loot, enable Shore/Ridge day-night preview at09:00. Refuses personal loaded saves and clients. Stop PIE to discard; do not Save World. See Docs/TRELLO_TEST_GUIDES.md G8 and ECOLOGY_RUNTIME_M13.md. |
 | `PF.SetHealth Value` | Server-only: set living survivor Health, clamped to its configured maximum. |

@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-13 M13 original creature definitions and loot - bounded technical PASS
+
+Added primitive Scrabbler/passive40HP and DuskPouncer/hostile140HP plus capped supplemental existing-item loot. Baseline creatures/point layout/save schema unchanged; real loaded catalog includes defaults without migration. Unknown/duplicate/nonstackable loot refuses before spawn; repeated dead damage does not duplicate drops. Editor5.12s/Game31.03s clean; final native5 with actual-file identity codec, oneclient2/twoclient75ms1%3 normalAI/combat/Eloot, corrected720/HUD1.5 one passed11records. ThreePNG/baselines/private guards checked. [CREATURE_VARIETY_M13.md](CREATURE_VARIETY_M13.md) retains exact failures/results/staged-source limits. Full M13 stays open; ordinary authored weighted distribution is next independent AI task, no new art/1440 retry/user acceptance inferred.
+
 ## 2026-10-13 M13 authored open-world ecology - bounded technical PASS
 
 Supported Editor Python creates DA_OpenWorldSpawnPolicies and narrowly assigns Shore/Ridge to existing nonstreamed PFCreatureSpawner_0/_1 in /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld. Names/positions/clock/navigation/resources/save layout preserved. Real daytime dormancy/night spawn/dawn retention/new-server GUIDs verified. Final Editor11.31s/Game34.39s clean; native6, oneclient Create/Restart4, twoclient75ms1%6, rendered720/HUD1.5 one and old full persistence replay4 passed21records. Two PNG/raw baseline/private guards reviewed. [AUTHORED_ECOLOGY_M13.md](AUTHORED_ECOLOGY_M13.md) has exact selectors/paths/failures/memory.

@@ -1,7 +1,7 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation','Traversal','AuthoredEcology')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation','Traversal','AuthoredEcology','CreatureVariety')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [string]$SettingsSourceRun='',
       [switch]$LowShadowDiagnostic,
@@ -46,6 +46,7 @@ if($TestCase -eq 'BuildingMenus'){$filter='PF.UI.BuildingMenusLive'}
 if($TestCase -eq 'MenuNavigation'){$filter='PF.UI.MenuNavigationLive'}
 if($TestCase -eq 'Traversal'){$filter='PF.Traversal.Live'}
 if($TestCase -eq 'AuthoredEcology'){$filter='PF.Creatures.AuthoredPreviewLive'}
+if($TestCase -eq 'CreatureVariety'){$filter='PF.Creatures.VarietyPreviewLive'}
 if($TestCase -eq 'SettingsRestartPrepare'){$filter='PF.UI.SettingsRestartPrepareLive'}
 if($TestCase -eq 'SettingsRestartVerify'){$filter='PF.UI.SettingsRestartVerifyLive'}
 # Every game login saves a server-issued credential, including ordinary UI fixtures.
@@ -77,6 +78,7 @@ if($OffscreenDiagnostic){$arguments+=' -RenderOffScreen'}
 if($TestCase -eq 'EcologyPreview'){$arguments=$arguments.Replace(' /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld',' /Game/PrimalFrontier/Maps/L_M7SurvivalArena');$arguments+=' -PFRunEcologyPreviewTest'}
 if($TestCase -eq 'BuildingMenus'){$arguments+=' -PFRunBuildingMenusTest'}
 if($TestCase -eq 'AuthoredEcology'){$arguments+=' -PFRunAuthoredPreviewTest'}
+if($TestCase -eq 'CreatureVariety'){$arguments+=' -PFRunVarietyPreviewTest'}
 if($TestCase -eq 'Traversal'){$arguments+=' -PFRunTraversalLiveTests -PFExpectedPlayers=1'}
 if($TestCase -eq 'CraftingScroll'){$arguments+=' -PFRunCraftingScrollTest'}
 if($TestCase -eq 'EarnedCombat'){$arguments+=' -PFRunEarnedCombatTest'}
