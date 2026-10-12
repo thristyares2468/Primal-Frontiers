@@ -1,5 +1,7 @@
 # M11 themed settings and category guidance
 
+October12 manual checkpoint: user reported “Settings Pass” for the focused Accessibility HUD-size Cancel/Apply/Resume/original-preference restoration test in the standalone open-world game. That bounded UX is accepted; no repeat needed. Other categories, display rollback, actual audio, physical device, settings process restart and full M11 remain separate. No new build/test/log/performance run inferred from this acknowledgment.
+
 October 10, 2026. Bounded technical presentation gate; full M11/M12 and personal usability remain open. Trello https://trello.com/c/PzdtVFJF.
 
 The existing local settings screen now shares PFUITheme with Pause/main/crafting: texture-free rounded surfaces, equal category and action buttons, outlined active row/category, wrapped category guidance and a separate status/controls footer. Exact values, settings backends, first-person focus, draft transactions, Apply/Cancel/Defaults and display confirmation remain unchanged. No art, assets, dependencies, gameplay authority, RPC, save schema or personal preference changes.

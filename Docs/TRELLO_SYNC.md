@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 user-confirmed settings transactions
+
+Fresh iH8I2Qfc G2 Doing readback after “Settings Pass.” Immediately record bounded HUD-size Cancel/Apply/Resume/restored-original preference acceptance and remove stale next-settings instructions. Preserve broad G2 Doing for remaining building/UI/device scope, all priority/member/deadline/history and already accepted chest/Pause/solo-persistence portions. No new card or full milestone pass. Docs-only Sol publication; no engine/build result inferred.
+
 ## 2026-10-12 user-confirmed pause
 
 Fresh iH8I2Qfc G2 Doing readback after “Pause Pass.” Immediately record standalone20second pause/no-needs-drain/resumed movement/look acceptance and remove stale next-Pause instructions. Preserve G2 Doing for remaining UI/settings/building scope; no new Personal card/priority/member/deadline change or broad milestone pass. Chest and G3 solo persistence already accepted. Docs-only Sol publication; no rebuilt/replayed engine results inferred.

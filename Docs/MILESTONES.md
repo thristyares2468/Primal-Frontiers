@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-12 M11 settings transactions — user-confirmed PASS
+
+User replied “Settings Pass” to Accessibility HUD-size Cancel/Apply/Resume/original-value restoration in the same standalone open-world game. Accept draft cancellation, visible applied HUD size and restored input. No fresh engine/build/automation/log/FPS evidence; display safety, audio, other settings/device/restart/full-M11 acceptance remain separate. Do not repeat this test. Existing G2 stays Doing for remaining scope; no new Personal card.
+
 ## 2026-10-12 M11 standalone pause — user-confirmed PASS
 
 User replied “Pause Pass” to the focused20second P-pause Food/Water comparison and resumed movement/look check on the same standalone open-world game. Accept no survival drain during solo pause and restored input after Resume. No new automated/build/log/screenshot/FPS evidence and no multiplayer/physical-controller/settings/full-M11 acceptance inferred. Do not repeat this test. Broader G2 stays Doing; previous chest and solo persistence checks remain accepted.
