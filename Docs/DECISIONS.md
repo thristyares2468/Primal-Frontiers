@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-13 - Creature variety and stable-layout weighted integration
+
+Use two additional native data-driven archetypes on the existing primitive class, with capped unique existing-item rewards and real item/stack validation before spawn. Keep legacy food payouts and references intact. Append alternate IDs to the existing authored policy, retain original tickets and dormant Ridge day, preserve point names/positions/count and resident saves. Do not add points or relax layout validation just to increase variety. Predicate tests permit the valid passive/hostile pools rather than assuming random draws always choose baseline IDs. Real-file/newserver/client/rendered proof precedes technical completion; human encounter acceptance precedes M14. Optional cross-species targeting would change combat/economy and needs a separate scope; taming remains unapproved, adaptations future. No art or new dependency. CREATURE_VARIETY_M13.md and WEIGHTED_ECOLOGY_M13.md record all limits.
+
 ## 2026-10-13 - Map-owned open-world ecology configuration
 
 Assign the tested biome/day-night data asset to the two existing always-loaded open-world points through supported Editor APIs. Keep point names/positions and world-save schema stable: adding points would invalidate existing layout checks. Shore is active by day/night; Ridge is dormant by day but retains an already living/corpse resident at dawn. Server nav/clearance/global and per-biome budgets remain authoritative. Saves restore GUIDs/enabled state/delay, never arbitrary policy paths. Regression maps retain fixed-ID defaults. Real separate-process restart and authored rendered proof precede this technical completion; no full-human/FPS acceptance is inferred. See AUTHORED_ECOLOGY_M13.md.

@@ -18,11 +18,15 @@ bool FPFAuthoredEcologyTest::RunTest(const FString&)
     auto Night=FGameplayTag::RequestGameplayTag(TEXT("World.Time.Night"));
     TestTrue(TEXT("Day shore chooses forager"),Policy->Choose(*Creatures,Defaults[0].Biome,Day,0,Id,Error));
     TestEqual(TEXT("Real authored shore definition"),Id,FName(TEXT("Creature_Forager")));
+    TestTrue(TEXT("Alternate shore ticket chooses new variant"),Policy->Choose(*Creatures,Defaults[0].Biome,Day,1,Id,Error));
+    TestEqual(TEXT("Actual alternate shore ID"),Id,FName(TEXT("Creature_Scrabbler")));
     Id=TEXT("Unchanged");
     TestFalse(TEXT("Day ridge is dormant"),Policy->Choose(*Creatures,Defaults[2].Biome,Day,0,Id,Error));
     TestEqual(TEXT("Dormant selection preserves output"),Id,FName(TEXT("Unchanged")));
     TestTrue(TEXT("Night ridge chooses prowler"),Policy->Choose(*Creatures,Defaults[2].Biome,Night,0,Id,Error));
     TestEqual(TEXT("Real authored ridge definition"),Id,FName(TEXT("Creature_Prowler")));
+    TestTrue(TEXT("Alternate night ridge ticket chooses new variant"),Policy->Choose(*Creatures,Defaults[2].Biome,Night,1,Id,Error));
+    TestEqual(TEXT("Actual alternate ridge ID"),Id,FName(TEXT("Creature_DuskPouncer")));
     AddInfo(TEXT("[PrimalAgentTools] Authored policy asset, day/night selection and dormant refusal verified"));
     return true;
 }

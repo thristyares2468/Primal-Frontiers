@@ -38,7 +38,7 @@ public:
             FString Error;Test->TestFalse(TEXT("Client cannot save authored world"),Persistence->Save(Slot,Error));
             Test->TestNull(TEXT("Client cannot spawn authored creature"),APFCreatureSpawner::Spawn(W,TEXT("Creature_Forager"),FVector::ZeroVector));
             Test->TestTrue(TEXT("Reconnect outcome matches phase"),Players[0]->GetPlayerSetupStatus()==(Restart?EPFPlayerSetupStatus::Restored:EPFPlayerSetupStatus::NewSurvivor));
-            int32 Forager=0,Prowler=0;for(TActorIterator<APFCreature> It(W);It;++It){Forager+=It->DefinitionId==TEXT("Creature_Forager");Prowler+=It->DefinitionId==TEXT("Creature_Prowler");Test->TestTrue(TEXT("Replicated resident is living"),It->Health>0);}
+            int32 Forager=0,Prowler=0;for(TActorIterator<APFCreature> It(W);It;++It){Forager+=!It->bHostile;Prowler+=It->bHostile;Test->TestTrue(TEXT("Replicated resident is living"),It->Health>0);Test->TestTrue(TEXT("Replicated ID is an authored group member"),It->bHostile?(It->DefinitionId==TEXT("Creature_Prowler") || It->DefinitionId==TEXT("Creature_DuskPouncer")):(It->DefinitionId==TEXT("Creature_Forager") || It->DefinitionId==TEXT("Creature_Scrabbler")));}
             Test->TestTrue(TEXT("Exactly one replicated resident of each type"),Forager==1 && Prowler==1);
             Test->AddInfo(TEXT("[PrimalAgentTools] Authored ecology client replicated dawn residents, reconnect and authority refusal verified"));Done=Now;return false;
         }

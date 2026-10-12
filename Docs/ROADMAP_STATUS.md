@@ -1,5 +1,9 @@
 # Roadmap and open-world direction
 
+## Current handoff - October 13, 2026
+
+M13 core technical integration now has four original primitive creature definitions, bounded food/fibre loot, ordinary Shore/nightRidge weighted policies, caps/server authority and one-/two-client actual restart/replication evidence. Same points/save schema; no external art or unrelated edits. See WEIGHTED_ECOLOGY_M13.md plus two preceding evidence files. Mandatory Personal G9 actual first-person encounter/escape/readability/performance acceptance is next before M14; full M13 not marked complete. Optional predator/prey deferred, taming unapproved, adaptations planned. M7/G8/solo persistence/chest/Pause/Settings accepted checks need no repeat;1440 deferred. No immediate asset needed; M9 provenance and other human/device/performance gates remain separate. Source scopes published897638b/67dbfd2, final weighted Sol publication follows.
+
 ## Current delivery update - October 13, 2026
 
 Authored open-world biome/day-night spawning passed its bounded Editor/Game/native/rendered/restart gate; exact21 successful records and limits in AUTHORED_ECOLOGY_M13.md. Stable existing point identities/save layout and private state preserved. Full M13 remains open for creature/loot variety and actual human ecology/performance acceptance; original adaptation proposals remain unimplemented. M7/G8/solo persistence/chest/Pause/Settings user acceptance retained; stale duplicate solo cards corrected. Full M11/device/rendered multiplayer/provenance remain separate. Weight/traversal fb2667a published,1440 explicitly deferred. No next full milestone or art integration certified.

@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-13 M13 weighted ordinary-world integration - technical PASS, human gate open
+
+Known Scrabbler/DuskPouncer alternate tickets added through supported Editor API to the existing policy asset; same two point identities, old residents/save layout preserved. Final Editor5.52s/Game13.64s clean; native5/oneclient newserverrestart4/twoclient75ms1%6/corrected720pHUD1.5 one passed16records. Actual oneclient server selected and restored new DuskPouncer; two-client retained baseline species; deterministic native ticket1 provesScrabbler. Two final caption-correct PNG/log baseline/private guards reviewed. [WEIGHTED_ECOLOGY_M13.md](WEIGHTED_ECOLOGY_M13.md) exact results/paths/staged failures/memory.
+
+Core M13 technical types/biome/day-night/loot/caps/authority/networking implemented. Mandatory actual Personal first-person ecology encounter/usability/performance G9 still UNVERIFIED; stop before M14. Optional predator/prey deferred, taming unapproved, adaptations planned, no false completion. Accepted earlier personal checks retained,1440 deferred. No new external art or user asset needed.
+
 ## 2026-10-13 M13 original creature definitions and loot - bounded technical PASS
 
 Added primitive Scrabbler/passive40HP and DuskPouncer/hostile140HP plus capped supplemental existing-item loot. Baseline creatures/point layout/save schema unchanged; real loaded catalog includes defaults without migration. Unknown/duplicate/nonstackable loot refuses before spawn; repeated dead damage does not duplicate drops. Editor5.12s/Game31.03s clean; final native5 with actual-file identity codec, oneclient2/twoclient75ms1%3 normalAI/combat/Eloot, corrected720/HUD1.5 one passed11records. ThreePNG/baselines/private guards checked. [CREATURE_VARIETY_M13.md](CREATURE_VARIETY_M13.md) retains exact failures/results/staged-source limits. Full M13 stays open; ordinary authored weighted distribution is next independent AI task, no new art/1440 retry/user acceptance inferred.

@@ -24,7 +24,7 @@ public:
         UWorld* W=nullptr;for(const auto& C:GEngine->GetWorldContexts()){if(C.World() && C.World()->GetNetMode()==NM_Standalone && C.World()->IsGameWorld()){W=C.World();break;}}
         if(!W){return false;}auto* PC=Cast<APFSurvivalPlayerController>(W->GetFirstPlayerController());if(!PC || !PC->GetPawn()){return false;}
         APFWorldClock* Clock=nullptr;for(TActorIterator<APFWorldClock> It(W);It;++It){Clock=*It;}if(!Clock){return false;}
-        APFCreature* Prowler=nullptr;int32 Foragers=0;for(TActorIterator<APFCreature> It(W);It;++It){if(It->DefinitionId==TEXT("Creature_Prowler")){Prowler=*It;}else{++Foragers;}}
+        APFCreature* Prowler=nullptr;int32 Foragers=0;for(TActorIterator<APFCreature> It(W);It;++It){if(It->bHostile){Prowler=*It;}else{++Foragers;}}
         if(Stage==0)
         {
             if(!Foragers){return false;}Test->TestNull(TEXT("Authored ridge dormant at day"),Prowler);
@@ -34,13 +34,13 @@ public:
         }
         if(Stage==1)
         {
-            if(!Prowler){return false;}Resident=Prowler;Prowler->SetActorTickEnabled(false);Prowler->GetCharacterMovement()->DisableMovement();
+            if(!Prowler){return false;}Resident=Prowler;Prowler->SetActorTickEnabled(true);Prowler->GetCharacterMovement()->DisableMovement();
             const FVector At=Prowler->GetActorLocation();PC->GetPawn()->SetActorLocation(At+FVector(-400,0,50));FVector Eye;FRotator Look;PC->GetPawn()->GetActorEyesViewPoint(Eye,Look);PC->SetControlRotation((At-Eye).Rotation());
             Stage=2;Until=Now+1;return false;
         }
-        if(Stage==2){FScreenshotRequest::RequestScreenshot(Directory/TEXT("authored_night.png"),true,false);Stage=3;Until=Now+1;return false;}
-        if(Stage==3){Test->TestTrue(TEXT("Actual authored night PNG"),IFileManager::Get().FileSize(*(Directory/TEXT("authored_night.png")))>0);Clock->SetHour(9);Stage=4;Until=Now+1;return false;}
-        if(Stage==4){FScreenshotRequest::RequestScreenshot(Directory/TEXT("authored_dawn.png"),true,false);Stage=5;Until=Now+1;return false;}
+        if(Stage==2){Prowler->SetActorTickEnabled(false);FScreenshotRequest::RequestScreenshot(Directory/TEXT("authored_night.png"),true,false);Stage=3;Until=Now+1;return false;}
+        if(Stage==3){Test->TestTrue(TEXT("Actual authored night PNG"),IFileManager::Get().FileSize(*(Directory/TEXT("authored_night.png")))>0);Clock->SetHour(9);Prowler->SetActorTickEnabled(true);Stage=4;Until=Now+1;return false;}
+        if(Stage==4){Prowler->SetActorTickEnabled(false);FScreenshotRequest::RequestScreenshot(Directory/TEXT("authored_dawn.png"),true,false);Stage=5;Until=Now+1;return false;}
         Test->TestTrue(TEXT("Actual authored dawn PNG"),IFileManager::Get().FileSize(*(Directory/TEXT("authored_dawn.png")))>0);
         Test->TestEqual(TEXT("Dawn preserves same resident"),Prowler,Resident.Get());Test->TestEqual(TEXT("No phase duplication"),APFCreatureSpawner::Count(W),2);
         Test->AddInfo(TEXT("[PrimalAgentTools] Authored open-world night and dawn rendered without policy reassignment"));return true;
