@@ -84,7 +84,15 @@ public:
             CheckLayout(Craft.Get(),TEXT("PF_CraftingPanel"));Capture(TEXT("craft_busy"));Wait(Now,0.5,5);return false;
         }
         if(Phase==5)
-        {if(!CheckShot()){return false;}Press(EKeys::R);Wait(Now,0.4,6);return false;}
+        {if(!CheckShot()){return false;}SlatePress(EKeys::Escape);Wait(Now,0.2,50);return false;}
+        if(Phase==50)
+        {
+            Test->TestFalse(TEXT("Esc closes active craft menu without Pause"),PC->IsCraftingOpen() || PC->IsPauseMenuOpen());
+            Test->TestEqual(TEXT("Esc Back preserves real running craft"),PC->GetCrafting()->ActiveRecipe,FName(TEXT("Recipe_Tool")));
+            Test->TestEqual(TEXT("Esc Back preserves ingredients"),PC->GetInventory()->Count(TEXT("Item_Wood")),3);
+            Press(EKeys::C);Wait(Now,0.2,51);return false;
+        }
+        if(Phase==51){Press(EKeys::R);Wait(Now,0.4,6);return false;}
         if(Phase==6)
         {
             Test->TestTrue(TEXT("Server cancellation visible"),Label(Craft.Get(),TEXT("PF_CraftingPanel_Result")).Contains(TEXT("Cancelled")));
@@ -179,8 +187,8 @@ public:
             CheckLayout(Build.Get(),TEXT("PF_BuildingPanel"));Capture(TEXT("build_storage"));Wait(Now,0.5,11);return false;
         }
         if(!CheckShot()){return false;}
-        PC->Building->OpenStorage=nullptr;Press(EKeys::B);
-        Test->TestFalse(TEXT("Build closes via real binding"),PC->Building->bBuildMode);
+        PC->Building->OpenStorage=nullptr;Press(EKeys::Escape);
+        Test->TestFalse(TEXT("Build closes via Esc binding without Pause"),PC->Building->bBuildMode || PC->IsPauseMenuOpen());
         Test->AddInfo(TEXT("[PrimalUI] Actual crafting refusal/start/busy/cancel and invalid placement rendered; bounded storage UI fixture. No hardware/traversal/multiplayer acceptance claimed."));return true;
     }
 private:

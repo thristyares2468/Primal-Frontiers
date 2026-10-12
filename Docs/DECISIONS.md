@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-12 — Separate build selection from Back/Pause
+
+B in placement returns to the picker instead of disabling building; B on picker closes it. Esc uses an explicit local BackOrPause binding for gameplay overlays and Pause only when none is open; focused modal widgets handle their own one-layer Back, with repeat guards on picker/chest/settings. Closing craft does not cancel the server job. P remains global secondary Pause. Keep existing authoritative close-storage RPC/placement and standalone-versus-multiplayer pause policy. User explicitly clarified standalone Esc is fine: no PIE input preprocessor, Editor shortcut interception or machine preferences change. MENU_NAVIGATION_M11.md distinguishes registered/Slate tests from human/device acceptance.
+
 ## 2026-10-12 — View-relative cardinal wall edges and contextual R
 
 Wall/Door/Window default edge is the nearest cardinal direction to the possessed pawn's current eye yaw, plus the validated quarter-turn offset. The shared Candidate routine derives preview and authoritative transform; clients still send only piece ID/offset, and reach/support/ownership/collision/wood checks remain unchanged. No client-supplied transform or stored-schema migration. Other piece grid rules and existing saved transforms remain. One R binding rotates during first-person building, cancels only with crafting open, and stays inert in other contexts; modal crafting's existing R handler remains. Help/HUD use the registered action and call the value an offset, because looking across a cardinal boundary changes its origin. Standard InputCore private dependency is required for the non-Shipping plugin's real-key live fixture; no new plugin/service. WALL_ROTATION_M11.md records native/rendered/network evidence and manual limits.

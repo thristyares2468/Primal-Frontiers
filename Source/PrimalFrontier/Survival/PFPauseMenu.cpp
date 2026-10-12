@@ -110,7 +110,7 @@ void UPFPauseMenu::NativeOnInitialized()
     SaveFeedback=Text(TEXT(""),22);SaveFeedback->SetColorAndOpacity(PFUITheme::Accent);
     SaveFeedback->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
     Details->AddChildToVerticalBox(SaveFeedback)->SetPadding(FMargin(0,20,0,0));
-    auto* Hint=Text(TEXT("P / Menu: resume\nArrows / D-pad: select | Enter / A: confirm\nIn Editor Play, Esc may end the session."),16);
+    auto* Hint=Text(TEXT("Esc / P / Menu: resume\nArrows / D-pad: select | Enter / A: confirm\nIn Editor Play, Esc may end the session."),16);
     Hint->SetColorAndOpacity(PFUITheme::Muted);Rows->AddChildToVerticalBox(Hint)->SetPadding(FMargin(0,12,0,0));
 }
 

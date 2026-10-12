@@ -52,7 +52,7 @@ void UPFBuildingHUD::NativeTick(const FGeometry& Geometry,float Delta)
     Font(Heading,20);Font(Text,18);Font(Result,16);Font(Controls,14);
     Heading->SetText(FText::FromString(TEXT("BUILDING & STORAGE")));
     Controls->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?
-        TEXT("B / RB close | N / D-up next\nR / D-down rotate | Click / RT place\nH / LB demolish | J debug damage\nE / X door/storage | U / D-left store\nO / D-right take first stored item"):TEXT("")));
+        TEXT("B / RB choose | Esc close | N / D-up next\nR / D-down rotate | Click / RT place\nH / LB demolish | J debug damage\nE / X door/storage | U / D-left store\nO / D-right take first stored item"):TEXT("")));
 
     FString Lines;
     // Selected piece, its cost, rotation and the preview's validity message.

@@ -25,7 +25,7 @@ void APFSurvivalPlayerController::BindGamepadControls()
     BindControl(EKeys::Gamepad_Special_Right,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Menu: pause / resume"),true);
     BindControl(EKeys::Gamepad_Special_Left,&APFSurvivalPlayerController::ToggleInventory,TEXT("General"),TEXT("View: open / close inventory"));
     BindControl(EKeys::Gamepad_FaceButton_Top,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Y: open / close crafting"));
-    BindControl(EKeys::Gamepad_RightShoulder,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("RB: open / close building"));
+    BindControl(EKeys::Gamepad_RightShoulder,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("RB: open picker / return to picker while placing"));
     BindControl(EKeys::Gamepad_FaceButton_Left,&APFSurvivalPlayerController::GamepadPrimary,TEXT("Contextual"),TEXT("X: inventory consume; craft selected recipe; otherwise interact"));
     BindControl(EKeys::Gamepad_FaceButton_Right,&APFSurvivalPlayerController::GamepadBack,TEXT("General"),TEXT("B: close overlay / resume"));
     BindControl(EKeys::Gamepad_DPad_Up,&APFSurvivalPlayerController::GamepadUp,TEXT("Contextual"),TEXT("Inventory previous; crafting previous recipe; building next piece"));

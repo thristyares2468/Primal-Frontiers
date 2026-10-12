@@ -11,6 +11,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/InputComponent.h"
 #include "Components/TextBlock.h"
+#include "Components/WidgetSwitcher.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -73,7 +74,7 @@ public:
             const auto Id=B->Catalog->Pieces[Choice].Id;Activate(Picker.Get(),FName(*(TEXT("PF_BuildChoice_")+Id.ToString())));
             Test->TestEqual(TEXT("UI selects requested piece"),B->SelectedId(),Id);
             Test->TestFalse(TEXT("Choice releases modal input"),PC->IsBuildingMenuOpen() || PC->bShowMouseCursor || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
-            if(++Choice<8){Press(EKeys::B);Press(EKeys::B);Wait(Now,0.2,2);return false;}
+            if(++Choice<8){Press(EKeys::B);Test->TestTrue(TEXT("B returns directly to picker while placing"),PC->IsBuildingMenuOpen());Wait(Now,0.2,2);return false;}
             Test->TestEqual(TEXT("Selection alone consumes no wood"),I->Count(TEXT("Item_Wood")),14);
             PC->SelectBuildingPiece(TEXT("Build_Foundation"));Aim(FVector(-800,-1200,0));Press(EKeys::LeftMouseButton);Wait(Now,0.4,3);return false;
         }
@@ -106,7 +107,7 @@ public:
             if(!ShotExists()){return false;}
             for(TActorIterator<APFBuildPiece> It(PC->GetWorld());It;++It){if(It->Kind==EPFBuildKind::Wall && It->IsOwnedBy(PC->PlayerState)){It->Destroy();break;}}
             PC->GetPawn()->SetActorLocation(FVector(-1200,-1100,100));
-            Press(EKeys::B);Press(EKeys::B);Activate(Picker.Get(),TEXT("PF_BuildChoice_Build_Storage"));Aim(Base->GetActorLocation()+FVector(0,0,10));Press(EKeys::LeftMouseButton);Wait(Now,0.4,4);return false;
+            Press(EKeys::B);Activate(Picker.Get(),TEXT("PF_BuildChoice_Build_Storage"));Aim(Base->GetActorLocation()+FVector(0,0,10));Press(EKeys::LeftMouseButton);Wait(Now,0.4,4);return false;
         }
         if(Stage==4)
         {
@@ -171,7 +172,25 @@ public:
         {
             Test->TestEqual(TEXT("Final food conservation"),I->Count(TEXT("Item_Food")),2);Test->TestTrue(TEXT("Chest empty after recovery"),Chest->Storage->GetStacks().IsEmpty());
             Activate(ChestUI.Get(),TEXT("PF_CloseStorage"));Test->TestFalse(TEXT("Close releases movement/look/cursor"),PC->IsStorageMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored() || PC->bShowMouseCursor);
-            Wait(Now,0.3,20);return false;
+            Wait(Now,0.3,190);return false;
+        }
+        if(Stage==190){Aim(Chest->GetActorLocation());Press(EKeys::E);Wait(Now,0.4,191);return false;}
+        if(Stage==191)
+        {
+            Test->TestTrue(TEXT("Chest reopens for Escape Back"),PC->IsStorageMenuOpen());
+            Activate(ChestUI.Get(),TEXT("PF_ChestSettings"));Activate(ChestUI.Get(),TEXT("PF_Filter_Item_Wood"));
+            SlateBack(true);Test->TestEqual(TEXT("Held Escape retains chest settings page"),StoragePage(),1);
+            SlateBack(false);Wait(Now,0.3,192);return false;
+        }
+        if(Stage==192)
+        {
+            Test->TestTrue(TEXT("Escape cancels filter draft and keeps chest open without Pause"),StoragePage()==0 && PC->IsStorageMenuOpen() && !PC->IsPauseMenuOpen() && !Chest->bRestrictStorageItems);
+            SlateBack(false);Wait(Now,0.3,193);return false;
+        }
+        if(Stage==193)
+        {
+            Test->TestFalse(TEXT("Second Escape closes chest and restores gameplay without Pause"),PC->IsStorageMenuOpen() || PC->IsPauseMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored() || PC->bShowMouseCursor);
+            Test->TestNull(TEXT("Esc close clears server open-storage pointer"),B->OpenStorage.Get());Wait(Now,0.3,20);return false;
         }
         if(Stage==20)
         {
@@ -196,6 +215,8 @@ public:
         Test->AddInfo(TEXT("[PrimalUI] Eight-piece picker, actual chest opening, transfers, Quick Store/filter Apply/Cancel, Sort/freshness/capacity, ownership and physical stair traversal verified"));return true;
     }
 private:
+    void SlateBack(bool Repeat){auto& App=FSlateApplication::Get();App.ProcessKeyDownEvent(FKeyEvent(EKeys::Escape,FModifierKeysState(),0,Repeat,0,0));App.ProcessKeyUpEvent(FKeyEvent(EKeys::Escape,FModifierKeysState(),0,false,0,0));}
+    int32 StoragePage(){TArray<UWidget*> Widgets;ChestUI->WidgetTree->GetAllWidgets(Widgets);for(auto* W:Widgets){if(auto* Pages=Cast<UWidgetSwitcher>(W)){return Pages->GetActiveWidgetIndex();}}Test->AddError(TEXT("Missing chest page switcher"));return INDEX_NONE;}
     UUserWidget* Find(UClass* Type){TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,Type,false);return Widgets.Num()==1?Widgets[0]:nullptr;}
     void Press(FKey K){for(const auto& Binding:PC->InputComponent->KeyBindings){if(Binding.Chord.Key==K && Binding.KeyEvent==IE_Pressed){Binding.KeyDelegate.Execute(K);return;}}Test->AddError(TEXT("Missing bound input"));}
     void Activate(UUserWidget* Menu,FName Name)

@@ -136,7 +136,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     // from the template Enhanced Input context (IMC_Default) via the base class.
     // P is the reliable pause key in PIE, where Esc may end the Play session.
     BindControl(EKeys::P,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Open / close Pause menu (secondary key; use in Editor Play)"),true);
-    BindControl(EKeys::Escape,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Open / close Pause menu (Editor may stop PIE)"),true);
+    BindControl(EKeys::Escape,&APFSurvivalPlayerController::BackOrPause,TEXT("General"),TEXT("Close current menu or placement; open Pause when none is open"),true);
     BindControl(EKeys::E,&APFSurvivalPlayerController::Interact,TEXT("World"),TEXT("Pick up / gather / use door or storage"));
     // Inventory (M3)
     BindControl(EKeys::Tab,&APFSurvivalPlayerController::ToggleInventory,TEXT("General"),TEXT("Open / close inventory"));
@@ -152,7 +152,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindControl(EKeys::Three,&APFSurvivalPlayerController::DryFood,TEXT("Crafting"),TEXT("Dry food"));
     BindControl(EKeys::R,&APFSurvivalPlayerController::RotateOrCancelCraft,TEXT("Crafting / Building"),TEXT("Rotate building clockwise; in crafting, cancel without consuming ingredients"));
     // Building (M5) and attack (M6, left click outside overlays)
-    BindControl(EKeys::B,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("Open / close building"));
+    BindControl(EKeys::B,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("Open build picker; return to picker while placing; close picker"));
     BindControl(EKeys::N,&APFSurvivalPlayerController::NextBuilding,TEXT("Building"),TEXT("Select next piece"));
     BindControl(EKeys::LeftMouseButton,&APFSurvivalPlayerController::PlaceBuilding,TEXT("Building / world"),TEXT("Place preview; attack when overlays are closed"));
     BindControl(EKeys::H,&APFSurvivalPlayerController::DemolishBuilding,TEXT("Building"),TEXT("Demolish owned targeted piece"));
@@ -191,6 +191,17 @@ TArray<FPFControlHint> APFSurvivalPlayerController::GetControlHints(bool bGamepa
 // ---------------------------------------------------------------------------
 
 void APFSurvivalPlayerController::TogglePauseMenu(){SetPauseMenuOpen(!bPauseMenuOpen);}
+void APFSurvivalPlayerController::BackOrPause()
+{
+    // Focused modal widgets handle their own nested Back (settings/filter/help).
+    // This binding covers game-input overlays and the no-menu gameplay state.
+    if(bPauseMenuOpen){SetPauseMenuOpen(false);}
+    else if(bStorageMenuOpen){Building->ServerCloseStorage();SetStorageMenuOpen(false);}
+    else if(bBuildingMenuOpen || Building->bBuildMode){Building->bBuildMode=false;SetBuildingMenuOpen(false);}
+    else if(bCraftingOpen){SetCraftingMenuOpen(false);}
+    else if(bInventoryOpen){bInventoryOpen=false;}
+    else{SetPauseMenuOpen(true);}
+}
 
 bool APFSurvivalPlayerController::SaveWorldFromMenu()
 {
@@ -494,13 +505,9 @@ void APFSurvivalPlayerController::ServerCraftAction_Implementation(FName Id,bool
 void APFSurvivalPlayerController::ToggleBuilding()
 {
     if(bPauseMenuOpen){return;}
-    Building->bBuildMode=!Building->bBuildMode;
-    if(Building->bBuildMode)
-    {
-        SetCraftingMenuOpen(false);
-        bInventoryOpen=false;
-    }
-    SetBuildingMenuOpen(Building->bBuildMode);
+    if(bBuildingMenuOpen){Building->bBuildMode=false;SetBuildingMenuOpen(false);return;}
+    SetCraftingMenuOpen(false);bInventoryOpen=false;Building->bBuildMode=true;
+    SetBuildingMenuOpen(true);
 }
 
 void APFSurvivalPlayerController::SetBuildingMenuOpen(bool bOpen)

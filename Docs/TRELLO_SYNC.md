@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 B/Esc navigation completion
+
+Fresh current AI Ieu24Nin/G2/G3 reads before writes. Final Editor/Game/native2/rendered4,19PNG/raw baseline and private guards passed. Immediately evidenceupdated, moved and marked complete Ieu24Nin Done; readback complete=true. Current G2 B/Esc/R guide copied (15,654chars), preserved Personal1/Doing/member/deadline/history and previous accepted checks. G3 accepted Done retained with current B/Esc controls. No manual/full-M11 checkbox assumed. User's subsequent weight/999k/encumbrance/sprint/climb/glide request is the next independent task after scoped Sol publication, requiring a fresh implementation audit/Doing card. MENU_NAVIGATION_M11.md retains exact tests/limits.
+
 ## 2026-10-12 wall orientation and R repair
 
 Fresh bounded Kz0bGzDT and Personal iH8I2Qfc readback before mutations. AI wall/input technical repair passed final Editor/Game, native4/rendered3/network5 and all20PNG/log baseline/hash guards. Immediately updated evidence, moved and read back Kz0bGzDT Done before another task. G2 current description copied from revised exact guide (R/ahead placement and one small retest), preserved title/priority/Doing/member/deadline/history and accepted chest/solo persistence/Pause/Settings. User requested continued Trello checkoffs; only verified scope was closed. WALL_ROTATION_M11.md retains exact evidence/limits; Sol scoped publication follows. Do not infer full M11 or close manual window/stair/device gates.

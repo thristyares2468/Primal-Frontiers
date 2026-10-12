@@ -190,7 +190,7 @@ void UPFSettingsMenu::NativeDestruct(){RevertDisplay();Super::NativeDestruct();}
 FReply UPFSettingsMenu::NativeOnPreviewKeyDown(const FGeometry& G,const FKeyEvent& E)
 {
     const auto K=E.GetKey();
-    if(K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right){Cancel();return FReply::Handled();}
+    if(K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right){if(!E.IsRepeat()){Cancel();}return FReply::Handled();}
     if(K==EKeys::Enter || K==EKeys::Gamepad_FaceButton_Bottom){if(!E.IsRepeat()){Apply();}return FReply::Handled();}
     if(K==EKeys::Gamepad_FaceButton_Top){Defaults();return FReply::Handled();}
     if(K==EKeys::Gamepad_LeftShoulder || K==EKeys::Gamepad_RightShoulder){Category=Cycle(Category,K==EKeys::Gamepad_LeftShoulder?-1:1,4);Selected=0;RefreshRows();return FReply::Handled();}

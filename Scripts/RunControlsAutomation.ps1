@@ -1,7 +1,7 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [string]$SettingsSourceRun='',
       [switch]$LowShadowDiagnostic,
@@ -29,7 +29,7 @@ function Get-PersonalSettingsSnapshot {
     }
 }
 $personalSettingsBefore=@(Get-PersonalSettingsSnapshot)
-$run=$(if($TestCase -eq 'SettingsRestartPrepare'){'M11RestartP'}elseif($TestCase -eq 'SettingsRestartVerify'){'M11RestartV'}elseif($TestCase -eq 'CraftingScroll'){'M11Scroll'}elseif($TestCase -eq 'EarnedWeapon'){'M12EarnedWeapon'}elseif($TestCase -eq 'EarnedCombat'){'M12EarnedCombat'}elseif($TestCase -eq 'EarnedProgression'){'M12Earned'}elseif($TestCase -eq 'Protection'){'M12Protection'}elseif($TestCase -eq 'WeaponProgression'){'M12Weapon'}elseif($TestCase -eq 'ToolProgression'){'M12Tool'}else{'M11'+$TestCase})+$Resolution+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
+$run=$(if($TestCase -eq 'SettingsRestartPrepare'){'M11RestartP'}elseif($TestCase -eq 'SettingsRestartVerify'){'M11RestartV'}elseif($TestCase -eq 'MenuNavigation'){'M11MenuNav'}elseif($TestCase -eq 'CraftingScroll'){'M11Scroll'}elseif($TestCase -eq 'EarnedWeapon'){'M12EarnedWeapon'}elseif($TestCase -eq 'EarnedCombat'){'M12EarnedCombat'}elseif($TestCase -eq 'EarnedProgression'){'M12Earned'}elseif($TestCase -eq 'Protection'){'M12Protection'}elseif($TestCase -eq 'WeaponProgression'){'M12Weapon'}elseif($TestCase -eq 'ToolProgression'){'M12Tool'}else{'M11'+$TestCase})+$Resolution+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
 $report=Join-Path $projectRoot ('Saved\AutomationReports\'+$run)
 $settingsTarget=Join-Path $report 'GameUserSettings.ini'
 if(Test-Path -LiteralPath $report){throw 'Refusing reused UI report/settings destination.'}
@@ -41,6 +41,7 @@ $height=if($Resolution -eq '720'){720}else{1440}
 $filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.InventorySelectionLive'} 'Survival'{'PF.UI.SurvivalFeedbackLive'} 'Overlays'{'PF.UI.ActionOverlaysLive'} 'Reconnect'{'PF.UI.ReconnectProfileLive'} 'Settings'{'PF.UI.SettingsCancelLive'} 'SettingsApply'{'PF.UI.SettingsApplyLive'} 'Display'{'PF.UI.SettingsDisplayLive'} 'WorldMenu'{'PF.UI.WorldMenuLive'} 'ToolProgression'{'PF.Crafting.ToolProgressionLive'} 'WeaponProgression'{'PF.Crafting.WeaponProgressionLive'} 'Protection'{'PF.Crafting.ProtectionLive'} 'Progression'{'PF.UI.ProgressionFeedbackLive'} 'EarnedProgression'{'PF.Progression.EarnedUpgradeLive'} 'EarnedCombat'{'PF.Progression.EarnedCombatLive'} 'EarnedWeapon'{'PF.Progression.EarnedWeaponLive'} 'CraftingScroll'{'PF.UI.CraftingScrollLive'}}
 if($TestCase -eq 'EcologyPreview'){$filter='PF.Creatures.EcologyPreviewLive'}
 if($TestCase -eq 'BuildingMenus'){$filter='PF.UI.BuildingMenusLive'}
+if($TestCase -eq 'MenuNavigation'){$filter='PF.UI.MenuNavigationLive'}
 if($TestCase -eq 'SettingsRestartPrepare'){$filter='PF.UI.SettingsRestartPrepareLive'}
 if($TestCase -eq 'SettingsRestartVerify'){$filter='PF.UI.SettingsRestartVerifyLive'}
 # Every game login saves a server-issued credential, including ordinary UI fixtures.

@@ -1,5 +1,7 @@
 # M11 — Forward wall placement and R rotation
 
+Current navigation update: MENU_NAVIGATION_M11.md supersedes B-exits-placement instructions in this historical wall verification record. B now returns directly to the picker; Esc exits placement or backs out before opening Pause. Wall/R snapping and the recorded results below remain valid.
+
 October12,2026. User reported walls only landing left/right and requested R.
 
 ## Behavior

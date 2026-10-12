@@ -1,5 +1,7 @@
 # Playing and testing Primal Frontier
 
+Current standalone navigation: **B** during placement returns directly to the piece picker. **Esc** exits placement or closes your current menu; with no menu open it opens Pause, and Esc on Pause resumes. Settings/Help return to Pause; chest settings first discard the draft and return to chest contents. Closing crafting leaves the job running; R/Cancel remains the deliberate cancel. P is still available. Editor PIE shortcuts are unchanged; use standalone for this Esc check. [MENU_NAVIGATION_M11.md](MENU_NAVIGATION_M11.md) records the exact technical evidence.
+
 October12 building controls: R rotates the first-person placement preview clockwise; T is no longer bound. Wall/Door/Window offset0 chooses the cardinal platform edge ahead of your current view. Keep looking the same way while cycling R; turning changes that starting edge. Aim down at your visible foundation/floor to attach a frame. R remains Cancel inside crafting; it does not cancel a job while you are rotating a building. Other pieces keep their existing world-grid rules. [WALL_ROTATION_M11.md](WALL_ROTATION_M11.md) records technical evidence; remaining human building acceptance is separate.
 
 Updated 2026-10-09. Use **L_PrimalFrontier_OpenWorld** for current open-world/M8 manual acceptance; **L_M7SurvivalArena** remains the small integration regression map. All 35 intended native regressions passed in 32+3 supported batches on df648eb; this is not one combined run or a claim about every later source change. One-/two-client NullRHI checks passed within their recorded scope. Settings were checked in rendered play; sustained walking, overnight survival and rendered full-loop persistence remain unverified. Exact current evidence and next action: [CURRENT_STATE.md](CURRENT_STATE.md). **L_M6Creatures** is the earlier creature fixture. Installed engine reports **5.8.3**, despite the requested 5.8.2 baseline.
@@ -72,7 +74,7 @@ M11 bag readability: only four rows are visible at once. The displayed row range
 | Pause | P opens/resumes; Esc also works in a standalone game window |
 | Inventory | Tab open/close; Up/Down select; X split half; G drop one; Q consume one |
 | Crafting | C open/close; Up/Down select; Enter craft selected; 1 tool; 2 cook; 3 dry; R cancel; clickable row/action buttons |
-| Building | B opens eight-piece picker; click/1–8 chooses; R rotate; left click place; B exits placement, B again reopens picker; N optional next while placing |
+| Building | B opens eight-piece picker; click/1–8 chooses; R rotate; left click place; B returns to picker; Esc exits placement; N optional next while placing |
 | Owned structures | E door/storage; H demolish in build mode; J debug damage in build mode |
 | Storage | Aim at owned chest, E opens its window; Store/Take1 or whole stack; Sort chest; Quick Store; Chest settings item filters then Apply/Cancel; Close/E/Tab returns to first person |
 | Console | Backtick/tilde, type command, Enter, close console |

@@ -126,6 +126,7 @@ private:
     UPROPERTY(Transient) EPFLocalReconnectStatus LocalReconnectStatus=EPFLocalReconnectStatus::Unknown;
     UPROPERTY(Transient) EPFPlayerSetupStatus PlayerSetupStatus=EPFPlayerSetupStatus::Unconfirmed;
     void BindControl(FKey Key,void (APFSurvivalPlayerController::*Handler)(),const TCHAR* Context,const TCHAR* Action,bool bWhenPaused=false);
+    void BackOrPause();
     TArray<FPFControlHint> RegisteredControlHints;
     // ---- Gamepad routing (PFGamepadInput.cpp) ----
     // Face/D-pad buttons are contextual: they act on whichever overlay is open.

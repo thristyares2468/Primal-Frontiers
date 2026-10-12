@@ -91,7 +91,7 @@ void UPFBuildingMenu::CloseMenu()
 FReply UPFBuildingMenu::NativeOnKeyDown(const FGeometry& G,const FKeyEvent& E)
 {
     const auto K=E.GetKey();
-    if(K==EKeys::B || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right){CloseMenu();return FReply::Handled();}
+    if(K==EKeys::B || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right){if(!E.IsRepeat()){CloseMenu();}return FReply::Handled();}
     if(K==EKeys::P || K==EKeys::Gamepad_Special_Right){CloseMenu();CastChecked<APFSurvivalPlayerController>(GetOwningPlayer())->SetPauseMenuOpen(true);return FReply::Handled();}
     const FKey Keys[]={EKeys::One,EKeys::Two,EKeys::Three,EKeys::Four,EKeys::Five,EKeys::Six,EKeys::Seven,EKeys::Eight};
     auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
@@ -233,7 +233,7 @@ void UPFStorageMenu::CancelSettings(){Pages->SetActiveWidgetIndex(0);SetKeyboard
 FReply UPFStorageMenu::NativeOnKeyDown(const FGeometry& G,const FKeyEvent& E)
 {
     const auto K=E.GetKey();
-    if(K==EKeys::E || K==EKeys::Tab || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right){if(Pages->GetActiveWidgetIndex()==1){CancelSettings();}else{CloseMenu();}return FReply::Handled();}
+    if(K==EKeys::E || K==EKeys::Tab || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right){if(!E.IsRepeat()){if(Pages->GetActiveWidgetIndex()==1){CancelSettings();}else{CloseMenu();}}return FReply::Handled();}
     if(K==EKeys::P || K==EKeys::Gamepad_Special_Right){CloseMenu();CastChecked<APFSurvivalPlayerController>(GetOwningPlayer())->SetPauseMenuOpen(true);return FReply::Handled();}
     return Super::NativeOnKeyDown(G,E);
 }
