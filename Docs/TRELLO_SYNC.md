@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## 2026-10-12 user-confirmed pause
+
+Fresh iH8I2Qfc G2 Doing readback after “Pause Pass.” Immediately record standalone20second pause/no-needs-drain/resumed movement/look acceptance and remove stale next-Pause instructions. Preserve G2 Doing for remaining UI/settings/building scope; no new Personal card/priority/member/deadline change or broad milestone pass. Chest and G3 solo persistence already accepted. Docs-only Sol publication; no rebuilt/replayed engine results inferred.
+
 ## 2026-10-12 extended solo persistence accepted
 
 User reports correct restored quantities and wood-only filter, with lower vitals after time passed. Read-only logs confirm Recipe_Tool completion and Health32.7 before save/restored32.7; earlier thirst depletion during Health-first commands caused damage. Fresh G3/Testing list readback verified scope and Done destination. Immediately record supported solo acceptance and limitations; move/read back UZVTTPLE Done. Optional rename/rendered multiplayer/full M8/M11 and other Personal cards remain separate. No repeated user test required. Correct vitals guide to needs-first/health-last/P-pause and actual save-time snapshot. Preserve full historical descriptions/observations, priorities/members/deadlines; publish docs-only Sol commit.

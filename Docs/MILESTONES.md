@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## 2026-10-12 M11 standalone pause — user-confirmed PASS
+
+User replied “Pause Pass” to the focused20second P-pause Food/Water comparison and resumed movement/look check on the same standalone open-world game. Accept no survival drain during solo pause and restored input after Resume. No new automated/build/log/screenshot/FPS evidence and no multiplayer/physical-controller/settings/full-M11 acceptance inferred. Do not repeat this test. Broader G2 stays Doing; previous chest and solo persistence checks remain accepted.
+
 ## 2026-10-12 M8 rendered solo persistence — accepted with log evidence
 
 User reports all item quantities correct and applied wood-only chest filter retained after the extended restart test; Health33/Food47/Water27 were read after gameplay time passed. Earlier chest/Save/Load passes plus this report accept the supported solo gather/craft/build/storage/vitals/save/relaunch scenario. Logs show Recipe_Tool completed02:04:37UTC; Health75 with Thirst0.9 at02:05:21, Health52.2/Thirst0 at02:05:32 Hunger command, Health32.7 at02:05:38 Thirst command, save02:06:03, restore Health32.7 at02:07:12. Dehydration during Health-first instruction entry caused the lower saved health; restored value matches. No exact paused hunger/thirst comparison or new automated run inferred. Source PFPlayerSaveAdapter restores vitals directly; Age affects inventory freshness only. Timing-safe guide corrected (needs first, health last, P-pause/compare actual save-time snapshot). G3 supported solo Personal acceptance Done; optional rename/rendered multiplayer/controller/FPS/minimum-spec and full M8/M11 closure remain separate.
