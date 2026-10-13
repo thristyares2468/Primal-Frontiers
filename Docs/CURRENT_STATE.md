@@ -2,6 +2,8 @@
 
 ## Active checkpoint - October 13, 2026
 
+Current final Tech material name is **Riftglass**, replacing the user-rejected Resonance Composite. Current planned ladder: Wood/Stone/Copper/Iron/Diamond/Titanium/Deepforge Alloy/Riftglass(Tech). Crystal/ancient-technology Frontier origin retained. No live material/assets/item IDs/save migration or new engine verification in this naming task. Existing futureAI implementation card and currentplanning docs updated; historical names below retained as history. Next fresh eligible task is M14 accessible greybox ledges now that M13 encounter acceptance passed.
+
 Latest plan status: eight resource/tool tiers now include Titanium before Deepforge, with Eryndor/Frontier-specific sources and names. Planning task https://trello.com/c/LpNlBTxm Done/complete; existing implementation https://trello.com/c/6ktNVyoo ToDo/incomplete. Document/source-lore consistency checked; gameplay still unchanged and no new build/playtest claimed. Existing automatic-climb, accepted user checks and next separate M14 ledge work remain as below.
 
 Dimensional direction incorporated into the eight-tier plan: Eryndor starter/highland/cave materials progress through Titanium; Deepforge is provisionally refined from volcanic Frontier ingredients, and finalTech Resonance Composite uses crystal/ancient-technology Frontier inputs. Names follow their regional origin and remain provisional for unfinished lore. RESOURCE_TIERS_M12.md records explicit region/tool gates, no early access deadlock, low-memory travel/save constraints and actual Frontier fixtures TBD. Documentation only; no new dimensions/spawns/portals/material gameplay or manual task implemented.

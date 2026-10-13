@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## October13 - Riftglass naming and next eligible task
+
+Fresh Main/Programming/Greybox lists reconcile M13accepted and futureM12/M14. Bounded MRS21GSa Doing for naming, currentfuture6ktNVyoo/MainM12 updated without extra implementationcard. Onlyplanningname changes to Riftglass; keep oldname in historical evidence. Close/readback boundednamingbefore M14 task. No member/due/Personalacceptance changes; scopedSol publication. LiveUnrealconnector tools unavailable; existing supportedEditorPython/compiler/testscripts used for nextconcrete task, no MCPinstallation.
+
 ## October13 - Titanium material-plan refinement
 
 Final readbacks: LpNlBTxm Titanium/dimensional planning Done/complete; 6ktNVyoo existing eight-tier implementation ToDo/incomplete; MainM12 Doing/incomplete. Historical Main material preface retained as comment and older implementation history preserved. No member/due changes. Established Eryndor/Frontier lore linked to explicit regional source/naming/access/save/travel constraints, all Frontier fixtures TBD. Consistency PASS8orderedtiers/Irongate/lorelinks/firstcrossingreachability/planned-onlystatus; gitdiffcheck clean. Scoped Sol docs-only publication follows.

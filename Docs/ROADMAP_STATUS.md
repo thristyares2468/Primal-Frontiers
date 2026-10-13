@@ -4,7 +4,7 @@
 
 Dimensional materials coordinated with later world/travel work: origin-specific ore/spawn permissions and original naming, Eryndor throughTitanium then volcanic/crystal Frontier ingredients for Deepforge/finalTech. REGION/map/travel fixture IDs TBD. No new dimension is implemented; first Frontier access must be possible without its exclusive materials. Preserve low-memory/save-layout gates.
 
-Expanded technology/resource progression now has the user's eight-tier direction: Wood/Stone/Copper/Iron/Diamond/Titanium/Deepforge Alloy/Resonance Composite (Tech), with original final names provisional. RESOURCE_TIERS_M12.md is a completed planning audit only. Real resource/tool-family minimum grades, iron-pick diamonds, processing and powered finalTech remain AI implementation work. No node/content/save migration or new unlock is already present; baseline/current M12 earned behavior preserved. M14 traversal candidate stays next separate world task; existing manual acceptance/untested limits unchanged.
+Expanded technology/resource progression now has the user's eight-tier direction: Wood/Stone/Copper/Iron/Diamond/Titanium/Deepforge Alloy/Riftglass (Tech), with original final names provisional. RESOURCE_TIERS_M12.md is a completed planning audit only. Real resource/tool-family minimum grades, iron-pick diamonds, processing and powered finalTech remain AI implementation work. No node/content/save migration or new unlock is already present; baseline/current M12 earned behavior preserved. M14 traversal candidate stays next separate world task; existing manual acceptance/untested limits unchanged.
 
 ## Current acceptance - October13
 

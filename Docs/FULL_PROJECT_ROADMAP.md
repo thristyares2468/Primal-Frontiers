@@ -443,7 +443,7 @@ Continue only if:
 
 Materials must also reflect Eryndor/Frontier origin: Titanium before Deepforge, regional exclusive ingredients, original names tied to the dimension and finalpoweredTech. Proposed volcanic/crystal links and future region/travel/save gates are in RESOURCE_TIERS_M12.md; no authored dimensions or new material nodes exist yet.
 
-October13 added requirement: eight resource/tool tiers, Wood -> Stone -> Copper -> Iron -> Diamond -> Titanium -> two original advanced materials, with the final tier Tech. Provisional replacements are Deepforge Alloy and Resonance Composite. Actual harvesting requires the appropriate family/minimum grade (Iron pick for diamonds); later powered Tech needs energy/research. RESOURCE_TIERS_M12.md is the staged plan, not implementation or milestone acceptance.
+October13 added requirement: eight resource/tool tiers, Wood -> Stone -> Copper -> Iron -> Diamond -> Titanium -> two original advanced materials, with the final tier Tech. Provisional replacements are Deepforge Alloy and Riftglass. Actual harvesting requires the appropriate family/minimum grade (Iron pick for diamonds); later powered Tech needs energy/research. RESOURCE_TIERS_M12.md is the staged plan, not implementation or milestone acceptance.
 
 Goal: Make survival progression feel meaningful.
 

@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - final Tech material renamed Riftglass
+
+User rejected Resonance Composite; currentplanning name Riftglass fits the crystal/ancient-technology Frontier refining origin. Eight-tier order/Iron-pick diamonds/Titanium beforeDeepforge unchanged. RESOURCE_TIERS_M12.md/currentplan/MainM12/future6ktNVyoo updated, oldernames retained ashistory. Documentation-only consistencycheck, no gameplay/source/assets/privatefile/build/test change. Boundednamingtask MRS21GSa closes onlythisscope.
+
 ## October13 - M12 Titanium planning refinement
 
 User additionally confirms cross-dimensional design must affect material spawning and names. Checked GAME_VISION/WORLD_DESIGN/CORE_LOOP: Eryndor and Frontiers already established, region types conceptual. New source table ties familiar tiers/Titanium to Eryndor and original late-tier ingredients to proposed volcanic/crystal Frontiers; names/travel fixtures TBD/provisional. Plan-only region/authority/acyclic access/save/memory constraints, no live spawning/portal/new map or gameplay acceptance.

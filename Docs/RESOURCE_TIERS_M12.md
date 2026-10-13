@@ -1,10 +1,12 @@
 # Resource and harvesting tiers — M12 technology expansion
 
+Naming update: **Riftglass** replaces the rejected name Resonance Composite for the final Tech material. It is provisionally a refined crystal/ancient-technology Frontier material used in powered equipment. Only planning/display wording changed; no live item ID or save record exists to migrate.
+
 Updated October 13, 2026. **Design/backlog only; not implemented or tested.** The user's latest direction adds Titanium immediately before Deepforge and supersedes the initial bronze/steel proposal:
 
-**Wood → Stone → Copper → Iron → Diamond → Titanium → Deepforge Alloy → Resonance Composite (Tech)**
+**Wood → Stone → Copper → Iron → Diamond → Titanium → Deepforge Alloy → Riftglass (Tech)**
 
-Deepforge Alloy and Resonance Composite are provisional original replacements for the user's final two reference materials. The final tier is explicitly advanced technology. Do not use Netherite, Siftite, Tek, Pal Metal or another reference game's distinctive material names as Primal Frontier item IDs/content. The requested eight-tier structure is authoritative; names, costs and pacing are tunable proposals.
+Deepforge Alloy and Riftglass are provisional original replacements for the user's final two reference materials. The final tier is explicitly advanced technology. Do not use Netherite, Siftite, Tek, Pal Metal or another reference game's distinctive material names as Primal Frontier item IDs/content. The requested eight-tier structure is authoritative; names, costs and pacing are tunable proposals.
 
 ## Current implementation checked
 
@@ -25,7 +27,7 @@ Tool **material quality**, **tool family** and **minimum harvest capability** ar
 | Diamond | High-performance mechanical tools and upgrade base | Titanium ore and other selected dense late-game deposits. | Eryndor deep mineral caves; not common starter deposits. |
 | Titanium | Refined specialist metal tools; proposed efficient weight/performance bridge before the rare alloy | Deepforge ingredients; requires a compatible Diamond pick to obtain titanium ore and an accessible refining process. | Remote Eryndor highlands/deep deposits; prepares the first Frontier expedition. |
 | Deepforge Alloy | Original refined late-game alloy; upgrade Titanium gear using rare ingredients at a specialised station | Resonant minerals needed for advanced components; stronger mechanical harvesting, not unlimited output. | Crafted using a volcanic Frontier's exclusive ore and Eryndor refining inputs. |
-| Resonance Composite — Tech | Original final tier of powered, specialised harvesting equipment | Advanced energy-bearing/dense deposits, precision extraction and bounded assisted harvesting. Needs an actual powered tool and charge; no passive free global gathering. | Crafted from crystal/ancient-technology Frontier materials plus previous-tier components. |
+| Riftglass — Tech | Original final tier of powered, specialised harvesting equipment | Advanced energy-bearing/dense deposits, precision extraction and bounded assisted harvesting. Needs an actual powered tool and charge; no passive free global gathering. | Crafted from crystal/ancient-technology Frontier materials plus previous-tier components. |
 
 Copper is a meaningful quality bridge, not necessarily a mandatory ore-access gate. Stone and Copper may both mine iron; Iron remains the diamond threshold. This follows the requested Minecraft-style structure without forcing every intermediate material into a grind prerequisite. Exact benefits/durability and all candidate minerals require later implementation and balance tests.
 
@@ -35,7 +37,7 @@ Expand resources in tested groups: starter materials first; copper/iron/coal and
 
 This progression belongs to **Eryndor and its unstable dimensional regions, the Frontiers**, as established in [GAME_VISION.md](GAME_VISION.md), [WORLD_DESIGN.md](WORLD_DESIGN.md) and [CORE_LOOP.md](CORE_LOOP.md). The source column above is a proposal, not authored spawning. Volcanic, frozen, primordial, crystal/ancient-technology, storm/sky and corrupted Frontiers are existing design concepts; their final proper names, map packages, travel rules and resources are **TBD**.
 
-Material names should explain their origin or transformation. Familiar Eryndor metals can retain familiar names; exotic ores should receive original names tied to their Frontier's geology, hazards or dimensional effects. Deepforge fits the proposed volcanic refining origin, and Resonance Composite fits crystal/ancient-technology processing. Both remain provisional until that region's lore is settled. Their raw ingredients need their own original names later; do not assume the finished alloy grows directly as an ore. Titanium is the added Eryndor bridge before those Frontier materials, not a replacement for dimensional progression.
+Material names should explain their origin or transformation. Familiar Eryndor metals can retain familiar names; exotic ores should receive original names tied to their Frontier's geology, hazards or dimensional effects. Deepforge fits the proposed volcanic refining origin, and Riftglass fits crystal/ancient-technology processing. Both remain provisional until that region's lore is settled. Their raw ingredients need their own original names later; do not assume the finished alloy grows directly as an ore. Titanium is the added Eryndor bridge before those Frontier materials, not a replacement for dimensional progression.
 
 Spawn rules use explicit allowed world/Frontier and biome tags, scarcity and hazard context, in addition to tool family/grade. Do not randomly spread every tier across the starter map or make all Frontiers the same mining ladder. Regional branches may provide specialised reagents for protection, building, adaptations or Tech while keeping the eight primary tool tiers. Those systems require their own gates; this plan adds no adaptation or new dimension now.
 
