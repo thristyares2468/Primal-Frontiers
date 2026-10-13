@@ -8,6 +8,7 @@
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
+#include "Progression/PFProgressionComponent.h"
 #include "Persistence/PFWorldPersistence.h"
 #include "GameFramework/PlayerStart.h"
 #include "TimerManager.h"
@@ -77,6 +78,7 @@ void APFSurvivalGameMode::RestartPlayer(AController* Controller)
         return;
     }
     RestartPlayerAtPlayerStart(Controller, Start);
+    if(auto* PS=Controller->GetPlayerState<APFInventoryPlayerState>()){if(PS->Progression && Controller->GetPawn()){PS->Progression->ApplyStats(Controller->GetPawn(),true);}}
 }
 
 void APFSurvivalGameMode::ScheduleRespawn(AController* Controller)

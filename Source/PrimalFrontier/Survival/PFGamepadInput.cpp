@@ -24,7 +24,7 @@ void APFSurvivalPlayerController::BindGamepadControls()
 {
     BindControl(EKeys::Gamepad_LeftThumbstick,&APFSurvivalPlayerController::StartSprint,TEXT("Traversal"),TEXT("Hold left stick click: sprint within weight/stamina limit"));
     InputComponent->BindKey(EKeys::Gamepad_LeftThumbstick,IE_Released,this,&APFSurvivalPlayerController::StopSprint);
-    BindControl(EKeys::Gamepad_RightThumbstick,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Right stick click: climb a low clear ledge"));
+    BindControl(EKeys::Gamepad_RightThumbstick,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Right stick click: climb a clear wall when full stamina cost is affordable"));
     BindControl(EKeys::Gamepad_Special_Right,&APFSurvivalPlayerController::TogglePauseMenu,TEXT("General"),TEXT("Menu: pause / resume"),true);
     BindControl(EKeys::Gamepad_Special_Left,&APFSurvivalPlayerController::ToggleInventory,TEXT("General"),TEXT("View: open / close inventory"));
     BindControl(EKeys::Gamepad_FaceButton_Top,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Y: open / close crafting"));

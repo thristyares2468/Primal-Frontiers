@@ -7,6 +7,8 @@
 // Gamepad bindings are in PFGamepadInput.cpp and reuse the same handlers.
 
 #include "Survival/PFSurvivalPlayerController.h"
+#include "Progression/PFProgressionComponent.h"
+#include "Progression/PFPlayerStatsMenu.h"
 #include "Survival/PFSurvivorCharacter.h"
 #include "PFRequestCodes.h"
 #include "Survival/PFSurvivalHUD.h"
@@ -17,6 +19,7 @@
 #include "Engine/World.h"
 #include "InputCoreTypes.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFItemPickup.h"
 #include "Inventory/PFInventoryHUD.h"
@@ -135,7 +138,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindGamepadControls();
     BindControl(EKeys::LeftShift,&APFSurvivalPlayerController::StartSprint,TEXT("Traversal"),TEXT("Hold to sprint; requires stamina and weight within carry limit"));
     InputComponent->BindKey(EKeys::LeftShift,IE_Released,this,&APFSurvivalPlayerController::StopSprint);
-    BindControl(EKeys::F,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Climb a clear low ledge ahead (45-120 cm), costs stamina"));
+    BindControl(EKeys::F,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Climb a clear wall ahead when the full height stamina cost is affordable"));
     BindControl(EKeys::V,&APFSurvivalPlayerController::Glide,TEXT("Traversal"),TEXT("Toggle glide while falling; uses stamina, unavailable overweight"));
     // Legacy key bindings for the greybox survival actions. Movement/look/jump come
     // from the template Enhanced Input context (IMC_Default) via the base class.
@@ -152,6 +155,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindControl(EKeys::Q,&APFSurvivalPlayerController::InventoryConsume,TEXT("Inventory"),TEXT("Consume one selected edible item"));
     // Crafting (M4)
     BindControl(EKeys::C,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Open / close crafting"));
+    BindControl(EKeys::U,&APFSurvivalPlayerController::ToggleStatMenu,TEXT("General"),TEXT("Player upgrades: spend earned stat points; separate from technology"));
     BindControl(EKeys::One,&APFSurvivalPlayerController::CraftTool,TEXT("Crafting"),TEXT("Craft primitive tool"));
     BindControl(EKeys::Two,&APFSurvivalPlayerController::CookFood,TEXT("Crafting"),TEXT("Cook food"));
     BindControl(EKeys::Three,&APFSurvivalPlayerController::DryFood,TEXT("Crafting"),TEXT("Dry food"));
@@ -204,6 +208,7 @@ void APFSurvivalPlayerController::BackOrPause()
     else if(bStorageMenuOpen){Building->ServerCloseStorage();SetStorageMenuOpen(false);}
     else if(bBuildingMenuOpen || Building->bBuildMode){Building->bBuildMode=false;SetBuildingMenuOpen(false);}
     else if(bCraftingOpen){SetCraftingMenuOpen(false);}
+    else if(bStatMenuOpen){SetStatMenuOpen(false);}
     else if(bInventoryOpen){bInventoryOpen=false;}
     else{SetPauseMenuOpen(true);}
 }
@@ -243,7 +248,7 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
     }
     if(bOpen)
     {
-        SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);SetStorageMenuOpen(false);
+        SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);SetStorageMenuOpen(false);SetStatMenuOpen(false);
         if(Building->OpenStorage){Building->ServerCloseStorage();}
     }
     bPauseMenuOpen=bOpen;
@@ -357,6 +362,7 @@ void APFSurvivalPlayerController::ToggleInventory()
         bInventoryOpen=!bInventoryOpen;
         if(bInventoryOpen)
         {
+            SetStatMenuOpen(false);
             InitializeInventorySelection();
             SetCraftingMenuOpen(false);
             Building->bBuildMode=false;
@@ -462,7 +468,7 @@ void APFSurvivalPlayerController::SetCraftingMenuOpen(bool bOpen)
 {
     if(bOpen){ClearTraversalInput();}
     if((bOpen && bPauseMenuOpen) || bOpen==bCraftingOpen){return;}
-    if(bOpen){SetBuildingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}}
+    if(bOpen){SetStatMenuOpen(false);SetBuildingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}}
     bCraftingOpen=bOpen;
     if(bOpen)
     {
@@ -522,7 +528,7 @@ void APFSurvivalPlayerController::SetBuildingMenuOpen(bool bOpen)
 {
     if(bOpen){ClearTraversalInput();}
     if(!IsLocalController() || !GetLocalPlayer() || !BuildingMenu || (bOpen && bPauseMenuOpen) || bBuildingMenuOpen==bOpen){return;}
-    if(bOpen){SetCraftingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}bInventoryOpen=false;Building->bBuildMode=true;BuildingMenu->RefreshMenu();}
+    if(bOpen){SetStatMenuOpen(false);SetCraftingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}bInventoryOpen=false;Building->bBuildMode=true;BuildingMenu->RefreshMenu();}
     bBuildingMenuOpen=bOpen;BuildingMenu->SetVisibility(bOpen?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
     SetIgnoreMoveInput(bOpen);SetIgnoreLookInput(bOpen);bShowMouseCursor=bOpen;
     if(PlayerInput){PlayerInput->FlushPressedKeys();}
@@ -546,7 +552,7 @@ void APFSurvivalPlayerController::SetStorageMenuOpen(bool bOpen)
     if(bOpen)
     {
         if(!IsValid(Building->OpenStorage)){return;}
-        SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);Building->bBuildMode=false;bInventoryOpen=false;StorageMenu->RefreshMenu();
+        SetStatMenuOpen(false);SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);Building->bBuildMode=false;bInventoryOpen=false;StorageMenu->RefreshMenu();
     }
     if(!bOpen){StorageMenu->ResetView();}
     bStorageMenuOpen=bOpen;StorageMenu->SetVisibility(bOpen?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
@@ -595,7 +601,8 @@ void APFSurvivalPlayerController::ServerAttackCreature_Implementation()
     auto* Creature=Cast<APFCreature>(Hit.GetActor());
     if(!Creature || Creature->IsDead() || !V->SpendStamina(5)){return;}
     const auto* I=GetInventory();
-    const float Amount=I?I->MeleeDamage():20.f;
+    const auto* PS=GetPlayerState<APFInventoryPlayerState>();
+    const float Amount=(I?I->MeleeDamage():20.f)*(PS && PS->Progression?FPFProgressionTransactions::AttackMultiplier(PS->Progression->GetRecord()):1.f);
     const bool HitCreature=Creature->TakeDamage(Amount,FDamageEvent(),this,GetPawn())>0;
     ClientInventoryFeedback(HitCreature?TEXT("Creature hit"):TEXT("Attack refused"));
 }

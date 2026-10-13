@@ -61,7 +61,7 @@ bool UPFTraversalMovement::IsGliding() const
     return bWantsGlide && CanGlide();
 }
 void UPFTraversalMovement::ClearTraversal()
-{bWantsSprint=false;bWantsGlide=false;ClimbUntil=0;AutomaticClimbDrive=FVector::ZeroVector;if(auto* P=Cast<APFSurvivorCharacter>(CharacterOwner)){P->CancelAutomaticClimb();}}
+{bWantsSprint=false;bWantsGlide=false;ClimbUntil=0;AutomaticClimbDrive=FVector::ZeroVector;ClimbLandingTarget=FVector::ZeroVector;if(auto* P=Cast<APFSurvivorCharacter>(CharacterOwner)){P->CancelAutomaticClimb();}}
 float UPFTraversalMovement::GetMaxSpeed() const
 {
     const float Base=Super::GetMaxSpeed();
@@ -85,7 +85,9 @@ void UPFTraversalMovement::UpdateCharacterStateBeforeMovement(float Delta)
         bWantsGlide=false;
         // UE processes queued LaunchCharacter after this callback. Preserve a
         // bounded manual mantle drive for that pending launch, but clear on landing.
-        if(PendingLaunchVelocity.IsZero() || GetWorld()->GetTimeSeconds()>=ClimbUntil){AutomaticClimbDrive=FVector::ZeroVector;}
+        const FVector ToLanding=ClimbLandingTarget-P->GetActorLocation();
+        const bool Reached=ToLanding.SizeSquared2D()<=100 && FMath::Abs(ToLanding.Z)<5;
+        if(GetWorld()->GetTimeSeconds()>=ClimbUntil || (PendingLaunchVelocity.IsZero() && Reached)){AutomaticClimbDrive=FVector::ZeroVector;}
         P->CancelAutomaticClimb();
     }
 }
@@ -109,6 +111,19 @@ void UPFTraversalMovement::PhysFalling(float Delta,int32 Iterations)
     if(Glide){Velocity.Z=FMath::Max(Velocity.Z,-GlideDescentSpeed);}
     Super::PhysFalling(Delta,Iterations);
     if(IsGliding()){Velocity.Z=FMath::Max(Velocity.Z,-GlideDescentSpeed);}
+}
+void UPFTraversalMovement::PhysWalking(float Delta,int32 Iterations)
+{
+    // Rounded capsule contact can become a walkable perch before the feet reach
+    // the top. Finish the already-validated mantle using normal swept walking
+    // and step-up; never clear the drive merely because the edge became walkable.
+    if(GetWorld()->GetTimeSeconds()<ClimbUntil && !AutomaticClimbDrive.IsNearlyZero())
+    {
+        Velocity.X=AutomaticClimbDrive.X;Velocity.Y=AutomaticClimbDrive.Y;
+        TGuardValue<float> Brake(BrakingDecelerationWalking,0.f),Friction(GroundFriction,0.f);
+        Super::PhysWalking(Delta,Iterations);return;
+    }
+    Super::PhysWalking(Delta,Iterations);
 }
 void UPFTraversalMovement::UpdateFromCompressedFlags(uint8 Flags)
 {Super::UpdateFromCompressedFlags(Flags);bWantsSprint=(Flags&FSavedMove_Character::FLAG_Custom_0)!=0;bWantsGlide=(Flags&FSavedMove_Character::FLAG_Custom_1)!=0;}

@@ -2,7 +2,7 @@
 
 ## Current acceptance - October13
 
-PLAYTEST_RESULTS_2026_10_13.md records the actual12namedPASS batch. G9 supported ecology encounter/dawn/loot and G5 WORLD_SPACING accepted; no repeat needed. G2 reportedBUILD_ROTATION/BUILD_PIECES/MENU_NAVIGATION/CRAFTING_UI plus earlierchest/Pause/Settings accepted. G3 supportedsolo andWORLD_RENAME accepted. SPRINT_WEIGHT/JUMP_WEIGHT/GLIDE accepted. CLIMB remains NOT TESTED (geometry), physicalCONTROLLER/AUDIO UNTESTED,1440 deferred. Unreported G2 expiry/displayrollback and optionalM12 earnedpacing not silently passed. Remaining guide text is reproduction or expressly unverified scope; old "keep open/pending" statements do not override accepted portions. No new immediate user test is required.
+PLAYTEST_RESULTS_2026_10_13.md records the actual12namedPASS batch. G9 supported ecology encounter/dawn/loot and G5 WORLD_SPACING accepted; no repeat needed. G2 reportedBUILD_ROTATION/BUILD_PIECES/MENU_NAVIGATION/CRAFTING_UI plus earlierchest/Pause/Settings accepted. G3 supportedsolo andWORLD_RENAME accepted. SPRINT_WEIGHT/JUMP_WEIGHT/GLIDE accepted. CLIMB userFAIL led to full-height repair; new CLIMB_STAMINA acceptance pending, physicalCONTROLLER/AUDIO UNTESTED,1440 deferred. Unreported G2 expiry/displayrollback and optionalM12 earnedpacing not silently passed. Remaining guide text is reproduction or expressly unverified scope; old "keep open/pending" statements do not override accepted portions. Current focused retest: G10 CLIMB_STAMINA; G14 earned-point check separate. No repeat of previous passes.
 
 Updated October 9, 2026. These guides are the current next-action instructions, not evidence of completion. Related cards use the same guide so one actual session can supply evidence to multiple cards. Manual gates remain unverified until observations arrive. Future features require actual implemented controls and a named test fixture before asking the user to test them.
 
@@ -234,7 +234,43 @@ Evidence: `Docs/WEIGHTED_ECOLOGY_M13.md`, `CREATURE_VARIETY_M13.md`, `AUTHORED_E
 Every new/updated test card starts with exact map package path (or NONE for non-gameplay work), launch/net mode, prerequisites and one Start here action. Follow with numbered steps, inputs, expected state/counters, pass/refusal conditions, evidence paths and remaining limits. Name future/TBD maps honestly. Copy the appropriate guide into the card rather than only linking this document; retain earlier evidence below it. Personal priorities/members/deadlines/status stay unchanged unless actual observations resolve them. Do not mark current generated guides as manual test passes.
 
 
-## G10 - Actual open-world camp climb (Personal 2)
+## G10 - Full-height stamina climb (Personal 1)
+
+Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Main menu: `/Engine/Maps/Entry`. Use one normal rendered standalone `-game` single-player session. Not NullRHI, not Lvl_FirstPerson or the older arena. No Editor/map/assets need saving. Prefer 720p for the first check;1440p remains deferred. Automation has passed; this card needs your actual movement/usability observation after the reported FAIL. Do not repeat the twelve accepted tests.
+
+Prerequisites: latest built project, no competing test instance, keyboard/mouse, living grounded survivor, bag weight at/below its displayed carry threshold (default30kg) and full stamina. Clear solid wall/top required; the old1.2m ceiling is removed. Enough stamina must cover the whole height before climbing. Upgrading stamina capacity does not refill it.
+
+Start here: from normal Single player > your OpenWorld world, turn RIGHT/east at camp and walk around the two low blocks to the first tall stone-grey wall beside the **STAMINA CLIMB:4m/10m** sign.4m centre `(1850,-1100,200)`;10m centre `(2450,-1100,500)`. The4m wall is sufficient for this first check. If restored elsewhere or hard to find, optionally run `PF.Teleport 1660 -1100 100` in the solo console and require explicit PASS; close console, look east toward the immediately adjacent wall. This changes only runtime position. If teleport refuses for an existing building/collision, navigate normally; do not force it or save a map.
+
+1. Wait for full stamina. Stand on FLAT GROUND, walk into the 4m wall until stopped, release W and press F once. Expected: full ascent onto the top, feet clear of the edge, owner feedback near `Full wall climb 4.0m; stamina cost42.8`. About43 stamina paid; normal recovery may subsequently raise the bar. No "Wall too high;45-120cm" message.
+2. After landing, look/move on the top and leave normally. Expected: no stuck input, falling back down the face or collision bypass. This is greybox ascent/mantle movement; wall-hanging animation is not implemented.
+3. Optional later: from flat ground/full stamina at the same4m face, hold W and briefly Space without F or Sprint. Expected: automatic rising-jump climb;20 normal jump plus about43 climb stamina. Release W on top. This is a separate input path; do not infer its manual pass from step1 alone.
+4. Optional after G14: the 10m wall needs about103 stamina for F, or123 including a normal jump. Rank1 stamina capacity120 permits F after recovery; rank2 capacity140 permits either input after recovery. Otherwise explicit stamina refusal with no climb charge is correct. Do not jump from a shorter block to measure the whole height.
+
+Immediate result: **CLIMB_STAMINA PASS**, or **CLIMB_STAMINA FAIL + F/Space, exact refusal, stamina/kg and what happened**. If only step1-2 tested, say so. No editor asset save or private-file upload required; save your gameplay world only if wanted. Normal needs/health change while unpaused. P pauses while reading.
+
+Evidence: `Docs/STAMINA_CLIMB_M14.md`, `Docs/PLAYER_STATS_M12.md`; ordinary `Saved/Logs/PrimalFrontier.log` or matching standalone log; optional console `shot showui` under `Saved/Screenshots/WindowsEditor`. AI native80/110/400/800/1000cm, actual saved4m and10m rendered, and one/two-client NullRHI tests remain technical evidence, not your pass. Controller/audio/1440p separate.
+
+## G14 - Earned player stat upgrade (Personal 2)
+
+Level/launch: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`, one normal rendered standalone single-player world from `/Engine/Maps/Entry` menus. Existing nearby resource nodes and the 4m/10m camp walls above are the fixture. No map/editor asset changes, private save uploads or two rendered clients required.
+
+Why Personal: verify your ordinary earned-point menu interaction and gameplay feel. AI has already checked record authority, real damage/crafting/carry modifiers, files, respawn, restart, independent clients and rendered controls; this is not a request to repeat those technical runs. All already accepted checks remain accepted.
+
+Start here: in a safe spot press **U**, or P > **Player upgrades**. Read Level/XP, STAT POINTS and TECHNOLOGY POINTS. Fresh level1/0XP should have disabled upgrade buttons. Ancient technology is labelled planned/unavailable, not an active reward pool.
+
+1. If at least 1 stat point is available, record both point counts and maximum stamina. Select **Stamina** once by click, or Up/Down then Enter. Expected: stat points decrease exactly1, stamina rank increases1 and maximum increases20 (100->120 for the first rank). Technology points and XP stay unchanged. Current stamina is not granted/refilled by the click.
+2. Press Esc/U to close and move/look. Wait for normal stamina recovery. Expected: input restored and HUD shows the upgraded maximum. You can use G10's optional10m F check after at least 103 current stamina; no need to do it now to report the menu result.
+3. Optional later earned points: Attack adds10% of weapon/bare-hand damage; Weight adds10kg to the bag carry threshold; Crafting adds10% speed for NEW jobs. C shows the actual new-job time. A running job keeps its original deadline. Chest capacity remains60kg. Do not spend technology points to upgrade these stats.
+4. Optional save/load in your disposable test world: use Pause Save world, end, load the same named world and reopen U. Expected: same ranks/spent budgets; stamina may recover and needs drain normally. Keep desired personal progress; do not reset/discard anything to perform this check.
+
+If no stat points: use ordinary E gathering and complete new C recipes until100XP/level2, during your next normal play session. Different resource categories have limited XP windows and unique first crafts reward once; merely receiving items or repeating a credited recipe does not grant free XP. You can reply **STATS_UPGRADE NOT TESTED - level1/no points** instead of grinding immediately. No developer XP grant is required.
+
+Reply **STATS_UPGRADE PASS + stat/tech counts before->after and max stamina**, or **STATS_UPGRADE FAIL + exact step/feedback/value**. Scope of a single point check is explicit; it does not silently accept every allocation or full M12. Current slice caps at level10/9stat points; broader tech/material tiers and ancient technology remain future work. No new asset needed.
+
+Evidence: `Docs/PLAYER_STATS_M12.md`; unique AI `Saved/AutomationReports/M12StatsLive.../run-summary.json` and `ControlsUI/M12StatsUI...` images; ordinary log/screenshot paths as G10. Do not upload `.pfs` or reconnect credentials.
+
+## Historical G10 - Low-ledge scope (superseded October13)
 
 Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`; normal menu `/Engine/Maps/Entry`. One normal rendered standalone `-game` session, not NullRHI or the old disposable raised course. This tests the implemented low-ledge mantle. Taller walls, including the 4-metre danger landmark, cannot currently be scaled. Your earlier tall-wall attempts were confirmed in the log; do not repeat your twelve passed tests.
 

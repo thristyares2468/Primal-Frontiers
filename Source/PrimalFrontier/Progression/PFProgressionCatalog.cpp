@@ -30,6 +30,11 @@ const FPFKnowledgeDefinition* UPFProgressionCatalog::Find(FName Id) const
 }
 bool UPFProgressionCatalog::Validate(const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Error) const
 {
+    if(!FMath::IsFinite(AttackBonusPerPoint) || AttackBonusPerPoint<0 || AttackBonusPerPoint>1 ||
+       !FMath::IsFinite(StaminaPerPoint) || StaminaPerPoint<1 || StaminaPerPoint>200 ||
+       !FMath::IsFinite(CarryKgPerPoint) || CarryKgPerPoint<1 || CarryKgPerPoint>100 ||
+       !FMath::IsFinite(CraftingBonusPerPoint) || CraftingBonusPerPoint<0 || CraftingBonusPerPoint>1)
+    {return ProgressionRefuse(Error,TEXT("Invalid player stat tuning"));}
     if(Knowledge.IsEmpty() || Knowledge.Num()>MaximumKnowledge || Crafting.Recipes.Num()>MaximumCraftRecords){return ProgressionRefuse(Error,TEXT("Progression catalog exceeds bounded limits"));}
     TSet<FName> Ids,AssignedRecipes;
     for(const auto& D:Knowledge)

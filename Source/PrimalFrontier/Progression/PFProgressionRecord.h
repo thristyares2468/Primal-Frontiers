@@ -8,6 +8,22 @@ class UPFProgressionCatalog;
 class UPFCraftingCatalog;
 class UPFItemCatalog;
 
+UENUM(BlueprintType)
+enum class EPFPlayerStat : uint8 { Attack, Stamina, Weight, CraftingSpeed };
+
+/** Allocations, not claimed bonuses or point balances. Technology uses its own ledger. */
+USTRUCT(BlueprintType)
+struct PRIMALFRONTIER_API FPFPlayerStatRanks
+{
+    GENERATED_BODY()
+    UPROPERTY(BlueprintReadOnly) int32 Attack=0;
+    UPROPERTY(BlueprintReadOnly) int32 Stamina=0;
+    UPROPERTY(BlueprintReadOnly) int32 Weight=0;
+    UPROPERTY(BlueprintReadOnly) int32 CraftingSpeed=0;
+    bool operator==(const FPFPlayerStatRanks& Other) const
+    {return Attack==Other.Attack && Stamina==Other.Stamina && Weight==Other.Weight && CraftingSpeed==Other.CraftingSpeed;}
+};
+
 /** Remaining active-server duration, never an absolute/offline clock or a client timestamp. */
 USTRUCT(BlueprintType)
 struct PRIMALFRONTIER_API FPFGatherRewardWindow
@@ -29,6 +45,7 @@ struct PRIMALFRONTIER_API FPFProgressionRecord
     UPROPERTY(BlueprintReadOnly) TArray<FName> Knowledge;
     UPROPERTY(BlueprintReadOnly) TArray<FName> CreditedCrafts;
     UPROPERTY(BlueprintReadOnly) TArray<FPFGatherRewardWindow> GatherWindows;
+    UPROPERTY(BlueprintReadOnly) FPFPlayerStatRanks Stats;
 };
 
 /** Pure transactions for trusted server callers, not networking authority or proof of an event.
@@ -58,6 +75,13 @@ public:
     static bool Validate(const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog,
         const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Error);
     static int32 AvailablePoints(const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog);
+    static int32 AvailableStatPoints(const FPFProgressionRecord& Record);
+    static float AttackMultiplier(const FPFProgressionRecord& R);
+    static float StaminaLimit(const FPFProgressionRecord& R);
+    static float WeightLimit(const FPFProgressionRecord& R);
+    static float CraftingMultiplier(const FPFProgressionRecord& R);
+    static bool PurchaseStat(FPFProgressionRecord& Record,EPFPlayerStat Stat,const UPFProgressionCatalog& Catalog,
+        const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Error);
     static bool AwardExperience(FPFProgressionRecord& Record,int32 Amount,const UPFProgressionCatalog& Catalog,
         const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Error);
     static bool CreditFirstCraft(FPFProgressionRecord& Record,FName Recipe,const UPFProgressionCatalog& Catalog,

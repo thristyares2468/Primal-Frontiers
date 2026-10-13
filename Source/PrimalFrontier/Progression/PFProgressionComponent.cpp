@@ -45,7 +45,33 @@ bool UPFProgressionComponent::Restore(const FPFProgressionRecord& Candidate,FStr
     if(!CanRestore(Candidate,Error)){return false;}
     const double Now=GetWorld()->GetTimeSeconds();
     if(!FMath::IsFinite(Now) || Now<0){Error=TEXT("Invalid progression restore clock");return false;}
-    Record=Candidate;RecordTime=Now;GetOwner()->ForceNetUpdate();return true;
+    Record=Candidate;RecordTime=Now;
+    if(auto* PS=Cast<APFInventoryPlayerState>(GetOwner())){if(auto* Pawn=PS->GetPawn()){ApplyStats(Pawn);}}
+    GetOwner()->ForceNetUpdate();return true;
+}
+bool UPFProgressionComponent::ApplyStats(APawn* Pawn,bool bFreshSpawn)
+{
+    const UPFCraftingCatalog* C=nullptr;const UPFItemCatalog* I=nullptr;FString Error;
+    auto* PS=Cast<APFInventoryPlayerState>(GetOwner());auto* V=IsValid(Pawn)?Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>():nullptr;
+    if(!Authority(C,I,Error) || !CanRestore(Record,Error) || !V || V->IsDead() || !Pawn->HasAuthority() || Pawn->GetPlayerState()!=PS ||
+       !V->SetMaximumStamina(FPFProgressionTransactions::StaminaLimit(Record),bFreshSpawn)){return false;}
+    PS->Inventory->WeightLimit=FPFProgressionTransactions::WeightLimit(Record);PS->ForceNetUpdate();Pawn->ForceNetUpdate();return true;
+}
+bool UPFProgressionComponent::RequestStat(EPFPlayerStat Stat,APawn* Pawn,FString& Error)
+{
+    const UPFCraftingCatalog* Craft=nullptr;const UPFItemCatalog* Items=nullptr;
+    if(!Authority(Craft,Items,Error)){return false;} // Clients cannot forge feedback either.
+    auto Refuse=[&](){StatFeedback=TEXT("Refused: ")+Error;GetOwner()->ForceNetUpdate();UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalProgression] Stat request refused: %s"),*Error);return false;};
+    const auto* V=IsValid(Pawn)?Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>():nullptr;
+    const auto* PC=V?Pawn->GetController():nullptr;
+    if(!V || V->IsDead() || !Pawn->HasAuthority() || Pawn->GetWorld()!=GetWorld() || !PC || !PC->HasAuthority() || PC->GetPawn()!=Pawn || PC->PlayerState!=GetOwner() || Pawn->GetPlayerState()!=GetOwner())
+    {Error=TEXT("Requires your living authoritative survivor");return Refuse();}
+    const double Now=GetWorld()->GetTimeSeconds();if(Now<NextStatRequestTime){Error=TEXT("Stat request cooldown");return Refuse();}NextStatRequestTime=Now+.25;
+    FPFProgressionRecord Candidate;if(!Capture(Candidate,Error) || !FPFProgressionTransactions::PurchaseStat(Candidate,Stat,*GetDefault<UPFProgressionCatalog>(),*Craft,*Items,Error)){return Refuse();}
+    const auto Previous=Record;const double PreviousTime=RecordTime;Record=MoveTemp(Candidate);RecordTime=Now;
+    if(!ApplyStats(Pawn)){Record=Previous;RecordTime=PreviousTime;Error=TEXT("Derived stat application refused");return Refuse();}
+    StatFeedback=TEXT("Player stat upgraded; technology points unchanged");GetOwner()->ForceNetUpdate();
+    UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalProgression] Stat allocated=%d remaining=%d tech=%d"),int32(Stat),GetAvailableStatPoints(),GetAvailablePoints());Error.Reset();return true;
 }
 bool UPFProgressionComponent::CanCraftRecipe(FName Recipe,FString& Error) const
 {
@@ -104,7 +130,7 @@ void UPFProgressionComponent::CommitCompletedCraft(const FPFProgressionRecord& C
     }
 }
 void UPFProgressionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{Super::GetLifetimeReplicatedProps(OutLifetimeProps);DOREPLIFETIME_CONDITION(UPFProgressionComponent,Record,COND_OwnerOnly);DOREPLIFETIME_CONDITION(UPFProgressionComponent,KnowledgeFeedback,COND_OwnerOnly);}
+{Super::GetLifetimeReplicatedProps(OutLifetimeProps);DOREPLIFETIME_CONDITION(UPFProgressionComponent,Record,COND_OwnerOnly);DOREPLIFETIME_CONDITION(UPFProgressionComponent,KnowledgeFeedback,COND_OwnerOnly);DOREPLIFETIME_CONDITION(UPFProgressionComponent,StatFeedback,COND_OwnerOnly);}
 
 bool UPFProgressionComponent::PrepareGather(FName YieldItem,APawn* Pawn,FPFProgressionRecord& Candidate,FString& Error) const
 {

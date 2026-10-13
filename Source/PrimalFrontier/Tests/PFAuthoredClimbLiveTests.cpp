@@ -29,7 +29,7 @@ class FAuthoredClimbExercise : public IAutomationLatentCommand
 {
 public:
     FAuthoredClimbExercise(FAutomationTestBase* InTest,FString InDirectory):Test(InTest),Directory(MoveTemp(InDirectory))
-    {FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);Manual=FParse::Param(FCommandLine::Get(),TEXT("PFManualClimb"));}
+    {FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);Manual=FParse::Param(FCommandLine::Get(),TEXT("PFManualClimb"));FullHeight=FParse::Param(FCommandLine::Get(),TEXT("PFFullHeightClimb"));}
     bool Update() override
     {
         const double Now=FPlatformTime::Seconds();if(Done){return Now-Done>(Client?8:15);}
@@ -41,10 +41,10 @@ public:
         {
             for(int32 Lane=0;Lane<2;++Lane){for(int32 Kind=0;Kind<2;++Kind)
             {
-                const FName Tag(*FString::Printf(TEXT("PF.M14.Ledge%d_%c"),Kind?110:80,Lane?TEXT('B'):TEXT('A')));
+                const FName Tag(*(FullHeight && Kind?FString::Printf(TEXT("PF.M14.Climb4_%c"),Lane?TEXT('B'):TEXT('A')):FString::Printf(TEXT("PF.M14.Ledge%d_%c"),Kind?110:80,Lane?TEXT('B'):TEXT('A'))));
                 AStaticMeshActor* Found=nullptr;for(TActorIterator<AStaticMeshActor> It(W);It;++It){if(It->ActorHasTag(Tag)){if(Found){Test->AddError(TEXT("Duplicate authored ledge"));return true;}Found=*It;}}
                 if(!Found){return false;}
-                const FVector At(Lane?(Kind?1600:1000):(Kind?1250:650),Lane?-3000:-1100,Kind?55:40),Scale(3,3.6,Kind?1.1:.8);
+                const FVector At(FullHeight && Kind?(Lane?2250:1850):(Lane?(Kind?1600:1000):(Kind?1250:650)),Lane?-3000:-1100,Kind?(FullHeight?200:55):40),Scale(3,3.6,Kind?(FullHeight?4:1.1):.8);
                 if(!Found->GetActorLocation().Equals(At,.1f) || !Found->GetActorScale3D().Equals(Scale,.001f) ||
                    !Found->GetStaticMeshComponent()->GetStaticMesh() || Found->GetStaticMeshComponent()->GetCollisionProfileName()!=TEXT("BlockAll"))
                 {Test->AddError(TEXT("Authored course geometry differs from saved contract"));return true;}
@@ -60,7 +60,7 @@ public:
                 ++Starts;
             }
             if(Starts!=2){Test->AddError(TEXT("Expected both normal camp PlayerStarts"));return true;}
-            Validated=true;Test->AddInfo(TEXT("[PrimalTraversal] Loaded four real authored 80/110cm ledges; near-spawn wall verified; no runtime geometry created"));
+            Validated=true;Test->AddInfo(FString::Printf(TEXT("[PrimalTraversal] Loaded four real authored 80/%dcm walls; near-spawn wall verified; no runtime geometry created"),FullHeight?400:110));
         }
         TArray<APFSurvivalPlayerController*> Players;
         for(auto It=W->GetPlayerControllerIterator();It;++It){auto* PC=Cast<APFSurvivalPlayerController>(It->Get());if(PC && Cast<APFSurvivorCharacter>(PC->GetPawn()) && PC->GetInventory() && PC->GetInventory()->Catalog){Players.Add(PC);}}
@@ -74,6 +74,10 @@ public:
                     auto* PC=Players[Lane];auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());
                     if(!PC->GetInventory()->GetStacks().IsEmpty()){Test->AddError(TEXT("Requires fresh disposable player bag"));return true;}
                     P->Survival->HungerDrainPerSecond=0;P->Survival->ThirstDrainPerSecond=0;P->Survival->StaminaRecoveryPerSecond=0;
+                    // Shift is only a fixture readiness/landing acknowledgement.
+                    // In-flight saved moves must not add unrelated sprint drain or
+                    // boost to the isolated single-attempt climb cost transaction.
+                    P->Traversal()->SprintStaminaPerSecond=0;P->Traversal()->SprintMultiplier=1;
                     FAuthoredClimbRecord R;R.Lane=Lane;R.Stamina=P->Survival->GetVitals().Stamina;Records.Add(PC,R);
                 }
                 Initialized=true;
@@ -86,7 +90,7 @@ public:
                 else if((R.Phase==1 || R.Phase==3) && Landed(P,R.Lane,R.Phase==3?1:0))
                 {
                     M->StopMovementImmediately();Test->TestTrue(TEXT("Authored mantle spends exactly its manual or jump-contact cost"),
-                        FMath::IsNearlyEqual(P->Survival->GetVitals().Stamina,R.Stamina-(Manual?0:P->JumpStaminaCost)-P->ClimbStaminaCost,.5f));
+                        FMath::IsNearlyEqual(P->Survival->GetVitals().Stamina,R.Stamina-(Manual?0:P->JumpStaminaCost)-P->ClimbStaminaCost-FMath::Max(0.,Top(R.Lane,R.Phase==3?1:0)-2.15-P->MaxClimbHeight)*P->ClimbStaminaPerMetre/100.,.5f));
                     R.Landed=W->GetTimeSeconds();++R.Phase;
                 }
                 else if((R.Phase==2 || R.Phase==4) && M->bWantsSprint && W->GetTimeSeconds()-R.Landed>1.6)
@@ -102,12 +106,18 @@ public:
                 All &= R.Phase==5;
                 if(R.Phase!=5){Diagnostic=FString::Printf(TEXT("lane%d phase%d at%s stamina%.1f sprint%d"),R.Lane,R.Phase,*P->GetActorLocation().ToString(),P->Survival->GetVitals().Stamina,M->bWantsSprint);}
             }
-            if(All && (W->GetNetMode()!=NM_Standalone || OwnerComplete))
-            {Test->AddInfo(TEXT("[PrimalTraversal] Authored server real80/110cm jump-contact landings and exact costs verified"));Done=Now;return false;}
+            // Health95 is each owner's completion signal. Wait for a distinct
+            // replicated view-yaw acknowledgement before broadcasting health94;
+            // otherwise adjacent snapshots can coalesce and hide95 from a client.
+            bool OwnersSawCompletion=true;
+            for(auto* PC:Players){OwnersSawCompletion &= FMath::Abs(FRotator::NormalizeAxis(PC->GetControlRotation().Yaw-123))<1;}
+            if(All && (W->GetNetMode()==NM_Standalone?OwnerComplete:OwnersSawCompletion))
+            {for(auto* PC:Players){CastChecked<APFSurvivorCharacter>(PC->GetPawn())->Survival->SetHealth(94);}Test->AddInfo(TEXT("[PrimalTraversal] Authored server real map contact landings and exact costs verified"));Done=Now;return false;}
         }
         if(Client || W->GetNetMode()==NM_Standalone)
         {
             auto* PC=Players[0];auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();const float H=P->Survival->GetVitals().Health;
+            M->SprintStaminaPerSecond=0;M->SprintMultiplier=1;
             Diagnostic=FString::Printf(TEXT("ready%d approaching%d prepare%.3f health%.1f at%s yaw%.1f grounded%d W%d ignored%d"),Ready,Approaching,Prepare,H,*P->GetActorLocation().ToString(),PC->GetControlRotation().Yaw,M->IsMovingOnGround(),PC->IsInputKeyDown(EKeys::W),PC->IsMoveInputIgnored());
             if(TallPlaced && !OwnerComplete)
             {
@@ -116,7 +126,7 @@ public:
                 if(TallPressed && Now-TallAt>.6)
                 {
                     Key(PC,EKeys::F,IE_Released);
-                    Test->TestTrue(TEXT("Actual tall landmark refusal reaches owner HUD feedback"),PC->RecentInteractionMessage().Contains(TEXT("Wall too high")));
+                    Test->TestTrue(TEXT("Actual tall landmark stamina refusal reaches owner HUD feedback"),PC->RecentInteractionMessage().Contains(TEXT("stamina")));
                     Test->TestEqual(TEXT("Tall wall refusal grants no height or spends stamina"),P->Survival->GetVitals().Stamina,TallStamina);
                     Test->TestTrue(TEXT("Tall landmark remains solid; player stays grounded"),M->IsMovingOnGround() && P->GetActorLocation().Z<110);
                     Capture(TEXT("tall_wall_refusal"));OwnerComplete=true;
@@ -143,7 +153,10 @@ public:
             if((OwnerStage==0 && H==97) || (OwnerStage==2 && H==96))
             {
                 const int32 Kind=OwnerStage==2?1:0;const auto* A=Ledges[Lane][Kind].Get();const float X=A->GetActorLocation().X-150-P->GetCapsuleComponent()->GetScaledCapsuleRadius()-200;
-                if(M->IsMovingOnGround() && FMath::Abs(P->GetActorLocation().X-X)<10)
+                // Server reposition can be followed by replay of already-sent moves.
+                // Accept the same clear approach corridor, then use actual W until
+                // contact. Never retry or substitute the climb key itself.
+                if(M->IsMovingOnGround() && P->GetActorLocation().X>=X-150 && P->GetActorLocation().X<=X+50)
                 {
                     if(Prepare==0){Prepare=Now;Key(PC,EKeys::LeftShift,IE_Released);PC->SetControlRotation(FRotator(-15,0,0));}
                     if(!Directory.IsEmpty() && !Kind && Now-Prepare>.2 && !ApproachShot){Capture(TEXT("camp_approach"));ApproachShot=true;}
@@ -160,8 +173,8 @@ public:
                 const int32 Kind=OwnerStage==3?1:0;
                 if(!Acknowledged && Landed(P,Lane,Kind))
                 {
-                    Key(PC,EKeys::W,IE_Released);M->StopMovementImmediately();PC->SetControlRotation(FRotator(-55,0,0));Capture(Kind?TEXT("climb_110_top"):TEXT("climb_80_top"));
-                    Test->AddInfo(FString::Printf(TEXT("[PrimalTraversal] Owner real authored %dcm landing verified with raw W + %s input"),Kind?110:80,Manual?TEXT("F"):TEXT("Space")));
+                    Key(PC,EKeys::W,IE_Released);M->StopMovementImmediately();PC->SetControlRotation(FRotator(-55,0,0));Capture(Kind?(FullHeight?TEXT("climb_400_top"):TEXT("climb_110_top")):TEXT("climb_80_top"));
+                    Test->AddInfo(FString::Printf(TEXT("[PrimalTraversal] Owner real authored %.0fcm landing verified with raw W + %s input"),Top(Lane,Kind),Manual?TEXT("F"):TEXT("Space")));
                     Key(PC,EKeys::LeftShift,IE_Pressed);Acknowledged=true;
                 }
                 if(OwnerStage==1 && H==96){Test->TestTrue(TEXT("Owner saw80cm landing before next stage"),Acknowledged);Acknowledged=false;OwnerStage=2;}
@@ -173,9 +186,10 @@ public:
                     if(P->GetActorLocation().X>0){return false;}
                     if(OverviewAt==0){OverviewAt=Now;PC->SetControlRotation(FRotator(0,0,0));}
                     if(Now-OverviewAt<.5){return false;}
-                    Capture(TEXT("course_sign"));
+                    if(!OverviewCaptured){Capture(TEXT("course_sign"));OverviewCaptured=true;OverviewAt=Now;return false;}
+                    if(Now-OverviewAt<.3){return false;} // Screenshot request is captured next frame.
                 }
-                Test->TestTrue(TEXT("Owner saw110cm landing before completion"),Acknowledged);Key(PC,EKeys::LeftShift,IE_Released);Key(PC,EKeys::W,IE_Released);Key(PC,EKeys::SpaceBar,IE_Released);Key(PC,EKeys::F,IE_Released);
+                Test->TestTrue(TEXT("Owner saw second wall landing before completion"),Acknowledged);Key(PC,EKeys::LeftShift,IE_Released);Key(PC,EKeys::W,IE_Released);Key(PC,EKeys::SpaceBar,IE_Released);Key(PC,EKeys::F,IE_Released);
                 Test->TestTrue(TEXT("Authored traversal never grants inventory"),PC->GetInventory()->GetStacks().IsEmpty());
                 if(Client){FString Reason;Test->TestFalse(TEXT("Client direct automatic mantle refused"),P->TryAutomaticClimb(Reason));}
                 Test->AddInfo(TEXT("[PrimalTraversal] Authored owner both real map ledges, server acknowledgements and no item grants verified"));
@@ -184,19 +198,22 @@ public:
                     // Reproduce the reported ordinary attempt at the saved 4m landmark.
                     M->ClearTraversal();M->StopMovementImmediately();M->ClearAccumulatedForces();
                     P->TeleportTo(FVector(1500,4685,100),FRotator(0,90,0),false,true);M->SetMovementMode(MOVE_Walking);PC->SetControlRotation(FRotator(0,90,0));
-                    TallStamina=P->Survival->GetVitals().Stamina;TallAt=Now;TallPlaced=true;OwnerStage=4;return false;
+                    P->Survival->ChangeStamina(15-P->Survival->GetVitals().Stamina);TallStamina=15;TallAt=Now;TallPlaced=true;OwnerStage=4;return false;
                 }
-                OwnerComplete=true;if(Client){Done=Now;}return false;
+                OwnerComplete=true;if(Client){PC->SetControlRotation(FRotator(0,123,0));}return false;
             }
+            // Keep each client connected until every server lane completed.
+            if(Client && OwnerComplete && H==94){Done=Now;}
         }
         return false;
     }
 private:
+    double Top(int32 Lane,int32 Kind) const {const auto* A=Ledges[Lane][Kind].Get();return A->GetActorLocation().Z+50*A->GetActorScale3D().Z;}
     bool Landed(APFSurvivorCharacter* P,int32 Lane,int32 Kind) const
     {
         const auto* A=Ledges[Lane][Kind].Get();const FVector At=P->GetActorLocation();
-        const float Top=Kind?110:80,Half=P->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-        return P->Traversal()->IsMovingOnGround() && At.X>A->GetActorLocation().X-150 && At.X<A->GetActorLocation().X+150 && FMath::Abs(At.Y-A->GetActorLocation().Y)<160 && FMath::Abs(At.Z-Half-Top)<5;
+        const float Height=Top(Lane,Kind),Half=P->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+        return P->Traversal()->IsMovingOnGround() && At.X>A->GetActorLocation().X-150 && At.X<A->GetActorLocation().X+150 && FMath::Abs(At.Y-A->GetActorLocation().Y)<160 && FMath::Abs(At.Z-Half-Height)<5;
     }
     void Place(APFSurvivalPlayerController* PC,FAuthoredClimbRecord& R,int32 Kind)
     {
@@ -212,7 +229,7 @@ private:
     }
     void Capture(const TCHAR* Name){if(!Directory.IsEmpty()){FScreenshotRequest::RequestScreenshot(Directory/(FString(Name)+TEXT(".png")),true,false);}}
     FAutomationTestBase* Test;FString Directory,Diagnostic;TWeakObjectPtr<AStaticMeshActor> Ledges[2][2];TMap<TWeakObjectPtr<APFSurvivalPlayerController>,FAuthoredClimbRecord> Records;
-    double Started=FPlatformTime::Seconds(),Done=0,Prepare=0,ReleaseAt=0,OverviewAt=0,SpawnViewAt=0,TallAt=0,ReadyAt=0;float TallStamina=0;int32 Expected=1,OwnerStage=0;bool Client=false,Validated=false,Initialized=false,Ready=false,Acknowledged=false,OwnerComplete=false,ApproachShot=false,Manual=false,Approaching=false,TallPlaced=false,TallPressed=false;
+    double Started=FPlatformTime::Seconds(),Done=0,Prepare=0,ReleaseAt=0,OverviewAt=0,SpawnViewAt=0,TallAt=0,ReadyAt=0;float TallStamina=0;int32 Expected=1,OwnerStage=0;bool Client=false,Validated=false,Initialized=false,Ready=false,Acknowledged=false,OwnerComplete=false,ApproachShot=false,Manual=false,Approaching=false,TallPlaced=false,TallPressed=false,FullHeight=false,OverviewCaptured=false;
 };
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFAuthoredClimbLiveTest,"PF.Traversal.AuthoredLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)

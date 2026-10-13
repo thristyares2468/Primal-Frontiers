@@ -117,6 +117,9 @@ bool FPFEarnedUpgradeTest::RunTest(const FString&)
     };
     if(!Craft(TEXT("Recipe_Tool"),80) || !Craft(TEXT("Recipe_Cook"),100) || !Craft(TEXT("Recipe_Dry"),120) || !Craft(TEXT("Recipe_Cord"),140) || !Craft(TEXT("Recipe_Club"),160)){return false;}
     TestTrue(TEXT("Five distinct earned crafts reach first knowledge boundary"),G->GetLevel()==2 && G->GetAvailablePoints()==3 && G->GetRecord().CreditedCrafts.Num()==5);
+    TestEqual(TEXT("Real earned level also grants independent stat point"),G->GetAvailableStatPoints(),1);
+    PC->ServerUpgradeStat(EPFPlayerStat::Stamina);
+    TestTrue(TEXT("Earned stat point increases capacity, tech remains3"),G->GetAvailableStatPoints()==0 && G->GetRecord().Stats.Stamina==1 && P->Survival->GetVitals().MaxStamina==120 && G->GetAvailablePoints()==3);
     if(!Craft(TEXT("Recipe_Cord"),160)){return false;}TestEqual(TEXT("Repeat cord gives no duplicate credit"),G->GetRecord().CreditedCrafts.Num(),5);
     TestFalse(TEXT("Owned points alone don't unlock optional conversion"),C->Start(TEXT("Recipe_BoundTool"),P));
     PC->ServerLearnKnowledge(TEXT("Tech_FieldTools"));TestTrue(TEXT("Earned owned purchase costs exactly two"),G->GetAvailablePoints()==1 && G->GetRecord().Knowledge.Contains(TEXT("Tech_FieldTools")) && G->GetExperience()==160);
@@ -133,6 +136,7 @@ bool FPFEarnedUpgradeTest::RunTest(const FString&)
     TestFalse(TEXT("Dead survivor cannot gather to renew earned budget"),DeadNode->Gather(P));DeadNode->Destroy();
     Advance(35);P=Cast<APFSurvivorCharacter>(PC->GetPawn());
     if(!TestTrue(TEXT("Default timer replaces dead pawn, retains same PlayerState"),P && P!=DeadPawn.Get() && PC->GetPlayerState<APFInventoryPlayerState>()==PS && PS->Progression==G)){return false;}
+    TestTrue(TEXT("Earned stamina rank survives actual respawn"),G->GetRecord().Stats.Stamina==1 && P->Survival->GetVitals().MaxStamina==120);
     P->GetCharacterMovement()->DisableMovement();P->Survival->HungerDrainPerSecond=0;P->Survival->ThirstDrainPerSecond=0;
     bool SameInventory=I->GetStacks().Num()==InventoryBeforeDeath.Num();
     for(const auto& Before:InventoryBeforeDeath){SameInventory&=I->GetStacks().ContainsByPredicate([&](const auto& After){return After.StackId==Before.StackId && After.ItemId==Before.ItemId && After.Quantity==Before.Quantity && After.ExpiresAt==Before.ExpiresAt;});}

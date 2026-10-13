@@ -5,6 +5,7 @@ param(
     [ValidateSet('Ecology','Lifecycle','Building','Traversal','Variety','InventoryRace','InventoryOwnership','AutoClimb','AuthoredClimb')][string]$TestCase='Ecology',
     [switch]$SimulateLagLoss,
     [switch]$ManualClimb,
+    [switch]$FullHeightClimb,
     [ValidateRange(1024,65535)][int]$Port=17993,
     [ValidateRange(60,300)][int]$TimeoutSeconds=150,
     [string]$EngineRoot='C:\Program Files\Epic Games\UE_5.8'
@@ -17,8 +18,9 @@ if(!(Test-Path -LiteralPath $editor)){throw 'Editor executable unavailable'}
 if(Get-Process UnrealEditor,UnrealEditor-Cmd -ErrorAction SilentlyContinue){throw 'Close the existing Unreal process before isolated ecology automation'}
 if(Get-NetUDPEndpoint -LocalPort $Port -ErrorAction SilentlyContinue){throw 'Diagnostic port already occupied'}
 foreach($path in @($root,$EngineRoot)){if($path -match '["\x00-\x1f]'){throw 'Unsupported path quote/control character'}}
+if($FullHeightClimb -and $TestCase -ne 'AuthoredClimb'){throw 'FullHeightClimb requires authored climbing'}
 if($ManualClimb -and $TestCase -ne 'AuthoredClimb'){throw 'ManualClimb requires the authored climb fixture'}
-$run=$(if($ManualClimb){'M14Manual'}elseif($TestCase -eq 'AuthoredClimb'){'M14'}elseif($TestCase -in @('InventoryRace','InventoryOwnership')){'M15'}elseif($TestCase -eq 'Building'){'M11Building'}elseif($TestCase -in @('Traversal','AutoClimb','AuthoredClimb')){'M1Traverse'}else{'M13Ecology'})+$TestCase+$Players+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
+$run=$(if($FullHeightClimb){'M14Height'}elseif($ManualClimb){'M14Manual'}elseif($TestCase -eq 'AuthoredClimb'){'M14'}elseif($TestCase -in @('InventoryRace','InventoryOwnership')){'M15'}elseif($TestCase -eq 'Building'){'M11Building'}elseif($TestCase -in @('Traversal','AutoClimb','AuthoredClimb')){'M1Traverse'}else{'M13Ecology'})+$TestCase+$Players+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
 $slot='AutomationM13Ecology'+[Guid]::NewGuid().ToString('N')
 $profile='Eco'+[Guid]::NewGuid().ToString('N').Substring(0,12)
 $reports=Join-Path $root 'Saved\AutomationReports'
@@ -56,10 +58,11 @@ if($TestCase -eq 'InventoryOwnership'){$flag='-PFRunInventoryOwnershipLiveTests'
 if($TestCase -eq 'AutoClimb'){$flag='-PFRunAutomaticClimbLiveTests'}
 if($TestCase -eq 'AuthoredClimb'){$flag='-PFRunAuthoredClimbLiveTests'}
 if($ManualClimb){$flag+=' -PFManualClimb'}
+if($FullHeightClimb){$flag+=' -PFFullHeightClimb'}
 $lag=if($SimulateLagLoss){75}else{0};$loss=if($SimulateLagLoss){1}else{0}
 $map=if($TestCase -eq 'Ecology'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}elseif($TestCase -eq 'Building'){'/Game/PrimalFrontier/Maps/L_M5Building'}elseif($TestCase -in @('Traversal','AutoClimb','AuthoredClimb')){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}else{'/Game/PrimalFrontier/Maps/L_M6Creatures'}
 if($TestCase -eq 'AuthoredClimb'){$map='/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld'}
-$summary=[ordered]@{Run=$run;Map=$map;TestCase=$TestCase;ManualClimb=[bool]$ManualClimb;Players=$Players;NullRHI=$true;HeadlessFrameRate=$(if($TestCase -in @('Traversal','AutoClimb','AuthoredClimb')){120}else{0});ExpectedFilter=$filter;Slot=$slot;ProfilePrefix=$profile;Port=$Port;OutgoingLagMs=$lag;OutgoingLossPercent=$loss;Passed=$false;TimedOut=$false;Processes=@();CleanupFailures=@();Failure=$null}
+$summary=[ordered]@{Run=$run;Map=$map;TestCase=$TestCase;ManualClimb=[bool]$ManualClimb;FullHeightClimb=[bool]$FullHeightClimb;Players=$Players;NullRHI=$true;HeadlessFrameRate=$(if($TestCase -in @('Traversal','AutoClimb','AuthoredClimb')){120}else{0});ExpectedFilter=$filter;Slot=$slot;ProfilePrefix=$profile;Port=$Port;OutgoingLagMs=$lag;OutgoingLossPercent=$loss;Passed=$false;TimedOut=$false;Processes=@();CleanupFailures=@();Failure=$null}
 $runs=@();$watch=[Diagnostics.Stopwatch]::StartNew();$exitCode=1
 function Sample-Memory($taskRun) {
     if(!$taskRun.Process.HasExited){
@@ -137,7 +140,7 @@ finally {
                 }
             }
             if($TestCase -eq 'AutoClimb'){$contract=if($taskRun.Role -eq 'Server'){$text.Contains('Server automatic real jump/wall contact landing verified')}else{$text.Contains('Owner automatic jump/contact/acknowledged landing verified without F')}}
-            if($TestCase -eq 'AuthoredClimb'){$contract=if($taskRun.Role -eq 'Server'){$text.Contains('Authored server real80/110cm jump-contact landings and exact costs verified')}else{$text.Contains('Authored owner both real map ledges, server acknowledgements and no item grants verified')}}
+            if($TestCase -eq 'AuthoredClimb'){$contract=if($taskRun.Role -eq 'Server'){$text.Contains('Authored server real map contact landings and exact costs verified')}else{$text.Contains('Authored owner both real map ledges, server acknowledgements and no item grants verified')}}
             $network=($text -match ('PktLag set to '+$lag+'\b')) -and ($text -match ('PktLoss set to '+$loss+'\b'))
             $passed=$verdictCode -eq 0 -and $verdict.Passed -and $verdict.TestCount -eq 1 -and $fatal -eq 0 -and $contract -and $network
             $summary.Processes+= [ordered]@{Role=$taskRun.Role;Passed=$passed;EngineExit=$taskRun.Process.ExitCode;VerdictExit=$verdictCode;Verdict=$verdict;Contract=$contract;NetworkApplied=$network;FatalEnsureAssertion=$fatal;WorkingGiB=[Math]::Round($taskRun.Working/1GB,3);PrivateGiB=[Math]::Round($taskRun.Private/1GB,3);LogWarnings=[regex]::Matches($text,'(?im)^.*\bWarning:').Count;LogErrors=[regex]::Matches($text,'(?im)^.*\bError:').Count;Log=$taskRun.Log;Report=(Join-Path $taskRun.Report 'index.json')}

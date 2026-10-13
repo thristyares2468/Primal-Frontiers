@@ -1,5 +1,15 @@
 # Architecture and Design Decisions
 
+## 2026-10-13 - Separate player stat budget and persist validated ranks
+
+Use existing earned XP/ten-level slice; one independent stat point per level, versus3 technology points. Four bounded ranks derive damage/max stamina/carry/new-job speed; owner ID-only request checks living own pawn/controller/server/cooldown and complete candidate. Shared native progression Game-config tuning, no INI/dependency change; allocation doesnot refill stamina or accelerate a running job. PlayerState lifetime survivesdeath; freshspawn applies/fills capacity. InnerPFXPV3 forallocations preserves zero-rankV1/V2 bytes and legacyXP; outerworldV2 validates owner-bound ranks before accepting/restoring upgraded vitals. Unknown/corrupt/overspent records fail closed, no private-file auto rewrite. Ancient technology planned separately. PLAYER_STATS_M12.md exactproof. Tall perches require reaching the full server-approved landing target through swept walking/step-up, not merely firstwalkable capsule contact; owner-only goal RPC and expiry remainbounded.
+
+
+## 2026-10-13 - Replace arbitrary mantle ceiling with full stamina budget
+
+Climb server traces within affordable full-height budget: base15 through1.2m plus10/metre above; jump-contact pays normal20 separately. Legacy MaxClimbHeight serialized field retains compatibility but now denotes base-cost height. Require walkable top, full swept capsule/overhead clearance, living pawn/weight/menus/cooldown/finite coordinates. Bounded falling ascent uses drive timed to above-top interval, clears on landing/death/cancel/jump; no wallhang animation/collision bypass. Stateless4m/10m fixtures near camp preserve all old persistent identities. Exact tests/failures STAMINA_CLIMB_M14.md; no manual acceptance assumed.
+
+
 ## 2026-10-13 - Share the bounded mantle drive across F and jump-contact climbs
 
 The contact regression reproduced F requests accepted at valid80/110cm walls without reaching their tops. Manual mantles now retain the same server-derived horizontal drive used by automatic mantles. Preserve it through grounded pre-movement only while an approved climb has a queued Unreal launch and an unexpired1.5-second window; landing, cancellation, ordinary jumps and death still clear it. Continue swept falling collision. Original ground-based height, reach, clearance, weight, stamina and authority validation stay intact. The controller reuses its existing owner-only feedback RPC for explicit acceptance/refusal text; no new movement target RPC or inventory action is introduced.

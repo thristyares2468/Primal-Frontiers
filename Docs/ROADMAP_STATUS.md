@@ -1,5 +1,9 @@
 # Roadmap and open-world direction
 
+## Current player upgrades and full-height climb — October 13
+
+The fixed low-ledge ceiling is superseded by full-height, server-costed climbing with safe collision/landing validation. Nearby 4m/10m walls and sign support retesting; older authored actors and persistence identities are retained. Independent earned stat points now improve attack, stamina capacity, bag weight threshold and new-job crafting speed through U/Pause. Technology budgets remain separate; ancient rewards and the broader material/dimension progression plan remain future work. Both builds and 30 final execution records pass. Human G10/G14 remain open; no further world/art expansion began. Exact current evidence: PLAYER_STATS_M12.md, STAMINA_CLIMB_M14.md and CURRENT_STATE.md. Older low-ledge descriptions below are historical.
+
 ## M14 nearby fixture repair - October13
 
 Existing two lane A climbing blocks/sign now immediately right/east of spawn; old persistent layout retained. Nine native/network/rendered execution records and both builds pass; exact proof SPAWN_TRAVERSAL_M14.md. Technical accessibility repair only; G10 humanCLIMB remains open before moreworldexpansion. New features must include discoverable nearby test fixtures per AGENTS; no new tier/dimension/system scope.

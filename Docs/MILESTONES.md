@@ -1,5 +1,19 @@
 # Primal Frontier milestone evidence
 
+## Final M12/M14 technical checkpoint — October 13
+
+Editor and Game builds passed. All 30 final execution records passed: 14 native, 10 player-stat network/restart, 5 authored climb network and 1 rendered menu/10m climb. Final compatibility tests and raw-log comparison passed; no new severity lines against the existing startup baseline. Exact reports, selectors, failures repaired and memory limits are in PLAYER_STATS_M12.md and STAMINA_CLIMB_M14.md. This checkpoint supersedes the intermediate pending statements below. Human CLIMB_STAMINA and STATS_UPGRADE remain open; neither full milestone is accepted.
+
+## October13 - M12 player stat points and M14 full-height climb integration
+
+Implemented independent level-earned stat allocations forattack/stamina/weight/crafting speed, U/Pause menu, configured native gains, real modifiers, owner validation/private replication, respawn and V3/legacy file compatibility. Native8/8 and real saved10m render1/1 pass; current one-/two-client create-restart4/4+6/6 and climb2/2+3/3 pass, with75ms1% on two-client checks. Actual earned firstpoint route is separate from explicit1000XP boundary seeds. PLAYER_STATS_M12.md/STAMINA_CLIMB_M14.md hold exact tests/failures/artifacts. Gameplay10m rounded-edge issue fixed through bounded approved-target swept walking. Final compatibility/Game/log checks pending; no new human/fullM12/M14 acceptance, no ore/dimension/ancient reward/art scope.
+
+
+## October13 - Full-height stamina climbing, technical gate
+
+User supersedes old low-ledge ceiling: full server-derived wall climb when complete stamina cost is affordable. Native8m, real-key4m one-client/manual/automatic and two-client75ms/1% pass; rendered F/refusal and Editor/Game builds pass. Four stateless tall-wall/sign fixtures preserve old81/configurations and resource/spawner identities. STAMINA_CLIMB_M14.md records failures, guards, exact reports and limits. Capture-only final replay pending; no fullM14/human pass. Separately requested level-earned attack/stamina/weight/crafting-speed stat points next, independently budgeted from technology.
+
+
 ## October13 - M14 F contact repair and climbing scope clarification
 
 User confirms attempts at taller walls, recorded at4m DangerLandmark; current ability supports45–120cm ledge mantles. Independent regression proved manual80/110cm contact accepted/charged but failed to land; shared bounded drive plus pending-launch preservation fixes it. Explicit owner feedback explains refusals. Editor/Game/native3/real-key one-two F and Space/rendered720 variants PASS15records, six landing/refusal PNGs inspected, exact evidence CLIMB_CONTACT_M14.md. Initial compiler/link/two-contact failures and one pre-request two-client timeout are retained; guarded replay passes, original intermittent cause unproven. No map/assets/private data/height-limit change or new systems. FullM14/manualCLIMB remains open; next small human action only CLIMB_F80.

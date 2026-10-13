@@ -12,8 +12,8 @@ struct FPFProgressionRecord;
 class PRIMALFRONTIER_API FPFWorldSaveFormat
 {
 public:
-    static bool PackPlayer(const FPFPlayerSaveData& Data, const UPFItemCatalog& Items, double Weight, FString& Out, FString& Error, bool bEnforceWeight=true);
-    static bool UnpackPlayer(const FString& Text, const UPFItemCatalog& Items, double Weight, FPFPlayerSaveData& Out, FString& Error, bool bEnforceWeight=true);
+    static bool PackPlayer(const FPFPlayerSaveData& Data, const UPFItemCatalog& Items, double Weight, FString& Out, FString& Error, bool bEnforceWeight=true,float MaxStamina=100);
+    static bool UnpackPlayer(const FString& Text, const UPFItemCatalog& Items, double Weight, FPFPlayerSaveData& Out, FString& Error, bool bEnforceWeight=true,float MaxStamina=100);
     static bool PackProgression(FGuid Owner,const FPFProgressionRecord& Record,const UPFProgressionCatalog& Catalog,
         const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Out,FString& Error);
     static bool UnpackProgression(const FString& Text,FGuid Owner,const UPFProgressionCatalog& Catalog,

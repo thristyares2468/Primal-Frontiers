@@ -1,5 +1,9 @@
 # Trello task workflow
 
+## Current M12/M14 handoff — October 13
+
+Full-height climbing and independent player stat upgrades are technically verified (30 final passing execution records; both targets build). Programming HHQrtCtr and vVvhE5Yp are Done/complete. The first stats-card move timed out; fresh readback and a successful retry confirmed Done. Current exact G10 replaces the obsolete height ceiling on 7zjNOKJJ (Personal 1 / To Do) and Main 1tI62BmQ (Personal 1 / Doing), both incomplete. New nonduplicate JgdyVGvK is Personal 2 STATS_UPGRADE / To Do, incomplete, with G14 and no immediate XP grind required. Main M12 retains broader objectives and received bounded evidence separately. Physical controller stays Personal 3 / To Do, with obsolete climb guidance explicitly superseded. Historical evidence/objectives retained; unrelated members, deadlines and accepted tests preserved. Technical publication follows scoped Sol commit/push; no human/full-milestone completion inferred.
+
 Published b3f6b9a origin/master equality/clean verified; technical publicationcomment succeeded, both manualcard readbacks retainPersonal2/incomplete and exact finalG10. No private/asset or broader status change. Scoped handoff note records publication only; source/test evidence unchanged.
 
 Climb repair final readback confirms octMd2Bo Done/complete;7zjNOKJJ restoredPersonal2ToDo/incomplete, MainM14 restoredPersonal2Doing/incomplete. Exact updated G10 includes one immediate F80 action and tall-wall limit; original guides/diagnoses/expandedworldobjectives retained. No human test accepted, member/due change or Unreal process left. ScopedSol source/docs publication follows.

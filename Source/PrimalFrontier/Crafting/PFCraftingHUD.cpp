@@ -179,6 +179,8 @@ void UPFCraftingHUD::RefreshMenu()
     FString AccessError;const bool bAccess=D && (Progression?Progression->CanCraftRecipe(D->Id,AccessError):Knowledge==nullptr);
     const auto View=PFRecipeDetails::Describe(D,I,UPFInventoryComponent::ServerTime(GetWorld()),C && !C->ActiveRecipe.IsNone());
     DetailTitle->SetText(View.Title);DetailBody->SetText(View.Body);
+    if(D && Progression)
+    {DetailTitle->SetText(FText::FromString(FString::Printf(TEXT("%s | %.1fs at %.0f%% crafting speed"),*D->DisplayName.ToString(),D->Duration/FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()),100*FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()))));}
     if(D && !bAccess){DetailBody->SetText(FText::FromString(AccessError+TEXT("\n")+View.Body.ToString()));}
     if(SelectedRecipe.IsNone() && !RecipeIds.IsEmpty())
     {

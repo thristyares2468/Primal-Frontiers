@@ -76,7 +76,8 @@ bool UPFCraftingComponent::Start(FName Id,APawn* Pawn)
     Inputs=MoveTemp(Selected);
     CraftPawn=Pawn;
     ActiveRecipe=Id;
-    FinishAt=UPFInventoryComponent::ServerTime(GetWorld())+Recipe->Duration;
+    // Snapshot at job start. Later allocations cannot shorten an already running job.
+    FinishAt=UPFInventoryComponent::ServerTime(GetWorld())+Recipe->Duration/(Progression?FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()):1.f);
     Feedback=TEXT("Crafting: keep ingredients in your bag until complete");
     GetOwner()->ForceNetUpdate();
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalCrafting] Started %s owner=%s finish=%.2f"),*Id.ToString(),*GetOwner()->GetName(),FinishAt);

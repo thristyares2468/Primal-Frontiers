@@ -58,7 +58,7 @@ bool FPFPlayerSaveAdapter::Capture(APFSurvivalPlayerController* PC, FPFPlayerSav
 }
 
 bool FPFPlayerSaveAdapter::CanRestore(APFSurvivalPlayerController* PC, const FPFPlayerSaveData& Data,
-    double Age, FString& Error)
+    double Age, FString& Error,float ExpectedMaxStamina)
 {
     if (!PersistencePlayerReady(PC, Error)) { return false; }
     auto* Pawn = CastChecked<APFSurvivorCharacter>(PC->GetPawn());
@@ -66,7 +66,13 @@ bool FPFPlayerSaveAdapter::CanRestore(APFSurvivalPlayerController* PC, const FPF
     {
         Error = TEXT("Player identity mismatch or current pawn awaits respawn"); return false;
     }
-    if (!FPFPlayerSaveFormat::Validate(Data, *PC->GetInventory()->Catalog, PlayerPersistenceLimits(PC), Error)) { return false; }
+    auto Limits=PlayerPersistenceLimits(PC);
+    if(ExpectedMaxStamina!=0)
+    {
+        if(!FMath::IsFinite(ExpectedMaxStamina) || ExpectedMaxStamina<100 || ExpectedMaxStamina>1900){Error=TEXT("Invalid trusted stamina capacity");return false;}
+        Limits.MaxStamina=ExpectedMaxStamina;
+    }
+    if (!FPFPlayerSaveFormat::Validate(Data, *PC->GetInventory()->Catalog, Limits, Error)) { return false; }
     TArray<FPFItemStack> Proposed;
     if (!PC->GetInventory()->PreparePersistence(Data.Inventory, Age, Proposed, Error)) { return false; }
     FCollisionQueryParams Params(SCENE_QUERY_STAT(PFSaveSpawn), false, Pawn);
@@ -84,9 +90,9 @@ bool FPFPlayerSaveAdapter::CanRestore(APFSurvivalPlayerController* PC, const FPF
 }
 
 bool FPFPlayerSaveAdapter::Restore(APFSurvivalPlayerController* PC, const FPFPlayerSaveData& Data,
-    double Age, FString& Error)
+    double Age, FString& Error,float ExpectedMaxStamina)
 {
-    if (!CanRestore(PC, Data, Age, Error)) { return false; }
+    if (!CanRestore(PC, Data, Age, Error,ExpectedMaxStamina)) { return false; }
     auto* Pawn = CastChecked<APFSurvivorCharacter>(PC->GetPawn());
     const FVector PreviousLocation = Pawn->GetActorLocation(); const FRotator PreviousRotation = Pawn->GetActorRotation();
     if (!Pawn->TeleportTo(Data.Location, FRotator(0, Data.Rotation.Yaw, 0), false, false))
@@ -98,6 +104,7 @@ bool FPFPlayerSaveAdapter::Restore(APFSurvivalPlayerController* PC, const FPFPla
         Pawn->TeleportTo(PreviousLocation, PreviousRotation, false, true); return false;
     }
     if (PC->GetCrafting()) { PC->GetCrafting()->Cancel(); }
+    if(ExpectedMaxStamina>0){Pawn->Survival->SetMaximumStamina(ExpectedMaxStamina);}
     PC->SetControlRotation(Data.Rotation); Pawn->GetCharacterMovement()->StopMovementImmediately();
     Pawn->Survival->SetHunger(Data.Hunger); Pawn->Survival->SetThirst(Data.Thirst);
     Pawn->Survival->ChangeStamina(Data.Stamina - Pawn->Survival->GetVitals().Stamina);

@@ -63,8 +63,8 @@ bool FPFTraversalRulesTest::RunTest(const FString&)
     P->SetRole(ROLE_AutonomousProxy);TestFalse(TEXT("Client cannot execute climb authority directly"),P->TryClimb(Reason));P->SetRole(ROLE_Authority);
     P->SetSprintHeld(true);P->LaunchCharacter(FVector(100,0,500),true,true);P->Survival->ApplyDamage(1000);TestFalse(TEXT("Death clears sprint"),M->bWantsSprint);TestFalse(TEXT("Dead pawn cannot climb"),P->TryClimb(Reason));
     TestFalse(TEXT("Death clears queued climb launch"),M->HandlePendingLaunch());
-    P->SetRole(ROLE_AutonomousProxy);P->ClientClimbImpulse_Implementation(FVector(100,0,500),false);TestFalse(TEXT("Late owner climb acknowledgment cannot relaunch corpse"),M->HandlePendingLaunch());P->SetRole(ROLE_Authority);
-    P->SetRole(ROLE_AutonomousProxy);P->ClientClimbImpulse_Implementation(FVector(100,0,500),true);TestFalse(TEXT("Late automatic acknowledgment cannot relaunch corpse"),M->HandlePendingLaunch());TestTrue(TEXT("Dead owner has no automatic drive"),M->AutomaticClimbDrive.IsNearlyZero());P->SetRole(ROLE_Authority);
+    P->SetRole(ROLE_AutonomousProxy);P->ClientClimbImpulse_Implementation(FVector(100,0,500),false,1.5f,FVector::ZeroVector);TestFalse(TEXT("Late owner climb acknowledgment cannot relaunch corpse"),M->HandlePendingLaunch());P->SetRole(ROLE_Authority);
+    P->SetRole(ROLE_AutonomousProxy);P->ClientClimbImpulse_Implementation(FVector(100,0,500),true,1.5f,FVector::ZeroVector);TestFalse(TEXT("Late automatic acknowledgment cannot relaunch corpse"),M->HandlePendingLaunch());TestTrue(TEXT("Dead owner has no automatic drive"),M->AutomaticClimbDrive.IsNearlyZero());P->SetRole(ROLE_Authority);
     F.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalTraversal] Real weight boundaries, movement/stamina, saved-move replay, falling glide, swept ledge climb, menus/death/client refusal checked."));return true;
 }
 #endif

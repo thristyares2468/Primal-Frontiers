@@ -102,6 +102,8 @@ public:
 
     /** Spend stamina only if enough is available (all-or-nothing). */
     UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Survival") bool SpendStamina(float Amount);
+    /** Trusted server-derived progression capacity. Upgrades never refill current stamina. */
+    bool SetMaximumStamina(float Value,bool bFill=false);
 
     /** True if the survivor is alive and has at least Amount stamina. Usable on clients for prediction checks. */
     UFUNCTION(BlueprintPure, Category="Survival") bool CanSpendStamina(float Amount) const;

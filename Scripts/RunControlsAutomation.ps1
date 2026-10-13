@@ -1,11 +1,12 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation','Traversal','AuthoredEcology','CreatureVariety','AutoClimb','AuthoredClimb')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation','Traversal','AuthoredEcology','CreatureVariety','AutoClimb','AuthoredClimb','PlayerStats')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [string]$SettingsSourceRun='',
       [switch]$LowShadowDiagnostic,
       [switch]$ManualClimb,
+    [switch]$FullHeightClimb,
       [switch]$OffscreenDiagnostic,
       [ValidateRange(60,600)][int]$TimeoutSeconds=180)
 Set-StrictMode -Version Latest
@@ -32,8 +33,9 @@ function Get-PersonalSettingsSnapshot {
     }
 }
 $personalSettingsBefore=@(Get-PersonalSettingsSnapshot)
+if($FullHeightClimb -and $TestCase -ne 'AuthoredClimb'){throw 'FullHeightClimb requires authored climbing'}
 if($ManualClimb -and $TestCase -ne 'AuthoredClimb'){throw 'ManualClimb requires the authored climb fixture'}
-$run=$(if($ManualClimb){'M14ClimbF'}elseif($TestCase -eq 'SettingsRestartPrepare'){'M11RestartP'}elseif($TestCase -eq 'SettingsRestartVerify'){'M11RestartV'}elseif($TestCase -eq 'MenuNavigation'){'M11MenuNav'}elseif($TestCase -eq 'Traversal'){'M1Traverse'}elseif($TestCase -eq 'CraftingScroll'){'M11Scroll'}elseif($TestCase -eq 'EarnedWeapon'){'M12EarnedWeapon'}elseif($TestCase -eq 'EarnedCombat'){'M12EarnedCombat'}elseif($TestCase -eq 'EarnedProgression'){'M12Earned'}elseif($TestCase -eq 'Protection'){'M12Protection'}elseif($TestCase -eq 'WeaponProgression'){'M12Weapon'}elseif($TestCase -eq 'ToolProgression'){'M12Tool'}else{'M11'+$TestCase})+$Resolution+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
+$run=$(if($TestCase -eq 'PlayerStats'){'M12StatsUI'}elseif($FullHeightClimb){'M14Height'}elseif($ManualClimb){'M14ClimbF'}elseif($TestCase -eq 'SettingsRestartPrepare'){'M11RestartP'}elseif($TestCase -eq 'SettingsRestartVerify'){'M11RestartV'}elseif($TestCase -eq 'MenuNavigation'){'M11MenuNav'}elseif($TestCase -eq 'Traversal'){'M1Traverse'}elseif($TestCase -eq 'CraftingScroll'){'M11Scroll'}elseif($TestCase -eq 'EarnedWeapon'){'M12EarnedWeapon'}elseif($TestCase -eq 'EarnedCombat'){'M12EarnedCombat'}elseif($TestCase -eq 'EarnedProgression'){'M12Earned'}elseif($TestCase -eq 'Protection'){'M12Protection'}elseif($TestCase -eq 'WeaponProgression'){'M12Weapon'}elseif($TestCase -eq 'ToolProgression'){'M12Tool'}else{'M11'+$TestCase})+$Resolution+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
 $report=Join-Path $projectRoot ('Saved\AutomationReports\'+$run)
 $settingsTarget=Join-Path $report 'GameUserSettings.ini'
 if(Test-Path -LiteralPath $report){throw 'Refusing reused UI report/settings destination.'}
@@ -46,6 +48,7 @@ $filter=switch($TestCase){'Controls'{'PF.UI.ControlsLive'} 'Inventory'{'PF.UI.In
 if($TestCase -eq 'EcologyPreview'){$filter='PF.Creatures.EcologyPreviewLive'}
 if($TestCase -eq 'BuildingMenus'){$filter='PF.UI.BuildingMenusLive'}
 if($TestCase -eq 'MenuNavigation'){$filter='PF.UI.MenuNavigationLive'}
+if($TestCase -eq 'PlayerStats'){$filter='PF.UI.PlayerStatsLive'}
 if($TestCase -eq 'Traversal'){$filter='PF.Traversal.Live'}
 if($TestCase -eq 'AutoClimb'){$filter='PF.Traversal.AutomaticLive'}
 if($TestCase -eq 'AuthoredClimb'){$filter='PF.Traversal.AuthoredLive'}
@@ -87,6 +90,7 @@ if($TestCase -eq 'Traversal'){$arguments+=' -PFRunTraversalLiveTests -PFExpected
 if($TestCase -eq 'AutoClimb'){$arguments+=' -PFRunAutomaticClimbLiveTests -PFExpectedPlayers=1'}
 if($TestCase -eq 'AuthoredClimb'){$arguments+=' -PFRunAuthoredClimbLiveTests -PFExpectedPlayers=1'}
 if($ManualClimb){$arguments+=' -PFManualClimb'}
+if($FullHeightClimb){$arguments+=' -PFFullHeightClimb'}
 if($TestCase -eq 'CraftingScroll'){$arguments+=' -PFRunCraftingScrollTest'}
 if($TestCase -eq 'EarnedCombat'){$arguments+=' -PFRunEarnedCombatTest'}
 if($TestCase -eq 'EarnedWeapon'){$arguments+=' -PFRunEarnedWeaponTest'}
@@ -125,7 +129,7 @@ try {
     $personalWorldsUnchanged=($personalWorldsBefore -join "`n") -ceq ($personalWorldsAfter -join "`n")
     $sourceSettingsUnchanged=($TestCase -ne 'SettingsRestartVerify') -or ($sourceSettingsHash -ceq (Get-FileHash -LiteralPath $settingsTarget -Algorithm SHA256).Hash)
     $runnerCode=if($personalSettingsUnchanged -and $personalWorldsUnchanged -and $sourceSettingsUnchanged){$verdictCode}else{1}
-    $diagnostic=[ordered]@{Run=$run;ManualClimb=[bool]$ManualClimb;Resolution="$width x $height";HUDScale=$HUDScale;LowShadowDiagnostic=[bool]$LowShadowDiagnostic;Rendered=$true;RequestedUncapped=$true;TimedOut=$timedOut;EngineExitCode=$code;VerdictExitCode=$verdictCode;RunnerExitCode=$runnerCode;SettingsTarget=$settingsTarget;DefaultConfigFileCount=$personalSettingsBefore.Count;DefaultConfigsUnchanged=$personalSettingsUnchanged;Seconds=[Math]::Round($watch.Elapsed.TotalSeconds,2);SampledPeakWorkingGiB=[Math]::Round($working/1GB,3);SampledPeakPrivateGiB=[Math]::Round($private/1GB,3);Report=$report;Log=$log;Screenshots=(Join-Path $projectRoot ('Saved\AutomationReports\ControlsUI\'+$run));Verdict=($inspection -join "`n" | ConvertFrom-Json)}
+    $diagnostic=[ordered]@{Run=$run;ManualClimb=[bool]$ManualClimb;FullHeightClimb=[bool]$FullHeightClimb;Resolution="$width x $height";HUDScale=$HUDScale;LowShadowDiagnostic=[bool]$LowShadowDiagnostic;Rendered=$true;RequestedUncapped=$true;TimedOut=$timedOut;EngineExitCode=$code;VerdictExitCode=$verdictCode;RunnerExitCode=$runnerCode;SettingsTarget=$settingsTarget;DefaultConfigFileCount=$personalSettingsBefore.Count;DefaultConfigsUnchanged=$personalSettingsUnchanged;Seconds=[Math]::Round($watch.Elapsed.TotalSeconds,2);SampledPeakWorkingGiB=[Math]::Round($working/1GB,3);SampledPeakPrivateGiB=[Math]::Round($private/1GB,3);Report=$report;Log=$log;Screenshots=(Join-Path $projectRoot ('Saved\AutomationReports\ControlsUI\'+$run));Verdict=($inspection -join "`n" | ConvertFrom-Json)}
     # The runner owns its generated diagnostics; retain failures rather than overwrite artifacts.
     $diagnostic.PersonalSaveFileCount=$personalWorldsBefore.Count
     $diagnostic.OffscreenDiagnostic=[bool]$OffscreenDiagnostic

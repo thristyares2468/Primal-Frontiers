@@ -27,11 +27,12 @@ bool FPFClimbContactTest::RunTest(const FString&)
     const float Half=P->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
     auto Tick=[&](int32 N,bool Forward=false)
     {for(int32 J=0;J<N;++J){if(Forward){P->AddMovementInput(P->GetActorForwardVector());}F.TickTestWorld(.025f);}};
-    for(int32 Height:{80,110})
+    for(int32 Height:{80,110,400,800})
     {
         auto* Ledge=Box(FVector(220,0,Height*.5),FVector(150,180,Height*.5));
         for(bool Automatic:{false,true})
         {
+            if(Height==800 && Automatic){continue;}
             P->StopJumping();M->ClearTraversal();M->StopMovementImmediately();M->ClearAccumulatedForces();
             P->SetActorLocation(FVector(-500,1000,Half+3));M->SetMovementMode(MOVE_Falling);Tick(80);
             V->ChangeStamina(100);P->SetActorLocation(FVector(-200,0,Half+3));M->SetMovementMode(MOVE_Falling);
@@ -42,14 +43,14 @@ bool FPFClimbContactTest::RunTest(const FString&)
             if(Automatic){P->Jump();}else{Accepted=P->TryClimb(Reason);}
             TestTrue(TEXT("Grounded contact manual request accepted"),Accepted);if(!Accepted){AddInfo(Reason);}
             bool Landed=false;
-            for(int32 J=0;J<80;++J)
+            for(int32 J=0;J<220;++J)
             {
                 if(J==6){P->StopJumping();}Tick(1,Automatic);
                 if(M->IsMovingOnGround() && P->GetActorLocation().X>70 && FMath::Abs(P->GetActorLocation().Z-Half-Height)<5){Landed=true;break;}
             }
             AddInfo(FString::Printf(TEXT("[PrimalTraversal] Contact height=%d automatic=%d accepted=%d landed=%d at=%s"),Height,Automatic,Accepted,Landed,*P->GetActorLocation().ToString()));
             TestTrue(TEXT("Climb from actual wall contact lands on top"),Landed);
-            TestEqual(TEXT("Contact climb charges exactly once"),V->GetVitals().Stamina,100-P->ClimbStaminaCost-(Automatic?P->JumpStaminaCost:0));
+            TestTrue(TEXT("Contact climb charges exactly once"),FMath::IsNearlyEqual(V->GetVitals().Stamina,100-P->ClimbStaminaCost-FMath::Max(0.f,Height-2.15f-P->MaxClimbHeight)*P->ClimbStaminaPerMetre/100-(Automatic?P->JumpStaminaCost:0),.1f));
         }
         Ledge->Destroy();
     }

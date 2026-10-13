@@ -10,7 +10,7 @@ public:
     static TArray<FPFSavedItemStack> CaptureInventory(const UPFInventoryComponent& Inventory);
     static bool Capture(APFSurvivalPlayerController* PC, FPFPlayerSaveData& Out, FString& Error);
     static bool CanRestore(APFSurvivalPlayerController* PC, const FPFPlayerSaveData& Data,
-        double Age, FString& Error);
+        double Age, FString& Error,float ExpectedMaxStamina=0);
     static bool Restore(APFSurvivalPlayerController* PC, const FPFPlayerSaveData& Data,
-        double Age, FString& Error);
+        double Age, FString& Error,float ExpectedMaxStamina=0);
 };

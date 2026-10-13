@@ -163,7 +163,7 @@ void APFSurvivorCharacter::OnJumped_Implementation()
 {
     Super::OnJumped_Implementation();
     // A new ordinary jump must not inherit a prior mantle's temporary drive.
-    Traversal()->AutomaticClimbDrive=FVector::ZeroVector;Traversal()->ClimbUntil=0;
+    Traversal()->AutomaticClimbDrive=FVector::ZeroVector;Traversal()->ClimbUntil=0;Traversal()->ClimbLandingTarget=FVector::ZeroVector;
     if (HasAuthority() && GetNetMode()!=NM_Client && Survival->SpendStamina(JumpStaminaCost))
     {
         // Arm once for an actual paid jump, never for walking off a ledge. Do not

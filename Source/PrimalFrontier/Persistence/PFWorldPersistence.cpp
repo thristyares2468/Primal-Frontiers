@@ -49,10 +49,10 @@ bool UPFWorldPersistence::Authority(FString& Error)
     if (!Items || !Buildings || !Crafting || !Creatures) { Error = TEXT("Missing persistence catalogs"); return false; }
     return true;
 }
-bool UPFWorldPersistence::PackPlayer(const FPFPlayerSaveData& Player, double Weight, FString& Out, FString& Error, bool bEnforceWeight)
-{ return FPFWorldSaveFormat::PackPlayer(Player, *Items, Weight, Out, Error,bEnforceWeight); }
-bool UPFWorldPersistence::UnpackPlayer(const FString& Text, double Weight, FPFPlayerSaveData& Out, FString& Error, bool bEnforceWeight)
-{ return FPFWorldSaveFormat::UnpackPlayer(Text, *Items, Weight, Out, Error,bEnforceWeight); }
+bool UPFWorldPersistence::PackPlayer(const FPFPlayerSaveData& Player, double Weight, FString& Out, FString& Error, bool bEnforceWeight,float MaxStamina)
+{ return FPFWorldSaveFormat::PackPlayer(Player, *Items, Weight, Out, Error,bEnforceWeight,MaxStamina); }
+bool UPFWorldPersistence::UnpackPlayer(const FString& Text, double Weight, FPFPlayerSaveData& Out, FString& Error, bool bEnforceWeight,float MaxStamina)
+{ return FPFWorldSaveFormat::UnpackPlayer(Text, *Items, Weight, Out, Error,bEnforceWeight,MaxStamina); }
 bool UPFWorldPersistence::Validate(const FPFWorldSaveData& Data, FString& Error)
 { return Authority(Error) && FPFWorldSaveFormat::Validate(Data, *Items, *Buildings, *Crafting, *Creatures, Error); }
 bool UPFWorldPersistence::Encode(const FPFWorldSaveData& Data, TArray<uint8>& Out, FString& Error)
@@ -141,7 +141,7 @@ bool UPFWorldPersistence::RestorePlayer(APFSurvivalPlayerController* PC, bool* b
     FPFPlayerSaveData Data;
     FPFProgressionRecord Progress;auto* Component=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();
     if (!Component || !UnpackProgression(Roster.Version,*Entry,Progress,Error) || !Component->CanRestore(Progress,Error) ||
-        !UnpackPlayer(Entry->Data, 30, Data, Error,false) || !FPFPlayerSaveAdapter::Restore(PC, Data, FMath::Max<int64>(0, PersistenceUtcNow() - Entry->CapturedUtc), Error) || !Component->Restore(Progress,Error))
+        !UnpackPlayer(Entry->Data, 30, Data, Error,false,FPFProgressionTransactions::StaminaLimit(Progress)) || !FPFPlayerSaveAdapter::Restore(PC, Data, FMath::Max<int64>(0, PersistenceUtcNow() - Entry->CapturedUtc), Error,FPFProgressionTransactions::StaminaLimit(Progress)) || !Component->Restore(Progress,Error))
     {
         UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Reconnect restoration refused: %s"), *Error); return false;
     }
@@ -162,7 +162,7 @@ void UPFWorldPersistence::Logout(APFSurvivalPlayerController* PC)
     if (!Authority(Error) || !FPFPlayerSaveAdapter::Capture(PC, Player, Error)) { return; }
     auto* Entry = Roster.Players.FindByPredicate([&](const auto& P) { return P.PlayerId == Player.PlayerId; });
     if (!Entry || !PS->Progression) { return; }auto Candidate=*Entry;FPFProgressionRecord Progress;
-    if(!PS->Progression->Capture(Progress,Error) || !PackPlayer(Player,30,Candidate.Data,Error,false) ||
+    if(!PS->Progression->Capture(Progress,Error) || !PackPlayer(Player,30,Candidate.Data,Error,false,FPFProgressionTransactions::StaminaLimit(Progress)) ||
         !FPFWorldSaveFormat::PackProgression(Player.PlayerId,Progress,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Candidate.Progression,Error)){return;}
     Candidate.CapturedUtc=PersistenceUtcNow();auto UpdatedRoster=Roster;
     *UpdatedRoster.Players.FindByPredicate([&](const auto& P){return P.PlayerId==Player.PlayerId;})=MoveTemp(Candidate);
@@ -204,7 +204,7 @@ bool UPFWorldPersistence::Capture(FPFWorldSaveData& Out, FString& Error)
         auto* Entry = Data.Players.FindByPredicate([&](const auto& P) { return P.PlayerId == Player.PlayerId; });
         if (!Entry) { Error = TEXT("Player has no server-issued reconnect registration"); return false; }
         FPFProgressionRecord Progress;
-        if (!PS || !PS->Progression || !PS->Progression->Capture(Progress,Error) || !PackPlayer(Player, 30, Entry->Data, Error,false) ||
+        if (!PS || !PS->Progression || !PS->Progression->Capture(Progress,Error) || !PackPlayer(Player, 30, Entry->Data, Error,false,FPFProgressionTransactions::StaminaLimit(Progress)) ||
             !FPFWorldSaveFormat::PackProgression(Player.PlayerId,Progress,*GetDefault<UPFProgressionCatalog>(),*Crafting,*Items,Entry->Progression,Error)) { return false; } Entry->CapturedUtc = PersistenceUtcNow();
     }
     for (TActorIterator<APFBuildPiece> It(GetWorld()); It; ++It)
@@ -326,7 +326,7 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
         if (!Record) { Error = TEXT("Connected player absent from save; restart with load enabled before joining"); return false; }
         FPlayerRestore Restore; Restore.PC = PC; Restore.Age = FMath::Max<int64>(0, PersistenceUtcNow() - Record->CapturedUtc);
         if (!PS->Progression || !UnpackProgression(Data.Version,*Record,Restore.Progression,Error) || !PS->Progression->CanRestore(Restore.Progression,Error) ||
-            !UnpackPlayer(Record->Data, 30, Restore.Data, Error,false) || !FPFPlayerSaveAdapter::CanRestore(PC, Restore.Data, Restore.Age, Error)) { return false; }
+            !UnpackPlayer(Record->Data, 30, Restore.Data, Error,false,FPFProgressionTransactions::StaminaLimit(Restore.Progression)) || !FPFPlayerSaveAdapter::CanRestore(PC, Restore.Data, Restore.Age, Error,FPFProgressionTransactions::StaminaLimit(Restore.Progression))) { return false; }
         Players.Add(MoveTemp(Restore));
     }
     for (TActorIterator<APFBuildPiece> It(GetWorld()); It; ++It) { OldPieces.Add(*It); }
@@ -374,7 +374,7 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
     }
     // Preflight above ran on the same game-thread transaction, with no world tick in between.
     for (const auto& P : Players)
-    {if (!FPFPlayerSaveAdapter::Restore(P.PC, P.Data, P.Age, Error) || !P.PC->GetPlayerState<APFInventoryPlayerState>()->Progression->Restore(P.Progression,Error)) { return Abort(); }}
+    {if (!FPFPlayerSaveAdapter::Restore(P.PC, P.Data, P.Age, Error,FPFProgressionTransactions::StaminaLimit(P.Progression)) || !P.PC->GetPlayerState<APFInventoryPlayerState>()->Progression->Restore(P.Progression,Error)) { return Abort(); }}
     for (auto* A : OldPieces) { A->Destroy(); } for (auto* A : OldCreatures) { A->Destroy(); } for (auto* A : OldPickups) { A->Destroy(); }
     for (const auto& R : Data.Resources) { Nodes[R.Name]->RestorePersistence(R.Hits, R.Respawn); }
     for (const auto& S : Data.Spawners) { SpawnPoints[S.Name]->RestorePersistence(Animals.FindRef(S.Resident), S.Respawn, S.Enabled); }

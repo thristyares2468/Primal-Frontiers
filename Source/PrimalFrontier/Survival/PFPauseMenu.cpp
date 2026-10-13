@@ -107,6 +107,10 @@ void UPFPauseMenu::NativeOnInitialized()
     QuitButton->SetContent(QuitLabel);
     QuitButton->OnClicked.AddDynamic(this,&UPFPauseMenu::Quit);
     SaveButton=Button(TEXT("Save world"));SaveButton->OnClicked.AddDynamic(this,&UPFPauseMenu::Save);
+    StatsButton=Button(TEXT("Player upgrades"));StatsButton->OnClicked.AddDynamic(this,&UPFPauseMenu::Stats);
+    // Preserve the established action-column height at720p; put the new entry
+    // in the spare session column while keeping it in keyboard/gamepad navigation.
+    Rows->RemoveChild(StatsButton);Details->AddChildToVerticalBox(StatsButton)->SetPadding(FMargin(0,20,0,0));
     SaveFeedback=Text(TEXT(""),22);SaveFeedback->SetColorAndOpacity(PFUITheme::Accent);
     SaveFeedback->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
     Details->AddChildToVerticalBox(SaveFeedback)->SetPadding(FMargin(0,20,0,0));
@@ -173,7 +177,9 @@ void UPFPauseMenu::UpdateSelection()
     ControlsButton->SetStyle(PFUITheme::NavigationButton(SelectedButton==2));
     QuitButton->SetStyle(PFUITheme::NavigationButton(SelectedButton==3,true));
     SaveButton->SetStyle(PFUITheme::NavigationButton(SelectedButton==4));
+    StatsButton->SetStyle(PFUITheme::NavigationButton(SelectedButton==5));
 }
+void UPFPauseMenu::Stats(){Resume();if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetStatMenuOpen(true);}}
 
 void UPFPauseMenu::Settings()
 {
@@ -208,17 +214,18 @@ FReply UPFPauseMenu::HandleNavigation(FKey K,bool bRepeat)
         if(!bRepeat){Resume();}
         return FReply::Handled();
     }
-    // D-pad moves the highlight between all four buttons.
+    if(K==EKeys::U){if(!bRepeat){Stats();}return FReply::Handled();}
+    // D-pad moves the highlight between all six buttons.
     if(K==EKeys::Gamepad_DPad_Up || K==EKeys::Gamepad_DPad_Down || K==EKeys::Up || K==EKeys::Down)
     {
-        SelectedButton=(SelectedButton+((K==EKeys::Gamepad_DPad_Down || K==EKeys::Down)?1:4))%5;
+        SelectedButton=(SelectedButton+((K==EKeys::Gamepad_DPad_Down || K==EKeys::Down)?1:5))%6;
         UpdateSelection();
         return FReply::Handled();
     }
     // A activates the highlighted button (ignore key-repeat so a held A can't double-confirm).
     if(K==EKeys::Gamepad_FaceButton_Bottom || K==EKeys::Enter)
     {
-        if(!bRepeat){if(SelectedButton==4){Save();}else if(SelectedButton==3){Quit();}else if(SelectedButton==2){Controls();}else if(SelectedButton==1){Settings();}else{Resume();}}
+        if(!bRepeat){if(SelectedButton==5){Stats();}else if(SelectedButton==4){Save();}else if(SelectedButton==3){Quit();}else if(SelectedButton==2){Controls();}else if(SelectedButton==1){Settings();}else{Resume();}}
         return FReply::Handled();
     }
     return FReply::Handled();

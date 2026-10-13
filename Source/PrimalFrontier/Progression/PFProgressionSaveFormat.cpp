@@ -83,8 +83,10 @@ bool FPFProgressionSaveFormat::Encode(const FPFProgressionRecord& Record,const U
     if(!FPFProgressionTransactions::Validate(Record,Catalog,Crafting,Items,Error)){return false;}
     TArray<uint8> Payload;FMemoryWriter Writer(Payload,true);int32 XP=Record.Experience;Writer<<XP;
     if(!WriteProgressionIds(Writer,Record.Knowledge,Error) || !WriteProgressionIds(Writer,Record.CreditedCrafts,Error)){return false;}
-    const uint32 WireVersion=Record.GatherWindows.IsEmpty()?1:CurrentVersion;
-    if(WireVersion==2 && !WriteGatherWindows(Writer,Record.GatherWindows)){return CodecRefuse(Error,TEXT("Gather window write failed"));}
+    const bool HasStats=!(Record.Stats==FPFPlayerStatRanks{});
+    const uint32 WireVersion=HasStats?CurrentVersion:(Record.GatherWindows.IsEmpty()?1:2);
+    if(WireVersion>=2 && !WriteGatherWindows(Writer,Record.GatherWindows)){return CodecRefuse(Error,TEXT("Gather window write failed"));}
+    if(WireVersion==3){auto S=Record.Stats;Writer<<S.Attack<<S.Stamina<<S.Weight<<S.CraftingSpeed;}
     if(Writer.IsError() || Payload.Num()>MaximumBytes-EnvelopeBytes){return CodecRefuse(Error,TEXT("Progression payload exceeds limit"));}
     TArray<uint8> Bytes;FMemoryWriter Envelope(Bytes,true);uint32 Magic=ProgressionMagic,Version=WireVersion,Length=Payload.Num(),CRC=FCrc::MemCrc32(Payload.GetData(),Payload.Num());
     Envelope<<Magic<<Version<<Length<<CRC;Envelope.Serialize(Payload.GetData(),Payload.Num());
@@ -96,14 +98,19 @@ bool FPFProgressionSaveFormat::Decode(const TArray<uint8>& Bytes,const UPFProgre
     if(!Catalog.Validate(Crafting,Items,Error)){return false;}
     if(Bytes.Num()<EnvelopeBytes+12 || Bytes.Num()>MaximumBytes){return CodecRefuse(Error,TEXT("Invalid progression file size"));}
     FMemoryReader Reader(Bytes,true);uint32 Magic=0,Version=0,Length=0,CRC=0;Reader<<Magic<<Version<<Length<<CRC;
-    if(Magic!=ProgressionMagic || (Version!=1 && Version!=CurrentVersion)){return CodecRefuse(Error,TEXT("Invalid progression signature or unsupported version"));}
+    if(Magic!=ProgressionMagic || Version<1 || Version>CurrentVersion){return CodecRefuse(Error,TEXT("Invalid progression signature or unsupported version"));}
     if(Length!=static_cast<uint32>(Bytes.Num()-EnvelopeBytes) || FCrc::MemCrc32(Bytes.GetData()+EnvelopeBytes,Length)!=CRC)
     {return CodecRefuse(Error,TEXT("Progression length/checksum mismatch"));}
     FPFProgressionRecord Candidate;Reader<<Candidate.Experience;TArray<FName> KnowledgeIds,RecipeIds;
     for(const auto& D:Catalog.Knowledge){KnowledgeIds.Add(D.Id);}for(const auto& D:Crafting.Recipes){RecipeIds.Add(D.Id);}
     if(!ReadProgressionIds(Reader,UPFProgressionCatalog::MaximumKnowledge,KnowledgeIds,Candidate.Knowledge,Error) ||
         !ReadProgressionIds(Reader,UPFProgressionCatalog::MaximumCraftRecords,RecipeIds,Candidate.CreditedCrafts,Error)){return false;}
-    if(Version==2 && !ReadGatherWindows(Reader,Candidate.GatherWindows,Error)){return false;}
+    if(Version>=2 && !ReadGatherWindows(Reader,Candidate.GatherWindows,Error)){return false;}
+    if(Version==3)
+    {
+        if(Reader.TotalSize()-Reader.Tell()!=16){return CodecRefuse(Error,TEXT("Invalid stat-rank payload size"));}
+        Reader<<Candidate.Stats.Attack<<Candidate.Stats.Stamina<<Candidate.Stats.Weight<<Candidate.Stats.CraftingSpeed;
+    }
     if(Reader.IsError() || Reader.Tell()!=Reader.TotalSize()){return CodecRefuse(Error,TEXT("Truncated or trailing progression payload"));}
     if(!FPFProgressionTransactions::Validate(Candidate,Catalog,Crafting,Items,Error)){return false;}Out=MoveTemp(Candidate);Error.Reset();return true;
 }

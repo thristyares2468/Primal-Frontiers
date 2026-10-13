@@ -50,8 +50,8 @@ bool FPFAutomaticClimbTest::RunTest(const FString&)
     TestEqual(TEXT("Exactly one jump plus one climb stamina charge"),V->GetVitals().Stamina,100-P->JumpStaminaCost-P->ClimbStaminaCost);
     FString Reason;TestFalse(TEXT("Landed/used jump cannot trigger another automatic climb"),P->TryAutomaticClimb(Reason));
     Ledge->Destroy();auto* Tall=Box(FVector(220,0,100),FVector(150,180,100));Reset();
-    P->Jump();Tick(6,true);P->StopJumping();Tick(54,true);
-    TestEqual(TEXT("Tall wall cannot become low ledge from airborne feet"),V->GetVitals().Stamina,100-P->JumpStaminaCost);
+    V->ChangeStamina(-70);P->Jump();Tick(6,true);P->StopJumping();Tick(54,true);
+    TestEqual(TEXT("Unaffordable full wall climb cannot use airborne feet to reduce cost"),V->GetVitals().Stamina,30-P->JumpStaminaCost);
     Tall->Destroy();Ledge=Box(FVector(220,0,40),FVector(150,180,40));
     auto* Roof=Box(FVector(100,0,260),FVector(250,200,15));Reset();
     P->Jump();Tick(6,true);P->StopJumping();Tick(54,true);

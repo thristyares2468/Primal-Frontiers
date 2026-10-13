@@ -25,11 +25,18 @@ public:
     bool CanCraftRecipe(FName Recipe,FString& Error) const;
     /** Owning live pawn only. Server catalog sets price/level; client never supplies XP or target. */
     bool RequestKnowledge(FName Knowledge,APawn* Pawn,FString& Error);
+    bool RequestStat(EPFPlayerStat Stat,APawn* Pawn,FString& Error);
+    /** Trusted spawn/respawn/restore only; derives values from the validated record. */
+    bool ApplyStats(APawn* Pawn,bool bFreshSpawn=false);
+    UFUNCTION(BlueprintPure,Category="Progression") int32 GetAvailableStatPoints() const {return FPFProgressionTransactions::AvailableStatPoints(Record);}
+    FString GetStatFeedback() const {return StatFeedback;}
     UFUNCTION(BlueprintPure,Category="Progression") FString GetKnowledgeFeedback() const {return KnowledgeFeedback;}
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 private:
     UPROPERTY(Replicated) FPFProgressionRecord Record;
     UPROPERTY(Replicated) FString KnowledgeFeedback;
+    UPROPERTY(Replicated) FString StatFeedback;
+    double NextStatRequestTime=0;
     double NextKnowledgeRequestTime=0;
     // Epoch for stored remaining durations. Capture is read-only; commits/restore rebase it.
     // Unreal game time pauses with the world and never includes offline wall-clock time.

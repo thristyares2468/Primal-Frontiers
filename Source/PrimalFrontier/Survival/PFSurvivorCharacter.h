@@ -43,14 +43,17 @@ public:
     void CancelTraversal();
     UFUNCTION(Server,Reliable) void ServerCancelTraversal();
     UFUNCTION(Server,Reliable) void ServerClimb();
-    /** Server derives a <=120cm ledge and swept capsule clearance; never takes a target. */
+    /** Server derives the full wall height, stamina budget and capsule clearance; no client target. */
     bool TryClimb(FString& Reason);
     /** Server-only mantle on real rising jump/wall contact; original ground anchors height. */
     bool TryAutomaticClimb(FString& Reason);
     void CancelAutomaticClimb() {AutomaticClimbUntil=0;}
-    UFUNCTION(Client,Reliable) void ClientClimbImpulse(FVector_NetQuantize100 Impulse,bool bAutomatic=false);
-    UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="50",ClampMax="150")) float MaxClimbHeight=120;
+    UFUNCTION(Client,Reliable) void ClientClimbImpulse(FVector_NetQuantize100 Impulse,bool bAutomatic,float Duration,FVector_NetQuantize100 LandingTarget);
+    /** Legacy serialized name retained: base-cost height, not a maximum climb height. */
+    UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="50",ClampMax="150",DisplayName="Base Cost Climb Height")) float MaxClimbHeight=120;
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="1",ClampMax="100")) float ClimbStaminaCost=15;
+    /** Additional stamina per metre above the legacy short-ledge baseline; no fixed height ceiling. */
+    UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="1",ClampMax="1000")) float ClimbStaminaPerMetre=10;
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="0.1",ClampMax="1")) float AutomaticClimbWindow=0.75f;
 
     /** Authoritative vitals. Recreated with each respawned pawn. */

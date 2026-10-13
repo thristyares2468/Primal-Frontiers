@@ -161,6 +161,12 @@ bool UPFPlayerSurvivalComponent::SetHunger(float Value)
     Publish(Previous);
     return true;
 }
+bool UPFPlayerSurvivalComponent::SetMaximumStamina(float Value,bool bFill)
+{
+    if(!CanMutate() || !FMath::IsFinite(Value) || Value<100 || Value>1900){return false;}
+    const auto Previous=Vitals;Vitals.MaxStamina=Value;
+    Vitals.Stamina=bFill?Value:FMath::Min(Vitals.Stamina,Value);Publish(Previous);return true;
+}
 
 bool UPFPlayerSurvivalComponent::SetThirst(float Value)
 {

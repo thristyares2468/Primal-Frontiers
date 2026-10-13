@@ -140,3 +140,5 @@ If added later:
 
 \- Server performance and moderation become more important.
 
+
+October13 player stats: ServerUpgradeStat accepts only owning-player stat enum, validates living authoritative pawn/controller/PlayerState and0.25s cadence; complete bounded ranks share earnedXP but not tech spending. Records/result private owner-only; public vitals/carry derive configured server gains. V3 owner-bound progression restores upgraded capacity before saved stamina; no client XP/bonus/target claims. Final one4/4/two75ms1%6/6 save-new-server-restart passed, exact PLAYER_STATS_M12.md. Full-height climb sends only a server-approved landing target/impulse/duration to itsowner, sweeps falling/walking/step-up, expires/cancels safely; no client targetRPC. One/two actual-map4m and rendered10m passed; human/device/packagedServer limits unchanged.

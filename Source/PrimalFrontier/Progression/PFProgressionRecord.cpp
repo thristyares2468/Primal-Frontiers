@@ -37,6 +37,38 @@ int32 FPFProgressionTransactions::AvailablePoints(const FPFProgressionRecord& Re
     for(FName Id:Record.Knowledge){const auto* D=Catalog.Find(Id);if(!D || Seen.Contains(Id) || D->PointCost<1 || D->PointCost>27){return INDEX_NONE;}Seen.Add(Id);Spent+=D->PointCost;}
     return 3*(LevelForExperience(Record.Experience)-1)-Spent;
 }
+int32 FPFProgressionTransactions::AvailableStatPoints(const FPFProgressionRecord& R)
+{
+    if(R.Experience<0 || R.Experience>MaximumExperience){return INDEX_NONE;}
+    int32 Spent=0;
+    for(int32 Rank:{R.Stats.Attack,R.Stats.Stamina,R.Stats.Weight,R.Stats.CraftingSpeed})
+    {if(Rank<0 || Rank>9){return INDEX_NONE;}Spent+=Rank;}
+    return LevelForExperience(R.Experience)-1-Spent;
+}
+float FPFProgressionTransactions::AttackMultiplier(const FPFProgressionRecord& R)
+{return 1.f+GetDefault<UPFProgressionCatalog>()->AttackBonusPerPoint*FMath::Clamp(R.Stats.Attack,0,9);}
+float FPFProgressionTransactions::StaminaLimit(const FPFProgressionRecord& R)
+{return 100.f+GetDefault<UPFProgressionCatalog>()->StaminaPerPoint*FMath::Clamp(R.Stats.Stamina,0,9);}
+float FPFProgressionTransactions::WeightLimit(const FPFProgressionRecord& R)
+{return 30.f+GetDefault<UPFProgressionCatalog>()->CarryKgPerPoint*FMath::Clamp(R.Stats.Weight,0,9);}
+float FPFProgressionTransactions::CraftingMultiplier(const FPFProgressionRecord& R)
+{return 1.f+GetDefault<UPFProgressionCatalog>()->CraftingBonusPerPoint*FMath::Clamp(R.Stats.CraftingSpeed,0,9);}
+bool FPFProgressionTransactions::PurchaseStat(FPFProgressionRecord& R,EPFPlayerStat Stat,const UPFProgressionCatalog& Catalog,
+    const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Error)
+{
+    if(!Validate(R,Catalog,Crafting,Items,Error)){return false;}
+    if(AvailableStatPoints(R)<1){return RecordRefuse(Error,TEXT("No unspent player stat points; earn another level"));}
+    auto Candidate=R;
+    switch(Stat)
+    {
+    case EPFPlayerStat::Attack:++Candidate.Stats.Attack;break;
+    case EPFPlayerStat::Stamina:++Candidate.Stats.Stamina;break;
+    case EPFPlayerStat::Weight:++Candidate.Stats.Weight;break;
+    case EPFPlayerStat::CraftingSpeed:++Candidate.Stats.CraftingSpeed;break;
+    default:return RecordRefuse(Error,TEXT("Unknown player stat"));
+    }
+    if(!Validate(Candidate,Catalog,Crafting,Items,Error)){return false;}R=MoveTemp(Candidate);return true;
+}
 bool FPFProgressionTransactions::Validate(const FPFProgressionRecord& R,const UPFProgressionCatalog& Catalog,
     const UPFCraftingCatalog& Crafting,const UPFItemCatalog& Items,FString& Error)
 {
@@ -55,7 +87,7 @@ bool FPFProgressionTransactions::Validate(const FPFProgressionRecord& R,const UP
         {return RecordRefuse(Error,TEXT("Invalid, duplicate or unbounded gather reward window"));}
         Gathered.Add(W.Category);GatherCredits+=W.Rewards;
     }
-    if(R.Experience<FMath::Min(MaximumExperience,R.CreditedCrafts.Num()*FirstCraftExperience+GatherCredits*GatherExperience) || AvailablePoints(R,Catalog)<0)
+    if(R.Experience<FMath::Min(MaximumExperience,R.CreditedCrafts.Num()*FirstCraftExperience+GatherCredits*GatherExperience) || AvailablePoints(R,Catalog)<0 || AvailableStatPoints(R)<0)
     {return RecordRefuse(Error,TEXT("Progression experience or point accounting is inconsistent"));}
     Error.Reset();return true;
 }

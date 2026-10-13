@@ -21,6 +21,7 @@
 #pragma once
 #include "PrimalFrontierPlayerController.h"
 #include "Survival/PFControlHint.h"
+#include "Progression/PFProgressionRecord.h"
 #include "PFSurvivalPlayerController.generated.h"
 class UPFSurvivalHUD;
 class UPFInventoryHUD;
@@ -32,6 +33,7 @@ class UPFBuildingHUD;
 class UPFBuildingMenu;
 class UPFStorageMenu;
 class UPFPauseMenu;
+class UPFPlayerStatsMenu;
 
 /** Local credential write outcome only; never a server/world restoration verdict. */
 UENUM(BlueprintType)
@@ -96,6 +98,9 @@ public:
 
     // ---- Crafting ----
     bool IsCraftingOpen() const {return bCraftingOpen;}
+    void SetStatMenuOpen(bool bOpen);
+    bool IsStatMenuOpen() const {return bStatMenuOpen;}
+    UFUNCTION(Server,Reliable) void ServerUpgradeStat(EPFPlayerStat Stat);
     /** Local modal UI, never pauses the world or starts a job. */
     void SetCraftingMenuOpen(bool bOpen);
     /** Ask the server to start RecipeId or cancel the active job. */
@@ -125,6 +130,9 @@ protected:
     UFUNCTION(Server, Reliable) void ServerInteract();
 
 private:
+    UPROPERTY() TObjectPtr<UPFPlayerStatsMenu> StatMenu;
+    bool bStatMenuOpen=false;
+    void ToggleStatMenu();
     void StartSprint();
     void StopSprint();
     void Climb();
