@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October14 — M18 offline additive resource contract
+
+Editor22.74s/fixture repair5.64s and Game32.26s PASS. Replay ResourceLayoutTransform/WorldRecords/WorldRuntime PASS3/3,17.04s/raw+testseverity0,2.985/2.822GiB. Fixture TArray self-append assertion/crash retained, separate-copy repair only. Exact manifest and all original bytes including upgraded stats/chest/food/ownership/time conserved; invalid/repeat/alias/bounds refuse unchanged. RESOURCE_LAYOUT_TRANSFORM_M18.md. No live content edge/private processing/fullM18 claim.
+
 ## October14 — M12 read-only saved layout prerequisite
 
 M12LayoutAudit_20261013_213325591_d5070ee7 exit0/script0errors0warnings;85actors/descriptors,15resource identities,2starts/2spawners and serialized13items/8recipes/5definitions audited. RESOURCE_LAYOUT_BASELINE_M12.md records exact manifest/candidate-only location/known shutdown warning/memory and no Content/Config diff. No new playable tier or mapping added; supported authoring and whole-world migration/restart tests still required.

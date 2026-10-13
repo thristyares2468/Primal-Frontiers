@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October14 VToFqmBX offline additive resource transform: three native replay selectors and both targets passed, exact conservation/refusal proof in RESOURCE_LAYOUT_TRANSFORM_M18.md. Retained TArray fixture assertion repaired without gameplay changes. Close only this primitive; actual authored identity/backup/time-anchor-safe load integration and earned ore/craft/restart/render/human gates remain separate. No fake uncreated fixture test assigned to Personal.
+
 October14 lbYvJVV9 read-only layout/catalog audit passed; exact resource manifest and candidate-only near-camp position in RESOURCE_LAYOUT_BASELINE_M12.md. No new level fixture or Personal task invented. Close technical audit after evidence/readback; eight-tier parent remains incomplete for actual content/transform/earned/restart/render/manual gates.
 
 October14 M18 dyQLazEA tracks only original-envelope backend primitive: native2/2 and both builds passed; no private migration or generalM18 acceptance. Programming Doing until final evidence/status readback, then Done. MainM18 retains broader dependencies; no Personal task created for backend-only files. Next permanent-node work still requires exact content mapping and whole-world/restart proof. Other accepted checks and human climb/upgrades/device/audio/1440 statuses unchanged.

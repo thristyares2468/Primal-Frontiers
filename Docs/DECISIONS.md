@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October14 — reviewed additive resource manifests preserve old state
+
+Use a pure exact-map/name/definition transform before any live migration integration. Validate complete source/candidate, preserve all existing resources/world bytes and append only bounded unique catalog-derived full defaults. Do not guess identities by order/proximity, discard unknown nodes, replace definitions or repeatedly append. Separate source/output; failures preserve both. This offline primitive has no live registered edge or file/actor effects; authoring, original backup, time-anchor-safe publication, restart and manual gates remain required.
+
 ## October 14 — preserve migration originals outside rotating generations
 
 Add a trusted, game-thread no-overwrite original envelope copy under bounded project-local Originals/slot/edge paths. Verify exact selected generation/UTC/payload; keep the first healthy original across ordinary A/B rotation and refuse corrupt or occupied originals. Bounded archive copy preserves raw envelope rather than creating a newer generation. No destructive cleanup of partial destinations and no crash-atomic/cross-process/authentication guarantee. Future callers must validate semantic world/source/edge separately. API is not wired into normal Save/Load/startup and does not enable private-world migration.

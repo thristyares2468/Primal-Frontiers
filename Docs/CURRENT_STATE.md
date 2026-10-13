@@ -2,6 +2,20 @@
 
 ## Active task — October 14, 2026
 
+Offline additive transform replay3/3 clean, both Editor and Game final checks complete after fixture repair; no live edge enabled. Exact evidence RESOURCE_LAYOUT_TRANSFORM_M18.md; final Game time appended after log confirmation. Next first playable ore/tool step must pair exact authored new identity, original preservation, loaded old-state conservation and actual earned crafting/request/restart/render gates before human handoff.
+
+Transform replay Automation_M18LayoutFixtureReplay_20261013_214415287_8f53835f PASS3/3,17.04s/raw+testseverity0/no timeout/fatal/ensure,2.985working/2.822privateGiB. Whole-resource transform, WorldRecords and WorldRuntime all clean after fixture-only TArray repair. Game final build pending, then scoped publication; no actual runtime layout edge or private migration enabled.
+
+Transform fixture-only Editor rebuild PFM18ResourceTransformFixtureBuild.log PASS5.64s; three uncompleted selectors replay pending. No production mutation/extra scope; TArray crash retained and exact source cause fixed.
+
+Crash cause confirmed in our test fixture at PFResourceLayoutTransformTests.cpp:50: Wrong.Add(Wrong[0]) violates Unreal TArray CheckAddress (append references its own storage). Not RHI or transform runtime. Copy the duplicate to a separate value before appending; production source unchanged. Rebuild/replay all three previously uncompleted selectors, retain exact assertion/crash report. Runner fatal/ensure counter0 did not capture this assertion text; exit3/missing-report still correctly failed.
+
+M18 transform first native run Automation_M18ResourceLayout_20261013_214003859_1f75e245 exited3 before report (20.35s; no completed selectors). Do not claim pass. Stop expansion and inspect exact log/crash before narrowing the repair/replay; Editor22.74s passed but full gate remains failed.
+
+Offline additive transform Editor PFM18ResourceTransformBuild.log PASS22.74s, no compiler warning; native new ResourceLayoutTransform + existing WorldRecords/WorldRuntime pending. Exact manifest/whole-record conservation and refusal contract in RESOURCE_LAYOUT_TRANSFORM_M18.md. No live source/load/actor/save changes, no tier/mandatory user test claimed yet.
+
+Next bounded VToFqmBX Doing: offline exact-manifest additive resource transform. Validate complete source/candidate, preserve old node states and all other world bytes, add only catalog-derived full defaults for unique disjoint names; failure/alias/repeat/unknown/map/bounds refuse. No registered live edge, file I/O, private migration or actual ore implemented. Editor/native/compatibility/Game checks pending; audit source05eb291 published/clean verified.
+
 Read-only authored layout/catalog audit PASS: M12LayoutAudit_20261013_213325591_d5070ee7 exit0,85 actors/descriptors,15 stable resources,2 starts,2 spawners; serialized13items/8recipes/5nodes neutral legacy requirements. No Content/Config diff or private file reads. RESOURCE_LAYOUT_BASELINE_M12.md records full name/definition manifest and candidate(0,-850,60), not created/clearance not certified. Final audit script emits semantic tags, raw commandlet peak1993MB physical/1897MB virtual; no rendering claim. Exact additive layout transform before any permanent ore remains next AI step; human climb/upgrades still open.
 
 Next bounded lbYvJVV9 Doing: read-only actual authored OpenWorld resource/start/catalog layout audit for the first ore compatibility edge. No save/asset/property edits, private persistence reads or new node. Unique Editor Python/NullRHI report pending; backup4aa5e37 published/remote equal/clean verified, all three preceding technical cards Done.
