@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Published b3f6b9a origin/master equality/clean verified; technical publicationcomment succeeded, both manualcard readbacks retainPersonal2/incomplete and exact finalG10. No private/asset or broader status change. Scoped handoff note records publication only; source/test evidence unchanged.
+
 Climb repair final readback confirms octMd2Bo Done/complete;7zjNOKJJ restoredPersonal2ToDo/incomplete, MainM14 restoredPersonal2Doing/incomplete. Exact updated G10 includes one immediate F80 action and tall-wall limit; original guides/diagnoses/expandedworldobjectives retained. No human test accepted, member/due change or Unreal process left. ScopedSol source/docs publication follows.
 
 ## October13 - Normal-input climb report and contact repair
