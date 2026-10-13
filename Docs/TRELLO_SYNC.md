@@ -1,5 +1,11 @@
 # Trello task workflow
 
+Climb repair final readback confirms octMd2Bo Done/complete;7zjNOKJJ restoredPersonal2ToDo/incomplete, MainM14 restoredPersonal2Doing/incomplete. Exact updated G10 includes one immediate F80 action and tall-wall limit; original guides/diagnoses/expandedworldobjectives retained. No human test accepted, member/due change or Unreal process left. ScopedSol source/docs publication follows.
+
+## October13 - Normal-input climb report and contact repair
+
+Fresh CLIMB/MainM14 reads before diagnosis. User reports failure; nextactor becomesAI during investigation, boundedoctMd2Bo ProgrammingDoing. Later user confirms taller walls; preserve that observation and the actual ordinary DangerLandmark refusal. Technical contact bug independently reproduced/repaired; final builds/native/key/network/render evidence passes with previous failures retained in CLIMB_CONTACT_M14.md. Close only bounded repair, then restore Personal2 CLIMB/MainM14 with exact revised G10 and one immediate F80 action. Preserve historical guides/objectives, members/deadlines and all accepted unrelated checks. No human/high-wall/fullM14 pass inferred; source publication scopedSol after final readback.
+
 Near-spawn publication confirmed a9247b2 origin/master equality/clean;4LFSobjects uploaded. Technical card publicationcomment succeeded; current exactG10/manualstatus readbacks remain unchanged. No human/fullM14 acceptance. Scoped handoff note contains publication proof only, no compiled-source or asset change.
 
 Near-spawn task final readbacks:4stnnnKf Done/complete,7zjNOKJJ Personal2ToDo/incomplete, MainM14Personal2Doing/incomplete. Revised G10 copied exactly to both manual cards; previous guides retained, original expanded-world plan preserved. All members/dates/status outside verified scope unchanged. No human acceptance inferred or ownedUnreal process left. ScopedSol publication follows.

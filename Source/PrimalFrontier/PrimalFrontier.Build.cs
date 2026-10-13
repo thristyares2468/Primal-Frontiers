@@ -31,6 +31,8 @@ public class PrimalFrontier : ModuleRules
 
 		// Built-in bounded world-save metadata conversion (M8); no external plugin.
 		PrivateDependencyModuleNames.AddRange(new string[] { "Json", "JsonUtilities" });
+		// Real keyboard automation uses the engine's platform input-device mapper.
+		PrivateDependencyModuleNames.Add("ApplicationCore");
 
 		// Variant_Horror / Variant_Shooter are Epic template samples, not part of the
 		// survival game. They still compile into this module; removing them (code,

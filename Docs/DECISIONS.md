@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## 2026-10-13 - Share the bounded mantle drive across F and jump-contact climbs
+
+The contact regression reproduced F requests accepted at valid80/110cm walls without reaching their tops. Manual mantles now retain the same server-derived horizontal drive used by automatic mantles. Preserve it through grounded pre-movement only while an approved climb has a queued Unreal launch and an unexpired1.5-second window; landing, cancellation, ordinary jumps and death still clear it. Continue swept falling collision. Original ground-based height, reach, clearance, weight, stamina and authority validation stay intact. The controller reuses its existing owner-only feedback RPC for explicit acceptance/refusal text; no new movement target RPC or inventory action is introduced.
+
+User confirmed attempts at the4m danger landmark. The implemented ability remains a45–120cm ledge mantle, not vertical wall scaling. Actual key routing now verifies W/F and W/Space from ordinary walking contact, including two clients. Built-in private ApplicationCore is needed for the owning input-device mapper in automation; no plugin/external dependency. Initial fixture readiness waits for confirmed player setup/open input, with only its Shift readiness cue re-armed if cleared. A previous pre-request timeout is retained as an unproven timing cause, not disguised as a fixed gameplay defect. Exact evidence CLIMB_CONTACT_M14.md.
+
 ## 2026-10-13 - Discoverable feature fixtures beside normal spawn
 
 Every new playable feature must ship with a clearly marked reachable fixture near the current open-world starting area and exact test instructions before handoff. Backend-only work uses automated fixtures. Preserve normal spawn/resource access and persistence identities; explicit migration is required if persistent records change. For climbing, relocate only the existing lane A80/110cm blocks and sign east of both starts, retaining their GUIDs and the southern lane. This is stateless layout repair, not a new gameplay system or larger-world gate. Existing clear low-ledge45-120cm mantle limits remain.

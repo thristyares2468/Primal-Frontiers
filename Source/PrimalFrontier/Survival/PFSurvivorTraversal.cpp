@@ -19,11 +19,12 @@ void APFSurvivorCharacter::ServerClimb_Implementation()
 {
     FString Reason;const bool Accepted=TryClimb(Reason);
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalTraversal] Climb %s: %s at %s yaw=%.1f"),Accepted?TEXT("accepted"):TEXT("refused"),*Reason,*GetActorLocation().ToString(),GetControlRotation().Yaw);
+    if(auto* PC=Cast<APFSurvivalPlayerController>(GetController())){PC->NotifyTraversalFeedback(Accepted,Reason);}
 }
-void APFSurvivorCharacter::ClientClimbImpulse_Implementation(FVector_NetQuantize100 Impulse,bool bAutomatic)
+void APFSurvivorCharacter::ClientClimbImpulse_Implementation(FVector_NetQuantize100 Impulse,bool /*bAutomatic*/)
 {
     if(HasAuthority() || Survival->IsDead()){return;}Traversal()->ClearTraversal();Traversal()->ClimbUntil=GetWorld()->GetTimeSeconds()+1.5;
-    if(bAutomatic){Traversal()->AutomaticClimbDrive=FVector(Impulse.X,Impulse.Y,0);}
+    Traversal()->AutomaticClimbDrive=FVector(Impulse.X,Impulse.Y,0);
     LaunchCharacter(Impulse,true,true);
 }
 bool APFSurvivorCharacter::TryClimb(FString& Reason)
@@ -39,14 +40,19 @@ bool APFSurvivorCharacter::TryAutomaticClimb(FString& Reason)
     AutomaticClimbUntil=0;
     const bool Accepted=TryClimbFromFeet(Reason,AutomaticClimbGroundFeet,true);
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalTraversal] Automatic climb %s: %s"),Accepted?TEXT("accepted"):TEXT("refused"),*Reason);
+    if(auto* PC=Cast<APFSurvivalPlayerController>(GetController())){PC->NotifyTraversalFeedback(Accepted,Reason);}
     return Accepted;
 }
 bool APFSurvivorCharacter::TryClimbFromFeet(FString& Reason,const FVector& Feet,bool bAutomatic)
 {
     auto Refuse=[&](const TCHAR* R){Reason=R;return false;};auto* M=Traversal();
-    if(!HasAuthority() || GetNetMode()==NM_Client || !GetController() || Survival->IsDead() || IsTraversalInputBlocked() ||
-        (bAutomatic?!M->IsFalling():!M->IsMovingOnGround()) || !M->CanCarryJump() || !Survival->CanSpendStamina(ClimbStaminaCost))
-    {return Refuse(TEXT("Needs living grounded survivor, manageable weight and stamina"));}
+    if(!HasAuthority() || GetNetMode()==NM_Client || !GetController()){return Refuse(TEXT("Server-owned survivor required"));}
+    if(Survival->IsDead()){return Refuse(TEXT("Cannot climb while dead"));}
+    if(IsTraversalInputBlocked()){return Refuse(TEXT("Close the current menu before climbing"));}
+    if(bAutomatic?!M->IsFalling():!M->IsMovingOnGround())
+    {return Refuse(TEXT("Press F from the ground; W + Space climbs during a rising jump"));}
+    if(!M->CanCarryJump()){return Refuse(TEXT("Too heavy to climb; drop or store items"));}
+    if(!Survival->CanSpendStamina(ClimbStaminaCost)){return Refuse(TEXT("Not enough stamina to climb"));}
     const double Now=GetWorld()->GetTimeSeconds();if(Now<NextClimbTime){return Refuse(TEXT("Climb cooldown"));}NextClimbTime=Now+0.4;
     const float Radius=GetCapsuleComponent()->GetScaledCapsuleRadius(),Half=GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
     const FVector Start=GetActorLocation();
@@ -58,7 +64,9 @@ bool APFSurvivorCharacter::TryClimbFromFeet(FString& Reason,const FVector& Feet,
     if(!GetWorld()->LineTraceSingleByChannel(Top,FVector(Probe.X,Probe.Y,Feet.Z+MaxClimbHeight+5),FVector(Probe.X,Probe.Y,Feet.Z+45),ECC_Visibility,Params) || Top.ImpactNormal.Z<M->GetWalkableFloorZ())
     {return Refuse(TEXT("No walkable low ledge"));}
     const double Height=Top.ImpactPoint.Z-Feet.Z;
-    if(Height<=45 || Height>MaxClimbHeight){return Refuse(TEXT("Ledge height outside climb range"));}
+    if(Top.bStartPenetrating || Height>MaxClimbHeight)
+    {Reason=FString::Printf(TEXT("Wall too high; ledge climbing supports 45-%.0f cm"),MaxClimbHeight);return false;}
+    if(Height<=45){return Refuse(TEXT("Ledge too low; walk or jump over it"));}
     const double RemainingHeight=Top.ImpactPoint.Z-(Start.Z-Half);
     if(RemainingHeight<=0){return Refuse(TEXT("Already above ledge"));}
     const FVector Target=Top.ImpactPoint+FVector(0,0,Half+2),Lift=Start+FVector(0,0,RemainingHeight+65),Across(Target.X,Target.Y,Lift.Z);
@@ -73,6 +81,8 @@ bool APFSurvivorCharacter::TryClimbFromFeet(FString& Reason,const FVector& Feet,
     FVector Impulse=(Target-Start)/Seconds;Impulse.Z=Up;
     if(Impulse.ContainsNaN() || Impulse.Size()>1500 || !Survival->SpendStamina(ClimbStaminaCost)){return Refuse(TEXT("Invalid impulse or unavailable stamina"));}
     M->ClearTraversal();M->ClimbUntil=Now+1.5;NextClimbTime=Now+1.5;LaunchCharacter(Impulse,true,true);
-    if(bAutomatic){M->AutomaticClimbDrive=FVector(Impulse.X,Impulse.Y,0);}
+    // Manual contact climbs need the same bounded drive as jump-contact climbs.
+    // The falling solver otherwise strips XY on the first touching-wall sweep.
+    M->AutomaticClimbDrive=FVector(Impulse.X,Impulse.Y,0);
     ClientClimbImpulse(Impulse,bAutomatic);ForceNetUpdate();Reason=TEXT("Server-derived short ledge climb");return true;
 }

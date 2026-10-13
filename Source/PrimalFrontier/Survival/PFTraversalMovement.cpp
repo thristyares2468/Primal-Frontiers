@@ -80,7 +80,14 @@ void UPFTraversalMovement::UpdateCharacterStateBeforeMovement(float Delta)
         if(Rate>0 && !P->Survival->SpendStamina(Rate*Delta)){bWantsSprint=false;bWantsGlide=false;}
     }
     // Clear landed gliding intent rather than silently deploying on the next jump.
-    if(!IsFalling()){bWantsGlide=false;AutomaticClimbDrive=FVector::ZeroVector;P->CancelAutomaticClimb();}
+    if(!IsFalling())
+    {
+        bWantsGlide=false;
+        // UE processes queued LaunchCharacter after this callback. Preserve a
+        // bounded manual mantle drive for that pending launch, but clear on landing.
+        if(PendingLaunchVelocity.IsZero() || GetWorld()->GetTimeSeconds()>=ClimbUntil){AutomaticClimbDrive=FVector::ZeroVector;}
+        P->CancelAutomaticClimb();
+    }
 }
 void UPFTraversalMovement::HandleImpact(const FHitResult& Hit,float TimeSlice,const FVector& MoveDelta)
 {

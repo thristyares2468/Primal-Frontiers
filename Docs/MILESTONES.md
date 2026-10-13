@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - M14 F contact repair and climbing scope clarification
+
+User confirms attempts at taller walls, recorded at4m DangerLandmark; current ability supports45–120cm ledge mantles. Independent regression proved manual80/110cm contact accepted/charged but failed to land; shared bounded drive plus pending-launch preservation fixes it. Explicit owner feedback explains refusals. Editor/Game/native3/real-key one-two F and Space/rendered720 variants PASS15records, six landing/refusal PNGs inspected, exact evidence CLIMB_CONTACT_M14.md. Initial compiler/link/two-contact failures and one pre-request two-client timeout are retained; guarded replay passes, original intermittent cause unproven. No map/assets/private data/height-limit change or new systems. FullM14/manualCLIMB remains open; next small human action only CLIMB_F80.
+
 ## October13 - M14 test wall immediately beside spawn
 
 At user request, relocate only existing lane A80/110cm blocks and sign east of both normal starts. Supported Editor reload/repeat PASS, stable5GUIDs/old76 unrelated configurations; initial external-package dirty/save issue repaired. Editor6.72s/Game14.07s/native3/one-client2/two-client3/render720one PASS9records, fivePNG/log/private guards inspected. SPAWN_TRAVERSAL_M14.md contains exact paths and limits; current G10 and PLAYTEST use the new location. Nearby fixtures for every new playable feature are now required by AGENTS. Technical repair complete; humanCLIMB/fullM14 remains unverified, no world expansion begun.
