@@ -1,3 +1,7 @@
+# Current networking objective - October13, 2026
+
+The user confirmed proximity voice chat as future M15 work. See [PROXIMITY_VOICE_PLAN.md](PROXIMITY_VOICE_PLAN.md) for opt-in input/device controls, range/identity authority, mute/accessibility, dedicated-server requirements and separate listening acceptance. Planned only: no transport, plugin, service, microphone capture or voice testing has been added. The historical imported networking text below is retained.
+
 
 
 \---

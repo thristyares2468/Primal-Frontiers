@@ -1,5 +1,11 @@
 # Trello task workflow
 
+## October13 - direct user batch reconciliation
+
+Confirmed readbacks: Bc3tb6yW M13 Done/complete; N5sIBw7f spacing Done/complete; UZVTTPLE solo persistence Done/complete with rename accepted. iH8I2Qfc and mfWT22JZ retain Doing/incomplete for only unreported scope; accepted R/buildpieces/B-Esc/crafting portions no longer requested. Their original15654-character guides are retained verbatim as comments because adding the new acceptance preface would exceed Trello's16384-character description limit; current remaining guide is concise and exact. DctLv1lR/hzF1F4vV retain Personal3/ToDo/incomplete; controller guide includes automatic jump climb. M14 ToDo now has resolvedM13 dependency; M15 Doing includes explicitly confirmed plannedproximityvoice. No member/deadline/privacy changes. Automatic task yeU27Cvr Done/complete and0a94bdf remote/local equality verified.
+
+Fresh affected cards/board lists read before writes. Record12namedpasses in PLAYTEST_RESULTS_2026_10_13.md; close supported M13 encounter and G5 spacing gates, retain previoussoloG3 Done with rename acceptance. G2 accepts reportedbuilding/menu/crafting plus earlierchest/Pause/Settings; remaining unreported expiry/display/optionalpacing/device observations not markedpassed. Controller/audio stayPersonal3ToDo and1440deferred. M14 no longer blocked byM13. Add confirmed proximity voice toexistingM15 plan, not implemented or currentPersonal assignment. Preserve historicalguides/comments/member/deadlines/privacy. Final readbacks required; no fresh engine result inferred. Automatic-climb0a94bdf remoteSHAequal, cleanbefore thisdocs-only task.
+
 ## October13 - automatic jump-contact climb technical completion
 
 Fresh yeU27Cvr Doing read before final writes. Editor/Game/native2/autoone2/autotwo3/renderone/sharedmanual2 and three PNG/rawbaseline/privateguards passed; exact evidence AUTOMATIC_CLIMB_M1.md. Update/move/mark/read back Done only for bounded technical scope before reconciling the user batch. CLIMB human remains NOT TESTED geometry, controller/audio untested,1440 deferred. Preserve assignments/deadlines/privacy and prior failures; scoped Sol publication follows.

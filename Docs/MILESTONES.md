@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - direct user playtest acceptance and future proximity voice
+
+[PLAYTEST_RESULTS_2026_10_13.md](PLAYTEST_RESULTS_2026_10_13.md) records12 namedpasses andthree untestedchecks without inferred stats/device tests. M13 encounter/dawn/loot gate accepted; M14 dependency resolves for bounded greybox work. Building/R/eightpieces/B-Esc/crafting/weight-sprint-jump/glide/spacing/rename accepted. CLIMB unavailablegeometry,controller/audio untested;1440 deferred. Broader optional earnedpacing/displayrollback/expiryselection/renderedmultiplayer/packagedserver acceptance separate. User confirms proximity voice chat for futureM15; PROXIMITY_VOICE_PLAN.md records requirements and later listening gate, no implementation or new dependency. No fresh engine launch/test inferred from this docs/Trello acceptance task.
+
 ## October13 - M1 automatic jump-contact climb technical gate
 
 [AUTOMATIC_CLIMB_M1.md](AUTOMATIC_CLIMB_M1.md): server-owned rising paid first-ground-jump contact uses original ground feet and existing45–120cm ledge/clearance/weight/stamina guards; jump20+climb15 default. ManualF retained. Editor6.20s/final fixture6.09s/Game32.58s clean, native2/autoone2/autotwo75ms1%3/render720one/manualFone2 PASS10records acrossfour selectors. Three inspected PNG; raw known baseline/private guards retained; rendered peak3.126/4.924GiB. Initial compiler/three landing failures and startup floor race diagnosed/fixed/replayed, all history retained. No binary assets, personal settings/saves or new dependency. Human CLIMB NOT TESTED due geometry;1440 deferred, no full human/device/FPS acceptance inferred.
