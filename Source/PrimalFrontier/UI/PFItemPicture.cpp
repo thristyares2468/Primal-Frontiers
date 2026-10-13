@@ -41,12 +41,23 @@ int32 UPFItemPicture::NativePaint(const FPaintArgs& Args,const FGeometry& G,cons
         FSlateDrawElement::MakeLines(Draw,Layer,G.ToPaintGeometry(),Points,ESlateDrawEffect::None,Color*Style.GetColorAndOpacityTint(),true,Width*Side);
     };
     Box({0,0},{1,1},PFUITheme::Inset,0.12f);
-    if(ItemId==TEXT("Item_Tool") || ItemId==TEXT("Item_BoundTool"))
+    if(ItemId==TEXT("Item_Tool") || ItemId==TEXT("Item_BoundTool") || ItemId==TEXT("Item_WoodTool") || ItemId==TEXT("Item_CopperPick"))
     {
+        const FLinearColor Head=ItemId==TEXT("Item_CopperPick")?FLinearColor(0.84f,0.43f,0.22f,1):ItemId==TEXT("Item_WoodTool")?FLinearColor(0.53f,0.32f,0.14f,1):FLinearColor(0.66f,0.72f,0.72f,1);
         Line({{0.28,0.82},{0.68,0.21}},FLinearColor(0.53f,0.32f,0.14f,1),0.11f);
-        Line({{0.23,0.25},{0.57,0.16},{0.81,0.37},{0.86,0.59}},FLinearColor(0.66f,0.72f,0.72f,1),0.16f);
+        Line({{0.23,0.25},{0.57,0.16},{0.81,0.37},{0.86,0.59}},Head,0.16f);
         Line({{0.52,0.19},{0.69,0.31}},PFUITheme::Text,0.04f);
         if(ItemId==TEXT("Item_BoundTool")){Line({{0.52,0.27},{0.69,0.36},{0.49,0.32},{0.65,0.41}},PFUITheme::Accent,0.04f);}
+    }
+    else if(ItemId==TEXT("Item_CopperOre"))
+    {
+        Box({0.19,0.23},{0.62,0.56},PFUITheme::Muted,0.16f);
+        for(const FVector2D At:{FVector2D(.26,.35),FVector2D(.53,.28),FVector2D(.46,.59)}){Box(At,{.20,.18},FLinearColor(.84f,.43f,.22f,1),.06f);}
+    }
+    else if(ItemId==TEXT("Item_CopperIngot"))
+    {
+        Box({.18,.31},{.64,.40},FLinearColor(.63f,.29f,.13f,1),.06f);
+        Box({.22,.27},{.56,.25},FLinearColor(.91f,.52f,.27f,1),.05f);
     }
     else if(ItemId==TEXT("Item_Club") || ItemId==TEXT("Item_BoundClub"))
     {

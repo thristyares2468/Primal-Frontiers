@@ -46,6 +46,7 @@ private:
     TSet<FGuid> RestoredLogins;
     bool Authority(FString& Error);
     bool Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FString& Error);
+    bool PrepareCopperLayout(FPFWorldSaveData& Data,bool& Changed,FString& Error);
     bool PackPlayer(const FPFPlayerSaveData& Player, double Weight, FString& Out, FString& Error, bool bEnforceWeight=true,float MaxStamina=100);
     bool UnpackPlayer(const FString& Text, double Weight, FPFPlayerSaveData& Out, FString& Error, bool bEnforceWeight=true,float MaxStamina=100);
     bool UnpackProgression(int32 Version,const FPFWorldPlayerRecord& Player,FPFProgressionRecord& Out,FString& Error);

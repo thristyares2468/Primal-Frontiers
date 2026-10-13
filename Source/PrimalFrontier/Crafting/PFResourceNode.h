@@ -41,7 +41,9 @@ public:
     UPROPERTY(Replicated,BlueprintReadOnly) double RespawnAt=0;
 
     /** Server: give Pawn one gather action's yield if every check passes. */
-    bool Gather(APawn* Pawn);
+    bool Gather(APawn* Pawn,FString* OutReason=nullptr);
+    /** Advisory owner prompt only; the server independently validates at commit. */
+    FString HarvestPrompt(APawn* Pawn) const;
     /** True if ResourceId resolves to a valid definition. */
     bool IsConfigurationValid() const;
     bool RestorePersistence(int32 Hits, double RemainingRespawn);

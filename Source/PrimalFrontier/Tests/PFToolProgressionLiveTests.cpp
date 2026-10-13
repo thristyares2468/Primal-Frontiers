@@ -121,13 +121,13 @@ public:
             }
             else if(LocalStage==20 && Now-Changed>0.5)
             {
-                CheckMenu(TEXT("Recipe_Cord"),TEXT("Item_Cord"));Test->TestEqual(TEXT("All eight recipes initially visible"),Menu->GetVisibleRecipeIds().Num(),8);
+                CheckMenu(TEXT("Recipe_Cord"),TEXT("Item_Cord"));Test->TestEqual(TEXT("All eleven recipes initially visible"),Menu->GetVisibleRecipeIds().Num(),11);
                 auto* Button=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_Category3_Button")));if(!Button){Test->AddError(TEXT("Missing material category button"));return true;}Button->SetKeyboardFocus();Test->TestTrue(TEXT("Category button has real Slate focus"),Button->HasKeyboardFocus());Press(EKeys::SpaceBar);Next(24,Now);
             }
             else if(LocalStage==24 && Now-Changed>0.3)
             {
                 Test->TestEqual(TEXT("Button selects material category"),Menu->GetSelectedCategory().ToString(),FString(TEXT("Recipe.Category.Material")));
-                Test->TestEqual(TEXT("Material shows only cord"),Menu->GetVisibleRecipeIds().Num(),1);Test->TestTrue(TEXT("Material row is cord"),Menu->GetVisibleRecipeIds().Contains(TEXT("Recipe_Cord")));
+                Test->TestEqual(TEXT("Material shows cord and new Copper refinement"),Menu->GetVisibleRecipeIds().Num(),2);Test->TestTrue(TEXT("Material row is cord"),Menu->GetVisibleRecipeIds().Contains(TEXT("Recipe_Cord")));
                 Test->TestEqual(TEXT("Filtering clears selection instead of silently replacing it"),Menu->GetSelectedRecipe(),NAME_None);Press(EKeys::Enter);Next(25,Now);
             }
             else if(LocalStage==25 && Now-Changed>0.3)
@@ -141,7 +141,7 @@ public:
             else if(LocalStage==29 && Now-Changed>0.3){Press(EKeys::Gamepad_LeftShoulder);Next(27,Now);}
             else if(LocalStage==27 && Now-Changed>0.3)
             {
-                Test->TestEqual(TEXT("Controller shoulder switches tool category"),Menu->GetSelectedCategory().ToString(),FString(TEXT("Recipe.Category.Tool")));Test->TestEqual(TEXT("Both tools visible"),Menu->GetVisibleRecipeIds().Num(),2);
+                Test->TestEqual(TEXT("Controller shoulder switches tool category"),Menu->GetSelectedCategory().ToString(),FString(TEXT("Recipe.Category.Tool")));Test->TestEqual(TEXT("Stone, bound, Wood and Copper tools visible"),Menu->GetVisibleRecipeIds().Num(),4);
                 const auto Prior=Menu->GetSelectedCategory();Menu->SelectCategory(FGameplayTag::RequestGameplayTag(TEXT("Item.Category.Resource")));Test->TestEqual(TEXT("Unknown recipe category safely refused"),Menu->GetSelectedCategory(),Prior);
                 Press(EKeys::Gamepad_RightShoulder);Press(EKeys::Gamepad_RightShoulder);Press(EKeys::Down);Next(28,Now);
             }
@@ -220,13 +220,18 @@ private:
         {
             if(auto* Text=Cast<UTextBlock>(Child))
             {
+                // Ungated recipes intentionally collapse the knowledge text/button.
+                // A descendant's own visibility does not include its collapsed ancestor.
+                bool Hidden=Text->GetVisibility()==ESlateVisibility::Collapsed || Text->GetVisibility()==ESlateVisibility::Hidden;
+                for(auto* Parent=Text->GetParent();Parent;Parent=Parent->GetParent()){Hidden|=Parent->GetVisibility()==ESlateVisibility::Collapsed || Parent->GetVisibility()==ESlateVisibility::Hidden;}
+                if(Hidden){continue;}
                 const auto Geometry=Text->GetCachedGeometry();
                 if(Geometry.GetLocalSize().Y==0)
                 {
                     // ScrollBox culls recipe rows outside its viewport. Zero is not an allocated visible row.
                     bool Scrollable=false;for(auto* Parent=Text->GetParent();Parent;Parent=Parent->GetParent()){if(Cast<UScrollBox>(Parent)){Scrollable=true;break;}}
                     const bool OffscreenRecipe=Scrollable && Text->GetName().StartsWith(TEXT("PF_Recipe")) && !Text->GetName().StartsWith(SelectedRow);
-                    Test->TestTrue(TEXT("Only unselected scroll-managed recipe text may be culled"),OffscreenRecipe);
+                    Test->TestTrue(FString::Printf(TEXT("Only unselected scroll-managed recipe text may be culled: %s"),*Text->GetName()),OffscreenRecipe);
                     if(OffscreenRecipe){continue;}
                 }
                 Test->TestTrue(FString::Printf(TEXT("Displayed menu text fits allocated row: %s desired=%.1f allocated=%.1f"),*Text->GetName(),Text->GetDesiredSize().Y,Geometry.GetLocalSize().Y),Text->GetDesiredSize().Y<=Geometry.GetLocalSize().Y+1);

@@ -317,7 +317,7 @@ void APFSurvivalPlayerController::ServerInteract_Implementation()
         else if (auto* Pickup = Cast<APFRecoveryPickup>(Target)) { Pickup->TryConsume(GetPawn()); }
         else if(auto* Node=Cast<APFResourceNode>(Target))
         {
-            ClientInventoryFeedback(Node->Gather(GetPawn())?TEXT("Gathered"):TEXT("Gather refused: depleted, cooldown or full inventory"));
+            FString Reason;const bool Gathered=Node->Gather(GetPawn(),&Reason);ClientInventoryFeedback(Gathered?TEXT("Gathered"):Reason);
         }
     }
     else{ClientInventoryFeedback(TEXT("No item in reach - aim at a labelled pickup or resource within 2.5 m."));}
@@ -334,7 +334,7 @@ FString APFSurvivalPlayerController::InteractionPrompt() const
             const auto* D=I?I->Definition(Item->GetContents().ItemId):nullptr;
             return FString::Printf(TEXT("E / Pad X - Pick up %s x%d"),D?*D->DisplayName.ToString():*Item->GetContents().ItemId.ToString(),Item->GetContents().Quantity);
         }
-        if(auto* Node=Cast<APFResourceNode>(Target)){return Node->HitsRemaining>0?TEXT("E / Pad X - Gather resource"):TEXT("Resource depleted - wait for regrowth");}
+        if(auto* Node=Cast<APFResourceNode>(Target)){return Node->HarvestPrompt(GetPawn());}
         return TEXT("E / Pad X - Recover");
     }
     // Something interactable is visible but beyond the 2.5 m reach.

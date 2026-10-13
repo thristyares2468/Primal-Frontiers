@@ -1,16 +1,16 @@
 # Resource and harvesting tiers — M12 technology expansion
 
-October 14 implementation checkpoint: smallest sequence step 1 has a native-verified trusted family/grade/node-requirement contract with neutral legacy defaults; HARVEST_CAPABILITIES_M12.md records exact evidence. The eight-tier content ladder remains planned: no new ore, tool item, processing recipe, Tech charge, authored layout migration or dimensional spawning is delivered. Synthetic tests are not shipped materials. Live request verification is next; old statements about having no eligibility contract below describe the pre-contract audit.
+October14 implementation checkpoint: trusted family/grade/node-requirement contract and actual owned client requests passed (HARVEST_CAPABILITIES_M12.md). First bounded Wood/Stone-to-Copper content, portable refinement, FieldTools-gated pick and exact backed-up15->16 OpenWorld edge are now implemented; COPPER_TIERS_M12.md records earned native, actual one-/two-client restart and rendered evidence. Manual COPPER_LOOP remains pending; final build/log review still required before publication. Iron/Diamond/Titanium/Deepforge/Riftglass items, powered charge and dimensional spawning remain planned. The old audit below is historical, not the current Copper status.
 
 Naming update: **Riftglass** replaces the rejected name Resonance Composite for the final Tech material. It is provisionally a refined crystal/ancient-technology Frontier material used in powered equipment. Only planning/display wording changed; no live item ID or save record exists to migrate.
 
-Updated October 13, 2026. **Design/backlog only; not implemented or tested.** The user's latest direction adds Titanium immediately before Deepforge and supersedes the initial bronze/steel proposal:
+Updated October14,2026. **Eight-tier roadmap; only the first Copper slice is implemented, not full manual acceptance.** The user's latest direction adds Titanium immediately before Deepforge and supersedes the initial bronze/steel proposal:
 
 **Wood → Stone → Copper → Iron → Diamond → Titanium → Deepforge Alloy → Riftglass (Tech)**
 
 Deepforge Alloy and Riftglass are provisional original replacements for the user's final two reference materials. The final tier is explicitly advanced technology. Do not use Netherite, Siftite, Tek, Pal Metal or another reference game's distinctive material names as Primal Frontier item IDs/content. The requested eight-tier structure is authoritative; names, costs and pacing are tunable proposals.
 
-## Current implementation checked
+## Historical pre-contract implementation audit
 
 `PFResourceNode::Gather` validates authority, living owned pawn, aim/reach, cooldown and inventory capacity, but has **no resource/tool eligibility gate**. `PFInventoryComponent::GatheringHits` picks the highest valid carried gathering benefit: bare hands one hit, stone tool two, bound stone tool three. Benefits improve action speed without changing finite node yield. The bound stone variant remains in the Stone tier; it is not a separate material tier.
 
@@ -66,17 +66,17 @@ An under-tier/wrong-family/unpowered request must return a readable reason such 
 
 Prompts show required tool and current eligibility. Item/crafting views show material tier, family, harvest capability, cost/station/knowledge requirement and actual charge/durability only when implemented. Use original placeholder pictures/primitives; no new art is needed. Details must explain Copper's speed benefit even when its mining access matches Stone.
 
-**Compatibility prerequisite:** live restore currently requires exact authored resource/spawner names/counts/definitions. New permanent ore nodes change world layout. Implement and test the bounded content-layout migration first, or keep the first prototype in a disposable runtime fixture. Do not delete old world records, silently bypass validation or overwrite a failed restore. Preserve existing private saves and resource identities; general M18 migration is not already implemented.
+**Compatibility prerequisite:** strict authored resource/spawner identities remain enforced. COPPER_TIERS_M12.md documents the single reviewed backed-up Copper15->16 edge; it does not authorize another ore/layout addition. Further permanent nodes need their own reviewed state/age/original-preserving migration. Do not delete old records, bypass validation or overwrite failed restore. General M18 migration remains incomplete.
 
 ## Smallest implementation sequence and future tests
 
 1. Add the minimum trusted tool-family/grade and resource-requirement contract, preserving old defaults. Compile Editor; native data/authority/refusal tests in disposable worlds. No normal-map ore expansion yet.
 2. Prove one new gated mineral/tool pair with actual gathered ingredients and an acyclic craft path, then Iron-pick-to-diamonds. Native tests cover bare/under-tier/wrong-family/exact-tier/higher-tier, swapped/dropped tools, full inventory, malformed definitions, unchanged refusal state and finite yield.
 3. One server/client first, then two NullRHI clients: actual owning-client gather requests, server-selected capabilities, competing harvesting, privacy and no duplicate output/XP. Save/new-server restart preserves inventory and node depletion without creating/free-upgrading tools. Use disposable save profiles only.
-4. One rendered player confirms target prompts, pictures, rejected low-tier harvesting and successful crafted-upgrade harvesting. Existing baseline `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`; small regression map `/Game/PrimalFrontier/Maps/L_M7SurvivalArena`. A tier-specific authored fixture/runner is **TBD**, not available yet. Use one 720p window, uncapped when profiling; 1440p remains explicitly deferred.
+4. One rendered player confirms target prompts, pictures, rejected low-tier harvesting and successful crafted-upgrade harvesting. Existing baseline `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`; small regression map `/Game/PrimalFrontier/Maps/L_M7SurvivalArena`. Copper fixture now exists at `(0,-850,60)` near the mining sign; `RunControlsAutomation.ps1 -TestCase Copper` exercises the rendered earned route. Other-tier fixtures remain TBD. Use one720p window, uncapped when profiling;1440p remains deferred.
 5. Expand Copper/Diamond/Titanium/Deepforge/Tech in separate bounded gates only after the first access/craft/save loop passes. Powered Tech additionally tests missing/depleted charge, finite range/yield, cancellation, join/reconnect and restart. Actual manual pacing is separate from automated assertions.
 
-No new user test is assigned until the feature and exact fixture/controls exist. Update this plan, CURRENT_STATE, decisions, milestone evidence and Trello after each real gate; never mark this design as shipped gameplay.
+Copper's concrete manual guide is G15 in TRELLO_TEST_GUIDES.md; assign only after its technical gate finishes. Update CURRENT_STATE, decisions, milestone evidence and Trello after each real gate; the remaining tier ladder is not shipped gameplay.
 
 ## Reference research and limits
 

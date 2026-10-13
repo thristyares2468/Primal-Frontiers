@@ -66,8 +66,8 @@ private:
                 I->Catalog=DuplicateObject<UPFItemCatalog>(I->Catalog,I);
                 for(auto& D:I->Catalog->Items)
                 {
-                    if(D.Id==TEXT("Item_Tool")){D.HarvestFamilies.AddTag(PFHarvest::Pick());D.HarvestGrade=EPFHarvestGrade::Stone;}
-                    if(D.Id==TEXT("Item_BoundTool")){D.HarvestFamilies.AddTag(PFHarvest::Axe());D.HarvestGrade=EPFHarvestGrade::Iron;D.GatheringHits=8;}
+                    if(D.Id==TEXT("Item_Tool")){D.HarvestFamilies.Reset();D.HarvestFamilies.AddTag(PFHarvest::Pick());D.HarvestGrade=EPFHarvestGrade::Stone;}
+                    if(D.Id==TEXT("Item_BoundTool")){D.HarvestFamilies.Reset();D.HarvestFamilies.AddTag(PFHarvest::Axe());D.HarvestGrade=EPFHarvestGrade::Iron;D.GatheringHits=8;}
                 }
                 if(!Check(I->Grant(TEXT("Item_Tool"),1) && I->Grant(TEXT("Item_BoundTool"),1) && I->Grant(TEXT("Item_Water"),6),TEXT("Trusted boundary tools and phase acknowledgements"))){return true;}
                 auto* Craft=NewObject<UPFCraftingCatalog>();auto* D=Craft->Resources.FindByPredicate([](const auto& R){return R.Id==TEXT("Node_Stone");});D->HarvestRequirement.Family=PFHarvest::Pick();D->HarvestRequirement.MinimumGrade=EPFHarvestGrade::Iron;

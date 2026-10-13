@@ -258,7 +258,10 @@ bool UPFWorldPersistence::Load(const FString& Slot, FString& Error)
     if(!FPFSaveFileStore::ValidSlot(Slot) || Slot.StartsWith(TEXT("Identity_"),ESearchCase::IgnoreCase) || Slot.StartsWith(TEXT("Metadata_"),ESearchCase::IgnoreCase))
     {Error=TEXT("Invalid or reserved world-save slot.");return false;}
     FPFSavedFile File; FPFWorldSaveData Data;
-    if (!Authority(Error) || !FPFSaveFileStore::Read(Slot, File, Error) || !Decode(File.Payload, Data, Error) || !Apply(Data, File.SavedUtc, Error)) { return false; }
+    if (!Authority(Error) || !FPFSaveFileStore::Read(Slot, File, Error) || !Decode(File.Payload, Data, Error)) { return false; }
+    bool AddedCopper=false;
+    if(!PrepareCopperLayout(Data,AddedCopper,Error) || (AddedCopper && !FPFSaveFileStore::PreserveOriginal(Slot,TEXT("M12CopperLayout1"),Error)) || !Apply(Data,File.SavedUtc,Error)){return false;}
+    if(AddedCopper){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalPersistence] Copper layout 15->16 applied; verified original retained, source UTC preserved until ordinary save"));}
     ActiveSlot = Slot; bLoadedWorld = true;
     UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Loaded slot=%s generation=%llu backupRecovery=%d"), *Slot, File.Generation, File.bRecoveredBackup);
     return true;
@@ -295,6 +298,12 @@ void UPFWorldPersistence::ConfigureStartup()
 void UPFWorldPersistence::ApplyStartup()
 {
     if (!bPending) { return; } FString Error;
+    // InitGame has not run resource BeginPlay yet. Inspect the actual reviewed
+    // actors/catalogs only after StartPlay, before applying or publishing state.
+    bool AddedCopper=false;
+    if(!PrepareCopperLayout(Pending,AddedCopper,Error) || (AddedCopper && !FPFSaveFileStore::PreserveOriginal(ActiveSlot,TEXT("M12CopperLayout1"),Error)))
+    {bStartupBlocked=true;bPending=false;UE_LOG(LogPFSurvival,Error,TEXT("[PrimalAgentTools] Startup Copper layout refused: %s"),*Error);return;}
+    if(AddedCopper){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalPersistence] Startup Copper layout 15->16 prepared; original/UTC preserved"));}
     if (!Apply(Pending, PendingUtc, Error)) { bStartupBlocked = true; UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Startup world restore refused: %s"), *Error); }
     bPending = false;
 }

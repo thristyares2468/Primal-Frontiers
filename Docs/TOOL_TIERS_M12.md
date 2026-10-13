@@ -1,5 +1,7 @@
 # M12 fibre cord and bound stone tool
 
+October14 Copper update: the original bound stone recipe/IDs/2-to3hit benefit below remain intact. Both old stone variants now have trusted Stone Pick/Axe capabilities. Optional Wood tool and new Copper Pick/refinement/near-camp vein are separately documented in COPPER_TIERS_M12.md; portable Copper pick uses existing FieldTools knowledge and4Pick hits. This supersedes the old next-scope wording without claiming full M12 or manual Copper acceptance.
+
 October9,2026. Bounded tool slice verified; full M12 is not accepted. No external assets, maps, dependencies or save-schema changes. Next independent scope: XP/knowledge or further weapon/armor work, each with separate save compatibility and playtest gates.
 
 ## Play the loop

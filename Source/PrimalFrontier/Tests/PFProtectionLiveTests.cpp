@@ -91,7 +91,7 @@ public:
             }
             else if(LocalStage==20 && Now-Changed>.5)
             {
-                Test->TestEqual(TEXT("All eight recipes"),Menu->GetVisibleRecipeIds().Num(),8);auto* B=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_Category5_Button")));
+                Test->TestEqual(TEXT("All eleven recipes"),Menu->GetVisibleRecipeIds().Num(),11);auto* B=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_Category5_Button")));
                 if(!B){Test->AddError(TEXT("Missing Protection category"));return true;}B->SetKeyboardFocus();Test->TestTrue(TEXT("Actual category Slate focus"),B->HasKeyboardFocus());Press(EKeys::SpaceBar);Next(21,Now);
             }
             else if(LocalStage==21 && Now-Changed>.4)

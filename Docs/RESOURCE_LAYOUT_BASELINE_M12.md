@@ -1,5 +1,7 @@
 # M12 — saved resource-layout baseline
 
+October14 current layout update: COPPER_TIERS_M12.md retains the audited old85actors/15resource identities below and adds exactly one tagged Copper vein plus sign (87actors/16resources). Supported setup/repeat reports verify all old names/GUIDs/transforms/definitions remain unchanged. New vein stable name PFResourceNode_UAID_047C16BE2EE3FE0A03_1812350095/GUID D3B7A145429531FDE7301AB0E9D917C8 at(0,-850,60). Exact reviewed15->16 original-preserving runtime edge now exists; this historical baseline remains the old manifest, not permission to guess future ore identities.
+
 Read-only audit October14,2026, published source4aa5e37. Level `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`,85 saved actors/descriptors,15 resources,2 starts and2 spawners. Actor GUIDs/transforms and current serialized catalog fields are in the project-local audit JSON; no private world/profile records were read.
 
 | Persistent actor name | Resource definition |

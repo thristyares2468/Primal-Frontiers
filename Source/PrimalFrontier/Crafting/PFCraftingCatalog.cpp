@@ -35,6 +35,9 @@ UPFCraftingCatalog::UPFCraftingCatalog()
     AddRecipe(TEXT("Recipe_Club"),TEXT("Shape wooden club"),TEXT("Item_Club"),6,TAG_PF_CraftWeapon,{{TEXT("Item_Wood"),3},{TEXT("Item_Cord"),1}});
     AddRecipe(TEXT("Recipe_BoundClub"),TEXT("Bind stone club"),TEXT("Item_BoundClub"),8,TAG_PF_CraftWeapon,{{TEXT("Item_Club"),1},{TEXT("Item_Cord"),1},{TEXT("Item_Stone"),2},{TEXT("Item_Wood"),2}});
     AddRecipe(TEXT("Recipe_WovenGuard"),TEXT("Weave protective guard"),TEXT("Item_WovenGuard"),6,TAG_PF_CraftProtection,{{TEXT("Item_Fibre"),8},{TEXT("Item_Cord"),1},{TEXT("Item_Wood"),2}});
+    AddRecipe(TEXT("Recipe_WoodTool"),TEXT("Wood gathering tool"),TEXT("Item_WoodTool"),4,TAG_PF_CraftTool,{{TEXT("Item_Wood"),3}});
+    AddRecipe(TEXT("Recipe_CopperRefine"),TEXT("Refine copper (portable greybox)"),TEXT("Item_CopperIngot"),8,TAG_PF_CraftMaterial,{{TEXT("Item_CopperOre"),2},{TEXT("Item_Wood"),1}});
+    AddRecipe(TEXT("Recipe_CopperPick"),TEXT("Copper pick"),TEXT("Item_CopperPick"),10,TAG_PF_CraftTool,{{TEXT("Item_CopperIngot"),3},{TEXT("Item_Wood"),2},{TEXT("Item_Cord"),1}});
 
     // Resource nodes use the struct defaults: 2 items per hit, 3 hits, 20 s regrowth.
     auto AddResource=[&](FName Id,const TCHAR* Name,FName Item)
@@ -50,6 +53,8 @@ UPFCraftingCatalog::UPFCraftingCatalog()
     AddResource(TEXT("Node_Food"),TEXT("Forage patch"),TEXT("Item_Food"));
     AddResource(TEXT("Node_Fibre"),TEXT("Fibre patch"),TEXT("Item_Fibre"));
     AddResource(TEXT("Node_Water"),TEXT("Freshwater collection"),TEXT("Item_Water"));
+    AddResource(TEXT("Node_Copper"),TEXT("Copper vein"),TEXT("Item_CopperOre"));
+    Resources.Last().Hits=6;Resources.Last().HarvestRequirement.Family=PFHarvest::Pick();Resources.Last().HarvestRequirement.MinimumGrade=EPFHarvestGrade::Stone;
 }
 
 const FPFRecipeDefinition* UPFCraftingCatalog::Recipe(FName Id,const UPFItemCatalog* Items) const

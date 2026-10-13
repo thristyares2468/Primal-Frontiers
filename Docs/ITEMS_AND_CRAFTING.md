@@ -1,5 +1,9 @@
 Current bounded M12 protection: Item_WovenGuard,1kg/stack1/nonperishable; Recipe_WovenGuard costs8fibre+1cord+2wood/6s. Best carried guard reduces actual creature-caused server hits25% without stacking, generic/needs/exposure immunity, gathering or melee benefit. Original Protection tag/picture/stat; V1 stable-ID compatible. Exact gates: PROTECTION_M12.md. No equipment slots/worn mesh/XP/durability.
 
+## Current first Copper slice — October14
+
+Optional Wood tool3Wood/4s, existing Stone tool3Wood+2Stone/5s, Copper vein requires actual Stone Pick,6hits×2ore/20sregrowth. Portable refinement2ore+1Wood→1ingot/8s; FieldTools-gated Copper pick3ingots+2Wood+1Cord/10s,4hits/Pick only. Existing FieldTools level2/cost2 Technology Points does not spend Stat Points. All quantities remain server-owned and finite;17items/11recipes/6node definitions, existing bag/weight rules unchanged. No furnace/charge/durability/later ores. COPPER_TIERS_M12.md has implementation and exact verification; G15 ordinary manual acceptance remains pending.
+
 \# Items and Crafting
 
 Current bounded M12 weapon content: Item_Club (wooden club,40melee damage,1.5kg) and Item_BoundClub (stone-bound club,60melee damage,2.5kg), bothstack1/nonperishable/no gathering benefit. Recipe_Club costs3wood+1cord/6seconds; Recipe_BoundClub costs1club+1cord+2stone+2wood/8seconds. Existing Recipe_Cord costs4fibre/4seconds. Native Weapon Gameplay Tags drive the new category; best fresh owned carried item is automatic, no equip slots yet. Exact test/build/save compatibility evidence and provisional-balance limits: WEAPON_TIERS_M12.md. Broader technology/durability entries below remain direction, not implemented claims.

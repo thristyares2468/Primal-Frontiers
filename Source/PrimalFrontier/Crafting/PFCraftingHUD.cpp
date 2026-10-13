@@ -196,7 +196,12 @@ void UPFCraftingHUD::RefreshMenu()
         if(Output->ShelfLifeSeconds>0){Stats+=FString::Printf(TEXT("Shelf life when made: %.0f min\n"),Output->ShelfLifeSeconds/60);}
         else{Stats+=TEXT("Does not expire\n");}
         if(Output->FoodRecovery>0 || Output->WaterRecovery>0){Stats+=FString::Printf(TEXT("Per portion: +%.0f food | +%.0f water\n"),Output->FoodRecovery,Output->WaterRecovery);}
-        if(Output->GatheringHits>0){Stats+=FString::Printf(TEXT("Tool: %d gather hits | %.0f melee damage\n"),Output->GatheringHits,Output->MeleeDamage);}
+        if(Output->GatheringHits>0)
+        {
+            Stats+=FString::Printf(TEXT("Tool: %d gather hits | %.0f melee damage\n"),Output->GatheringHits,Output->MeleeDamage);
+            for(FGameplayTag Family:Output->HarvestFamilies)
+            {FPFHarvestRequirement R;R.Family=Family;R.MinimumGrade=Output->HarvestGrade;Stats+=PFHarvest::RequirementText(R).Replace(TEXT("Requires "),TEXT("Capability: "))+TEXT("\n");}
+        }
         else if(Output->MeleeDamage>0){Stats+=FString::Printf(TEXT("Weapon: %.0f melee damage | no gathering benefit\n"),Output->MeleeDamage);}
         if(Output->CreatureHitReduction>0){Stats+=FString::Printf(TEXT("Carried: %.0f%% creature hit reduction\nNeeds and environmental damage unaffected\n"),Output->CreatureHitReduction*100);}
         Stats+=TEXT("Greybox item preview");

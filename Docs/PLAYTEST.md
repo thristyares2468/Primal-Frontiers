@@ -190,3 +190,6 @@ Evidence lives under `C:\UnrealProjects\PrimalFrontier\Saved`: `Logs`, `Automati
 A useful bug report includes map, solo/client/server, steps, expected versus actual result, displayed message/count, keyboard/controller, approximate time, screenshot and matching log. Exclude credentials/unrelated logs.
 
 Limits: placeholder visuals/UI, small arena, no tech tree, third person, production authentication, save migration, final art or production-scale world. Verification status is in `MILESTONES.md`.
+# First Copper check — October14
+
+Use `TRELLO_TEST_GUIDES.md` G15 **COPPER_LOOP** on `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`, one normal standalone Single player world. Mining sign/vein `(0,-850,60)` is a few metres north of unchanged camp starts. Bare/Wood refusal → gather/craft Stone → Copper ore/refining → earned FieldTools → Copper pick. Exact ingredients, controls, success/refusal, limits and evidence are in G15/COPPER_TIERS_M12.md. AI assisted native/rendered and real server restart evidence does not replace your ordinary route/pacing pass. Do not repeat already accepted twelve tests or save editor assets. CLIMB_STAMINA/STATS_UPGRADE/controller/audio/1440p remain separate.

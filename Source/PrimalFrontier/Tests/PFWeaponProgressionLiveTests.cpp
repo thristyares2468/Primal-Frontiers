@@ -99,7 +99,7 @@ public:
             }
             else if(LocalStage==20 && Now-Changed>.5)
             {
-                Test->TestEqual(TEXT("All eight catalog recipes"),Menu->GetVisibleRecipeIds().Num(),8);
+                Test->TestEqual(TEXT("All eleven catalog recipes"),Menu->GetVisibleRecipeIds().Num(),11);
                 auto* B=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_Category4_Button")));if(!B){Test->AddError(TEXT("Missing weapon category button"));return true;}
                 B->SetKeyboardFocus();Test->TestTrue(TEXT("Category actual Slate focus"),B->HasKeyboardFocus());Press(EKeys::SpaceBar);Next(21,Now);
             }

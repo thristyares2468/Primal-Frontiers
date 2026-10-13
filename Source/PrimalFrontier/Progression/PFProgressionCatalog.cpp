@@ -20,7 +20,7 @@ bool ValidKnowledgeId(FName Id)
 UPFProgressionCatalog::UPFProgressionCatalog()
 {
     FPFKnowledgeDefinition D;D.Id=TEXT("Tech_FieldTools");D.DisplayName=FText::FromString(TEXT("Field tool knowledge"));D.Category=TAG_PF_KnowledgeTool;
-    D.Recipes.Add(TEXT("Recipe_BoundTool"));Knowledge.Add(D);
+    D.Recipes.Add(TEXT("Recipe_BoundTool"));D.Recipes.Add(TEXT("Recipe_CopperPick"));Knowledge.Add(D);
     FPFKnowledgeDefinition Weapon;Weapon.Id=TEXT("Tech_FieldWeapons");Weapon.DisplayName=FText::FromString(TEXT("Field weapon knowledge"));Weapon.Category=TAG_PF_KnowledgeWeapon;
     Weapon.MinimumLevel=3;Weapon.PointCost=3;Weapon.Prerequisites={TEXT("Tech_FieldTools")};Weapon.Recipes={TEXT("Recipe_BoundClub")};Knowledge.Add(Weapon);
 }

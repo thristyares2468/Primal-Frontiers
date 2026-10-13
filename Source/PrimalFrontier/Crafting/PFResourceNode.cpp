@@ -95,8 +95,20 @@ bool APFResourceNode::RestorePersistence(int32 Hits, double RemainingRespawn)
     ForceNetUpdate(); return true;
 }
 
-bool APFResourceNode::Gather(APawn* Pawn)
+FString APFResourceNode::HarvestPrompt(APawn* Pawn) const
 {
+    if(HitsRemaining<=0){return TEXT("Resource depleted - wait for regrowth");}
+    const auto* D=Catalog?Catalog->Resource(ResourceId,Items):nullptr;
+    auto* I=Pawn && Pawn->GetPlayerState()?Pawn->GetPlayerState()->FindComponentByClass<UPFInventoryComponent>():nullptr;
+    if(!D || !I){return TEXT("Resource configuration unavailable");}
+    int32 Hits=0;FString Error;
+    if(!I->ResolveHarvest(D->HarvestRequirement,Hits,Error)){return Error;}
+    return D->HarvestRequirement.Family.IsValid()?TEXT("E / Pad X - Gather (compatible tool)"):TEXT("E / Pad X - Gather resource");
+}
+
+bool APFResourceNode::Gather(APawn* Pawn,FString* OutReason)
+{
+    if(OutReason){*OutReason=TEXT("Gather refused: depleted, cooldown, full inventory or invalid request");}
     if(!HasAuthority() || !IsValid(Pawn) || !Pawn->HasAuthority() || Pawn->GetWorld()!=GetWorld() || !Pawn->GetController() || HitsRemaining<=0){return false;}
     auto* V=Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>();
     auto* I=Pawn->GetPlayerState()?Pawn->GetPlayerState()->FindComponentByClass<UPFInventoryComponent>():nullptr;
@@ -109,7 +121,7 @@ bool APFResourceNode::Gather(APawn* Pawn)
     // cannot spend cooldown, hits, items, stamina or the progression reward window.
     int32 ToolHits=0;FString Error;
     if(!I->ResolveHarvest(D->HarvestRequirement,ToolHits,Error))
-    {UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalGathering] Refused: %s"),*Error);return false;}
+    {if(OutReason){*OutReason=Error;}UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalGathering] Refused: %s"),*Error);return false;}
     // Speed is selected only from a compatible owned tool; finite yield is unchanged.
     const int32 Damage=FMath::Min(HitsRemaining,ToolHits);
     auto* Progression=Pawn->GetPlayerState()->FindComponentByClass<UPFProgressionComponent>();
@@ -123,5 +135,6 @@ bool APFResourceNode::Gather(APawn* Pawn)
     if(HitsRemaining==0){RespawnAt=Now+D->RespawnSeconds;}
     ForceNetUpdate();
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalGathering] %s yielded %d %s hits=%d pawn=%s"),*GetName(),D->YieldPerHit*Damage,*D->YieldItem.ToString(),HitsRemaining,*Pawn->GetName());
+    if(OutReason){OutReason->Reset();}
     return true;
 }

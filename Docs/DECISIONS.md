@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October14 — one earned Copper slice and reviewed runtime layout edge
+
+Ship the first mineral loop before later tiers: optional Wood tool cannot mine Copper; existing Stone/Bound stone Pick+Axe capabilities unlock it, Copper Pick improves compatible speed to4hits without larger total yield. Append portable ore+Wood refinement and reuse FieldTools knowledge gate; no station/charge/durability claim. Preserve original old15resource identities and add only a tagged near-camp node/sign through supported Editor Python. Server Load/startup approves only that exact manifest and preserves a verified original outside A/B before apply using originalUTC; do not immediately rewrite remaining food-life values with a new timestamp. Ordinary Save captures aged runtime16. Unsupported layouts block safely, no general mapping guessed. Real earned native/UI and actual server restart use isolated profiles/sources; human pacing is a separate gate before more tiers.
+
 ## October14 — reviewed additive resource manifests preserve old state
 
 Use a pure exact-map/name/definition transform before any live migration integration. Validate complete source/candidate, preserve all existing resources/world bytes and append only bounded unique catalog-derived full defaults. Do not guess identities by order/proximity, discard unknown nodes, replace definitions or repeatedly append. Separate source/output; failures preserve both. This offline primitive has no live registered edge or file/actor effects; authoring, original backup, time-anchor-safe publication, restart and manual gates remain required.
