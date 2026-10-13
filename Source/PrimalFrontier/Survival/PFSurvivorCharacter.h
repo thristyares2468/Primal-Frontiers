@@ -45,9 +45,13 @@ public:
     UFUNCTION(Server,Reliable) void ServerClimb();
     /** Server derives a <=120cm ledge and swept capsule clearance; never takes a target. */
     bool TryClimb(FString& Reason);
-    UFUNCTION(Client,Reliable) void ClientClimbImpulse(FVector_NetQuantize100 Impulse);
+    /** Server-only mantle on real rising jump/wall contact; original ground anchors height. */
+    bool TryAutomaticClimb(FString& Reason);
+    void CancelAutomaticClimb() {AutomaticClimbUntil=0;}
+    UFUNCTION(Client,Reliable) void ClientClimbImpulse(FVector_NetQuantize100 Impulse,bool bAutomatic=false);
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="50",ClampMax="150")) float MaxClimbHeight=120;
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="1",ClampMax="100")) float ClimbStaminaCost=15;
+    UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="0.1",ClampMax="1")) float AutomaticClimbWindow=0.75f;
 
     /** Authoritative vitals. Recreated with each respawned pawn. */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Survival") TObjectPtr<UPFPlayerSurvivalComponent> Survival;
@@ -84,6 +88,9 @@ protected:
 private:
     UPROPERTY(Replicated) bool bRemoteGliding=false;
     double NextClimbTime=0;
+    double AutomaticClimbUntil=0;
+    FVector AutomaticClimbGroundFeet=FVector::ZeroVector;
+    bool TryClimbFromFeet(FString& Reason,const FVector& GroundFeet,bool bAutomatic);
     /** Server-derived gathering benefit, independently replicated from held melee identity. */
     UPROPERTY(Replicated) bool bHasGatheringTool=false;
     UPROPERTY(Replicated) FName HeldMeleeItem;

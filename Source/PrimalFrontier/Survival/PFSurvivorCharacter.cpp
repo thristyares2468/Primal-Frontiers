@@ -162,7 +162,19 @@ bool APFSurvivorCharacter::CanJumpInternal_Implementation() const
 void APFSurvivorCharacter::OnJumped_Implementation()
 {
     Super::OnJumped_Implementation();
-    if (HasAuthority()) { Survival->SpendStamina(JumpStaminaCost); }
+    // A new ordinary jump must not inherit a prior mantle's temporary drive.
+    Traversal()->AutomaticClimbDrive=FVector::ZeroVector;Traversal()->ClimbUntil=0;
+    if (HasAuthority() && GetNetMode()!=NM_Client && Survival->SpendStamina(JumpStaminaCost))
+    {
+        // Arm once for an actual paid jump, never for walking off a ledge. Do not
+        // send a client target/origin RPC or derive max height from airborne feet.
+        CancelAutomaticClimb();
+        if(JumpCurrentCountPreJump==0 && JumpCurrentCount==1)
+        {
+            AutomaticClimbGroundFeet=GetActorLocation()-FVector(0,0,GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+            AutomaticClimbUntil=GetWorld()->GetTimeSeconds()+FMath::Clamp(AutomaticClimbWindow,0.1f,1.f);
+        }
+    }
 }
 
 void APFSurvivorCharacter::DoMove(float Right, float Forward)

@@ -12,6 +12,7 @@ public:
     bool bWantsSprint=false;
     bool bWantsGlide=false;
     double ClimbUntil=0; // short server-confirmed impulse, not persistent state
+    FVector AutomaticClimbDrive=FVector::ZeroVector; // approved horizontal drive survives wall sliding
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="1",ClampMax="3")) float SprintMultiplier=1.5f;
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="0.01",ClampMax="1")) float MinimumCarrySpeedFraction=0.1f;
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="1",ClampMax="2")) float JumpWeightRatio=1.1f;
@@ -31,6 +32,7 @@ public:
     virtual bool DoJump(bool bReplayingMoves,float DeltaTime) override;
     virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
     virtual void PhysFalling(float DeltaSeconds,int32 Iterations) override;
+    virtual void HandleImpact(const FHitResult& Hit,float TimeSlice=0.f,const FVector& MoveDelta=FVector::ZeroVector) override;
     virtual void UpdateFromCompressedFlags(uint8 Flags) override;
     virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 };

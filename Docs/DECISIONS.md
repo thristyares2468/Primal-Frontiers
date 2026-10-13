@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-13 - Automatic short-ledge climb uses real authoritative contact
+
+Arm one bounded0.75s window only from the first actual paid ground jump. Server movement impact selects the existing ledge path, measured from original ground feet so airborne extra jumps cannot reanchor taller walls. Approval costs normal jump20 plus climb15 and preserves capsule collision sweeps. Automatic-only approved horizontal drive persists after the initial wall slide until landing/cancel/death/new jump; client acknowledgment carries only server-selected impulse/mode. ManualF keeps its path. No per-frame idle probing, client target/origin authority or unlimited wall climbing. Shared live-course floor receipt barrier is test-only, using existing saved-move intent before raised teleport; no production net setting/RPC added. Exact failure and replay evidence in AUTOMATIC_CLIMB_M1.md.
+
 ## 2026-10-13 - Creature variety and stable-layout weighted integration
 
 Use two additional native data-driven archetypes on the existing primitive class, with capped unique existing-item rewards and real item/stack validation before spawn. Keep legacy food payouts and references intact. Append alternate IDs to the existing authored policy, retain original tickets and dormant Ridge day, preserve point names/positions/count and resident saves. Do not add points or relax layout validation just to increase variety. Predicate tests permit the valid passive/hostile pools rather than assuming random draws always choose baseline IDs. Real-file/newserver/client/rendered proof precedes technical completion; human encounter acceptance precedes M14. Optional cross-species targeting would change combat/economy and needs a separate scope; taming remains unapproved, adaptations future. No art or new dependency. CREATURE_VARIETY_M13.md and WEIGHTED_ECOLOGY_M13.md record all limits.

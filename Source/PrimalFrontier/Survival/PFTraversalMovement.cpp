@@ -60,7 +60,8 @@ bool UPFTraversalMovement::IsGliding() const
     if(P && P->GetLocalRole()==ROLE_SimulatedProxy){return P->IsRemoteGliding() && !P->Survival->IsDead() && IsFalling();}
     return bWantsGlide && CanGlide();
 }
-void UPFTraversalMovement::ClearTraversal(){bWantsSprint=false;bWantsGlide=false;ClimbUntil=0;}
+void UPFTraversalMovement::ClearTraversal()
+{bWantsSprint=false;bWantsGlide=false;ClimbUntil=0;AutomaticClimbDrive=FVector::ZeroVector;if(auto* P=Cast<APFSurvivorCharacter>(CharacterOwner)){P->CancelAutomaticClimb();}}
 float UPFTraversalMovement::GetMaxSpeed() const
 {
     const float Base=Super::GetMaxSpeed();
@@ -79,13 +80,25 @@ void UPFTraversalMovement::UpdateCharacterStateBeforeMovement(float Delta)
         if(Rate>0 && !P->Survival->SpendStamina(Rate*Delta)){bWantsSprint=false;bWantsGlide=false;}
     }
     // Clear landed gliding intent rather than silently deploying on the next jump.
-    if(!IsFalling()){bWantsGlide=false;}
+    if(!IsFalling()){bWantsGlide=false;AutomaticClimbDrive=FVector::ZeroVector;P->CancelAutomaticClimb();}
+}
+void UPFTraversalMovement::HandleImpact(const FHitResult& Hit,float TimeSlice,const FVector& MoveDelta)
+{
+    Super::HandleImpact(Hit,TimeSlice,MoveDelta);
+    auto* P=Cast<APFSurvivorCharacter>(CharacterOwner);
+    if(P && P->HasAuthority() && IsFalling() && Hit.bBlockingHit && Hit.ImpactNormal.Z<=0.3f)
+    {FString Reason;P->TryAutomaticClimb(Reason);}
 }
 void UPFTraversalMovement::PhysFalling(float Delta,int32 Iterations)
 {
     const bool Glide=IsGliding(),Climb=GetWorld()->GetTimeSeconds()<ClimbUntil;
     TGuardValue<float> Air(AirControl,Climb?0.f:(Glide?0.75f:AirControl));
     TGuardValue<float> Brake(BrakingDecelerationFalling,Climb?0.f:BrakingDecelerationFalling);
+    // A contact-triggered launch initially touches the wall. UE correctly strips
+    // horizontal velocity there; reapply only the server-approved bounded drive
+    // until the capsule rises clear. Swept falling collision still runs normally.
+    if(Climb && !AutomaticClimbDrive.IsNearlyZero())
+    {Velocity.X=AutomaticClimbDrive.X;Velocity.Y=AutomaticClimbDrive.Y;}
     if(Glide){Velocity.Z=FMath::Max(Velocity.Z,-GlideDescentSpeed);}
     Super::PhysFalling(Delta,Iterations);
     if(IsGliding()){Velocity.Z=FMath::Max(Velocity.Z,-GlideDescentSpeed);}
