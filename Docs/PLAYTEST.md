@@ -1,6 +1,6 @@
 # Playing and testing Primal Frontier
 
-October13 actual climb area: four80/110cm solidledges and CLIMB LEDGES sign south-eastofsafe camp in L_PrimalFrontier_OpenWorld. Follow G10 in TRELLO_TEST_GUIDES.md: fromflatground onwestface, holdW + brieflySpace withoutF, >=35stamina/<=30kg. All priorpassedchecks needno repeat. LEDGE_TRAVERSAL_M14.md has coordinates/actualfirst-personPNG/technicalproof; humanCLIMB stillpending.
+October13 climb fixture: turn RIGHT/east at the normal OpenWorld spawn for the **CLIMB TEST: beside spawn** sign and80cm/110cm stone-grey blocks. First wall face2.5-7.5m away; no trip south required. Hold W + brieflySpace into a west face from flat ground, >=35stamina/<=30kg. G10 in TRELLO_TEST_GUIDES.md gives the exact steps; SPAWN_TRAVERSAL_M14.md records current verification. Previous passes need no repeat; humanCLIMB remains pending.
 
 October13 M13 gate: the ordinary OpenWorld now picks Forager/Scrabbler by day/night and Prowler/DuskPouncer at night. Existing living/corpse hostile remains at dawn; same two points, normal corpse expiry/cooldown. See G9 in [TRELLO_TEST_GUIDES.md](TRELLO_TEST_GUIDES.md) for reproduction of the encounter/escape/readability check accepted by the user October13 (ECOLOGY_ENCOUNTERS/ECOLOGY_DAWN/CREATURE_LOOT). Use one standalone unused world,720p if desired; no repeated M7/solo-save/chest/settings checks or1440 requirement. Weighted species are random; not seeing every species on the first load is valid. Optional predator/prey/taming and adaptations remain unimplemented, no final art needed.
 

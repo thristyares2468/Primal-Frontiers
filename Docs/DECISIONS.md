@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-13 - Discoverable feature fixtures beside normal spawn
+
+Every new playable feature must ship with a clearly marked reachable fixture near the current open-world starting area and exact test instructions before handoff. Backend-only work uses automated fixtures. Preserve normal spawn/resource access and persistence identities; explicit migration is required if persistent records change. For climbing, relocate only the existing lane A80/110cm blocks and sign east of both starts, retaining their GUIDs and the southern lane. This is stateless layout repair, not a new gameplay system or larger-world gate. Existing clear low-ledge45-120cm mantle limits remain.
+
 ## 2026-10-13 - Authored stateless traversal area before broader world expansion
 
 Keep fourclear80/110cm ledges nearcamp usingexistingprimitive/material and nonspatial loaded collision. No persistentresource/spawner ID or navigationchange; compare every oldactor before/after and repeat onlyverification. Python wrappers are not stable identity: compare UObjectasset paths, GameplayTag names and ActorGuid values rather than strrepr/memoryaddresses. Testactualsavedgeometry bytags beforemovement, no substitute spawnedcourse; useowning jump/savedmoves and servercost/landing. Render-onlywaiting/overview provesreadable sign without alteringheadlesspath. This boundedtechnicalpass doesnotreplace humanCLIMB or fullworldexpansion acceptance. LEDGE_TRAVERSAL_M14.md exactevidence.

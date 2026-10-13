@@ -1,7 +1,8 @@
-"""M14: add only stateless primitive ledges south-east of the spawn camp.
+"""M14: author stateless primitive ledges, including two beside spawn.
 
-Supported Editor APIs; refuse custom/partial courses and preserve all old actor
-identities/transforms/catalog assignments. Repeat is verification-only.
+Supported Editor APIs; refuse custom/partial courses. Relocate only the known
+course; preserve all unrelated identities/transforms/catalog assignments.
+Repeat is verification-only.
 """
 import json
 import os
@@ -10,12 +11,17 @@ import unreal
 
 MAP = "/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld"
 PREFIX = "M14_Traversal_"
-SPECS = [("80_A", (1000, -2300, 40), (3, 3.6, .8)),
-         ("110_A", (1600, -2300, 55), (3, 3.6, 1.1)),
+SPECS = [("80_A", (650, -1100, 40), (3, 3.6, .8)),
+         ("110_A", (1250, -1100, 55), (3, 3.6, 1.1)),
          ("80_B", (1000, -3000, 40), (3, 3.6, .8)),
          ("110_B", (1600, -3000, 55), (3, 3.6, 1.1))]
-SIGN_AT = (600, -1900, 180)
-SIGN = "CLIMB LEDGES: 80cm / 110cm\nFace a WEST edge; hold forward + jump (35 stamina)\nF: manual climb (15). Tall / blocked walls refuse."
+SIGN_AT = (500, -850, 160)
+SIGN = "CLIMB TEST: beside spawn ->\n80cm wall, then 110cm wall\nFace wall; W + Space (35 stamina). F: manual."
+# One reversible migration of the exact previously published layout only.
+LEGACY_SPECS = [("80_A", (1000, -2300, 40), (3, 3.6, .8)),
+                ("110_A", (1600, -2300, 55), (3, 3.6, 1.1))] + SPECS[2:]
+LEGACY_SIGN_AT = (600, -1900, 180)
+LEGACY_SIGN = "CLIMB LEDGES: 80cm / 110cm\nFace a WEST edge; hold forward + jump (35 stamina)\nF: manual climb (15). Tall / blocked walls refuse."
 levels = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 editor_actors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 
@@ -54,11 +60,11 @@ def snapshot(actors):
         rows.append(r)
     return sorted(rows, key=lambda r: r["name"])
 
-def verify(actors):
+def verify(actors, legacy=False):
     found = {a.get_actor_label(): a for a in actors if a.get_actor_label().startswith(PREFIX)}
     if len(found) != 5:
         raise RuntimeError("Expected exactly four ledges and one sign")
-    for name, at, scale in SPECS:
+    for name, at, scale in (LEGACY_SPECS if legacy else SPECS):
         a = found.get(PREFIX + name)
         if not a or a.get_class().get_name() != "StaticMeshActor":
             raise RuntimeError("Missing/unexpected ledge " + name)
@@ -71,9 +77,9 @@ def verify(actors):
             not a.actor_has_tag(unreal.Name("PF.M14.Ledge" + name))):
             raise RuntimeError("Unexpected custom ledge configuration " + name)
     a = found.get(PREFIX + "Sign")
-    if not a or a.get_class().get_name() != "TextRenderActor" or xyz(a.get_actor_location()) != list(SIGN_AT):
+    if not a or a.get_class().get_name() != "TextRenderActor" or xyz(a.get_actor_location()) != list(LEGACY_SIGN_AT if legacy else SIGN_AT):
         raise RuntimeError("Unexpected sign")
-    if str(a.get_component_by_class(unreal.TextRenderComponent).get_editor_property("text")) != SIGN:
+    if str(a.get_component_by_class(unreal.TextRenderComponent).get_editor_property("text")) != (LEGACY_SIGN if legacy else SIGN):
         raise RuntimeError("Unexpected sign text")
     # Newly created WP actors receive an external-package object name at save.
     # Their persistent ActorGuid, unlike that temporary name, must not change.
@@ -84,7 +90,25 @@ before = snapshot(actors)
 existing = [a for a in actors if a.get_actor_label().startswith(PREFIX)]
 mutations = 0
 if existing:
-    identities = verify(actors)  # never overwrite a custom/partial course
+    try:
+        identities = verify(actors)
+    except RuntimeError:
+        identities = verify(actors, legacy=True)  # refuse custom/partial courses
+        found = {a.get_actor_label(): a for a in existing}
+        for name, at, _ in SPECS[:2]:
+            found[PREFIX + name].modify()
+            if not found[PREFIX + name].set_actor_location(unreal.Vector(*at), False, True):
+                raise RuntimeError("Could not relocate existing ledge " + name)
+            mutations += 1
+        sign = found[PREFIX + "Sign"]
+        sign.modify()
+        sign.set_actor_location(unreal.Vector(*SIGN_AT), False, True)
+        sign.get_component_by_class(unreal.TextRenderComponent).set_text(SIGN)
+        mutations += 1
+        if verify(editor_actors.get_all_level_actors()) != identities or snapshot(editor_actors.get_all_level_actors()) != before:
+            raise RuntimeError("Relocation altered actor identities or unrelated configuration")
+        if not levels.save_current_level():
+            raise RuntimeError("Relocated course save failed")
 else:
     cube = unreal.load_asset("/Engine/BasicShapes/Cube.Cube")
     rock = unreal.load_asset("/Game/PrimalFrontier/World/Greybox/MI_M7Rock")

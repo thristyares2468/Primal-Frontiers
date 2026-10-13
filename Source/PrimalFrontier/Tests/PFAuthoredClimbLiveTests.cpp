@@ -8,6 +8,7 @@
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
+#include "GameFramework/PlayerStart.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -41,13 +42,23 @@ public:
                 const FName Tag(*FString::Printf(TEXT("PF.M14.Ledge%d_%c"),Kind?110:80,Lane?TEXT('B'):TEXT('A')));
                 AStaticMeshActor* Found=nullptr;for(TActorIterator<AStaticMeshActor> It(W);It;++It){if(It->ActorHasTag(Tag)){if(Found){Test->AddError(TEXT("Duplicate authored ledge"));return true;}Found=*It;}}
                 if(!Found){return false;}
-                const FVector At(Kind?1600:1000,Lane?-3000:-2300,Kind?55:40),Scale(3,3.6,Kind?1.1:.8);
+                const FVector At(Lane?(Kind?1600:1000):(Kind?1250:650),Lane?-3000:-1100,Kind?55:40),Scale(3,3.6,Kind?1.1:.8);
                 if(!Found->GetActorLocation().Equals(At,.1f) || !Found->GetActorScale3D().Equals(Scale,.001f) ||
                    !Found->GetStaticMeshComponent()->GetStaticMesh() || Found->GetStaticMeshComponent()->GetCollisionProfileName()!=TEXT("BlockAll"))
                 {Test->AddError(TEXT("Authored course geometry differs from saved contract"));return true;}
                 Ledges[Lane][Kind]=Found;
             }}
-            Validated=true;Test->AddInfo(TEXT("[PrimalTraversal] Loaded four real authored 80/110cm ledges; no runtime geometry created"));
+            int32 Starts=0;
+            for(TActorIterator<APlayerStart> It(W);It;++It)
+            {
+                const FVector Start=It->GetActorLocation(),Wall=Ledges[0][0]->GetActorLocation();
+                const float FaceDistance=Wall.X-150-Start.X;
+                if(FaceDistance<200 || FaceDistance>800 || FMath::Abs(Start.Y-Wall.Y)>10)
+                {Test->AddError(TEXT("Climb wall must be beside both unobstructed camp starts (2-8m to west face)"));return true;}
+                ++Starts;
+            }
+            if(Starts!=2){Test->AddError(TEXT("Expected both normal camp PlayerStarts"));return true;}
+            Validated=true;Test->AddInfo(TEXT("[PrimalTraversal] Loaded four real authored 80/110cm ledges; near-spawn wall verified; no runtime geometry created"));
         }
         TArray<APFSurvivalPlayerController*> Players;
         for(auto It=W->GetPlayerControllerIterator();It;++It){auto* PC=Cast<APFSurvivalPlayerController>(It->Get());if(PC && Cast<APFSurvivorCharacter>(PC->GetPawn()) && PC->GetInventory() && PC->GetInventory()->Catalog){Players.Add(PC);}}
@@ -82,7 +93,7 @@ public:
                     else
                     {
                         M->ClearTraversal();
-                        if(!Directory.IsEmpty()){P->TeleportTo(FVector(-200,-1900,100),FRotator::ZeroRotator,false,true);M->StopMovementImmediately();M->SetMovementMode(MOVE_Walking);}
+                        if(!Directory.IsEmpty()){P->TeleportTo(FVector(-200,-850,100),FRotator::ZeroRotator,false,true);M->StopMovementImmediately();M->SetMovementMode(MOVE_Walking);}
                         P->Survival->SetHealth(95);R.Phase=5;
                     }
                 }
@@ -94,8 +105,17 @@ public:
         if(Client || W->GetNetMode()==NM_Standalone)
         {
             auto* PC=Players[0];auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();const float H=P->Survival->GetVitals().Health;
-            if(!Ready){Key(PC,EKeys::LeftShift,IE_Pressed);Ready=true;}
-            const int32 Lane=FMath::Abs(P->GetActorLocation().Y+2300)<FMath::Abs(P->GetActorLocation().Y+3000)?0:1;
+            if(!Ready)
+            {
+                if(!Directory.IsEmpty())
+                {
+                    if(SpawnViewAt==0){SpawnViewAt=Now;PC->SetControlRotation(FRotator(-10,0,0));}
+                    if(Now-SpawnViewAt<.6){return false;}
+                    Capture(TEXT("spawn_wall"));
+                }
+                Key(PC,EKeys::LeftShift,IE_Pressed);Ready=true;
+            }
+            const int32 Lane=FMath::Abs(P->GetActorLocation().Y+1100)<FMath::Abs(P->GetActorLocation().Y+3000)?0:1;
             if((OwnerStage==0 && H==97) || (OwnerStage==2 && H==96))
             {
                 const int32 Kind=OwnerStage==2?1:0;const auto* A=Ledges[Lane][Kind].Get();const float X=A->GetActorLocation().X-150-P->GetCapsuleComponent()->GetScaledCapsuleRadius()-5;
@@ -154,7 +174,7 @@ private:
     {if(PC->InputComponent){for(const auto& B:PC->InputComponent->KeyBindings){if(B.Chord.Key==K && B.KeyEvent==Event){B.KeyDelegate.Execute(K);return;}}}Test->AddError(TEXT("Missing traversal binding"));}
     void Capture(const TCHAR* Name){if(!Directory.IsEmpty()){FScreenshotRequest::RequestScreenshot(Directory/(FString(Name)+TEXT(".png")),true,false);}}
     FAutomationTestBase* Test;FString Directory;TWeakObjectPtr<AStaticMeshActor> Ledges[2][2];TMap<TWeakObjectPtr<APFSurvivalPlayerController>,FAuthoredClimbRecord> Records;
-    double Started=FPlatformTime::Seconds(),Done=0,Prepare=0,ReleaseAt=0,OverviewAt=0;int32 Expected=1,OwnerStage=0;bool Client=false,Validated=false,Initialized=false,Ready=false,Acknowledged=false,OwnerComplete=false,ApproachShot=false;
+    double Started=FPlatformTime::Seconds(),Done=0,Prepare=0,ReleaseAt=0,OverviewAt=0,SpawnViewAt=0;int32 Expected=1,OwnerStage=0;bool Client=false,Validated=false,Initialized=false,Ready=false,Acknowledged=false,OwnerComplete=false,ApproachShot=false;
 };
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFAuthoredClimbLiveTest,"PF.Traversal.AuthoredLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)

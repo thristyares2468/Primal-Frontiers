@@ -1,5 +1,11 @@
 # Trello task workflow
 
+Near-spawn task final readbacks:4stnnnKf Done/complete,7zjNOKJJ Personal2ToDo/incomplete, MainM14Personal2Doing/incomplete. Revised G10 copied exactly to both manual cards; previous guides retained, original expanded-world plan preserved. All members/dates/status outside verified scope unchanged. No human acceptance inferred or ownedUnreal process left. ScopedSol publication follows.
+
+## October13 - Near-spawn climb fixture repair
+
+Fresh G10/MainM14 reads confirmed no human climb pass. Bounded4stnnnKf ProgrammingDoing tracks user-requested relocation of two existing blocks/sign and standing AGENTS fixture policy. Saved/reloaded/repeated geometry stable; Editor/Game/native3/one2/two3/renderone and five PNG/raw/private guards pass. Exact evidence SPAWN_TRAVERSAL_M14.md; update/close only bounded technical repair before handoff. Copy revised G10 with turn-right-nearspawn and optional runtime reposition into Personal7zjNOKJJ and MainM14, retain previous guides/history and original expandedworldplan. Personal2 priorities/members/deadlines/unverified statuses stay unchanged; no fullM14/pass assumption or duplicate manual task. ScopedSol publication follows.
+
 ## October13 - M14 authored camp ledge completion
 
 Publication verified: 8b86360 source/assets/evidence and1cdd4f5 naming pushed, sixLFSobjectsuploaded/remoteSHAequal/cleanbeforehandoffdocs. Technicalcard publicationcomment andPersonalG10 latest-buildcomment confirmed. No ownedUnrealprocess, no fakeManual/fullM14acceptance. StopworldexpansionatG10; scopedhandoffnote publicationdoesnotchangecompiledsource/tests.

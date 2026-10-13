@@ -1,5 +1,9 @@
 # Roadmap and open-world direction
 
+## M14 nearby fixture repair - October13
+
+Existing two lane A climbing blocks/sign now immediately right/east of spawn; old persistent layout retained. Nine native/network/rendered execution records and both builds pass; exact proof SPAWN_TRAVERSAL_M14.md. Technical accessibility repair only; G10 humanCLIMB remains open before moreworldexpansion. New features must include discoverable nearby test fixtures per AGENTS; no new tier/dimension/system scope.
+
 ## M14 first bounded technical delivery - October13
 
 Accessible80/110cm camp ledges/sign now saved in realOpenWorld; Editor/Game/native/one-twoNullRHI/render720/ordinaryauthoredrestart PASS19records with stableoldactorlayout. LEDGE_TRAVERSAL_M14.md exactproof andlimitations. G10 humanCLIMB is the remainingboundedacceptance beforefurtherworldexpansion; fullM14notaccepted. No ore/dimensions/art/newspawner or saveversion added. Latest M12 finalTechnameRiftglass, eighttiersplanned only; Personalcontroller/audio/1440 remainseparate.

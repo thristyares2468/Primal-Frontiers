@@ -1,5 +1,7 @@
 # M14 accessible camp ledges — October 13, 2026
 
+**Layout superseded later October13:** lane A and its sign have moved immediately beside spawn at the user's request. See [SPAWN_TRAVERSAL_M14.md](SPAWN_TRAVERSAL_M14.md) and current G10 for locations and fresh verification. The original positions/screenshots/results below are retained as historical evidence.
+
 The normal open world now has four solid primitive climbing ledges and a readable instruction sign south-east of the starting camp. This repairs the user's **CLIMB NOT TESTED — no suitable geometry** obstacle. It does not complete all of M14 or supply a human climb pass.
 
 Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Two lanes each contain an 80 cm and a 110 cm ledge. A lane uses cubes centred at `(1000,-2300,40)` and `(1600,-2300,55)`; B uses Y `-3000`. Each top is 3 × 3.6 m. The sign is at `(600,-1900,180)`, facing west. PlayerStarts remain at X ±250, Y -1100. All coordinates are Unreal centimetres.

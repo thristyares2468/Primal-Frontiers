@@ -54,6 +54,7 @@ combat, crafting, construction, and creature logic in C++.
 * Do not claim an editor-facing feature works without testing it in Unreal.
 * For multiplayer features, test a server and at least two clients when practical.
 * Record evidence for important visual or gameplay changes.
+* When adding a playable feature, provide a clearly marked, reachable test fixture near the starting area of the current open-world level before handing it over. Reuse primitives and existing assets; keep normal spawning, gathering and traversal unobstructed. Document its exact location, controls and expected result. Preserve persistent actor identities/layout or plan the required migration explicitly. Backend-only changes may use automated fixtures instead of invented level tests.
 
 ## Change management
 

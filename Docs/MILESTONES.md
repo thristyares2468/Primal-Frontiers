@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - M14 test wall immediately beside spawn
+
+At user request, relocate only existing lane A80/110cm blocks and sign east of both normal starts. Supported Editor reload/repeat PASS, stable5GUIDs/old76 unrelated configurations; initial external-package dirty/save issue repaired. Editor6.72s/Game14.07s/native3/one-client2/two-client3/render720one PASS9records, fivePNG/log/private guards inspected. SPAWN_TRAVERSAL_M14.md contains exact paths and limits; current G10 and PLAYTEST use the new location. Nearby fixtures for every new playable feature are now required by AGENTS. Technical repair complete; humanCLIMB/fullM14 remains unverified, no world expansion begun.
+
 ## October13 - M14 accessible authored camp climb technical gate
 
 LEDGE_TRAVERSAL_M14.md records four80/110cm primitiveledges+sign, supportedEditorreload/idempotence/stable5GUIDs/old76unchanged, exactEditor14.99/final6.10/Game30.29s clean. Native3, realauthoredone2/two75ms1%3/render720one andauthoritative authoredsave-newserverrestartone4/two6 PASS19records/five selectors; fourfinalPNG/rawbaseline/privateguards/memoryreviewed. Two initialPythonrepresentationguardfails repaired/replayed; no compiler/gameplayfailure. Existingresource/spawnerlayout/assetsotherthanone map+five newactorpackages untouched, no schema/quality/dependency. HumanCLIMB notpassed; G10 nowusable. FullM14/futureworld/dimensions/tiers/device/audio/1440 limits preserved.
