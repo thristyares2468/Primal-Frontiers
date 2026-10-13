@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - M14 accessible authored camp climb technical gate
+
+LEDGE_TRAVERSAL_M14.md records four80/110cm primitiveledges+sign, supportedEditorreload/idempotence/stable5GUIDs/old76unchanged, exactEditor14.99/final6.10/Game30.29s clean. Native3, realauthoredone2/two75ms1%3/render720one andauthoritative authoredsave-newserverrestartone4/two6 PASS19records/five selectors; fourfinalPNG/rawbaseline/privateguards/memoryreviewed. Two initialPythonrepresentationguardfails repaired/replayed; no compiler/gameplayfailure. Existingresource/spawnerlayout/assetsotherthanone map+five newactorpackages untouched, no schema/quality/dependency. HumanCLIMB notpassed; G10 nowusable. FullM14/futureworld/dimensions/tiers/device/audio/1440 limits preserved.
+
 ## October13 - final Tech material renamed Riftglass
 
 User rejected Resonance Composite; currentplanning name Riftglass fits the crystal/ancient-technology Frontier refining origin. Eight-tier order/Iron-pick diamonds/Titanium beforeDeepforge unchanged. RESOURCE_TIERS_M12.md/currentplan/MainM12/future6ktNVyoo updated, oldernames retained ashistory. Documentation-only consistencycheck, no gameplay/source/assets/privatefile/build/test change. Boundednamingtask MRS21GSa closes onlythisscope.

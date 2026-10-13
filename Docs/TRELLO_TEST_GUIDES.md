@@ -232,3 +232,24 @@ Evidence: `Docs/WEIGHTED_ECOLOGY_M13.md`, `CREATURE_VARIETY_M13.md`, `AUTHORED_E
 ## Card-description contract
 
 Every new/updated test card starts with exact map package path (or NONE for non-gameplay work), launch/net mode, prerequisites and one Start here action. Follow with numbered steps, inputs, expected state/counters, pass/refusal conditions, evidence paths and remaining limits. Name future/TBD maps honestly. Copy the appropriate guide into the card rather than only linking this document; retain earlier evidence below it. Personal priorities/members/deadlines/status stay unchanged unless actual observations resolve them. Do not mark current generated guides as manual test passes.
+
+
+## G10 - Actual open-world camp climb (Personal 2)
+
+Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`; normal menu `/Engine/Maps/Entry`. One normal rendered standalone `-game` session, not NullRHI or the old disposable raised course. This is the previously untestable CLIMB check with actual new geometry; do not repeat your twelve passed tests.
+
+Why Personal: automation has tested authority/physical landings and inspected screenshots; the milestone still requires your real first-person input/route/usability observation. Controller/audio and1440p remain separate.
+
+Prerequisites: latest built project, no competing automation/Unreal instances, keyboard/mouse, living player at/below30kg and at least35stamina. Use your normal test world or a new unused world name; no editor/map/assets need saving. P pauses while you read. Default renderer quality need not increase.
+
+Start here: launch your normal standalone game from PLAYTEST.md, Single player, open the OpenWorld test world. From the safe starting camp, head south/behind the starting facing direction, then east/left toward the **CLIMB LEDGES** sign (about10-20m from the starts). Sign position `(600,-1900,180)`; near laneA80cm block `(1000,-2300,40)`,110cm block `(1600,-2300,55)`. LaneB sits700cm farther south. Coordinates are cm, not map names or teleport requirements.
+
+1. Stand on FLAT GROUND just west of an80cm block, close to its face (within1m), looking east/straight into the face. Hold W and briefly press/release Space while continuing forward. Do not pressF orSprint. Expected: one automatic mantle, landing on the block and roughly35stamina spent; normal movement/look afterward. Release forward after landing so you do not walk off immediately.
+2. Walk off to flat ground and go around to the110cm block's west face. Wait for at least35stamina/cooldown, then repeat W+Space withoutF from flat ground. Expected: land on its top, no stuck input or passage through geometry. Do not jump from the80cm top to test110cm height; that measures a different30cm step.
+3. Optional existing manual alternative: from flat ground facing a valid block useF (15stamina), then step off. Tall walls/blocked landings remain deliberately refused; no unlimited wall scaling is promised. No need to test controller here.
+
+PASS: both authored heights work with normal keyboard/mouse input and you can approach, land, look/move and leave normally. FAIL: first failingheight, input, carriedkg/stamina, expected/actual and visible refusal/stuck behavior. If you cannot locate the area, report that as a route/sign issue; do not edit/save the map or assume a pass.
+
+Reply **CLIMB PASS**, or **CLIMB FAIL - 80cm/110cm + brief issue**. Normal health/needs may change while unpaused; the damage/health markers in AI screenshots are fixture-only and are not expected in your normal run. End session normally; save only if you want to keep the test world.
+
+Evidence: Docs/LEDGE_TRAVERSAL_M14.md; Saved/Logs/PrimalFrontier.log for ordinary editor or matching unique standalone log, optional `shot showui` under Saved/Screenshots/WindowsEditor. AI reference PNGs: Saved/AutomationReports/ControlsUI/M11AuthoredClimb720_20261013_024733262_0d1cde31/course_sign.png and climb_80_top.png/climb_110_top.png. Do not upload private .pfs/identity profiles. Technical native/network/rendered/restart gates alreadypassed; no duplicate multiplayer/FPS test required for this small action.

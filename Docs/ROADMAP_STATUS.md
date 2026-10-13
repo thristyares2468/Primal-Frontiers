@@ -1,5 +1,9 @@
 # Roadmap and open-world direction
 
+## M14 first bounded technical delivery - October13
+
+Accessible80/110cm camp ledges/sign now saved in realOpenWorld; Editor/Game/native/one-twoNullRHI/render720/ordinaryauthoredrestart PASS19records with stableoldactorlayout. LEDGE_TRAVERSAL_M14.md exactproof andlimitations. G10 humanCLIMB is the remainingboundedacceptance beforefurtherworldexpansion; fullM14notaccepted. No ore/dimensions/art/newspawner or saveversion added. Latest M12 finalTechnameRiftglass, eighttiersplanned only; Personalcontroller/audio/1440 remainseparate.
+
 ## Added M12 objective - October13
 
 Dimensional materials coordinated with later world/travel work: origin-specific ore/spawn permissions and original naming, Eryndor throughTitanium then volcanic/crystal Frontier ingredients for Deepforge/finalTech. REGION/map/travel fixture IDs TBD. No new dimension is implemented; first Frontier access must be possible without its exclusive materials. Preserve low-memory/save-layout gates.

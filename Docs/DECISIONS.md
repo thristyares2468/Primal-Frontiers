@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-13 - Authored stateless traversal area before broader world expansion
+
+Keep fourclear80/110cm ledges nearcamp usingexistingprimitive/material and nonspatial loaded collision. No persistentresource/spawner ID or navigationchange; compare every oldactor before/after and repeat onlyverification. Python wrappers are not stable identity: compare UObjectasset paths, GameplayTag names and ActorGuid values rather than strrepr/memoryaddresses. Testactualsavedgeometry bytags beforemovement, no substitute spawnedcourse; useowning jump/savedmoves and servercost/landing. Render-onlywaiting/overview provesreadable sign without alteringheadlesspath. This boundedtechnicalpass doesnotreplace humanCLIMB or fullworldexpansion acceptance. LEDGE_TRAVERSAL_M14.md exactevidence.
+
 ## 2026-10-13 - Planned resource grades separate access from tool speed
 
 Latest user steering requires dimension-aware origin and names. Use explicit trusted region/Frontier spawn permissions alongside tool grades. Titanium precedes Deepforge as Eryndor preparation; proposed Deepforge volcanic ingredients and Resonance crystal/ancient-tech inputs motivate expeditions. No final region name, map or raw exotic material name is invented as implemented. Avoid access cycles (first crossing must not need beyond-crossing material), arbitrary saved map paths and simultaneous loaded worlds. See RESOURCE_TIERS_M12.md for future save/travel tests.
