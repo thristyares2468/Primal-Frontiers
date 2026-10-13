@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October 14 — M12 actual owned gather request gate
+
+PF.Harvest.Live one-client PASS2/2 and two-client75ms/1% PASS3/3, all role markers/phase acknowledgements/packet/private/settings guards checked. Editor6.79s and Game29.30s PASS; final raw startup21warnings/14known Python errors perrole, zero new normalized severity or test warning/ensure. Exact paths and retained fixture compilation/ack failures in HARVEST_CAPABILITIES_M12.md. No new permanent ore, recipes, authored layout or normal gameplay acceptance; full tier ladder stays open.
+
 ## October 14 — M12 harvest capability backend gate
 
 Editor initial/final 41.66s/12.18s and Game 39.17s PASS. New Definitions/Selection/AtomicGather 3/3 clean; compatibility five passing plus GatherEvents fixture repair/replay 1/1 clean gives nine distinct native selectors covered. Exact reports/failure diagnosis/memory in HARVEST_CAPABILITIES_M12.md. No new ore, catalog assets, recipes, permanent nodes, save schema, art or private-save mutation. Next live server/client gate is independent; full tiers and human climb/upgrades remain open.

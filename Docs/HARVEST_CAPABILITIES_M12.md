@@ -14,6 +14,25 @@ Empty families/None grade is the explicit legacy tool default. Empty/None resour
 
 ## Tests and limits
 
+## Actual owned-request network gate
+
+Final Game build PFM12HarvestLiveGameBuild.log PASS29.30s without compiler warnings. Editor final PFM12HarvestAckBuild.log PASS6.79s. Final two-role memory: server1.726working/1.632privateGiB, client1 1.803/1.784, client2 1.794/1.779. All five final role logs reviewed; no new severity against existing baseline. No Unreal process left after owned cleanup. The backend/native and live tasks close only their bounded technical gates.
+
+`PF.Harvest.Live`, opt-in `-PFRunHarvestLiveTests -nullrhi -PFExpectedPlayers=1|2`, runs only on disposable `/Game/PrimalFrontier/Maps/L_M7SurvivalArena` with an uncooked dedicated server. Server clones item catalogs at runtime, temporarily treats existing Item_Tool as Stone then Iron Pick, and existing faster Item_BoundTool as Iron Axe. Synthetic Stone nodes require Iron Pick. These trusted boundary fixtures do not add earned materials or change saved data assets. Existing controller RPC is invoked through Unreal reflection on the owning client; access is not widened and no test gameplay RPC is introduced.
+
+Actual client phases: ready; denied under-tier/wrong family; accepted exact tool with immediate duplicate request refused; denied after removal; exact tool restored for finite last hit; final owner/private state acknowledged. Each accepted action earns one bounded gather reward, total6 Stone/10XP per lane. Direct client node/grant mutations fail, foreign inventories/progression remain private. Consume of one test water acknowledges ordered RPCs. The first stalled run found the acknowledgement itself was sent inside the inventory cooldown; per-phase0.5s observation fixes only the fixture. NullRHI runs use120FPS to avoid unbounded saved-move queues; rendered performance remains uncapped and unmeasured here.
+
+Reproduce one before two:
+
+```powershell
+./Scripts/RunEcologyAutomation.ps1 -TestCase Harvest -Players 1 -Port 17987 -TimeoutSeconds 180
+./Scripts/RunEcologyAutomation.ps1 -TestCase Harvest -Players 2 -SimulateLagLoss -Port 17987 -TimeoutSeconds 180
+```
+
+Final one-client `M12Harvest1_20261013_211151288_3abeafce` PASS2/2,48.62s, server1.729/1.635GiB working/private and client1.791/1.779. Final two-client `M12Harvest2_20261013_211327579_a866ce05` PASS3/3,55.61s,75ms/1%; exact per-role memory in run-summary.json. Both private-save/settings guards pass, no test warnings/errors/fatal/ensure/timeout. All five final role logs introduce zero normalized severity lines against the previously inspected startup baseline; raw21warnings/14known ToolsetDefinition/PythonTestRunner errors per role remain. Actual .log/index.json/run-summary paths are Saved/Logs/PF<Run><Role>.log and Saved/AutomationReports/<Run>[<Role>]. No disk restart, new mineral crafting, rendered prompt/physics, manual pacing or packaged-server acceptance inferred.
+
+Retained failures: PFM12HarvestLiveBuild.log C3535/C2440 weak pointer deduction and C2248 protected RPC access; fixture `.Get()` plus reflected existing RPC repair buildPASS5.86s. Initial `M12Harvest1_20261013_210835439_df6d06c7` failed both role tests at phase9 and logged3 saved-move warnings; private/default guards still passed. Ack buildPASS6.79s, new-phase delay and headless120 guard repaired it. No production authority, cooldown or inventory rules relaxed. Subsequent native source was unchanged from d8245ec.
+
 Final backend checkpoint: fixture-only Editor rebuild `PFM12HarvestFixtureBuild.log` PASS 12.18s; Game `PFM12HarvestGameBuild.log` PASS 39.17s, no compiler warnings. Failed selector replay `Automation_M12GatherFixtureReplay_20261013_210101442_0ffa2c10` PASS 1/1, 19.09s, raw severity 0, sampled 2.998GiB working/2.881GiB private. Other five compatibility selectors passed in the initial run: PF.Crafting.Gathering, PF.Crafting.Transactions, PF.World.Resources, PF.Persistence.WorldRuntime and PF.Progression.WorldCompatibility. Together with the three new selectors, nine distinct relevant native tests have passed. Ordinary PrimalFrontier.log checked alongside the unique native logs; no new fatal/ensure. No live networking/rendering acceptance yet.
 
 Compatibility first run `Automation_M12HarvestCompatibility_20261013_205830343_12eb09c6`: 5/6 passed; GatherEvents failed its cap-boundary gather. Root cause was a latent fixture interaction with the previous stat feature: the fixture retained temporary hard-weight enforcement after its full-bag probe, while progression restore reapplies the normal 30kg threshold. Its accumulated 33.5kg then correctly refused under that artificial hard-container policy. Restore normal soft player-bag enforcement after the probe; do not change production weight or progression rules. Failed report retained; narrow rebuild/replay pending.
