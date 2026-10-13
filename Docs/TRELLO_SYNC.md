@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October14 lbYvJVV9 read-only layout/catalog audit passed; exact resource manifest and candidate-only near-camp position in RESOURCE_LAYOUT_BASELINE_M12.md. No new level fixture or Personal task invented. Close technical audit after evidence/readback; eight-tier parent remains incomplete for actual content/transform/earned/restart/render/manual gates.
+
 October14 M18 dyQLazEA tracks only original-envelope backend primitive: native2/2 and both builds passed; no private migration or generalM18 acceptance. Programming Doing until final evidence/status readback, then Done. MainM18 retains broader dependencies; no Personal task created for backend-only files. Next permanent-node work still requires exact content mapping and whole-world/restart proof. Other accepted checks and human climb/upgrades/device/audio/1440 statuses unchanged.
 
 October14 live gate bKsAZFnb: current supported guide names actual L_M7SurvivalArena/opt-in PF.Harvest.Live and one-then-two NullRHI runner, backend-only. Nine native/5live execution records and both builds passed; source publication scoped separately. Capability Gx6Bk5mB Done confirmed after move retry. No duplicate Personal task; climb/upgrades remain open. The next independent M18 backup primitive is a bounded prerequisite for future content-layout migration, not permission to migrate private saves.

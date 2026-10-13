@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October14 — M12 read-only saved layout prerequisite
+
+M12LayoutAudit_20261013_213325591_d5070ee7 exit0/script0errors0warnings;85actors/descriptors,15resource identities,2starts/2spawners and serialized13items/8recipes/5definitions audited. RESOURCE_LAYOUT_BASELINE_M12.md records exact manifest/candidate-only location/known shutdown warning/memory and no Content/Config diff. No new playable tier or mapping added; supported authoring and whole-world migration/restart tests still required.
+
 ## October 14 — M18 original-envelope primitive
 
 Editor6.35s/Game27.19s PASS; native OriginalBackup/FileGenerations2/2,18.13s, exact selected bytes/generation/UTC preserved and no-overwrite/rotation/corrupt/occupied/path/output/source cases checked. Raw/test severity0,3.108/3.048GiB working/private. ORIGINAL_SAVE_BACKUPS_M18.md records failed Copy flags build, bounded archive implementation and limits. No normal Save/Load/startup integration, private migration, semantic layout edge, archived writer, rollback or fullM18 acceptance. A future live layout change must still provide its explicit manifest/transform and playtest gate.
