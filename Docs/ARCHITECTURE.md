@@ -1,5 +1,7 @@
 # Technical Architecture
 
+M12 harvest capabilities (October 14): trusted item family/grade and resource requirement fields use neutral legacy defaults. PFHarvestCapabilities validates exact native families/bounded mechanical grades; InventoryHarvest resolves real fresh owner bag capabilities read-only, and ResourceNode authorizes before mutations. No new RPC, energy system or save-layout change. HARVEST_CAPABILITIES_M12.md separates the native backend gate from upcoming live/new-content gates.
+
 October13 player stats: owner-only PlayerState record gains four bounded allocation ranks, independent Level-1 stat budget versus normal3-per-level knowledge points. Authoritative owned ID-only request/cooldown derives configured native gains for real damage/new-job time/carry threshold/max stamina; death retains record and respawn reapplies capacity. PFXPV3 onlyfor nonzero ranks, oldV1/V2 bytes/defaults preserved; outerworldV2 decodes validated ranks before player max-stamina validation/restore. Centered U/Paused-entry native presentation cannot grant XP or mix budgets. Shared Game-config tuning validated, default values unchanged/no newdependency. PLAYER_STATS_M12.md records proof andlimits. Full-height climb nowfinishes its swept rounded-capsule edge onto a server-approved landing target, detailed STAMINA_CLIMB_M14.md.
 
 

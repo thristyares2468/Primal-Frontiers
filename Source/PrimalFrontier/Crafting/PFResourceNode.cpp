@@ -105,11 +105,15 @@ bool APFResourceNode::Gather(APawn* Pawn)
     if(!V || V->IsDead() || !I || !D || Now<NextHitAt){return false;}
     // Derive reach and aim from the possessed pawn. Clients never supply a target, yield or damage.
     if(PFInteraction::FindTarget(Pawn)!=this){return false;}
-    I->PruneExpired();
-    // Tool tiers improve actions, never the node's finite total yield.
-    const int32 Damage=FMath::Min(HitsRemaining,I->GatheringHits());
+    // Resolve before any mutation (including expiry pruning). An access refusal
+    // cannot spend cooldown, hits, items, stamina or the progression reward window.
+    int32 ToolHits=0;FString Error;
+    if(!I->ResolveHarvest(D->HarvestRequirement,ToolHits,Error))
+    {UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalGathering] Refused: %s"),*Error);return false;}
+    // Speed is selected only from a compatible owned tool; finite yield is unchanged.
+    const int32 Damage=FMath::Min(HitsRemaining,ToolHits);
     auto* Progression=Pawn->GetPlayerState()->FindComponentByClass<UPFProgressionComponent>();
-    FPFProgressionRecord Reward;FString Error;
+    FPFProgressionRecord Reward;
     if(!Progression || !Progression->PrepareGather(D->YieldItem,Pawn,Reward,Error)){return false;}
     // Grant first: if the bag is full the node keeps its hits.
     if(!I->Grant(D->YieldItem,D->YieldPerHit*Damage)){return false;}

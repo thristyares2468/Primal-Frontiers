@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October 14 — M12 harvest capability backend gate
+
+Editor initial/final 41.66s/12.18s and Game 39.17s PASS. New Definitions/Selection/AtomicGather 3/3 clean; compatibility five passing plus GatherEvents fixture repair/replay 1/1 clean gives nine distinct native selectors covered. Exact reports/failure diagnosis/memory in HARVEST_CAPABILITIES_M12.md. No new ore, catalog assets, recipes, permanent nodes, save schema, art or private-save mutation. Next live server/client gate is independent; full tiers and human climb/upgrades remain open.
+
 ## Final M12/M14 technical checkpoint — October 13
 
 Editor and Game builds passed. All 30 final execution records passed: 14 native, 10 player-stat network/restart, 5 authored climb network and 1 rendered menu/10m climb. Final compatibility tests and raw-log comparison passed; no new severity lines against the existing startup baseline. Exact reports, selectors, failures repaired and memory limits are in PLAYER_STATS_M12.md and STAMINA_CLIMB_M14.md. This checkpoint supersedes the intermediate pending statements below. Human CLIMB_STAMINA and STATS_UPGRADE remain open; neither full milestone is accepted.

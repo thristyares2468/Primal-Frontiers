@@ -72,6 +72,8 @@ const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
             !FMath::IsFinite(D.WaterRecovery) || D.WaterRecovery<0 || D.WaterRecovery>100 ||
             D.GatheringHits<0 || D.GatheringHits>8 || !FMath::IsFinite(D.MeleeDamage) || D.MeleeDamage<0 || D.MeleeDamage>100 ||
             (!D.Category.MatchesTag(TAG_PF_Tool) && D.GatheringHits!=0) ||
+            !PFHarvest::ValidTool(D.HarvestFamilies,D.HarvestGrade,D.GatheringHits) ||
+            (!D.Category.MatchesTag(TAG_PF_Tool) && (!D.HarvestFamilies.IsEmpty() || D.HarvestGrade!=EPFHarvestGrade::None)) ||
             (!D.Category.MatchesTag(TAG_PF_Tool) && !D.Category.MatchesTag(TAG_PF_Weapon) && D.MeleeDamage!=0) ||
             (D.Category.MatchesTag(TAG_PF_Weapon) && (D.MeleeDamage<=20 || D.StackLimit!=1)) ||
             !FMath::IsFinite(D.CreatureHitReduction) || D.CreatureHitReduction<0 || D.CreatureHitReduction>0.5f ||

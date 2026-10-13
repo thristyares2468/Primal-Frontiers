@@ -18,6 +18,7 @@
 #pragma once
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
+#include "Crafting/PFHarvestCapabilities.h"
 #include "PFItemCatalog.generated.h"
 class UTexture2D;
 
@@ -51,6 +52,9 @@ struct FPFItemDefinition
     UPROPERTY(EditAnywhere, BlueprintReadOnly) float WaterRecovery = 0;
     /** Performance selected from the server's owned bag; weapons cannot grant gathering. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="8")) int32 GatheringHits = 0;
+    /** Empty/None preserves legacy general gathering speed; does not unlock gated nodes. */
+    UPROPERTY(EditAnywhere,BlueprintReadOnly) FGameplayTagContainer HarvestFamilies;
+    UPROPERTY(EditAnywhere,BlueprintReadOnly) EPFHarvestGrade HarvestGrade=EPFHarvestGrade::None;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="100")) float MeleeDamage = 0;
     /** Best carried Protection item mitigates creature-caused hits only, never needs/hazards. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="0.5")) float CreatureHitReduction = 0;

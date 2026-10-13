@@ -12,6 +12,7 @@
 #pragma once
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
+#include "Crafting/PFHarvestCapabilities.h"
 #include "PFCraftingCatalog.generated.h"
 class UPFItemCatalog;
 
@@ -57,6 +58,8 @@ struct FPFResourceDefinition
     UPROPERTY(EditAnywhere, BlueprintReadOnly) int32 Hits=3;
     /** Seconds after depletion before the node refills. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) float RespawnSeconds=20;
+    /** Legacy nodes default unrestricted; grade/family never arrive in a gather RPC. */
+    UPROPERTY(EditAnywhere,BlueprintReadOnly) FPFHarvestRequirement HarvestRequirement;
 };
 
 UCLASS(BlueprintType)

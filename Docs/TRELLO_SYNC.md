@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October 14: fresh six-board discovery found eight-tier parent 6ktNVyoo eligible, with no duplicate capability task. Scoped Gx6Bk5mB tracks the neutral-default harvest contract; passing nine-selector native/Editor/Game evidence posted before the next live task. Initial move response was not confirmed; re-read/retry required rather than claiming placement. Human CLIMB_STAMINA/STATS_UPGRADE, controller/audio and deferred1440 remain incomplete; no new Personal burden or broader tier/milestone acceptance.
+
 ## Current M12/M14 handoff — October 13
 
 Full-height climbing and independent player stat upgrades are technically verified (30 final passing execution records; both targets build). Programming HHQrtCtr and vVvhE5Yp are Done/complete. The first stats-card move timed out; fresh readback and a successful retry confirmed Done. Current exact G10 replaces the obsolete height ceiling on 7zjNOKJJ (Personal 1 / To Do) and Main 1tI62BmQ (Personal 1 / Doing), both incomplete. New nonduplicate JgdyVGvK is Personal 2 STATS_UPGRADE / To Do, incomplete, with G14 and no immediate XP grind required. Main M12 retains broader objectives and received bounded evidence separately. Physical controller stays Personal 3 / To Do, with obsolete climb guidance explicitly superseded. Historical evidence/objectives retained; unrelated members, deadlines and accepted tests preserved. Technical publication follows scoped Sol commit/push; no human/full-milestone completion inferred.

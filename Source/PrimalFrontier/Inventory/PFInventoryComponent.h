@@ -25,6 +25,7 @@ class APawn;
 class APFItemPickup;
 struct FPFItemDefinition;
 struct FPFSavedItemStack;
+struct FPFHarvestRequirement;
 
 /** One inventory slot: a quantity of one item from one acquisition batch. */
 USTRUCT(BlueprintType)
@@ -75,6 +76,8 @@ public:
     int32 Count(FName Id) const;
     /** Best valid still-fresh owned tool benefit; defaults to bare hands (1 hit/20 damage). */
     int32 GatheringHits() const;
+    /** Read-only query for server commit or owner UI; false preserves OutHits and all state. */
+    bool ResolveHarvest(const FPFHarvestRequirement& Requirement,int32& OutHits,FString& Error) const;
     float MeleeDamage() const;
     /** Stable ID of the best valid carried melee benefit; None means bare hands. */
     FName MeleeItem() const;

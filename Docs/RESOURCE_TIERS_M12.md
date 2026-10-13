@@ -1,5 +1,7 @@
 # Resource and harvesting tiers — M12 technology expansion
 
+October 14 implementation checkpoint: smallest sequence step 1 has a native-verified trusted family/grade/node-requirement contract with neutral legacy defaults; HARVEST_CAPABILITIES_M12.md records exact evidence. The eight-tier content ladder remains planned: no new ore, tool item, processing recipe, Tech charge, authored layout migration or dimensional spawning is delivered. Synthetic tests are not shipped materials. Live request verification is next; old statements about having no eligibility contract below describe the pre-contract audit.
+
 Naming update: **Riftglass** replaces the rejected name Resonance Composite for the final Tech material. It is provisionally a refined crystal/ancient-technology Frontier material used in powered equipment. Only planning/display wording changed; no live item ID or save record exists to migrate.
 
 Updated October 13, 2026. **Design/backlog only; not implemented or tested.** The user's latest direction adds Titanium immediately before Deepforge and supersedes the initial bronze/steel proposal:

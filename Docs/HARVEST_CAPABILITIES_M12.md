@@ -1,0 +1,25 @@
+# M12 — trusted harvesting capabilities
+
+October 14, 2026. Bounded backend contract; verification in progress. This does not deliver the eight-tier content ladder.
+
+## Contract
+
+`FPFItemDefinition` has a native Gameplay Tag family container and a material grade; `FPFResourceDefinition` has a required family/minimum grade. Pick, Axe and Sickle are exact native tags. Mechanical grades are Wood, Stone, Copper, Iron, Diamond, Titanium and Deepforge. Grade is access capability; `GatheringHits` remains speed and cannot increase a node's total yield. Tech is reserved but explicitly refused: powered Tech harvesting is NOT IMPLEMENTED until real charge validation exists.
+
+Empty families/None grade is the explicit legacy tool default. Empty/None resource requirements are unrestricted. Existing item IDs, speed values, nodes, recipes, native/saved catalogs, actor identities and all save schemas are unchanged. Existing general stone/bound tools do not silently acquire access to future gated nodes. Typed families require a valid mechanical grade, positive bounded gathering benefit and Tool category; unrelated/unknown tags, malformed combinations and unsupported grade values fail catalog lookup.
+
+`UPFInventoryComponent::ResolveHarvest` is a read-only query usable for authoritative validation or future advisory owner UI. It selects the highest gathering speed among compatible, valid, fresh tools actually in that bag. Under-grade/wrong-family/expired/removed/foreign tools confer no access; no cached selection or client-supplied bonus exists. Failed queries preserve the output hit value and all inventory state, including expired stacks.
+
+`APFResourceNode::Gather` resolves access before any mutation or progression preparation. An access failure logs a readable requirement with `[PrimalAgentTools]`, changes no hits, cooldown, items, stamina, respawn or XP. Normal server ownership/aim/life/capacity/cooldown and finite-yield rules remain. No new target/tier/yield RPC is added. No physical feature is exposed yet, so backend tests use disposable worlds instead of inventing a normal-map fixture.
+
+## Tests and limits
+
+Final backend checkpoint: fixture-only Editor rebuild `PFM12HarvestFixtureBuild.log` PASS 12.18s; Game `PFM12HarvestGameBuild.log` PASS 39.17s, no compiler warnings. Failed selector replay `Automation_M12GatherFixtureReplay_20261013_210101442_0ffa2c10` PASS 1/1, 19.09s, raw severity 0, sampled 2.998GiB working/2.881GiB private. Other five compatibility selectors passed in the initial run: PF.Crafting.Gathering, PF.Crafting.Transactions, PF.World.Resources, PF.Persistence.WorldRuntime and PF.Progression.WorldCompatibility. Together with the three new selectors, nine distinct relevant native tests have passed. Ordinary PrimalFrontier.log checked alongside the unique native logs; no new fatal/ensure. No live networking/rendering acceptance yet.
+
+Compatibility first run `Automation_M12HarvestCompatibility_20261013_205830343_12eb09c6`: 5/6 passed; GatherEvents failed its cap-boundary gather. Root cause was a latent fixture interaction with the previous stat feature: the fixture retained temporary hard-weight enforcement after its full-bag probe, while progression restore reapplies the normal 30kg threshold. Its accumulated 33.5kg then correctly refused under that artificial hard-container policy. Restore normal soft player-bag enforcement after the probe; do not change production weight or progression rules. Failed report retained; narrow rebuild/replay pending.
+
+Initial native run: `Automation_M12HarvestContract_20261013_205728976_097d7850`, PASS 3/3, zero warnings/errors, raw severity 0, 43.07s, sampled peak 2.936GiB working/2.835GiB private. Each new selector succeeded; exact selection checked and process exit 0. Matching report/index/run-summary under Saved/AutomationReports and PFAutomation_M12HarvestContract_20261013_205728976_097d7850.log under Saved/Logs. UTC run ID is October13; user-facing Brisbane date is October14. Baseline compatibility and Game build still pending.
+
+New selectors: `PF.Harvest.Definitions`, `PF.Harvest.Selection`, `PF.Harvest.AtomicGather`. They exercise validation/legacy defaults, real bag grants/removals/freshness/family selection and an actual possessed pawn aiming at a synthetic Iron-gated Stone node. This synthetic gate changes only the disposable test world; it is not a shipped Iron pick or ore deposit. Runtime tests check refusal snapshots, immediate same-clock success after refusals, exact compatible speed, finite total yield, cooldown/depletion, XP, client-role and foreign-controller rejection.
+
+Editor build PFM12HarvestContractBuild.log passed in 41.66s with no compiler warning. Native results/evidence follow after execution. No multiplayer/rendering, new resource crafting loop, authored save migration, earned tier pacing or human pass is claimed by these native tests. The existing climb/player-upgrade Personal checks remain open. Permanent node expansion still requires the explicit layout migration in SAVE_COMPATIBILITY_PLAN.md; do not alter private saves to make tests pass.

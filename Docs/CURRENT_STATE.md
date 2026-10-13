@@ -1,5 +1,19 @@
 # Primal Frontier — current state
 
+## Active task — October 14, 2026
+
+Current final backend checkpoint: harvest contract technically passed, nine distinct native selectors covered. Failed GatherEvents replay Automation_M12GatherFixtureReplay_20261013_210101442_0ffa2c10 PASS 1/1, 19.09s/raw severity 0, 2.998GiB working/2.881GiB private. Editor fixture rebuild PASS 12.18s; Game PFM12HarvestGameBuild.log PASS 39.17s without compiler warnings. Three new tests passed plus five unchanged compatibility passes and the repaired sixth. Exact history HARVEST_CAPABILITIES_M12.md. No assets/config/private saves changed. Next independent gate is actual owned gather requests against a disposable requirement fixture on server/one then two NullRHI clients; no shipped tier/rendered/human claim. Earlier intermediate entries below are superseded.
+
+GatherEvents failure diagnosed: its temporary hard-capacity probe stayed enabled; restoring the XP-cap boundary now correctly reapplies the prior player-stat 30kg threshold, so the fixture's accumulated 33.5kg falsely blocked the final gather. End only the fixture hard-cap probe and return to normal soft player-bag policy. No gameplay/capacity rules relaxed. Rebuild and failed-selector replay pending; failed report retained.
+
+Compatibility run Automation_M12HarvestCompatibility_20261013_205830343_12eb09c6: 5/6 PASS; PF.Progression.GatherEvents failed one assertion. Crafting Gathering/Transactions, World.Resources, Persistence.WorldRuntime and Progression.WorldCompatibility passed. No expansion; inspect exact assertion and repair only failed scope, then replay. Initial three new harvest tests and Editor build passed; no final delivery yet.
+
+New harvest tests PASS 3/3: Definitions, Selection and AtomicGather in Automation_M12HarvestContract_20261013_205728976_097d7850, 43.07s, raw warnings/errors/fatal/ensure all 0, 2.936GiB working/2.835GiB private. Editor build PASS 41.66s. Existing gathering/crafting/progression/world-save compatibility replay pending, then Game build. Backend-only; no new resource content, live/network/rendered or human acceptance inferred.
+
+Harvest contract implemented; Editor build PFM12HarvestContractBuild.log PASS in 41.66s without compiler warnings. Native PF.Harvest definitions/selection/actual-gather gate pending. No catalog asset/layout/save-schema or live tier content change; no human acceptance inferred.
+
+Fresh Trello audit and clean checkout at 6a93f9b. Next eligible bounded M12 work is the trusted harvest-family/grade contract, Programming Gx6Bk5mB Doing, linked to the eight-tier plan. Preserve default resource access/speed, item IDs, authored layout and save schemas. Native disposable-world tests first; no new permanent ore, recipes, energy or dimension implementation. Existing CLIMB_STAMINA and STATS_UPGRADE remain human-unverified; no repeat of accepted checks. Implementation/build/test pending.
+
 ## Current checkpoint - October13, 2026
 
 Full-height stamina climbing and separate level-earned player upgrades are technically verified. F from grounded contact or W+Space climbs a clear solid wall only when the complete server-derived cost is affordable; the old1.2m ceiling is gone. Cost15 through1.2m+10/metre above, normal jump20 additional. Rounded-capsule edge perches now finish onto the validated landing target. New4m/10m primitive fixtures/sign sit east of normal camp; all81 old actor configurations/resource-spawner identities and4newGUIDs preserved, repeat mutations0.

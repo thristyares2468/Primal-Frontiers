@@ -37,6 +37,10 @@ bool FPFGatherEventsTest::RunTest(const FString&)
     auto Once=[&](FName Id){auto* Node=Spawn(Id);if(!Node){return false;}ON_SCOPE_EXIT{Node->Destroy();};Advance();return TestTrue(TEXT("Owned real target trace"),PFInteraction::FindTarget(P)==Node) && TestTrue(TEXT("Actual finite gather accepts"),Node->Gather(P));};
     auto* Node=Spawn(TEXT("Node_Wood"));if(!Node){return false;}ON_SCOPE_EXIT{if(IsValid(Node)){Node->Destroy();}};Advance();
     I->bEnforceWeightLimit=true;I->WeightLimit=0.01f;TestFalse(TEXT("Full bag no gather"),Node->Gather(P));TestTrue(TEXT("Full bag preserves hits/items/XP/windows"),Node->HitsRemaining==3 && I->GetStacks().IsEmpty() && G->GetExperience()==0 && G->GetRecord().GatherWindows.IsEmpty());I->WeightLimit=100;
+    // End the hard-capacity probe. Real player bags use a soft carry threshold;
+    // progression restore correctly reapplies 30kg and must not make this test's
+    // accumulated 33.5kg refuse the later cap-boundary gather as a hard container.
+    I->bEnforceWeightLimit=false;
     PC->SetControlRotation(FRotator(0,180,0));TestFalse(TEXT("Wrong aim no gather or reward"),Node->Gather(P));PC->SetControlRotation(FRotator::ZeroRotator);
     Node->SetRole(ROLE_SimulatedProxy);TestFalse(TEXT("Client node cannot gather"),Node->Gather(P));Node->SetRole(ROLE_Authority);
     P->SetRole(ROLE_AutonomousProxy);TestFalse(TEXT("Client pawn cannot gather"),Node->Gather(P));P->SetRole(ROLE_Authority);

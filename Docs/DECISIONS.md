@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October 14 — harvest access is separate from speed
+
+Use exact native Pick/Axe/Sickle Gameplay Tags and a bounded material-grade enum in trusted item/node data. Resolve the best compatible fresh owned tool per action; never accept client tier/target/yield claims. Empty/None defaults preserve legacy unrestricted gathering without assigning old generic speed tools new gated access. Tech fails explicitly until charge is implemented. Access refusal precedes inventory expiry pruning, progression preparation and node mutation. No permanent resource/layout/schema expansion in this backend slice; use disposable automation fixtures. Legacy actor identities, catalog IDs and saved inventory remain unchanged.
+
 ## 2026-10-13 - Separate player stat budget and persist validated ranks
 
 Use existing earned XP/ten-level slice; one independent stat point per level, versus3 technology points. Four bounded ranks derive damage/max stamina/carry/new-job speed; owner ID-only request checks living own pawn/controller/server/cooldown and complete candidate. Shared native progression Game-config tuning, no INI/dependency change; allocation doesnot refill stamina or accelerate a running job. PlayerState lifetime survivesdeath; freshspawn applies/fills capacity. InnerPFXPV3 forallocations preserves zero-rankV1/V2 bytes and legacyXP; outerworldV2 validates owner-bound ranks before accepting/restoring upgraded vitals. Unknown/corrupt/overspent records fail closed, no private-file auto rewrite. Ancient technology planned separately. PLAYER_STATS_M12.md exactproof. Tall perches require reaching the full server-approved landing target through swept walking/step-up, not merely firstwalkable capsule contact; owner-only goal RPC and expiry remainbounded.

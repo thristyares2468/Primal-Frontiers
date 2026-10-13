@@ -79,7 +79,7 @@ const FPFResourceDefinition* UPFCraftingCatalog::Resource(FName Id,const UPFItem
     {
         if(D.Id!=Id){continue;}
         if(Found || Id.IsNone() || !Items || !Items->Find(D.YieldItem) || D.YieldPerHit<1 || D.YieldPerHit>100 || D.Hits<1 || D.Hits>100 ||
-            !FMath::IsFinite(D.RespawnSeconds) || D.RespawnSeconds<1 || D.RespawnSeconds>3600){return nullptr;}
+            !FMath::IsFinite(D.RespawnSeconds) || D.RespawnSeconds<1 || D.RespawnSeconds>3600 || !PFHarvest::ValidRequirement(D.HarvestRequirement)){return nullptr;}
         Found=&D;
     }
     return Found;
