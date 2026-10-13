@@ -2,6 +2,18 @@
 
 ## Active task — October 14, 2026
 
+M18 final primitive gate: Editor6.35s and Game27.19s PASS without compiler warnings. OriginalBackup/FileGenerations native PASS2/2 in Automation_M18OriginalBackup_20261013_212202078_4299412e,18.13s/raw and testseverity0/no timeout/fatal/ensure,3.108working/3.048privateGiB. No private-world preservation or migration enabled. Exact evidence ORIGINAL_SAVE_BACKUPS_M18.md; earlier pending journal statements below are historical. Publication and next eligible task audit follow; no human climb/stat pass inferred.
+
+M18 bounded archive implementation Editor PFM18OriginalBackupRepairBuild.log PASS6.35s, no compiler warning. Native actual-file OriginalBackup plus existing FileGenerations starts next. First failed copy-flag build retained; no world/startup integration or private originals created.
+
+Engine copy implementation inspected: no-progress platform copy has platform-specific replacement/cleanup policy. Use bounded reader/no-replace writer archives instead so our error path never deletes a partial original. This also removes the enum-cast copy call. Destination-directory refusal explicit. No cross-process race or crash-atomic publication guarantee; source and any existing original untouched by our failure handling. Rebuild/test pending.
+
+M18 first build failed C2664: bitwise file-copy flags need explicit EFileWrite cast. Correct only API use and explicitly refuse a directory at the backup destination. Inspect engine copy cleanup semantics before claiming partial-destination preservation; rebuild/test pending, no backup gate passed yet.
+
+M18 no-overwrite original preservation/read APIs and unique actual-file native fixture implemented; Editor build pending. Preserve selected envelope byte-for-byte and validate generation/UTC/payload; retain corrupt/partial destination and source on refusal. No normal Save/Load/startup integration, automatic migration, gameplay fallback or private-save processing. Exact limits ORIGINAL_SAVE_BACKUPS_M18.md.
+
+Harvest live source published2e3cb1c, remote equality/clean verified; both bounded harvest cards Done. Next independent M18 prerequisite: immutable original-backup file primitive, unique native slots only. No automatic migration, private-world rewrite or general content mapping enabled. Exact source envelope/payload verification and no-overwrite/error/rotation tests before any future new-node migration. Implementation/build/tests pending; personal climb/upgrades remain open.
+
 Final live gate complete: Editor5.86s/ack repair6.79s and Game29.30s PASS; PF.Harvest.Live one-client2/2 and impaired two-client3/3 pass with successful guards/zero new raw severity. Exact results HARVEST_CAPABILITIES_M12.md. Trello bKsAZFnb technical completion/publication follows. Human climb/upgrades remain open. Next independent prerequisite before permanent new nodes is a bounded immutable original-backup primitive for future layout migration (M18); no automatic private-world migration will be enabled by that primitive.
 
 Live two-client M12Harvest2_20261013_211327579_a866ce05 PASS 3/3 roles, 55.61s,75ms/1% outgoing impairment, exact selector/packet/phase markers and private/default guards passed. No test warning/error, saved-move warning, timeout/fatal/ensure. All final five live-role logs add zero normalized severity lines against existing startup baseline. Raw21warnings/14known Python errors perrole unchanged. Game final build/review/publication pending; native9+live5 passing records remain backend evidence, not real ore/recipe/layout migration or human tier pacing.

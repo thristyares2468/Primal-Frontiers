@@ -1,5 +1,7 @@
 # Save compatibility and migration plan — M18
 
+October14 bounded implementation update: ORIGINAL_SAVE_BACKUPS_M18.md records a native-tested no-overwrite original-envelope primitive, outside ordinary A/B rotation. It is NOT integrated into normal load/startup/migration; no private save automatically receives this protection yet. General transforms/layout mappings, permanent-original migration transaction, archived writer fixtures, rollback and fullM18 remain unimplemented. Older blanket statements below describe the earlier audit. Inner progression now also supports V3 stat allocations (PLAYER_STATS_M12.md), with neutral-rank V1/V2 bytes retained; outerworldV2 unchanged.
+
 Current contracts reconciled October13,2026 against published c2890ee. **General content/layout migration and permanent original-backup publication are not implemented.** Specific backwards-compatible readers/defaults below already exist; this distinction supersedes the original October8 planning-only overview. Full M18 remains To Do. This document audit changes no source, schema, assets or private saves and certifies no production authentication/crash durability. Accepted M7 and solo M8 observations remain accepted; rendered multiplayer, M13 G9 and deferred1440 remain separate open gates.
 
 ## Current contracts checked in source

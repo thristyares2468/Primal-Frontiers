@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October 14 — M18 original-envelope primitive
+
+Editor6.35s/Game27.19s PASS; native OriginalBackup/FileGenerations2/2,18.13s, exact selected bytes/generation/UTC preserved and no-overwrite/rotation/corrupt/occupied/path/output/source cases checked. Raw/test severity0,3.108/3.048GiB working/private. ORIGINAL_SAVE_BACKUPS_M18.md records failed Copy flags build, bounded archive implementation and limits. No normal Save/Load/startup integration, private migration, semantic layout edge, archived writer, rollback or fullM18 acceptance. A future live layout change must still provide its explicit manifest/transform and playtest gate.
+
 ## October 14 — M12 actual owned gather request gate
 
 PF.Harvest.Live one-client PASS2/2 and two-client75ms/1% PASS3/3, all role markers/phase acknowledgements/packet/private/settings guards checked. Editor6.79s and Game29.30s PASS; final raw startup21warnings/14known Python errors perrole, zero new normalized severity or test warning/ensure. Exact paths and retained fixture compilation/ack failures in HARVEST_CAPABILITIES_M12.md. No new permanent ore, recipes, authored layout or normal gameplay acceptance; full tier ladder stays open.

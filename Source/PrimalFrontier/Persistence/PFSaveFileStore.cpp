@@ -104,3 +104,61 @@ bool FPFSaveFileStore::Write(const FString& Slot, const TArray<uint8>& Payload, 
     }
     return true;
 }
+
+FString FPFSaveFileStore::OriginalPath(const FString& Slot,const FString& Edge)
+{
+    return ValidSlot(Slot) && ValidSlot(Edge) ? FPaths::Combine(FPaths::ProjectSavedDir(),TEXT("Persistence/Originals"),Slot,Edge+TEXT(".pfs")) : FString();
+}
+
+bool FPFSaveFileStore::ReadOriginal(const FString& Slot,const FString& Edge,FPFSavedFile& Out,FString& Error)
+{
+    Error.Reset();const FString Original=OriginalPath(Slot,Edge);FPFSavedFile Candidate;
+    if(Original.IsEmpty() || !ReadGeneration(Original,Candidate))
+    {Error=TEXT("Original backup missing, invalid or corrupt; files preserved");return false;}
+    Out=MoveTemp(Candidate);return true;
+}
+
+bool FPFSaveFileStore::PreserveOriginal(const FString& Slot,const FString& Edge,FString& Error)
+{
+    Error.Reset();const FString Original=OriginalPath(Slot,Edge);
+    if(!IsInGameThread() || Original.IsEmpty())
+    {Error=TEXT("Requires game thread and bounded slot/migration edge identifiers");return false;}
+    if(IFileManager::Get().DirectoryExists(*Original))
+    {Error=TEXT("Original backup destination occupied by a directory; source preserved");return false;}
+    if(IFileManager::Get().FileExists(*Original))
+    {
+        FPFSavedFile Existing;
+        if(!ReadGeneration(Original,Existing)){Error=TEXT("Corrupt original backup preserved; explicit recovery required");return false;}
+        return true; // Retain the FIRST original, even after ordinary A/B rotation.
+    }
+    FPFSavedFile A,B;
+    const bool GoodA=ReadGeneration(Path(Slot,false),A),GoodB=ReadGeneration(Path(Slot,true),B);
+    if((!GoodA && IFileManager::Get().FileExists(*Path(Slot,false))) || (!GoodB && IFileManager::Get().FileExists(*Path(Slot,true))))
+    {Error=TEXT("Corrupt source generation preserved; explicit recovery before migration backup");return false;}
+    if(!GoodA && !GoodB){Error=TEXT("No valid source generation; no original created");return false;}
+    const bool Second=GoodB && (!GoodA || B.Generation>A.Generation);
+    const auto& Source=Second?B:A;
+    if(!IFileManager::Get().MakeDirectory(*FPaths::GetPath(Original),true))
+    {Error=TEXT("Cannot create original backup directory; source preserved");return false;}
+    // No replacement. A partial/failed destination is deliberately retained and
+    // blocks a later attempt instead of being deleted or overwritten. Copy keeps
+    // the exact source envelope/generation/time, rather than re-encoding as a save.
+    TUniquePtr<FArchive> Reader(IFileManager::Get().CreateFileReader(*Path(Slot,Second),FILEREAD_Silent));
+    if(!Reader || Reader->TotalSize()<HeaderBytes || Reader->TotalSize()>HeaderBytes+MaxPayloadBytes)
+    {Error=TEXT("Cannot read bounded source envelope; source preserved");return false;}
+    TArray<uint8> Bytes;Bytes.SetNumUninitialized(static_cast<int32>(Reader->TotalSize()));
+    Reader->Serialize(Bytes.GetData(),Bytes.Num());
+    const bool Read=!Reader->IsError() && Reader->Close();Reader.Reset();
+    if(!Read){Error=TEXT("Source envelope read failed; source preserved");return false;}
+    // Write through bounded archives, not platform CopyFile cleanup/replacement
+    // policy. Our failure path never deletes a partial original.
+    TUniquePtr<FArchive> File(IFileManager::Get().CreateFileWriter(*Original,FILEWRITE_NoReplaceExisting|FILEWRITE_Silent));
+    if(!File){Error=TEXT("Cannot create original backup; source and any destination preserved");return false;}
+    File->Serialize(Bytes.GetData(),Bytes.Num());
+    const bool Written=!File->IsError() && File->Close();File.Reset();
+    if(!Written){Error=TEXT("Original write failed; source and partial destination preserved");return false;}
+    FPFSavedFile Verified;
+    if(!ReadGeneration(Original,Verified) || Verified.Generation!=Source.Generation || Verified.SavedUtc!=Source.SavedUtc || Verified.Payload!=Source.Payload)
+    {Error=TEXT("Original backup verification failed; source/destination preserved");return false;}
+    return true;
+}

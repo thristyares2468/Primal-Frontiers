@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October14 M18 dyQLazEA tracks only original-envelope backend primitive: native2/2 and both builds passed; no private migration or generalM18 acceptance. Programming Doing until final evidence/status readback, then Done. MainM18 retains broader dependencies; no Personal task created for backend-only files. Next permanent-node work still requires exact content mapping and whole-world/restart proof. Other accepted checks and human climb/upgrades/device/audio/1440 statuses unchanged.
+
 October14 live gate bKsAZFnb: current supported guide names actual L_M7SurvivalArena/opt-in PF.Harvest.Live and one-then-two NullRHI runner, backend-only. Nine native/5live execution records and both builds passed; source publication scoped separately. Capability Gx6Bk5mB Done confirmed after move retry. No duplicate Personal task; climb/upgrades remain open. The next independent M18 backup primitive is a bounded prerequisite for future content-layout migration, not permission to migrate private saves.
 
 October 14: fresh six-board discovery found eight-tier parent 6ktNVyoo eligible, with no duplicate capability task. Scoped Gx6Bk5mB tracks the neutral-default harvest contract; passing nine-selector native/Editor/Game evidence posted before the next live task. Initial move response was not confirmed; re-read/retry required rather than claiming placement. Human CLIMB_STAMINA/STATS_UPGRADE, controller/audio and deferred1440 remain incomplete; no new Personal burden or broader tier/milestone acceptance.

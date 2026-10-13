@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October 14 — preserve migration originals outside rotating generations
+
+Add a trusted, game-thread no-overwrite original envelope copy under bounded project-local Originals/slot/edge paths. Verify exact selected generation/UTC/payload; keep the first healthy original across ordinary A/B rotation and refuse corrupt or occupied originals. Bounded archive copy preserves raw envelope rather than creating a newer generation. No destructive cleanup of partial destinations and no crash-atomic/cross-process/authentication guarantee. Future callers must validate semantic world/source/edge separately. API is not wired into normal Save/Load/startup and does not enable private-world migration.
+
 ## October 14 — harvest access is separate from speed
 
 Use exact native Pick/Axe/Sickle Gameplay Tags and a bounded material-grade enum in trusted item/node data. Resolve the best compatible fresh owned tool per action; never accept client tier/target/yield claims. Empty/None defaults preserve legacy unrestricted gathering without assigning old generic speed tools new gated access. Tech fails explicitly until charge is implemented. Access refusal precedes inventory expiry pruning, progression preparation and node mutation. No permanent resource/layout/schema expansion in this backend slice; use disposable automation fixtures. Legacy actor identities, catalog IDs and saved inventory remain unchanged.

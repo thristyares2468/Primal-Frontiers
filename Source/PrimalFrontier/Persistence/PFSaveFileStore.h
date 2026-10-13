@@ -19,4 +19,10 @@ public:
     static FString Path(const FString& Slot, bool bSecond);
     static bool Read(const FString& Slot, FPFSavedFile& Out, FString& Error);
     static bool Write(const FString& Slot, const TArray<uint8>& Payload, FString& Error);
+    /** Trusted migration preparation only; not called by normal Save/Load yet.
+     *  Existing originals are never overwritten, including corrupt originals. */
+    static FString OriginalPath(const FString& Slot,const FString& Edge);
+    static bool PreserveOriginal(const FString& Slot,const FString& Edge,FString& Error);
+    /** Checks the ordinary bounded envelope; failed reads preserve Out. */
+    static bool ReadOriginal(const FString& Slot,const FString& Edge,FPFSavedFile& Out,FString& Error);
 };
