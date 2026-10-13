@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## October13 - M12 Titanium planning refinement
+
+User additionally confirms cross-dimensional design must affect material spawning and names. Checked GAME_VISION/WORLD_DESIGN/CORE_LOOP: Eryndor and Frontiers already established, region types conceptual. New source table ties familiar tiers/Titanium to Eryndor and original late-tier ingredients to proposed volcanic/crystal Frontiers; names/travel fixtures TBD/provisional. Plan-only region/authority/acyclic access/save/memory constraints, no live spawning/portal/new map or gameplay acceptance.
+
+User requests one additional material beside Deepforge. Titanium now precedes it, making eight planned tiers, Diamond->Titanium->Deepforge->Tech late path. Requirement graph remains reachable: Diamond mines titanium; refining it does not require Titanium tools; Titanium tools mine Deepforge ingredients. Iron-pick diamonds and finalpoweredTech retained. RESOURCE_TIERS_M12.md/current crosslinks and existing future Trello objective updated. Documentation-only consistency check, no gameplay implementation/build/playtest/asset/private save change. Earlier seven-tier checks below are historical, not current count.
+
 ## October13 - M12 seven-tier resource/tool progression planning
 
 User selected Wood/Stone/Copper/Iron/Diamond plus two original replacement tiers, final tier Tech. RESOURCE_TIERS_M12.md records provisional Deepforge Alloy/Resonance Composite, Iron-pick diamond requirement, quality vs family/access, staged acyclic recipes, powered Tech, source audit and reference links. Existing PFResourceNode has no access gate and existing carried stone/bound tool only speeds finite harvesting. Plan does not claim implementation, tests or fullM12 acceptance; source/assets/private saves/settings unchanged. Future native/server-client/rendered/save gates and exact absent fixture TBD documented; no new manual task. Compatibility remains prerequisite before new permanent resource nodes.

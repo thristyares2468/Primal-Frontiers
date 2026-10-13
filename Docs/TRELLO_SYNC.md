@@ -1,5 +1,11 @@
 # Trello task workflow
 
+## October13 - Titanium material-plan refinement
+
+Final readbacks: LpNlBTxm Titanium/dimensional planning Done/complete; 6ktNVyoo existing eight-tier implementation ToDo/incomplete; MainM12 Doing/incomplete. Historical Main material preface retained as comment and older implementation history preserved. No member/due changes. Established Eryndor/Frontier lore linked to explicit regional source/naming/access/save/travel constraints, all Frontier fixtures TBD. Consistency PASS8orderedtiers/Irongate/lorelinks/firstcrossingreachability/planned-onlystatus; gitdiffcheck clean. Scoped Sol docs-only publication follows.
+
+Fresh MainM12/future6ktNVyoo reads preserve Doing/ToDo and assignments/deadlines. Bounded Titanium planning task Doing while current eight-tier docs/requirements updated. Close only this docs refinement after eight-row/acyclic-chain/current-link checks; rename existing future implementation card to eight tiers, not a duplicate implementation task or gameplay pass. Earlier seven-tier task evidence remains historical. Scoped Sol M12 publication follows; no source/assets/engine/private state touched.
+
 ## October13 - resource/tool tier planning
 
 Readback confirmed planning lTI5AZ1F Done/complete and future implementation 6ktNVyoo ToDo/incomplete. MainM12 KsGXaOQ6 updated with final seven-tier instruction. Source/document check passed exactlyseven tierrows, Iron-pick diamonds/finalTech/planned-only status andsix crosslinks; git diff --check clean. Original assignments/dates/privacy unchanged. No engine verification was needed or claimed for this docs-only scope.
