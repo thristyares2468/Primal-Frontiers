@@ -1,5 +1,7 @@
 # Trello task workflow
 
+Near-spawn publication confirmed a9247b2 origin/master equality/clean;4LFSobjects uploaded. Technical card publicationcomment succeeded; current exactG10/manualstatus readbacks remain unchanged. No human/fullM14 acceptance. Scoped handoff note contains publication proof only, no compiled-source or asset change.
+
 Near-spawn task final readbacks:4stnnnKf Done/complete,7zjNOKJJ Personal2ToDo/incomplete, MainM14Personal2Doing/incomplete. Revised G10 copied exactly to both manual cards; previous guides retained, original expanded-world plan preserved. All members/dates/status outside verified scope unchanged. No human acceptance inferred or ownedUnreal process left. ScopedSol publication follows.
 
 ## October13 - Near-spawn climb fixture repair
