@@ -441,6 +441,8 @@ Continue only if:
 
 ## Milestone 12: Combat, Tools, And Progression
 
+October13 added requirement: seven resource/tool tiers, Wood -> Stone -> Copper -> Iron -> Diamond -> two original advanced materials, with the final tier Tech. Provisional replacements are Deepforge Alloy and Resonance Composite. Actual harvesting requires the appropriate family/minimum grade (Iron pick for diamonds); later powered Tech needs energy/research. RESOURCE_TIERS_M12.md is the staged plan, not implementation or milestone acceptance.
+
 Goal: Make survival progression feel meaningful.
 
 Build:

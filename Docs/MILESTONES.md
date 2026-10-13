@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October13 - M12 seven-tier resource/tool progression planning
+
+User selected Wood/Stone/Copper/Iron/Diamond plus two original replacement tiers, final tier Tech. RESOURCE_TIERS_M12.md records provisional Deepforge Alloy/Resonance Composite, Iron-pick diamond requirement, quality vs family/access, staged acyclic recipes, powered Tech, source audit and reference links. Existing PFResourceNode has no access gate and existing carried stone/bound tool only speeds finite harvesting. Plan does not claim implementation, tests or fullM12 acceptance; source/assets/private saves/settings unchanged. Future native/server-client/rendered/save gates and exact absent fixture TBD documented; no new manual task. Compatibility remains prerequisite before new permanent resource nodes.
+
 ## October13 - direct user playtest acceptance and future proximity voice
 
 [PLAYTEST_RESULTS_2026_10_13.md](PLAYTEST_RESULTS_2026_10_13.md) records12 namedpasses andthree untestedchecks without inferred stats/device tests. M13 encounter/dawn/loot gate accepted; M14 dependency resolves for bounded greybox work. Building/R/eightpieces/B-Esc/crafting/weight-sprint-jump/glide/spacing/rename accepted. CLIMB unavailablegeometry,controller/audio untested;1440 deferred. Broader optional earnedpacing/displayrollback/expiryselection/renderedmultiplayer/packagedserver acceptance separate. User confirms proximity voice chat for futureM15; PROXIMITY_VOICE_PLAN.md records requirements and later listening gate, no implementation or new dependency. No fresh engine launch/test inferred from this docs/Trello acceptance task.

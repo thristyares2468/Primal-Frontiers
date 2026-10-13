@@ -1,5 +1,9 @@
 # Original progression and biological upgrades — M12/M13 plan
 
+## October13 resource-tier direction
+
+The user requests a seven-tier Minecraft-style material progression with a final Tech tier: **Wood -> Stone -> Copper -> Iron -> Diamond -> Deepforge Alloy -> Resonance Composite (Tech)**. The last two names are provisional original replacements for the supplied reference names; no bronze/steel branch replaces this order. [RESOURCE_TIERS_M12.md](RESOURCE_TIERS_M12.md) records source audit, reference research, tool-family/minimum-grade requirements, acyclic crafting/station progression, powered Tech, UI, save-layout compatibility and staged test gates. Iron picks (or compatible higher picks) must harvest diamonds; Copper can be a useful speed bridge with Stone-level mining access. Current gathering only improves hits per action and DOES NOT enforce these requirements. This is an expanded M12 implementation objective, not shipped gameplay; retain existing baseline recipes/tools/saves. Advanced challenge/research/station costs remain TBD and require separate verification.
+
 ## Current implementation — October 10
 
 Read this section as current state. Dated checkpoints below retain historical evidence; the original proposal sections do not imply that their stations, discoveries or adaptations exist.

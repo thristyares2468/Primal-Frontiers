@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## 2026-10-13 - Planned resource grades separate access from tool speed
+
+Use the user's seven material tiers ending in original Tech, not the earlier bronze/steel proposal. Future tool-family Gameplay Tags and trusted material grades gate node access; best valid compatible server-carried tool preserves current automatic-selection behavior initially. Iron pick is the diamond minimum. Copper may improve speed without a separate mining access level. Existing stone/bound tool IDs and baseline recipes remain compatible; no retrospective item deletion/knowledge rewards. Powered Tech requires real charge, advanced infrastructure and bounded special research. Node eligibility refusal must preserve hits/items/stamina/XP/power; permanent new node layout waits for tested save compatibility. These are decisions for future implementation, not current gameplay changes. See RESOURCE_TIERS_M12.md.
+
 ## 2026-10-13 - Automatic short-ledge climb uses real authoritative contact
 
 Arm one bounded0.75s window only from the first actual paid ground jump. Server movement impact selects the existing ledge path, measured from original ground feet so airborne extra jumps cannot reanchor taller walls. Approval costs normal jump20 plus climb15 and preserves capsule collision sweeps. Automatic-only approved horizontal drive persists after the initial wall slide until landing/cancel/death/new jump; client acknowledgment carries only server-selected impulse/mode. ManualF keeps its path. No per-frame idle probing, client target/origin authority or unlimited wall climbing. Shared live-course floor receipt barrier is test-only, using existing saved-move intent before raised teleport; no production net setting/RPC added. Exact failure and replay evidence in AUTOMATIC_CLIMB_M1.md.

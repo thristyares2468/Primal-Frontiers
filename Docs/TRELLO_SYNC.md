@@ -1,5 +1,11 @@
 # Trello task workflow
 
+## October13 - resource/tool tier planning
+
+Readback confirmed planning lTI5AZ1F Done/complete and future implementation 6ktNVyoo ToDo/incomplete. MainM12 KsGXaOQ6 updated with final seven-tier instruction. Source/document check passed exactlyseven tierrows, Iron-pick diamonds/finalTech/planned-only status andsix crosslinks; git diff --check clean. Original assignments/dates/privacy unchanged. No engine verification was needed or claimed for this docs-only scope.
+
+Fresh Main/Programming reads found MainM12 KsGXaOQ6 Doing and no resource-grade implementation task. Bounded lTI5AZ1F planning Doing while source/reference audit and RESOURCE_TIERS_M12.md were prepared. Latest user correction is seven-tier Wood/Stone/Copper/Iron/Diamond plus two original replacements, finalTech; supersedes bronze/steel proposal. Close only the planning task after document/source consistency checks, keep fullMainM12 open and add a separate AI future implementation card ToDo with exact staged guide/TBD fixture. No Personal task/priority/member/deadline change, engine launch or gameplay pass; scoped Sol docs publication after Trello readback.
+
 ## October13 - direct user batch reconciliation
 
 Confirmed readbacks: Bc3tb6yW M13 Done/complete; N5sIBw7f spacing Done/complete; UZVTTPLE solo persistence Done/complete with rename accepted. iH8I2Qfc and mfWT22JZ retain Doing/incomplete for only unreported scope; accepted R/buildpieces/B-Esc/crafting portions no longer requested. Their original15654-character guides are retained verbatim as comments because adding the new acceptance preface would exceed Trello's16384-character description limit; current remaining guide is concise and exact. DctLv1lR/hzF1F4vV retain Personal3/ToDo/incomplete; controller guide includes automatic jump climb. M14 ToDo now has resolvedM13 dependency; M15 Doing includes explicitly confirmed plannedproximityvoice. No member/deadline/privacy changes. Automatic task yeU27Cvr Done/complete and0a94bdf remote/local equality verified.

@@ -2,6 +2,10 @@
 
 ## Active checkpoint - October 13, 2026
 
+Resource-tier planning completed and checked: exactly seven materialtiers, Iron-pick diamonds, original finalTech and cross-linked design. Trello planning https://trello.com/c/lTI5AZ1F Done/complete; implementation https://trello.com/c/6ktNVyoo ToDo/incomplete. No gameplay/C++/asset/save change or new Unreal test/build in this planning-only task. Scoped M12 Sol docs publication follows; earlier automatic-climb and user acceptance evidence remains valid.
+
+New October13 objective recorded for expanded M12 technology: **Wood -> Stone -> Copper -> Iron -> Diamond -> Deepforge Alloy -> Resonance Composite (Tech)**, with provisional original final names. [RESOURCE_TIERS_M12.md](RESOURCE_TIERS_M12.md) defines actual minimum-tool harvesting (Iron pick for diamonds), family-specific eligibility, crafted upgrades and powered Tech. Planning/source audit only; no new resource, C++, asset, harvest gate, save version, Editor build or gameplay test added. Existing tools only improve speed today. Future implementation remains AI/ToDo, first minimum validated contract and disposable gated-node tests before ordinary-world ore expansion/save-layout migration. M14 ledge candidate and accepted playtests remain unchanged; no immediate user action or new art is required for this plan.
+
 Latest completed work: automatic jump-at-wall climb is built, tested and published as **0a94bdf**. Both Editor and game builds passed. All 10 final native/live test executions passed, including two NullRHI clients and a rendered 720p course; exact evidence and earlier repaired failures are in [AUTOMATIC_CLIMB_M1.md](AUTOMATIC_CLIMB_M1.md).
 
 Your October13 playtest report supplies **12 named passes**, recorded in [PLAYTEST_RESULTS_2026_10_13.md](PLAYTEST_RESULTS_2026_10_13.md). Trello readback confirms the M13 supported ecology encounter gate and world-spacing check are Done; the accepted solo persistence card includes world rename. Building, menus, crafting, sprint/jump weight and glide acceptance are recorded. No passed check needs repetition.

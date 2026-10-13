@@ -1,5 +1,9 @@
 # Roadmap and open-world direction
 
+## Added M12 objective - October13
+
+Expanded technology/resource progression now has the user's seven-tier direction: Wood/Stone/Copper/Iron/Diamond/Deepforge Alloy/Resonance Composite (Tech), with original final names provisional. RESOURCE_TIERS_M12.md is a completed planning audit only. Real resource/tool-family minimum grades, iron-pick diamonds, processing and powered finalTech remain AI implementation work. No node/content/save migration or new unlock is already present; baseline/current M12 earned behavior preserved. M14 traversal candidate stays next separate world task; existing manual acceptance/untested limits unchanged.
+
 ## Current acceptance - October13
 
 Direct user batch:12 namedpasses in PLAYTEST_RESULTS_2026_10_13.md. M13 supported greybox ecology gate now accepted (encounters/dawn/loot), resolving M14 dependency; optional predator/prey/taming/adaptation remain outside acceptance. World spacing, building/R/allpieces, menu navigation, centeredcrafting, sprint/jump weight, glide and rename accepted. CLIMB geometry unavailable/controller/audio untested;1440 deferred. M11 broader unreported guide portions and M12 earnedpacing remain separate. M8 solo accepted includingrename; renderedmultiplayer/packagedserver remain open. Automatic climb technically passes Editor/Game/native/network/render720/manualregression and is published0a94bdf; next candidate boundedAI scope is accessible primitive ledges preserving save layout. Confirmed proximity voice chat is futureM15 work, PROXIMITY_VOICE_PLAN.md, not implemented. This section supersedes older unverified M13/M14 dependency statements below.
