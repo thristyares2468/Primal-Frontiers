@@ -1,5 +1,7 @@
 # M12 — first earned Copper loop
 
+Published source/evidence **570dabe39ed8f81f6b1ad05c88ea441d793f587e**, origin/master equality/clean verified,3LFSobjects uploaded, Codex GPT-6.1 Sol coauthor.39scoped files: native data/authority/UI, exact layout helper, native/live/rendered fixtures, supported authoring/runner scripts, documentation, OpenWorld level and two new external actors. No unrelated asset/generated files. `git show --stat 570dabe` is the exact changed-file manifest. Later handoff documentation does not change compiled/tested source. Trello technical Done and Personal Copper ToDo read back; ordinary acceptance remains pending.
+
 October14,2026. Bounded Wood/Stone-to-Copper slice; full eight-tier M12 and M18 remain incomplete. Ordinary manual `COPPER_LOOP` acceptance is pending. No Iron/Diamond/Titanium/Frontier ores, powered Tech equipment, durability, furnace, station, external art or dimension is implemented by this slice.
 
 ## Actual content and controls
