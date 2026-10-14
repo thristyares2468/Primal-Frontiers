@@ -1,5 +1,7 @@
 # Technical Architecture
 
+October15 M15 follow-up: UPFVoiceAuthority derives actual server-world public ID/connection/pawn position/life and ephemeralspace; no client supplied route inputs. Weak controller consent/preferences reset on reconnect, no tick/capture/provider/RPC/save fields. Native3/3 and actual one2/2/impairedtwo3/3 headless gates passed; PROXIMITY_VOICE_AUTHORITY_M15.md holds failure repairs and limits. This is metadata bridge, not playable voice.
+
 October15 M15: Voice/PFProximityVoicePolicy is a pure metadata helper with bounded public participant/space snapshots and default-off consent/PTT/range/mute/block routing. No audio/provider/plugin/RPC added. Caller authority is an explicit upcoming adapter gate; see PROXIMITY_VOICE_POLICY_M15.md for contract, native proof and limits.
 
 October14 follow-up: inventory now owns Items and embedded Player upgrades pages; PFInventoryInput centralizes balanced open/close and preview key routing, preserving existing stat-ID authority and item selection. Separate Pause upgrade entry and ambiguous U/storage binding removed. Stationary wall input has0cost and no recovery; moving12/s remains. No point/save/schema/resource-layout changes. Current proof and limits: INVENTORY_UPGRADES_WALL_REST.md; older4/s-hold notes below are historical.

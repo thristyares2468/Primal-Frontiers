@@ -1,5 +1,7 @@
 # Current networking objective - October13, 2026
 
+October15 actual authority snapshot bridge now passes native3/3 and one2/2/two3/3 roles with75ms/1% impairment. Native metadata setters reject real client worlds; server derives connected public identity/position/life and routes near/far/mute/block. No microphone/capture/audio packets, client preference RPC, provider/session-account or transportsecurity claim. PROXIMITY_VOICE_AUTHORITY_M15.md documents exact contract/fixture/evidence; previous note's upcoming snapshot gate is now technically passed.
+
 October15 M15 bounded metadata voice-policy helper passes PF.Voice.Policy/PolicyValidation and Editor/Game builds. Default-off consent/PTT/range/volume/mute/block rules only, trusted caller contract; actual server snapshot adapter is next. No capture/audio transport/service/plugin/RPC/UI/live networking or physical listening claim. PROXIMITY_VOICE_POLICY_M15.md supersedes older wholly-planned notes only for this native helper, not full proximity voice/M15.
 
 October14 requested follow-up keeps stat ID-only server requests unchanged while inventory owns the UI. Neutral stationary wall holding is checked on one then two actual NullRHI clients (75ms/1%), including unchanged owner stamina/position, remote full-body state and zero-fall after moving. No client stamina/point grant or save schema change. Exact scope/evidence INVENTORY_UPGRADES_WALL_REST.md; physical/rendered multiplayer/packaged Server limits unchanged.

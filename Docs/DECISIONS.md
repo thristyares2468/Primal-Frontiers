@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October15 — derive voice metadata from authoritative world actors
+
+Nonticking Game/PIE subsystem accepts only active survival server worlds. Derive public ID, connection, real pawn position and life from owned actors; weak controller keys make reconnect consent defaultoff independently of persistent ownership GUID. Reject invalid ownership/identity/config/preferences atomically, no new voice RPC/provider/save fields. Real one2/2 and impairedtwo3/3 roles verify client refusal and server range/mute/block; existing consumption acknowledgements require300ms fixture spacing, keep real150ms cooldown. Finish server after allowner barriers without requiring exited pawns. PROXIMITY_VOICE_AUTHORITY_M15.md separates native/network metadata proof from future capture/listening/transport identity.
+
 ## October15 — separate proximity metadata policy from audio transport
 
 Use a pure bounded32-participant native helper with explicit public identity/space, default-off independent transmit/receive consent, PTT, receiver-only mute and bidirectional block. Reject malformed input atomically and attenuate trusted positions3–15m. No waveform/log/save/provider dependency or invented microphone pass. The helper requires trusted callers; derive real server snapshots in a separately tested adapter before exposing preferences or routing to any transport. PROXIMITY_VOICE_POLICY_M15.md records two clean native tests and both targets; fullM15 stays open.

@@ -4,6 +4,8 @@ Requested and confirmed by the user October 13, 2026: nearby multiplayer players
 
 ## Bounded future scope
 
+October15 backend checkpoint: server snapshot bridge now technically passes native3/3, actual one2/2 and impairedtwo3/3 metadata gates; PROXIMITY_VOICE_AUTHORITY_M15.md records scope. No provider/plugin/module or audio transmission selected/added. The initial paragraph's upcoming snapshot note is historical; actual transport audit is next before capture/UI or physical listening.
+
 - Optional push-to-talk, with an accessible input binding, microphone/output-device selection and clear speaking/receiving indicators. Default to no recording or transmission until the player deliberately enables voice.
 - Distance-based audibility/attenuation using authoritative player positions and the actual connected session. Account for dedicated servers; never trust a client-supplied position or arbitrary recipient identity for routing.
 - Local per-player mute, voice volume, block controls and clear device/network failure feedback. Preserve text/readable gameplay cues so voice is not necessary to play.

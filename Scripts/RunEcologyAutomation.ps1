@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet(1,2)][int]$Players=1,
-    [ValidateSet('Ecology','Lifecycle','Building','Traversal','Variety','InventoryRace','InventoryOwnership','AutoClimb','AuthoredClimb','Harvest')][string]$TestCase='Ecology',
+    [ValidateSet('Ecology','Lifecycle','Building','Traversal','Variety','InventoryRace','InventoryOwnership','AutoClimb','AuthoredClimb','Harvest','VoiceMetadata')][string]$TestCase='Ecology',
     [switch]$SimulateLagLoss,
     [switch]$ManualClimb,
     [switch]$FullHeightClimb,
@@ -23,6 +23,7 @@ if($ManualClimb -and $TestCase -ne 'AuthoredClimb'){throw 'ManualClimb requires 
 $run=$(if($FullHeightClimb){'M14Height'}elseif($ManualClimb){'M14Manual'}elseif($TestCase -eq 'AuthoredClimb'){'M14'}elseif($TestCase -in @('InventoryRace','InventoryOwnership')){'M15'}elseif($TestCase -eq 'Building'){'M11Building'}elseif($TestCase -in @('Traversal','AutoClimb','AuthoredClimb')){'M1Traverse'}else{'M13Ecology'})+$TestCase+$Players+'_'+[DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff')+'_'+[Guid]::NewGuid().ToString('N').Substring(0,8)
 $slot='AutomationM13Ecology'+[Guid]::NewGuid().ToString('N')
 if($TestCase -eq 'Harvest'){$run=$run.Replace('M13Ecology','M12')}
+if($TestCase -eq 'VoiceMetadata'){$run=$run.Replace('M13Ecology','M15')}
 $profile='Eco'+[Guid]::NewGuid().ToString('N').Substring(0,12)
 $reports=Join-Path $root 'Saved\AutomationReports'
 $report=Join-Path $reports $run
@@ -53,6 +54,7 @@ if($TestCase -eq 'InventoryOwnership'){$filter='PF.Inventory.OwnershipLive'}
 if($TestCase -eq 'AutoClimb'){$filter='PF.Traversal.AutomaticLive'}
 if($TestCase -eq 'AuthoredClimb'){$filter='PF.Traversal.AuthoredLive'}
 if($TestCase -eq 'Harvest'){$filter='PF.Harvest.Live'}
+if($TestCase -eq 'VoiceMetadata'){$filter='PF.Voice.AuthorityLive'}
 $flag=if($TestCase -eq 'Ecology'){'-PFRunEcologyLiveTests'}elseif($TestCase -eq 'Building'){'-PFRunBuildingLiveTests'}elseif($TestCase -in @('Traversal','AutoClimb','AuthoredClimb')){'-PFRunTraversalLiveTests'}else{'-PFRunCreatureLiveTests'}
 if($TestCase -eq 'Variety'){$flag='-PFRunCreatureVarietyLiveTests'}
 if($TestCase -eq 'InventoryRace'){$flag='-PFRunInventoryRaceLiveTests'}
@@ -60,13 +62,15 @@ if($TestCase -eq 'InventoryOwnership'){$flag='-PFRunInventoryOwnershipLiveTests'
 if($TestCase -eq 'AutoClimb'){$flag='-PFRunAutomaticClimbLiveTests'}
 if($TestCase -eq 'AuthoredClimb'){$flag='-PFRunAuthoredClimbLiveTests'}
 if($TestCase -eq 'Harvest'){$flag='-PFRunHarvestLiveTests'}
+if($TestCase -eq 'VoiceMetadata'){$flag='-PFRunVoiceMetadataTests'}
 if($ManualClimb){$flag+=' -PFManualClimb'}
 if($FullHeightClimb){$flag+=' -PFFullHeightClimb'}
 $lag=if($SimulateLagLoss){75}else{0};$loss=if($SimulateLagLoss){1}else{0}
 $map=if($TestCase -eq 'Ecology'){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}elseif($TestCase -eq 'Building'){'/Game/PrimalFrontier/Maps/L_M5Building'}elseif($TestCase -in @('Traversal','AutoClimb','AuthoredClimb')){'/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}else{'/Game/PrimalFrontier/Maps/L_M6Creatures'}
 if($TestCase -eq 'AuthoredClimb'){$map='/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld'}
 if($TestCase -eq 'Harvest'){$map='/Game/PrimalFrontier/Maps/L_M7SurvivalArena'}
-$summary=[ordered]@{Run=$run;Map=$map;TestCase=$TestCase;ManualClimb=[bool]$ManualClimb;FullHeightClimb=[bool]$FullHeightClimb;Players=$Players;NullRHI=$true;HeadlessFrameRate=$(if($TestCase -in @('Traversal','AutoClimb','AuthoredClimb','Harvest')){120}else{0});ExpectedFilter=$filter;Slot=$slot;ProfilePrefix=$profile;Port=$Port;OutgoingLagMs=$lag;OutgoingLossPercent=$loss;Passed=$false;TimedOut=$false;Processes=@();CleanupFailures=@();Failure=$null}
+if($TestCase -eq 'VoiceMetadata'){$map='/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld'}
+$summary=[ordered]@{Run=$run;Map=$map;TestCase=$TestCase;ManualClimb=[bool]$ManualClimb;FullHeightClimb=[bool]$FullHeightClimb;Players=$Players;NullRHI=$true;HeadlessFrameRate=$(if($TestCase -in @('Traversal','AutoClimb','AuthoredClimb','Harvest','VoiceMetadata')){120}else{0});ExpectedFilter=$filter;Slot=$slot;ProfilePrefix=$profile;Port=$Port;OutgoingLagMs=$lag;OutgoingLossPercent=$loss;Passed=$false;TimedOut=$false;Processes=@();CleanupFailures=@();Failure=$null}
 $runs=@();$watch=[Diagnostics.Stopwatch]::StartNew();$exitCode=1
 function Sample-Memory($taskRun) {
     if(!$taskRun.Process.HasExited){
@@ -84,9 +88,9 @@ try {
         $arguments='"{0}" {1} {2} -nullrhi -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig -PktLag={3} -PktLoss={4} {5} -PFExpectedPlayers={6} -PFSaveSlot={7} -PFIdentityProfile={8} -ExecCmds="Automation RunTests {9}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{10}" -abslog="{11}"' -f (Join-Path $root 'PrimalFrontier.uproject'),$url,$mode,$lag,$loss,$flag,$Players,$slot,($profile+$i),$filter,$taskReport,$log
         # Headless movement transport diagnostic: prevent unbounded NullRHI loops
         # exhausting saved moves. Rendered FPS tests remain uncapped.
-        if($TestCase -in @('Traversal','AutoClimb','AuthoredClimb','Harvest')){$arguments=$arguments.Replace('Automation RunTests '+$filter,'t.MaxFPS 120,Automation RunTests '+$filter);$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120'}
+        if($TestCase -in @('Traversal','AutoClimb','AuthoredClimb','Harvest','VoiceMetadata')){$arguments=$arguments.Replace('Automation RunTests '+$filter,'t.MaxFPS 120,Automation RunTests '+$filter);$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120'}
         # M6 navigation-only regression is deliberately outside the persistence map whitelist.
-        if($TestCase -ne 'Ecology'){$arguments=$arguments.Replace(' -PFSaveSlot='+$slot,'')}
+        if($TestCase -notin @('Ecology','VoiceMetadata')){$arguments=$arguments.Replace(' -PFSaveSlot='+$slot,'')}
         $process=Start-Process -FilePath $editor -ArgumentList $arguments -WorkingDirectory $root -WindowStyle Hidden -PassThru
         $taskRun=[pscustomobject]@{Role=$role;Process=$process;Report=$taskReport;Log=$log;Working=0L;Private=0L};$runs+=$taskRun
         if($i -eq 0){
@@ -144,6 +148,10 @@ finally {
                 }
             }
             if($TestCase -eq 'AutoClimb'){$contract=if($taskRun.Role -eq 'Server'){$text.Contains('Server automatic real jump/wall contact landing verified')}else{$text.Contains('Owner automatic jump/contact/acknowledged landing verified without F')}}
+            if($TestCase -eq 'VoiceMetadata'){
+                $contract=if($taskRun.Role -eq 'Server'){$text.Contains('Voice metadata server connected identity/position/default consent/range/mute/block and all owner acknowledgements verified; no audio')}else{$text.Contains('Voice metadata client authority refusal and three server barriers verified; no audio')}
+                if($taskRun.Role -ne 'Server'){foreach($phase in 1..3){$contract=$contract -and $text.Contains('Voice metadata client acknowledged phase='+$phase)}}
+            }
             if($TestCase -eq 'AuthoredClimb'){$contract=if($taskRun.Role -eq 'Server'){$text.Contains('Continuous wall server actual authored attach, timed drain, clear4m landing and zero-stamina10m fall verified')}else{$text.Contains('Continuous wall owner actual F/W input, private authority refusal, timed stamina, top landing and exhaustion fall replicated')}}
             if($TestCase -eq 'Harvest'){
                 $contract=if($taskRun.Role -eq 'Server'){$text.Contains('Harvest server exact owned RPC phases, under/wrong/removed tool refusal, finite yield and all acknowledgements verified')}else{$text.Contains('Harvest owner ordered RPC phases, direct mutation refusal, exact private yield and depletion verified')}
