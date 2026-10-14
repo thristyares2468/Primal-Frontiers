@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October15 voice transport audit i7Lh8WDt ProgrammingDone/complete readback. MainM15 Ki5GLWPM remainsDoing with current policy/actualsnapshot proof, no audio; new (Personal 2)91ZwTwxp MainToDo/incomplete for product-scope decision LANfirst versus intendedonlineprovider. Exact no-level/no-Unreal single-line choice/background is in description and VOICE_TRANSPORT_AUDIT_M15.md. Separate existingPersonal gates/members/deadlines preserved; nextAItransport implementation only after scope recorded.
+
 October15 VbaQfuF2 (AI) M15 authoritative metadata snapshot ProgrammingDone/complete readback after native3/3, actual one2/2 and impairedtwo3/3, finalEditor/Game. Exact level/runner/steps/contracts/failure repairs/evidence/limits retained in card and PROXIMITY_VOICE_AUTHORITY_M15.md. FullM15 staysDoing; next transport/backend audit. No microphonetest requested or Personal acceptance inferred.
 
 October15 bounded (AI) M15 voice-policy foundation https://trello.com/c/f5MTwa3W ProgrammingDone/complete readback after Editor/Game and2clean native tests. Reproduction/evidence/limits retained in description and PROXIMITY_VOICE_POLICY_M15.md. FullM15 staysDoing; actual authority snapshot adapter is the next independent bounded task. No unrelated Personal gate changed.

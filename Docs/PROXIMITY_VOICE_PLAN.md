@@ -4,6 +4,8 @@ Requested and confirmed by the user October 13, 2026: nearby multiplayer players
 
 ## Bounded future scope
 
+October15 supported transport audit now in VOICE_TRANSPORT_AUDIT_M15.md: current direct-IP/Null development sessions, no configured online voice provider. Recommend bounded LAN capture/relay first; next implementation needs user scope choice versus intended online platform/product. Installed EOS positional update is unimplemented, so no automatic proximity/provider selection assumed. No plugin/module/service/capture added and no Personal listening test exists yet.
+
 October15 backend checkpoint: server snapshot bridge now technically passes native3/3, actual one2/2 and impairedtwo3/3 metadata gates; PROXIMITY_VOICE_AUTHORITY_M15.md records scope. No provider/plugin/module or audio transmission selected/added. The initial paragraph's upcoming snapshot note is historical; actual transport audit is next before capture/UI or physical listening.
 
 - Optional push-to-talk, with an accessible input binding, microphone/output-device selection and clear speaking/receiving indicators. Default to no recording or transmission until the player deliberately enables voice.

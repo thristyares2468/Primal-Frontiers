@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October15 — keep provider selection explicit after transport audit
+
+Current multiplayer uses direct-IP/IpNetDriver/engineNullfallback, no productiononlinevoiceidentity/token setup. InstalledEOS positionalupdate isunimplemented; genericinterface/legacy mute forwarding does not enforce distancepolicy by itself. Recommend boundedLANvoicefirst, but user product-scope decision91ZwTwxp remainspending before newtransport dependencies or service setup. No provider chosen/installed, no credentials requested, no absentmicrophonetest. VOICE_TRANSPORT_AUDIT_M15.md records exact available APIs/limits and secure nextgate.
+
 ## October15 — derive voice metadata from authoritative world actors
 
 Nonticking Game/PIE subsystem accepts only active survival server worlds. Derive public ID, connection, real pawn position and life from owned actors; weak controller keys make reconnect consent defaultoff independently of persistent ownership GUID. Reject invalid ownership/identity/config/preferences atomically, no new voice RPC/provider/save fields. Real one2/2 and impairedtwo3/3 roles verify client refusal and server range/mute/block; existing consumption acknowledgements require300ms fixture spacing, keep real150ms cooldown. Finish server after allowner barriers without requiring exited pawns. PROXIMITY_VOICE_AUTHORITY_M15.md separates native/network metadata proof from future capture/listening/transport identity.
