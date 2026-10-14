@@ -1,5 +1,7 @@
 # Expedition UI overhaul — M11/M12
 
+October15 user report UI_HOTBAR PASS accepted for the named G17 visual/usability review. Trello5p0GUDCt Testing/Done and complete readback; guide retained for reproduction, no repeat requested. Exact evidence/limits PLAYTEST_RESULTS_2026_10_15.md. Resolution/HUD scale/FPS/build/device/optional substeps not separately reported; controller/audio/1440p/Copper/stat-earned/broader milestones remain separate. Documentation/Trello reconciliation only; no source/asset/settings/save change or new Unreal launch.
+
 ## Scope and status
 
 October 15, 2026: original expedition interface implemented and verified in Unreal. New human visual acceptance remains separate from technical verification. The previous accepted gameplay/navigation checks remain historical evidence. Trello: https://trello.com/c/1wNmkHRa.

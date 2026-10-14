@@ -2,6 +2,8 @@
 
 ## G17 — Expedition UI and hotbar visual review (Personal 2)
 
+Accepted October15: direct user UI_HOTBAR PASS. Guide below is reproduction only, not a repeat request. PLAYTEST_RESULTS_2026_10_15.md records exact scope/limits; physical controller/audio/performance and optional substeps are not individually inferred.
+
 Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Main-menu entry `/Engine/Maps/Entry`. One normal rendered standalone Single player world, keyboard/mouse, latest rebuilt project.720p sufficient;1440p remains deferred. Do not use NullRHI, edit/save the editor map, grant items, delete saves or repeat the accepted climbing/ecology/building/persistence suite.
 
 Why Personal: automation verifies layouts, real transactions and authority; your readability/usability preference requires your observation. This is one bounded visual review, not a request to grind XP or unlock Copper. Existing pending physical controller/audio/stat-earned gates remain separate.
