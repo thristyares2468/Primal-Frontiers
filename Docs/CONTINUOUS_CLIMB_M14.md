@@ -56,6 +56,18 @@ First Editor31.19s passed. Native/HUD rebuild failedC2027 missing movement inclu
 
 Live fixture build errorsC1075 parentheses thenC2280 weak-pointer boolean were repaired as syntax/IsValid only; PFM14WallWeakPtrBuild6.17s passed. First one-client M14HeightAuthoredClimb1_20261013_233550168_de6686af failed2/2 at second phase:4m climb passed, fixture requested reattach0.04s after landing, correctly refused by production0.5s cooldown. Keep failed reports/three saved-move warnings at subsequent stalled disconnect. Add0.75s fixture phase wait; do not weaken gameplay. Final one-/two-client replays above pass. No RHI crash or gameplay ensure/fatal in successful runs. Known24OpenWorld warning/14 experimental-Python error lines per live role remain baseline findings, not warning-free results.
 
-## Limits and next action
+## Changed files and publication
+
+36 scoped files published as `9a8128ca634dfae466de50542dd8f1ad93de0f96` to origin/master,2LFSobjects/18KB uploaded; remote equality/clean tree verified. Coauthor Codex GPT-6.1 Sol. Subsequent receipt edits are documentation only.
+
+- Survival: PFPlayerSurvivalComponent.cpp; PFSurvivalPlayerController.cpp/.h; PFSurvivorCharacter.cpp/.h; PFSurvivorTraversal.cpp; PFTraversalInput.cpp; PFTraversalMovement.cpp/.h; new PFWallClimbMovement.cpp.
+- Tests: PFAuthoredClimbLiveTests.cpp; PFAutomaticClimbTests.cpp; PFClimbContactTests.cpp; PFPlayerStatsMenuTests.cpp; PFPlayerStatsTests.cpp; PFTraversalLiveTests.cpp; PFTraversalTests.cpp; new PFWallClimbFixture.h.
+- Scripts: AddClimbBudgetFixtures.py; RunEcologyAutomation.ps1.
+- Content: L_PrimalFrontier_OpenWorld.umap and existing sign external actor C/UB/MJPOCWBOF45G23LTPORY94.uasset only.
+- Docs: ARCHITECTURE, AUTOMATIC_CLIMB_M1, CONTINUOUS_CLIMB_M14, CURRENT_STATE, DECISIONS, MILESTONES, NETWORKING, PLAYER_STATS_M12, PLAYTEST, PLAYTEST_RESULTS_2026_10_14, STAMINA_CLIMB_M14, TRAVERSAL_M1, TRELLO_SYNC, TRELLO_TEST_GUIDES.
+
+Trello technical ru1gvQJ5 Done/complete confirmed; [new Personal1 WALL_CLIMB](https://trello.com/c/GsgHT0o0) ToDo/incomplete and parent1tI62BmQ Personal1Doing/incomplete contain the fullG16 guide. Parent history retained verbatim; old4mF gate7zjNOKJJ Done/complete. No new manual/fullM14 acceptance; prior unrelated assignments/deadlines/acceptances preserved.
+
+## Remaining limits and next action
 
 This is greybox wall movement, not complete climbing animation, curved corner traversal, ceiling crawling, climbing jumps or a full traversal art system. A/D can leave the finite wall and fall. Empty stamina does not auto-glide. Controller mappings retain right-stick click attach/drop and movement stick, but physical device usability is unverified. Do one normal rendered G16 check; leave Copper/stat/controller/audio/performance gates separate and do not expand later playable tiers before their acceptance.
