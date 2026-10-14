@@ -13,10 +13,16 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
+#include "Components/Button.h"
+#include "Progression/PFPlayerStatsMenu.h"
 
 void UPFInventoryHUD::NativeOnInitialized()
 {
-    Super::NativeOnInitialized();
+    Super::NativeOnInitialized();SetIsFocusable(true);
     UBorder* P;UTextBlock* H;UTextBlock* B;UTextBlock* R;
     PFReadOnlyOverlay::Build(WidgetTree,TEXT("PF_InventoryPanel"),P,H,B,R);
     Panel=P;Heading=H;Text=B;Result=R;
@@ -42,8 +48,34 @@ void UPFInventoryHUD::NativeOnInitialized()
     DetailBody->SetColorAndOpacity(PFUITheme::Muted);DetailBody->SetAutoWrapText(true);
     Details->AddChildToVerticalBox(DetailBody)->SetPadding(FMargin(0,4,0,0));
     Column->AddChildToVerticalBox(Result)->SetPadding(FMargin(0,8,0,0));
-    Panel->SetVisibility(ESlateVisibility::Collapsed);
-    SetVisibility(ESlateVisibility::HitTestInvisible);
+    auto* Canvas=CastChecked<UCanvasPanel>(WidgetTree->RootWidget);
+    auto* ItemSlot=CastChecked<UCanvasPanelSlot>(Panel->Slot);ItemSlot->SetAnchors(FAnchors(.15f,.16f,.85f,.95f));
+    auto* Tabs=WidgetTree->ConstructWidget<UHorizontalBox>();auto* TabSlot=Canvas->AddChildToCanvas(Tabs);TabSlot->SetAnchors(FAnchors(.15f,.05f,.85f,.14f));TabSlot->SetOffsets(FMargin(0));
+    auto Tab=[&](FName Name,const TCHAR* Caption)
+    {
+        auto* B=WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(),Name);auto* T=WidgetTree->ConstructWidget<UTextBlock>();T->SetText(FText::FromString(Caption));T->SetColorAndOpacity(PFUITheme::Text);B->SetContent(T);
+        auto* S=Tabs->AddChildToHorizontalBox(B);S->SetSize(FSlateChildSize(ESlateSizeRule::Fill));S->SetPadding(FMargin(4,0));return B;
+    };
+    ItemsTab=Tab(TEXT("PF_InventoryItemsTab"),TEXT("Items"));StatsTab=Tab(TEXT("PF_InventoryStatsTab"),TEXT("Player upgrades"));
+    ItemsTab->OnClicked.AddDynamic(this,&UPFInventoryHUD::ShowItems);StatsTab->OnClicked.AddDynamic(this,&UPFInventoryHUD::ShowStats);
+    StatsPage=CreateWidget<UPFPlayerStatsMenu>(GetOwningPlayer());auto* StatsSlot=Canvas->AddChildToCanvas(StatsPage);StatsSlot->SetAnchors(FAnchors(.15f,.16f,.85f,.95f));StatsSlot->SetOffsets(FMargin(0));
+    SetPage(false);SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UPFInventoryHUD::ShowItems(){if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetStatMenuOpen(false);}}
+void UPFInventoryHUD::ShowStats(){if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetStatMenuOpen(true);}}
+void UPFInventoryHUD::SetPage(bool Stats)
+{
+    Panel->SetVisibility(Stats?ESlateVisibility::Collapsed:ESlateVisibility::Visible);
+    StatsPage->SetVisibility(Stats?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
+    ItemsTab->SetStyle(PFUITheme::NavigationButton(!Stats));StatsTab->SetStyle(PFUITheme::NavigationButton(Stats));bWasOpen=false;
+    if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());PC && PC->IsInventoryOpen())
+    {if(Stats){StatsPage->RefreshMenu();StatsPage->SetKeyboardFocus();}else{SetKeyboardFocus();}}
+}
+FReply UPFInventoryHUD::NativeOnPreviewKeyDown(const FGeometry&,const FKeyEvent& E)
+{
+    if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){if(PC->HandleInventoryKey(E.GetKey(),E.IsRepeat())){return FReply::Handled();}}
+    return FReply::Unhandled();
 }
 
 void UPFInventoryHUD::NativeTick(const FGeometry& Geometry,float Delta)
@@ -51,9 +83,8 @@ void UPFInventoryHUD::NativeTick(const FGeometry& Geometry,float Delta)
     Super::NativeTick(Geometry,Delta);
     const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
     const bool bOpen=PC && PC->IsInventoryOpen() && !PC->IsPauseMenuOpen();
-    Panel->SetVisibility(bOpen?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);
     Refresh+=Delta;
-    if(!bOpen){bWasOpen=false;return;}
+    if(!bOpen || PC->IsStatMenuOpen()){bWasOpen=false;return;}
     if(bWasOpen && Refresh<0.1f){return;}
     bWasOpen=true;Refresh=0;
     const auto* Settings=UPFGameUserSettings::Get();
@@ -94,6 +125,6 @@ void UPFInventoryHUD::NativeTick(const FGeometry& Geometry,float Delta)
     FString Feedback=PC->GetInventoryMessage();
     if(Selected==INDEX_NONE && !Stacks.IsEmpty()){Feedback=TEXT("No selected stack.");}
     else if(!Feedback.IsEmpty()){Feedback=TEXT("Last: ")+Feedback;}
-    if(!Settings || Settings->Preferences.bControlHints){Feedback+=TEXT("\nTab/View close | Up/Down select\nX/D-left split | G/D-right drop\nQ/pad X eat or drink one");}
+    if(!Settings || Settings->Preferences.bControlHints){Feedback+=TEXT("\nTab/View close | U/RB upgrades | Up/Down select\nX/D-left split | G/D-right drop\nQ/pad X eat or drink one");}
     Result->SetText(FText::FromString(Feedback));
 }

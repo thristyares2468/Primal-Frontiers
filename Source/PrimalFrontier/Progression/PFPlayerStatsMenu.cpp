@@ -22,12 +22,9 @@ void UPFStatUpgradeButton::Choose(){if(OwnerMenu){OwnerMenu->RequestUpgrade(Choi
 void UPFPlayerStatsMenu::NativeOnInitialized()
 {
     Super::NativeOnInitialized();SetIsFocusable(true);
-    auto* Canvas=WidgetTree->ConstructWidget<UCanvasPanel>();WidgetTree->RootWidget=Canvas;
-    auto* Shade=WidgetTree->ConstructWidget<UBorder>();Shade->SetBrushColor(FLinearColor(.005f,.012f,.01f,.8f));
-    auto* Back=Canvas->AddChildToCanvas(Shade);Back->SetAnchors(FAnchors(0,0,1,1));Back->SetOffsets(FMargin(0));
     auto* Panel=WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(),TEXT("PF_StatsPanel"));
+    WidgetTree->RootWidget=Panel;
     Panel->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Surface,12.f,PFUITheme::Muted,1.f));Panel->SetPadding(FMargin(20));
-    auto* Placement=Canvas->AddChildToCanvas(Panel);Placement->SetAnchors(FAnchors(.15f,.05f,.85f,.95f));Placement->SetOffsets(FMargin(0));
     auto* Rows=WidgetTree->ConstructWidget<UVerticalBox>();Panel->SetContent(Rows);
     auto Label=[&](FName Name){auto* T=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),Name);T->SetAutoWrapText(true);T->SetColorAndOpacity(PFUITheme::Text);return T;};
     Heading=Label(TEXT("PF_StatsHeading"));Heading->SetColorAndOpacity(PFUITheme::Accent);Rows->AddChildToVerticalBox(Heading)->SetPadding(FMargin(0,0,0,8));
@@ -42,9 +39,9 @@ void UPFPlayerStatsMenu::NativeOnInitialized()
     }
     Feedback=Label(TEXT("PF_StatsFeedback"));Feedback->SetColorAndOpacity(PFUITheme::Accent);Rows->AddChildToVerticalBox(Feedback)->SetPadding(FMargin(0,12,0,8));
     Help=Label(TEXT("PF_StatsHelp"));Help->SetColorAndOpacity(PFUITheme::Muted);
-    Help->SetText(FText::FromString(TEXT("Earn XP by gathering and first crafts. Each level grants 1 stat point and separate technology points.\nClick an upgrade / Up-Down or D-pad + Enter-A. U / Esc / B: close. P / Menu: pause. World keeps running.")));
+    Help->SetText(FText::FromString(TEXT("Earn XP by gathering and first crafts. Stat and technology points are separate.\nUp-Down / D-pad + Enter-A: upgrade. Esc / U / B / LB: Items. Tab / View: close inventory. World keeps running.")));
     Rows->AddChildToVerticalBox(Help)->SetPadding(FMargin(0,0,0,8));
-    auto* Close=WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(),TEXT("PF_StatsClose"));auto* Caption=Label(TEXT("PF_StatsCloseLabel"));Caption->SetText(FText::FromString(TEXT("Back to game")));Close->SetContent(Caption);Close->SetStyle(PFUITheme::NavigationButton(false));Close->OnClicked.AddDynamic(this,&UPFPlayerStatsMenu::CloseMenu);Rows->AddChild(Close);
+    auto* Close=WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(),TEXT("PF_StatsClose"));auto* Caption=Label(TEXT("PF_StatsCloseLabel"));Caption->SetText(FText::FromString(TEXT("Back to inventory")));Close->SetContent(Caption);Close->SetStyle(PFUITheme::NavigationButton(false));Close->OnClicked.AddDynamic(this,&UPFPlayerStatsMenu::CloseMenu);Rows->AddChild(Close);
     RefreshMenu();
 }
 void UPFPlayerStatsMenu::RefreshMenu()
@@ -81,8 +78,9 @@ void UPFPlayerStatsMenu::CloseMenu(){if(auto* PC=Cast<APFSurvivalPlayerControlle
 FReply UPFPlayerStatsMenu::NativeOnPreviewKeyDown(const FGeometry&,const FKeyEvent& E)
 {
     const FKey K=E.GetKey();if(E.IsRepeat()){return FReply::Handled();}
-    if(K==EKeys::U || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right){CloseMenu();return FReply::Handled();}
-    if(K==EKeys::P || K==EKeys::Gamepad_Special_Right){CloseMenu();if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetPauseMenuOpen(true);}return FReply::Handled();}
+    if(K==EKeys::U || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right || K==EKeys::Gamepad_LeftShoulder){CloseMenu();return FReply::Handled();}
+    if(K==EKeys::Tab || K==EKeys::Gamepad_Special_Left){if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetInventoryOpen(false);}return FReply::Handled();}
+    if(K==EKeys::P || K==EKeys::Gamepad_Special_Right){if(auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer())){PC->SetInventoryOpen(false);PC->SetPauseMenuOpen(true);}return FReply::Handled();}
     if(K==EKeys::Down || K==EKeys::Gamepad_DPad_Down){Selected=(Selected+1)%4;RefreshMenu();ChoicesScroll->ScrollWidgetIntoView(Buttons[Selected],true,EDescendantScrollDestination::IntoView);return FReply::Handled();}
     if(K==EKeys::Up || K==EKeys::Gamepad_DPad_Up){Selected=(Selected+3)%4;RefreshMenu();ChoicesScroll->ScrollWidgetIntoView(Buttons[Selected],true,EDescendantScrollDestination::IntoView);return FReply::Handled();}
     if(K==EKeys::Enter || K==EKeys::Gamepad_FaceButton_Bottom){RequestUpgrade(static_cast<EPFPlayerStat>(Selected));return FReply::Handled();}

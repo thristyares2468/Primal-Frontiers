@@ -1,5 +1,7 @@
 # M14 — Continuous wall climbing
 
+**Follow-up after user WALL_CLIMB PASS:** holding is now stamina-neutral, no loss/recovery; movement12/s/zero-fall remain. Current evidence/controls: INVENTORY_UPGRADES_WALL_REST.md. Prior4/s-hold runs and acceptance below are historical; do not use their wait-to-deplete instructions on current source. Player upgrades now live in inventory.
+
 October14,2026: replaces the prepaid full-height ascent described in STAMINA_CLIMB_M14.md. The user's `CLIMN_STAMINA PASS` accepts the earlier requested4mF check only. It is not acceptance of this changed behavior. New ordinary gate: G16 / WALL_CLIMB.
 
 ## Current behavior

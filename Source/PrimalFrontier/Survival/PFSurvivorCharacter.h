@@ -53,7 +53,7 @@ public:
     void PublishWallClimbState(bool bActive,bool bLanded);
     UFUNCTION(Client,Reliable) void ClientClimbImpulse(FVector_NetQuantize100 Impulse,bool bAutomatic,float Duration,FVector_NetQuantize100 LandingTarget);
     /** Inactive legacy serialized tuning retained for existing Blueprint compatibility.
-     * Tune WallClimbSpeed/WallClimbStaminaPerSecond/WallHoldStaminaPerSecond on movement instead. */
+     * Tune WallClimbSpeed/WallClimbStaminaPerSecond on movement instead; holding is always neutral. */
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="50",ClampMax="150",DisplayName="Base Cost Climb Height")) float MaxClimbHeight=120;
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="1",ClampMax="100")) float ClimbStaminaCost=15;
     /** Additional stamina per metre above the legacy short-ledge baseline; no fixed height ceiling. */

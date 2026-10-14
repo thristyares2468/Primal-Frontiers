@@ -22,7 +22,6 @@ public:
     void EndWallClimb(bool bLanded,const TCHAR* Reason);
     UPROPERTY(EditDefaultsOnly,Category="Traversal|Climbing",meta=(ClampMin="30",ClampMax="400")) float WallClimbSpeed=140;
     UPROPERTY(EditDefaultsOnly,Category="Traversal|Climbing",meta=(ClampMin="1",ClampMax="100")) float WallClimbStaminaPerSecond=12;
-    UPROPERTY(EditDefaultsOnly,Category="Traversal|Climbing",meta=(ClampMin="1",ClampMax="100")) float WallHoldStaminaPerSecond=4;
     // Inactive legacy source compatibility fields; no ballistic drive reads them.
     double ClimbUntil=0;
     FVector AutomaticClimbDrive=FVector::ZeroVector;

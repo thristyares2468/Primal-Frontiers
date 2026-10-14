@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October14 — Inventory owns upgrades; wall rest is neutral
+
+Reuse the existing stat presentation as an actual inventory child tab instead of creating a separate viewport modal or duplicate authority. Inventory owns input locks/cursor, page switch retains selection, nested Back→Items and Tab/View close; Pause has no competing entry. Keep all point requests/data budgets unchanged. Idle wall input costs0 and blocks recovery; moving still costs12/s and exact zero drops. Existing camp sign only, no geometry/identity/save migration. User WALL_CLIMB PASS records the prior behavior, not pre-acceptance of this follow-up. INVENTORY_UPGRADES_WALL_REST.md records fresh narrow proof.
+
 ## October14 — stamina limits duration instead of prepaying wall height
 
 Replace full-height ballistic launch with server-approved custom CharacterMovement, swept up/down/sideways motion and4/s holding versus12/s moving drain. Do not scan a whole tall wall or require enough stamina for its top; exhaustion releases into normal gravity. Allow only a local short clear walkable mantle, no collision bypass. Retain native saved-move input and sequenced owner acknowledgment instead of accepting client normals/targets/costs. Preserve serialized legacy fields as inert compatibility shims; no save/content-layout migration. Keep existing4m/10m wall identities and migrate only reviewed sign text. Old4m user PASS stays accepted in its original scope; the changed feel gets separate WALL_CLIMB/G16 acceptance. Exact tests/limits in CONTINUOUS_CLIMB_M14.md.

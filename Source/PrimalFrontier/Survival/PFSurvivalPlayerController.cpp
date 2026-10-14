@@ -117,7 +117,7 @@ void APFSurvivalPlayerController::BeginPlay()
         SurvivalHUD = CreateWidget<UPFSurvivalHUD>(this, SurvivalHUDClass);
         if (SurvivalHUD) { SurvivalHUD->AddToPlayerScreen(); }
         InventoryHUD=CreateWidget<UPFInventoryHUD>(this,UPFInventoryHUD::StaticClass());
-        if(InventoryHUD){InventoryHUD->AddToPlayerScreen();}
+        if(InventoryHUD){InventoryHUD->AddToPlayerScreen(60);}
         CraftingHUD=CreateWidget<UPFCraftingHUD>(this,UPFCraftingHUD::StaticClass());
         if(CraftingHUD){CraftingHUD->AddToPlayerScreen(50);}
         BuildingHUD=CreateWidget<UPFBuildingHUD>(this,UPFBuildingHUD::StaticClass());
@@ -139,7 +139,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindGamepadControls();
     BindControl(EKeys::LeftShift,&APFSurvivalPlayerController::StartSprint,TEXT("Traversal"),TEXT("Hold to sprint; requires stamina and weight within carry limit"));
     InputComponent->BindKey(EKeys::LeftShift,IE_Released,this,&APFSurvivalPlayerController::StopSprint);
-    BindControl(EKeys::F,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Attach to wall / drop; W/S climb, A/D sideways; stamina drains until you fall"));
+    BindControl(EKeys::F,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Attach / drop wall; W/S climb, A/D sideways; move spends stamina, holding is neutral"));
     BindControl(EKeys::V,&APFSurvivalPlayerController::Glide,TEXT("Traversal"),TEXT("Toggle glide while falling; uses stamina, unavailable overweight"));
     // Legacy key bindings for the greybox survival actions. Movement/look/jump come
     // from the template Enhanced Input context (IMC_Default) via the base class.
@@ -156,7 +156,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindControl(EKeys::Q,&APFSurvivalPlayerController::InventoryConsume,TEXT("Inventory"),TEXT("Consume one selected edible item"));
     // Crafting (M4)
     BindControl(EKeys::C,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Open / close crafting"));
-    BindControl(EKeys::U,&APFSurvivalPlayerController::ToggleStatMenu,TEXT("General"),TEXT("Player upgrades: spend earned stat points; separate from technology"));
+    BindControl(EKeys::U,&APFSurvivalPlayerController::ToggleStatMenu,TEXT("General"),TEXT("Inventory Player upgrades tab: spend earned stat points; separate from technology"));
     BindControl(EKeys::One,&APFSurvivalPlayerController::CraftTool,TEXT("Crafting"),TEXT("Craft primitive tool"));
     BindControl(EKeys::Two,&APFSurvivalPlayerController::CookFood,TEXT("Crafting"),TEXT("Cook food"));
     BindControl(EKeys::Three,&APFSurvivalPlayerController::DryFood,TEXT("Crafting"),TEXT("Dry food"));
@@ -167,7 +167,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindControl(EKeys::LeftMouseButton,&APFSurvivalPlayerController::PlaceBuilding,TEXT("Building / world"),TEXT("Place preview; attack when overlays are closed"));
     BindControl(EKeys::H,&APFSurvivalPlayerController::DemolishBuilding,TEXT("Building"),TEXT("Demolish owned targeted piece"));
     BindControl(EKeys::J,&APFSurvivalPlayerController::DamageBuilding,TEXT("Building"),TEXT("Developer damage to targeted piece"));
-    BindControl(EKeys::U,&APFSurvivalPlayerController::StoreItem,TEXT("Building"),TEXT("Store one item in targeted owned storage"));
+    // U is exclusively the inventory upgrades shortcut; chest transfers use the storage UI.
     BindControl(EKeys::O,&APFSurvivalPlayerController::TakeStoredItem,TEXT("Building"),TEXT("Take one item from targeted owned storage"));
 }
 
@@ -210,7 +210,7 @@ void APFSurvivalPlayerController::BackOrPause()
     else if(bBuildingMenuOpen || Building->bBuildMode){Building->bBuildMode=false;SetBuildingMenuOpen(false);}
     else if(bCraftingOpen){SetCraftingMenuOpen(false);}
     else if(bStatMenuOpen){SetStatMenuOpen(false);}
-    else if(bInventoryOpen){bInventoryOpen=false;}
+    else if(bInventoryOpen){SetInventoryOpen(false);}
     else{SetPauseMenuOpen(true);}
 }
 
@@ -249,7 +249,7 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
     }
     if(bOpen)
     {
-        SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);SetStorageMenuOpen(false);SetStatMenuOpen(false);
+        SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);SetStorageMenuOpen(false);SetInventoryOpen(false);
         if(Building->OpenStorage){Building->ServerCloseStorage();}
     }
     bPauseMenuOpen=bOpen;
@@ -261,7 +261,7 @@ void APFSurvivalPlayerController::SetPauseMenuOpen(bool bOpen)
     if(bOpen)
     {
         // Close other overlays; only freeze the world when we are the only player.
-        bInventoryOpen=false;
+        SetInventoryOpen(false);
         Building->bBuildMode=false;
         bPausedWorld=GetNetMode()==NM_Standalone && SetPause(true);
         PauseMenu->Refresh();
@@ -327,7 +327,7 @@ void APFSurvivalPlayerController::ServerInteract_Implementation()
 FString APFSurvivalPlayerController::InteractionPrompt() const
 {
     if(bPauseMenuOpen || !GetPawn()){return FString();}
-    if(auto* P=Cast<APFSurvivorCharacter>(GetPawn())){if(P->Traversal()->IsWallClimbing()){return TEXT("Climbing - W/S up/down | A/D sideways | F drop | stamina drains");}}
+    if(auto* P=Cast<APFSurvivorCharacter>(GetPawn())){if(P->Traversal()->IsWallClimbing()){return TEXT("Climbing - W/S up/down | A/D sideways | F drop | rest is free");}}
     if(AActor* Target=PFInteraction::FindTarget(GetPawn()))
     {
         if(auto* Item=Cast<APFItemPickup>(Target))
@@ -356,22 +356,6 @@ UPFInventoryComponent* APFSurvivalPlayerController::GetInventory() const
 // Inventory (Tab overlay)
 // ---------------------------------------------------------------------------
 
-void APFSurvivalPlayerController::ToggleInventory()
-{
-    ClearTraversalInput();
-    if(!bPauseMenuOpen)
-    {
-        bInventoryOpen=!bInventoryOpen;
-        if(bInventoryOpen)
-        {
-            SetStatMenuOpen(false);
-            InitializeInventorySelection();
-            SetCraftingMenuOpen(false);
-            Building->bBuildMode=false;
-        }
-    }
-}
-
 int32 APFSurvivalPlayerController::GetSelectedInventoryIndex() const
 {
     const auto* I=GetInventory();if(!I || !SelectedInventoryStack.IsValid()){return INDEX_NONE;}
@@ -392,7 +376,7 @@ void APFSurvivalPlayerController::InitializeInventorySelection()
 
 void APFSurvivalPlayerController::MoveInventorySelection(int32 Direction)
 {
-    if(!bInventoryOpen || bPauseMenuOpen){return;}
+    if(!bInventoryOpen || bStatMenuOpen || bPauseMenuOpen){return;}
     const auto* I=GetInventory();if(!I){return;}
     TArray<int32> Available;
     const double Now=UPFInventoryComponent::ServerTime(GetWorld());
@@ -414,7 +398,7 @@ void APFSurvivalPlayerController::InventoryConsume(){SendInventoryAction(PFInven
 void APFSurvivalPlayerController::SendInventoryAction(uint8 Action)
 {
     const auto* I=GetInventory();
-    if(bPauseMenuOpen || !bInventoryOpen || !I){return;}
+    if(bPauseMenuOpen || bStatMenuOpen || !bInventoryOpen || !I){return;}
     const int32 Selected=GetSelectedInventoryIndex();
     if(!I->GetStacks().IsValidIndex(Selected))
     {
@@ -470,12 +454,12 @@ void APFSurvivalPlayerController::SetCraftingMenuOpen(bool bOpen)
 {
     if(bOpen){ClearTraversalInput();}
     if((bOpen && bPauseMenuOpen) || bOpen==bCraftingOpen){return;}
-    if(bOpen){SetStatMenuOpen(false);SetBuildingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}}
+    if(bOpen){SetInventoryOpen(false);SetBuildingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}}
     bCraftingOpen=bOpen;
     if(bOpen)
     {
         Building->bBuildMode=false;
-        bInventoryOpen=false;
+        SetInventoryOpen(false);
     }
     // Headless/native fixtures still exercise input state, without stealing input
     // or freezing a controller that has no visible local-player widget.
@@ -522,7 +506,7 @@ void APFSurvivalPlayerController::ToggleBuilding()
 {
     if(bPauseMenuOpen){return;}
     if(bBuildingMenuOpen){Building->bBuildMode=false;SetBuildingMenuOpen(false);return;}
-    SetCraftingMenuOpen(false);bInventoryOpen=false;Building->bBuildMode=true;
+    SetCraftingMenuOpen(false);SetInventoryOpen(false);Building->bBuildMode=true;
     SetBuildingMenuOpen(true);
 }
 
@@ -530,7 +514,7 @@ void APFSurvivalPlayerController::SetBuildingMenuOpen(bool bOpen)
 {
     if(bOpen){ClearTraversalInput();}
     if(!IsLocalController() || !GetLocalPlayer() || !BuildingMenu || (bOpen && bPauseMenuOpen) || bBuildingMenuOpen==bOpen){return;}
-    if(bOpen){SetStatMenuOpen(false);SetCraftingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}bInventoryOpen=false;Building->bBuildMode=true;BuildingMenu->RefreshMenu();}
+    if(bOpen){SetInventoryOpen(false);SetCraftingMenuOpen(false);SetStorageMenuOpen(false);if(Building->OpenStorage){Building->ServerCloseStorage();}SetInventoryOpen(false);Building->bBuildMode=true;BuildingMenu->RefreshMenu();}
     bBuildingMenuOpen=bOpen;BuildingMenu->SetVisibility(bOpen?ESlateVisibility::Visible:ESlateVisibility::Collapsed);
     SetIgnoreMoveInput(bOpen);SetIgnoreLookInput(bOpen);bShowMouseCursor=bOpen;
     if(PlayerInput){PlayerInput->FlushPressedKeys();}
@@ -554,7 +538,7 @@ void APFSurvivalPlayerController::SetStorageMenuOpen(bool bOpen)
     if(bOpen)
     {
         if(!IsValid(Building->OpenStorage)){return;}
-        SetStatMenuOpen(false);SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);Building->bBuildMode=false;bInventoryOpen=false;StorageMenu->RefreshMenu();
+        SetInventoryOpen(false);SetCraftingMenuOpen(false);SetBuildingMenuOpen(false);Building->bBuildMode=false;SetInventoryOpen(false);StorageMenu->RefreshMenu();
     }
     if(!bOpen){StorageMenu->ResetView();}
     bStorageMenuOpen=bOpen;StorageMenu->SetVisibility(bOpen?ESlateVisibility::Visible:ESlateVisibility::Collapsed);

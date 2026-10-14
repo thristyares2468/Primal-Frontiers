@@ -121,6 +121,12 @@ bool FPFGamepadTest::RunTest(const FString&)
     TestEqual(TEXT("Pad selects next stack"),PC->GetSelectedInventoryIndex(),1);
     Press(EKeys::Gamepad_DPad_Right);
     TestEqual(TEXT("D-right drops exactly one"),PC->GetInventory()->Count(TEXT("Item_Wood")),4);
+    Press(EKeys::U);TestTrue(TEXT("U selects upgrades inside inventory"),PC->IsInventoryOpen() && PC->IsStatMenuOpen());
+    const int32 UpgradeSelection=PC->GetSelectedInventoryIndex();Press(EKeys::Gamepad_DPad_Right);
+    TestEqual(TEXT("Upgrade tab cannot accidentally drop bag items"),PC->GetInventory()->Count(TEXT("Item_Wood")),4);
+    Press(EKeys::Escape);TestTrue(TEXT("Back from upgrades returns to Items"),PC->IsInventoryOpen() && !PC->IsStatMenuOpen());
+    TestEqual(TEXT("Tab switch preserves selected stack identity"),PC->GetSelectedInventoryIndex(),UpgradeSelection);
+    const int32 UBindings=PC->InputComponent->KeyBindings.FilterByPredicate([](const auto& B){return B.Chord.Key==EKeys::U && B.KeyEvent==IE_Pressed;}).Num();TestEqual(TEXT("U has one upgrades binding without storage ambiguity"),UBindings,1);
     Press(EKeys::Gamepad_FaceButton_Top);
     TestTrue(TEXT("Y opens crafting"),PC->IsCraftingOpen());
     TestFalse(TEXT("Craft closes bag"),PC->IsInventoryOpen());

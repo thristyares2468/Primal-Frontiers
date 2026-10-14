@@ -9,7 +9,7 @@
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Climbing,"State.Traversal.Climbing");
 FGameplayTag UPFTraversalMovement::ClimbingState() const {return IsWallClimbing()?TAG_PF_Climbing:FGameplayTag();}
 bool UPFTraversalMovement::ValidWallClimbTuning() const
-{return FMath::IsFinite(WallClimbSpeed) && WallClimbSpeed>=30 && WallClimbSpeed<=400 && FMath::IsFinite(WallClimbStaminaPerSecond) && WallClimbStaminaPerSecond>=1 && WallClimbStaminaPerSecond<=100 && FMath::IsFinite(WallHoldStaminaPerSecond) && WallHoldStaminaPerSecond>=1 && WallHoldStaminaPerSecond<=100;}
+{return FMath::IsFinite(WallClimbSpeed) && WallClimbSpeed>=30 && WallClimbSpeed<=400 && FMath::IsFinite(WallClimbStaminaPerSecond) && WallClimbStaminaPerSecond>=1 && WallClimbStaminaPerSecond<=100;}
 
 bool UPFTraversalMovement::BeginWallClimb(const FVector& Normal)
 {
@@ -73,8 +73,8 @@ void UPFTraversalMovement::PhysCustom(float Delta,int32 Iterations)
     if(!bWallApproved || !ValidWallClimbTuning() || P->Survival->IsDead() || P->IsTraversalInputBlocked() || !CanCarryJump() || P->Survival->GetVitals().Stamina<=0)
     {EndWallClimb(false,TEXT("Stamina empty or climb cancelled"));StartNewPhysics(Delta,Iterations+1);return;}
     FVector Input=FVector::VectorPlaneProject(Acceleration,WallNormal)/FMath::Max(1.f,GetMaxAcceleration());Input=Input.GetClampedToMaxSize(1);
-    const float Rate=Input.IsNearlyZero()?WallHoldStaminaPerSecond:WallClimbStaminaPerSecond;float TravelTime=Delta;bool Exhausted=false;
-    if(P->HasAuthority())
+    const float Rate=Input.IsNearlyZero()?0.f:WallClimbStaminaPerSecond;float TravelTime=Delta;bool Exhausted=false;
+    if(P->HasAuthority() && Rate>0)
     {
         const float Current=P->Survival->GetVitals().Stamina,Cost=FMath::Min(Current,Rate*Delta);TravelTime=FMath::Min(Delta,Current/Rate);
         P->Survival->ChangeStamina(-Cost);Exhausted=P->Survival->GetVitals().Stamina<=KINDA_SMALL_NUMBER;

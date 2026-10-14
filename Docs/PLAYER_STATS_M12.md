@@ -1,5 +1,7 @@
 # M12 - Level-earned player upgrades
 
+**Current UI:** Tab→Player upgrades or U opens the embedded inventory page; Esc/U/B/LB returns to Items, Tab/View closes inventory. No separate Pause entry. Existing point-ID authority, stat/technology budgets and no-refill capacity rules are unchanged. Holding still on a wall is now neutral, moving12/s. INVENTORY_UPGRADES_WALL_REST.md supersedes the historical presentation/hold-cost notes below; G14 uses the current inventory flow.
+
 October14 traversal update: CONTINUOUS_CLIMB_M14.md supersedes the historical prepaid costs below. Stamina rank increases capacity without refill; wall attachment does not prepay height, movement/holding drains12/4 per second and zero makes you fall. Native StatRuntime and actual rendered PlayerStatsLive10m continuous climb passed; current technical evidence is in that M14 doc. G14 stat gate remains separate/unverified; old4m user CLIMN_STAMINA PASS accepted only its prior scope. Current wall guide G16.
 
 One player stat point is earned per level after level1, using the existing server-owned gathering and first-craft XP. Level2 starts at100XP. The current greybox supports levels1-10, so there are9 total stat points. Existing technology earns3 points per level and spends them on learned recipes; the ledgers are independent. Ancient technology rewards/unlocks are still planned and are labelled unavailable in the menu. No boss rewards, free XP or item grants were added to ordinary gameplay.

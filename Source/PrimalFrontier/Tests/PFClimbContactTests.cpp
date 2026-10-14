@@ -20,9 +20,9 @@ bool FPFClimbContactTest::RunTest(const FString&)
     F.Tick(20,FVector::UpVector);TestTrue(TEXT("Partial rise and gradual drain"),F.P->GetActorLocation().Z>Half+50 && FMath::IsNearlyEqual(F.P->Survival->GetVitals().Stamina,18.f,.1f));
     bool Fell=false;for(int32 N=0;N<85;++N){F.Tick(1,FVector::UpVector);if(F.M->IsFalling() && F.P->Survival->GetVitals().Stamina==0){Fell=true;break;}}
     TestTrue(TEXT("Exactly empty stamina drops before the top"),Fell && F.P->GetActorLocation().Z<Half+500);TestFalse(TEXT("Immediate regrab cannot create stamina"),F.P->TryClimb(Reason));F.Tick(80);TestTrue(TEXT("Normal gravity lands on ground after exhaustion"),F.M->IsMovingOnGround());
-    F.Reset();TestTrue(TEXT("Hold fixture attaches"),F.P->TryClimb(Reason));F.P->Survival->StaminaRecoveryDelay=0;F.P->Survival->StaminaRecoveryPerSecond=80;const FVector At=F.P->GetActorLocation();
-    F.Tick(40);TestTrue(TEXT("Holding drains4/s and never recovers on wall"),FMath::IsNearlyEqual(F.P->Survival->GetVitals().Stamina,96.f,.1f) && F.P->GetActorLocation().Equals(At,1));F.P->Survival->StaminaRecoveryPerSecond=0;
-    F.Tick(20,F.M->WallRight());TestTrue(TEXT("Sideways real movement with12/s drain"),F.P->GetActorLocation().Y>At.Y+60 && FMath::IsNearlyEqual(F.P->Survival->GetVitals().Stamina,90.f,.1f));
+    F.Reset(60);TestTrue(TEXT("Hold fixture attaches"),F.P->TryClimb(Reason));F.P->Survival->StaminaRecoveryDelay=0;F.P->Survival->StaminaRecoveryPerSecond=80;const FVector At=F.P->GetActorLocation();
+    F.Tick(80);TestTrue(TEXT("Holding is stamina-neutral even below maximum with recovery configured"),FMath::IsNearlyEqual(F.P->Survival->GetVitals().Stamina,60.f,.1f) && F.P->GetActorLocation().Equals(At,1));F.P->Survival->StaminaRecoveryPerSecond=0;
+    F.Tick(20,F.M->WallRight());TestTrue(TEXT("Sideways real movement with12/s drain"),F.P->GetActorLocation().Y>At.Y+60 && FMath::IsNearlyEqual(F.P->Survival->GetVitals().Stamina,54.f,.1f));
     F.Tick(30,FVector::UpVector);const float Up=F.P->GetActorLocation().Z;F.Tick(10,-FVector::UpVector);TestTrue(TEXT("S descends along wall"),F.P->GetActorLocation().Z<Up-20);
     F.P->ServerClimb();TestTrue(TEXT("Second F releases without extra charge"),F.M->IsFalling());F.Tick(80);
     F.Reset();auto* Roof=F.Box({100,0,260},{250,600,15});TestTrue(TEXT("Blocked route can attach without preflight top claim"),F.P->TryClimb(Reason));F.Tick(80,FVector::UpVector);

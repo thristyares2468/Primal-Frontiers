@@ -100,8 +100,8 @@ public:
             {
                 if(M->IsWallClimbing())
                 {
-                    if(!HoldingAt){HoldingAt=Now;}
-                    if(!UpHeld && Now-HoldingAt>.6){Shot(OwnerStage==1?TEXT("wall_holding"):TEXT("wall_low_budget"));Key(PC,EKeys::W,IE_Pressed);UpHeld=true;}
+                    if(!HoldingAt){HoldingAt=Now;HoldingStamina=P->Survival->GetVitals().Stamina;HoldingPosition=P->GetActorLocation();}
+                    if(!UpHeld && Now-HoldingAt>.8){Test->TestTrue(TEXT("Owning idle wall state preserves stamina and position"),FMath::IsNearlyEqual(P->Survival->GetVitals().Stamina,HoldingStamina,.1f) && P->GetActorLocation().Equals(HoldingPosition,1));Shot(OwnerStage==1?TEXT("wall_holding"):TEXT("wall_low_budget"));Key(PC,EKeys::W,IE_Pressed);UpHeld=true;}
                     if(!AscendingShot && OwnerStage==1 && Feet(P)>150 && Now-HoldingAt>1){Test->TestTrue(TEXT("Owning HUD provider confirms continuous climb controls"),PC->InteractionPrompt().Contains(TEXT("W/S")));Shot(TEXT("wall_ascending"));AscendingShot=true;}
                 }
                 if(Expected==2){for(TActorIterator<APFSurvivorCharacter> It(W);It;++It){if(*It!=P && It->Traversal()->IsWallClimbing() && Feet(*It)>30){RemoteSeen=true;}}}
@@ -128,7 +128,7 @@ private:
     void Key(APFSurvivalPlayerController* PC,FKey K,EInputEvent Event){PC->InputKey(FInputKeyEventArgs(nullptr,IPlatformInputDeviceMapper::Get().GetPrimaryInputDeviceForUser(PC->GetPlatformUserId()),K,Event,FPlatformTime::Cycles64()));}
     void Shot(const TCHAR* Name){if(!Directory.IsEmpty()){const FString Path=Directory/(FString(Name)+TEXT(".png"));Shots.Add(Path);FScreenshotRequest::RequestScreenshot(Path,true,false);}}
     FAutomationTestBase* Test;FString Directory,Diagnostic;TArray<FString> Shots;TWeakObjectPtr<AStaticMeshActor> Walls[2],Tall;TMap<TWeakObjectPtr<APFSurvivalPlayerController>,FWallRecord> Records;
-    int32 Expected=1,ServerStage=0,OwnerStage=0;bool Client=false,Initialized=false,Validated=false,UpHeld=false,RemoteSeen=false,AscendingShot=false,FallShot=false,Scaled=false;float OldScale=1;
+    int32 Expected=1,ServerStage=0,OwnerStage=0;bool Client=false,Initialized=false,Validated=false,UpHeld=false,RemoteSeen=false,AscendingShot=false,FallShot=false,Scaled=false;float OldScale=1,HoldingStamina=0;FVector HoldingPosition=FVector::ZeroVector;
     double Started=FPlatformTime::Seconds(),Done=0,HoldingAt=0,FallAt=0,LandedAt=0;
 };
 }

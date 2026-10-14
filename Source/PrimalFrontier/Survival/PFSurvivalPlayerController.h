@@ -114,6 +114,9 @@ public:
 
     // ---- Inventory ----
     bool IsInventoryOpen() const {return bInventoryOpen;}
+    void SetInventoryOpen(bool bOpen);
+    /** Visible inventory widgets route local keys; no direct authority or point grants. */
+    bool HandleInventoryKey(FKey Key,bool bRepeat=false);
     /** Current row of selected stable ID, or INDEX_NONE if absent/expired. Never chooses a replacement. */
     int32 GetSelectedInventoryIndex() const;
     const FString& GetInventoryMessage() const {return InventoryMessage;}
@@ -130,7 +133,6 @@ protected:
     UFUNCTION(Server, Reliable) void ServerInteract();
 
 private:
-    UPROPERTY() TObjectPtr<UPFPlayerStatsMenu> StatMenu;
     bool bStatMenuOpen=false;
     void ToggleStatMenu();
     void StartSprint();
@@ -195,6 +197,7 @@ private:
 
     // ---- Inventory input ----
     bool bInventoryOpen=false;
+    bool bInventoryInputBlocked=false;
     FGuid SelectedInventoryStack;
     bool bInventorySelectionInitialized=false;
     void InitializeInventorySelection();

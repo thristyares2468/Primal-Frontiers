@@ -45,7 +45,6 @@ private:
     UPROPERTY() TObjectPtr<UButton> SettingsButton;
     UPROPERTY() TObjectPtr<UButton> ControlsButton;
     UPROPERTY() TObjectPtr<UButton> SaveButton;
-    UPROPERTY() TObjectPtr<UButton> StatsButton;
     UPROPERTY() TObjectPtr<UTextBlock> SaveFeedback;
     UPROPERTY() TObjectPtr<UPFControlsMenu> ControlsMenu;
     UPROPERTY() TObjectPtr<UPFSettingsMenu> SettingsMenu;
@@ -58,5 +57,4 @@ private:
     UFUNCTION() void Save();
     UFUNCTION() void Settings();
     UFUNCTION() void Controls();
-    UFUNCTION() void Stats();
 };

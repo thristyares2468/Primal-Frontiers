@@ -164,7 +164,8 @@ private:
             if(Cast<UBorder>(W))
             {
                 const auto G=W->GetCachedGeometry();const auto TL=Root.AbsoluteToLocal(G.LocalToAbsolute(FVector2D::ZeroVector)),BR=Root.AbsoluteToLocal(G.LocalToAbsolute(G.GetLocalSize()));
-                Test->TestTrue(TEXT("Inventory panel fits right side without covering aim"),TL.X>Root.GetLocalSize().X*0.55 && TL.Y>=0 && BR.X<Root.GetLocalSize().X && BR.Y<Root.GetLocalSize().Y);
+                Test->TestTrue(TEXT("Centered inventory stays within its modal page bounds"),TL.X>=Root.GetLocalSize().X*.14 && TL.Y>=Root.GetLocalSize().Y*.15 && BR.X<=Root.GetLocalSize().X*.86 && BR.Y<=Root.GetLocalSize().Y*.96);
+                Test->TestTrue(TEXT("Centered Items page locks gameplay without pausing simulation"),PC->IsMoveInputIgnored() && PC->IsLookInputIgnored() && PC->bShowMouseCursor && !PC->IsPaused());
             }
         }
         Test->TestTrue(TEXT("Inventory row body rendered"),bBody);

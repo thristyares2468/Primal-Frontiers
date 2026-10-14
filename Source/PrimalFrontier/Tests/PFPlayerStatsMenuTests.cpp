@@ -3,6 +3,8 @@
 #include "Progression/PFProgressionComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFInventoryHUD.h"
+#include "Survival/PFPauseMenu.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFSurvivorCharacter.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -44,13 +46,22 @@ public:
             if(!PC->HasAuthority() || PC->GetNetMode()!=NM_Standalone || !G.IsValid() || G->GetExperience()!=0 || !PC->GetInventory()->GetStacks().IsEmpty()){Test->AddError(TEXT("Requires fresh standalone stats UI fixture"));return true;}
             auto* V=PC->GetPawn()->FindComponentByClass<UPFPlayerSurvivalComponent>();V->HungerDrainPerSecond=0;V->ThirstDrainPerSecond=0;V->StaminaRecoveryPerSecond=0;
             if(auto* S=UPFGameUserSettings::Get()){OldScale=S->Preferences.HUDScale;float Scale=1;FParse::Value(FCommandLine::Get(),TEXT("PFHUDScale="),Scale);S->Preferences.HUDScale=Scale;ChangedScale=true;}
-            Key(EKeys::U);Wait(Now,1);return false;
+            Key(EKeys::Tab);Wait(Now,15);return false;
         }
+        if(Stage==15)
+        {
+            TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFInventoryHUD::StaticClass(),true);
+            if(Widgets.Num()!=1){Test->AddError(TEXT("Tab did not open actual inventory parent"));return true;}Bag=CastChecked<UPFInventoryHUD>(Widgets[0]);
+            Test->TestTrue(TEXT("Items tab is a running modal inventory with cursor"),PC->IsInventoryOpen() && !PC->IsStatMenuOpen() && PC->IsMoveInputIgnored() && PC->IsLookInputIgnored() && PC->bShowMouseCursor && !PC->IsPaused());
+            Shot(TEXT("inventory_items"));Wait(Now,16);return false;
+        }
+        if(Stage==16){CastChecked<UButton>(Bag->WidgetTree->FindWidget(TEXT("PF_InventoryStatsTab")))->OnClicked.Broadcast();Wait(Now,1);return false;}
         if(Stage==1)
         {
             TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFPlayerStatsMenu::StaticClass(),false);
-            if(Widgets.Num()!=1){Test->AddError(TEXT("Real U input did not open stats widget"));return true;}Menu=CastChecked<UPFPlayerStatsMenu>(Widgets[0]);
-            Test->TestTrue(TEXT("U opens real modal, movement/look blocked but simulation runs"),PC->IsStatMenuOpen() && Menu->HasKeyboardFocus() && PC->IsMoveInputIgnored() && PC->IsLookInputIgnored() && PC->bShowMouseCursor && !PC->IsPaused());
+            if(Widgets.Num()!=1){Test->AddError(TEXT("Inventory upgrade tab missing or duplicated"));return true;}Menu=CastChecked<UPFPlayerStatsMenu>(Widgets[0]);
+            Test->TestTrue(TEXT("Upgrade widget is embedded in the actual inventory"),PC->IsInventoryOpen() && Menu->GetParent()!=nullptr);
+            Test->TestTrue(TEXT("Upgrade tab retains modal focus without pausing"),PC->IsStatMenuOpen() && Menu->HasKeyboardFocus() && PC->IsMoveInputIgnored() && PC->IsLookInputIgnored() && PC->bShowMouseCursor && !PC->IsPaused());
             for(int32 N=0;N<4;++N){Test->TestFalse(TEXT("Fresh no-points buttons disabled"),Button(N)->GetIsEnabled());}
             Test->TestTrue(TEXT("Separate budgets and honest ancient-tech status visible"),Text(TEXT("PF_StatsBudgets")).Contains(TEXT("STAT POINTS: 0")) && Text(TEXT("PF_StatsBudgets")).Contains(TEXT("Ancient technology: planned")));
             Shot(TEXT("stats_fresh"));Wait(Now,20);return false;
@@ -81,17 +92,25 @@ public:
         if(Stage==14){Slate(EKeys::Escape);Wait(Now,9);return false;}
         if(Stage==9)
         {
-            Test->TestFalse(TEXT("Esc closes stats, releases balanced input without pause"),PC->IsStatMenuOpen() || PC->IsPauseMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored() || PC->bShowMouseCursor);
-            Key(EKeys::P);Wait(Now,10);return false;
+            Test->TestTrue(TEXT("Esc returns to Items inside the same modal inventory"),PC->IsInventoryOpen() && !PC->IsStatMenuOpen() && PC->IsMoveInputIgnored() && PC->IsLookInputIgnored() && PC->bShowMouseCursor && !PC->IsPauseMenuOpen());
+            Shot(TEXT("inventory_stats_back"));Wait(Now,17);return false;
         }
+        if(Stage==17){Slate(EKeys::Tab);Wait(Now,19);return false;}
+        if(Stage==19){Test->TestFalse(TEXT("Closing inventory releases balanced modal state"),PC->IsInventoryOpen() || PC->IsStatMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored() || PC->bShowMouseCursor);Key(EKeys::P);Wait(Now,10);return false;}
         if(Stage==10)
-        {Test->TestTrue(TEXT("Pause still opens"),PC->IsPauseMenuOpen());Shot(TEXT("stats_pause"));Wait(Now,13);return false;}
-        if(Stage==13){for(int32 N=0;N<5;++N){Slate(EKeys::Down);}Slate(EKeys::Enter);Wait(Now,11);return false;}
+        {
+            Test->TestTrue(TEXT("Pause still opens"),PC->IsPauseMenuOpen());TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFPauseMenu::StaticClass(),true);
+            bool OldEntry=false;for(auto* W:Widgets){W->WidgetTree->ForEachWidget([&](UWidget* X){if(auto* T=Cast<UTextBlock>(X)){OldEntry |= T->GetText().ToString()==TEXT("Player upgrades");}});}
+            Test->TestFalse(TEXT("Player upgrades no longer live in Pause"),OldEntry);Shot(TEXT("stats_pause"));Wait(Now,13);return false;
+        }
+        if(Stage==13){Slate(EKeys::Escape);Wait(Now,22);return false;}
+        if(Stage==22){Key(EKeys::U);Wait(Now,11);return false;}
         if(Stage==11)
-        {Test->TestTrue(TEXT("Pause Player upgrades entry opens running stat modal"),PC->IsStatMenuOpen() && !PC->IsPauseMenuOpen() && !PC->IsPaused());Slate(EKeys::U);Wait(Now,12);return false;}
+        {Test->TestTrue(TEXT("U shortcut selects inventory upgrade tab"),PC->IsInventoryOpen() && PC->IsStatMenuOpen() && !PC->IsPauseMenuOpen() && !PC->IsPaused());Slate(EKeys::Gamepad_LeftShoulder);Wait(Now,18);return false;}
+        if(Stage==18){Test->TestTrue(TEXT("LB returns to Items without closing bag"),PC->IsInventoryOpen() && !PC->IsStatMenuOpen());Slate(EKeys::Gamepad_Special_Left);Wait(Now,12);return false;}
         if(Stage==12)
         {
-            Test->TestFalse(TEXT("U closes modal and restores input"),PC->IsStatMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
+            Test->TestFalse(TEXT("View closes whole inventory and restores input"),PC->IsInventoryOpen() || PC->IsStatMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
             auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());AStaticMeshActor* Wall=nullptr;
             for(TActorIterator<AStaticMeshActor> It(P->GetWorld());It;++It){if(It->ActorHasTag(TEXT("PF.M14.Climb10_A"))){if(Wall){Test->AddError(TEXT("Duplicate authored10m fixture"));return true;}Wall=*It;}}
             if(!Wall || !Wall->GetActorLocation().Equals(FVector(2450,-1100,500),.1) || !Wall->GetActorScale3D().Equals(FVector(3,3.6,10),.001)){Test->AddError(TEXT("Actual saved10m camp fixture unavailable/different"));return true;}
@@ -118,8 +137,8 @@ public:
         if(Stage==27){Shot(TEXT("stats_10m_climb"));Wait(Now,28);return false;}
         Test->TestFalse(TEXT("U closes modal and restores input"),PC->IsStatMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
         Test->TestTrue(TEXT("UI allocations never grant items"),PC->GetInventory()->GetStacks().IsEmpty());
-        for(const TCHAR* F:{TEXT("stats_fresh"),TEXT("stats_unspent"),TEXT("stats_spent"),TEXT("stats_crafting_scroll"),TEXT("stats_pause"),TEXT("stats_10m_climb")}){Test->TestTrue(TEXT("Fresh screenshot artifact"),IFileManager::Get().FileSize(*(Directory/(FString(F)+TEXT(".png"))))>0);}
-        Test->AddInfo(TEXT("[PrimalAgentTools] Stats U menu, disabled/earned allocations, real buttons, keyboard/gamepad routing, separate budgets, capacity, scroll, Pause entry, balanced Back and actual saved10m F landing verified"));return true;
+        for(const TCHAR* F:{TEXT("inventory_items"),TEXT("inventory_stats_back"),TEXT("stats_fresh"),TEXT("stats_unspent"),TEXT("stats_spent"),TEXT("stats_crafting_scroll"),TEXT("stats_pause"),TEXT("stats_10m_climb")}){Test->TestTrue(TEXT("Fresh screenshot artifact"),IFileManager::Get().FileSize(*(Directory/(FString(F)+TEXT(".png"))))>0);}
+        Test->AddInfo(TEXT("[PrimalAgentTools] Inventory embedded upgrades, Tab/U/button/Back/View, disabled/earned stat choices, separate budgets, capacity, scroll, no Pause upgrade entry and actual saved10m F landing verified"));return true;
     }
 private:
     UButton* Button(int32 N){return CastChecked<UButton>(Menu->WidgetTree->FindWidget(FName(*FString::Printf(TEXT("PF_Stats%d_Button"),N))));}
@@ -130,7 +149,7 @@ private:
     void Slate(FKey K,bool Repeat=false){auto& A=FSlateApplication::Get();A.ProcessKeyDownEvent(FKeyEvent(K,FModifierKeysState(),0,Repeat,0,0));A.ProcessKeyUpEvent(FKeyEvent(K,FModifierKeysState(),0,false,0,0));}
     void Shot(const TCHAR* Name){FScreenshotRequest::RequestScreenshot(Directory/(FString(Name)+TEXT(".png")),true,false);}
     void Wait(double Now,int32 Next){Until=Now+.6;Stage=Next;}
-    FAutomationTestBase* Test;FString Directory;TWeakObjectPtr<APFSurvivalPlayerController> PC;TWeakObjectPtr<UPFProgressionComponent> G;TWeakObjectPtr<UPFPlayerStatsMenu> Menu;
+    FAutomationTestBase* Test;FString Directory;TWeakObjectPtr<APFSurvivalPlayerController> PC;TWeakObjectPtr<UPFProgressionComponent> G;TWeakObjectPtr<UPFPlayerStatsMenu> Menu;TWeakObjectPtr<UPFInventoryHUD> Bag;
     double Started=FPlatformTime::Seconds(),Until=0;int32 Stage=0;float OldScale=1;bool ChangedScale=false;
 };
 }

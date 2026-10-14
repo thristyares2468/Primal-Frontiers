@@ -62,5 +62,5 @@ bool APFSurvivorCharacter::TryClimbFromFeet(FString& Reason,const FVector&,bool 
        !Hit.GetComponent() || Hit.GetComponent()->GetCollisionResponseToChannel(ECC_Pawn)!=ECR_Block || Hit.GetComponent()->IsSimulatingPhysics())
     {return Refuse(TEXT("No solid climbable wall within one metre"));}
     if(!M->BeginWallClimb(Hit.ImpactNormal)){return Refuse(TEXT("Invalid climb tuning or attachment clearance"));}
-    NextClimbTime=Now+.5;CancelAutomaticClimb();Reason=TEXT("Wall attached; W/S up/down, A/D sideways, F drop; stamina drains continuously");return true;
+    NextClimbTime=Now+.5;CancelAutomaticClimb();Reason=TEXT("Wall attached; move to climb, F drop; rest holds stamina");return true;
 }
