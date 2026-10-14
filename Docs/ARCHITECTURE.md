@@ -1,5 +1,7 @@
 # Technical Architecture
 
+October15 M15: Voice/PFProximityVoicePolicy is a pure metadata helper with bounded public participant/space snapshots and default-off consent/PTT/range/mute/block routing. No audio/provider/plugin/RPC added. Caller authority is an explicit upcoming adapter gate; see PROXIMITY_VOICE_POLICY_M15.md for contract, native proof and limits.
+
 October14 follow-up: inventory now owns Items and embedded Player upgrades pages; PFInventoryInput centralizes balanced open/close and preview key routing, preserving existing stat-ID authority and item selection. Separate Pause upgrade entry and ambiguous U/storage binding removed. Stationary wall input has0cost and no recovery; moving12/s remains. No point/save/schema/resource-layout changes. Current proof and limits: INVENTORY_UPGRADES_WALL_REST.md; older4/s-hold notes below are historical.
 
 October14 continuous wall climbing supersedes prepaid ballistic ascent: one authority-approved custom CharacterMovement mode, real capsule sweeps/contact, local short top mantle, continuous12/s moving or4/s holding and no attached recovery. F intent plus saved acceleration only; sequenced owner acknowledgment enables prediction, normal remote movement replication retains full body. Legacy serialized cost fields/RPC are inactive compatibility shims; no save-version/resource-layout change. CONTINUOUS_CLIMB_M14.md records verification and limits.

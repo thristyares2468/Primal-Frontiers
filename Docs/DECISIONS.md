@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October15 — separate proximity metadata policy from audio transport
+
+Use a pure bounded32-participant native helper with explicit public identity/space, default-off independent transmit/receive consent, PTT, receiver-only mute and bidirectional block. Reject malformed input atomically and attenuate trusted positions3–15m. No waveform/log/save/provider dependency or invented microphone pass. The helper requires trusted callers; derive real server snapshots in a separately tested adapter before exposing preferences or routing to any transport. PROXIMITY_VOICE_POLICY_M15.md records two clean native tests and both targets; fullM15 stays open.
+
 ## October15 — Original expedition sprites and local hotbar
 
 Use five original shared sprite atlases plus a static title illustration, catalog soft-icon overrides, square image bounds and a three-source-texel UV inset. Registered source dimensions/seams remain stable while Unreal compiles proxy textures; cancel an old UImage soft request before switching selected art. No real-time 3D inventory previews, blur, new plugin or arbitrary Fab mesh assignment. Existing Fab packages are staged/unassigned, so illustrations are provisional until actual licensed meshes/materials are selected and visually compared. The three-screen concept sheet is reference-only, not a new recipe catalog. Runtime labels retain all quantities, expiry and refusal details independently of color/icon recognition.

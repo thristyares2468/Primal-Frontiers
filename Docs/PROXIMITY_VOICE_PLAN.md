@@ -1,6 +1,6 @@
 # Proximity voice chat — future M15 multiplayer objective
 
-Requested and confirmed by the user October 13, 2026: nearby multiplayer players should hear each other based on distance. This is **planned, not implemented or tested**. It is proximity voice, not a global text chat request.
+Requested and confirmed by the user October 13, 2026: nearby multiplayer players should hear each other based on distance. Playable audio is **planned, not implemented or tested**. October15 metadata-only routing policy foundation passes two native tests and both targets; see PROXIMITY_VOICE_POLICY_M15.md. Actual server snapshot authority is the next separate gate. No microphone, transport, service, device UI or listening pass exists. It is proximity voice, not a global text chat request.
 
 ## Bounded future scope
 

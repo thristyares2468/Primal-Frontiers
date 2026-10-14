@@ -1,5 +1,7 @@
 # Primal Frontier milestone evidence
 
+October15 bounded M15 metadata voice-policy foundation: Editor12.94s/Game30.86s pass; PF.Voice.Policy and PolicyValidation PASS2/2 with no test/raw warning/error/ensure. Default-off consent/PTT/receive/range/volume/mute/block/identity-space validation,32participant cap and atomic refusals. No audio transport/capture/playback, plugin/RPC/UI/save or map changes. PROXIMITY_VOICE_POLICY_M15.md holds exact evidence and limits; next separate actual server snapshot gate, fullM15 remains open.
+
 October15 user report UI_HOTBAR PASS accepted for the named G17 visual/usability review. Trello5p0GUDCt Testing/Done and complete readback; guide retained for reproduction, no repeat requested. Exact evidence/limits PLAYTEST_RESULTS_2026_10_15.md. Resolution/HUD scale/FPS/build/device/optional substeps not separately reported; controller/audio/1440p/Copper/stat-earned/broader milestones remain separate. Documentation/Trello reconciliation only; no source/asset/settings/save change or new Unreal launch.
 
 ## October15 — M11/M12 expedition sprites and hotbar, bounded follow-up

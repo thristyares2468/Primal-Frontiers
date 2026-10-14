@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October15 bounded (AI) M15 voice-policy foundation https://trello.com/c/f5MTwa3W ProgrammingDone/complete readback after Editor/Game and2clean native tests. Reproduction/evidence/limits retained in description and PROXIMITY_VOICE_POLICY_M15.md. FullM15 staysDoing; actual authority snapshot adapter is the next independent bounded task. No unrelated Personal gate changed.
+
 October15 user report UI_HOTBAR PASS accepted for the named G17 visual/usability review. Trello5p0GUDCt Testing/Done and complete readback; guide retained for reproduction, no repeat requested. Exact evidence/limits PLAYTEST_RESULTS_2026_10_15.md. Resolution/HUD scale/FPS/build/device/optional substeps not separately reported; controller/audio/1440p/Copper/stat-earned/broader milestones remain separate. Documentation/Trello reconciliation only; no source/asset/settings/save change or new Unreal launch.
 
 Source/assets/evidence c04f62b4684d4d5a38a8965fdab519a38db2abe0 published to origin/master; remote SHA equality and clean working tree verified,6 LFS UI textures8.0MB uploaded,61 scoped files/Sol coauthor. This subsequent handoff receipt is documentation only; no additional source/assets/tests or manual acceptance.

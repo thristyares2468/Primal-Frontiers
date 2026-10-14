@@ -1,5 +1,7 @@
 # Primal Frontier — current state
 
+M15 metadata voice policy: Editor PFM15VoicePolicyEditorBuild PASS12.94s/Game PFM15VoicePolicyGameBuild PASS30.86s; Automation_M15VoicePolicy_20261014_232351964_21d5f49c PASS2/2 (PF.Voice.Policy/PolicyValidation),19.12s,2.996working/2.861privateGiB; compiler/test/raw warning/error/fatal/ensure0. Default-off32-participant consent/PTT/receive/mute/block/same-space/range and atomic malformed-input refusal only; no microphone/audio transport/plugin/RPC/UI/map/save change. Ordinary PrimalFrontier.log contains an earlier23:00UTC D3D12 DEVICE_HUNG/device-removed GPU page fault, predating this code; current NullRHI run is clean, no rendered crash fix claimed. f5MTwa3W ProgrammingDone/complete confirmed; next separate authority snapshot gate. PROXIMITY_VOICE_POLICY_M15.md holds exact evidence. FullM15 and physical voice remain unimplemented/unverified.
+
 October15 user report UI_HOTBAR PASS accepted for the named G17 visual/usability review. Trello5p0GUDCt Testing/Done and complete readback; guide retained for reproduction, no repeat requested. Exact evidence/limits PLAYTEST_RESULTS_2026_10_15.md. Resolution/HUD scale/FPS/build/device/optional substeps not separately reported; controller/audio/1440p/Copper/stat-earned/broader milestones remain separate. Documentation/Trello reconciliation only; no source/asset/settings/save change or new Unreal launch.
 
 ## Active checkpoint — expedition UI and hotbar, October 15, 2026
