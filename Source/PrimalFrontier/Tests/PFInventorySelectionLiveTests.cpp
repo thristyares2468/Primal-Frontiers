@@ -10,6 +10,9 @@
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
 #include "Components/InputComponent.h"
+#include "Components/Button.h"
+#include "UI/PFItemPicture.h"
+#include "Components/Image.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "UnrealClient.h"
@@ -75,6 +78,12 @@ public:
             if(IFileManager::Get().FileSize(*Shot)<=0){return false;}
             Test->AddInfo(TEXT("[PrimalUI] Reselection screenshot: ")+Shot);
             auto* I=PC->GetInventory();
+            auto* Bag=CastChecked<UPFInventoryHUD>(HUD.Get());auto* Slot=Bag->FindSlot(I->GetStacks()[0].StackId);
+            Test->TestNotNull(TEXT("Actual clickable stable-identity slot"),Slot);if(Slot){Slot->OnClicked.Broadcast();}
+            Test->TestEqual(TEXT("Mouse inspection preserves quantity"),I->Count(TEXT("Item_Wood")),5);
+            TArray<UUserWidget*> Art;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Art,UPFItemPicture::StaticClass(),false);bool bAtlas=false;
+            for(auto* Widget:Art){if(auto* Picture=Cast<UPFItemPicture>(Widget);Picture && Picture->GetItemId()==TEXT("Item_Wood")){auto* Image=Cast<UImage>(Picture->WidgetTree->RootWidget);if(Image){const FBox2f UV=Image->GetBrush().GetUVRegion();Test->AddInfo(FString::Printf(TEXT("[PrimalUI] Wood sprite resource=%s UVvalid=%d min=%.9f width=%.9f expected=%.9f"),Image->GetBrush().GetResourceObject()?*Image->GetBrush().GetResourceObject()->GetPathName():TEXT("NONE"),UV.bIsValid,UV.Min.X,UV.GetSize().X,.25f-6.f/1254.f));bAtlas |= Image->GetBrush().GetResourceObject()!=nullptr && UV.bIsValid && FMath::IsNearlyEqual(UV.GetSize().X,.25f-6.f/1254.f,1.e-6f) && UV.Min.X>0;}}}
+            Test->TestTrue(TEXT("Actual item sprite texture and atlas UV loaded"),bAtlas);
             for(int32 N=0;N<7;++N){Test->TestTrue(TEXT("Fill bag with distinct real food batches"),I->AddExisting(TEXT("Item_Food"),1,UPFInventoryComponent::ServerTime(PC->GetWorld())+300+N));}
             Test->TestEqual(TEXT("Default bag filled"),I->GetStacks().Num(),8);
             Until=Now+0.4;Phase=6;return false;
@@ -139,9 +148,8 @@ private:
         const auto& S=I->GetStacks()[Selected];const auto* D=I->Definition(S.ItemId);
         const FString Name=D?D->DisplayName.ToString():S.ItemId.ToString();
         const int32 Seconds=FMath::CeilToInt(S.ExpiresAt-UPFInventoryComponent::ServerTime(PC->GetWorld()));
-        TArray<FString> Lines;AllText().ParseIntoArrayLines(Lines);bool bFound=false;
-        for(const auto& Line:Lines)
-        {if(Line.StartsWith(TEXT(">")) && Line.Contains(Name) && (Line.Contains(FString::Printf(TEXT("[%ds fresh]"),Seconds)) || Line.Contains(FString::Printf(TEXT("[%ds fresh]"),Seconds+1)))){bFound=true;}}
+        const auto* Slot=CastChecked<UPFInventoryHUD>(HUD.Get())->FindSlot(S.StackId);bool bFound=false;
+        if(Slot){TArray<UWidget*> Children;HUD->WidgetTree->GetAllWidgets(Children);for(const auto* W:Children){if(const auto* T=Cast<UTextBlock>(W);T && T->GetText().ToString().StartsWith(TEXT("> ")+Name)){const FString Value=T->GetText().ToString();bFound |= Value.Contains(FString::Printf(TEXT("x%d"),S.Quantity)) && (Value.Contains(FString::Printf(TEXT("[%ds fresh]"),Seconds)) || Value.Contains(FString::Printf(TEXT("[%ds fresh]"),Seconds+1)));}}}
         Test->TestTrue(TEXT("Actual selected batch freshness row is visible"),bFound);
     }
     FString AllText() const
@@ -159,7 +167,7 @@ private:
             {
                 Test->TestTrue(FString::Printf(TEXT("Inventory text %s fits allocated height"),*T->GetName()),T->GetDesiredSize().Y<=T->GetCachedGeometry().GetLocalSize().Y+1);
                 if(T->GetFName()==TEXT("PF_InventoryPanel_Body"))
-                {bBody=true;Test->TestEqual(TEXT("Inventory rows respect HUD scaling"),T->GetFont().Size,float(FMath::RoundToInt(22*UPFGameUserSettings::Get()->Preferences.HUDScale)));}
+                {bBody=true;Test->TestEqual(TEXT("Inventory grid heading respects HUD scaling"),T->GetFont().Size,float(FMath::RoundToInt(14*UPFGameUserSettings::Get()->Preferences.HUDScale)));}
             }
             if(Cast<UBorder>(W))
             {

@@ -64,6 +64,7 @@ void UPFSettingsMenu::NativeOnInitialized()
 {
     Super::NativeOnInitialized();SetIsFocusable(true);CopyFromLive();
     auto* Canvas=WidgetTree->ConstructWidget<UCanvasPanel>();WidgetTree->RootWidget=Canvas;
+    PFUITheme::AddScrim(WidgetTree,Canvas);
     auto* Panel=WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(),TEXT("PF_SettingsPanel"));Panel->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Surface,16.f,FLinearColor(0.16f,0.25f,0.20f,1),1.f));Panel->SetPadding(FMargin(24));
     auto* Placement=Canvas->AddChildToCanvas(Panel);Placement->SetAnchors(FAnchors(0.08f,0.06f,0.92f,0.94f));Placement->SetOffsets(FMargin(0));
     auto* Body=WidgetTree->ConstructWidget<UVerticalBox>();Panel->SetContent(Body);
@@ -82,7 +83,7 @@ void UPFSettingsMenu::NativeOnInitialized()
     auto* FooterBody=WidgetTree->ConstructWidget<UVerticalBox>();Footer->SetContent(FooterBody);
     Status=Text(WidgetTree,TEXT("Changes apply only when confirmed. Display changes unavailable in PIE."),16);Status->SetColorAndOpacity(PFUITheme::Warning);FooterBody->AddChild(Status);
     auto* Actions=WidgetTree->ConstructWidget<UHorizontalBox>();FooterBody->AddChild(Actions);
-    auto Action=[&](const TCHAR* Name){auto* B=WidgetTree->ConstructWidget<UButton>();B->SetStyle(SettingsButton(false));B->SetContent(Text(WidgetTree,Name,18));auto* Slot=Actions->AddChildToHorizontalBox(B);Slot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));Slot->SetPadding(FMargin(0,8,6,8));return B;};
+    auto Action=[&](const TCHAR* Name){auto* B=WidgetTree->ConstructWidget<UButton>();B->SetStyle(SettingsButton(false));B->SetContent(Text(WidgetTree,Name,18));auto* Slot=Actions->AddChildToHorizontalBox(B);Slot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));Slot->SetPadding(FMargin(0,8,6,8));PFUITheme::AddButtonIcon(WidgetTree,B,FString(Name).Contains(TEXT("Apply"))?TEXT("Apply"):FString(Name).Contains(TEXT("Cancel"))?TEXT("Back"):TEXT("Reset"));return B;};
     Action(TEXT(" Apply / Keep "))->OnClicked.AddDynamic(this,&UPFSettingsMenu::Apply);
     Action(TEXT(" Cancel / Back "))->OnClicked.AddDynamic(this,&UPFSettingsMenu::Cancel);
     Action(TEXT(" Defaults "))->OnClicked.AddDynamic(this,&UPFSettingsMenu::Defaults);

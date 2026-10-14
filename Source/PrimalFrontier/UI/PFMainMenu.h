@@ -1,5 +1,6 @@
 #pragma once
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerController.h"
 #include "PFMainMenu.generated.h"
@@ -8,6 +9,19 @@ class UComboBoxString;
 class UTextBlock;
 class UVerticalBox;
 class UPFSettingsMenu;
+class UPFMainMenu;
+UCLASS()
+class PRIMALFRONTIER_API UPFWorldCardButton : public UButton
+{
+    GENERATED_BODY()
+public:
+    void InitializeWorld(UPFMainMenu* InMenu,FString InSlot);
+    const FString& GetWorldId() const {return WorldSlot;}
+private:
+    UPROPERTY() TObjectPtr<UPFMainMenu> Menu;
+    FString WorldSlot;
+    UFUNCTION() void Select();
+};
 
 UCLASS()
 class PRIMALFRONTIER_API UPFMainMenu : public UUserWidget
@@ -16,6 +30,7 @@ class PRIMALFRONTIER_API UPFMainMenu : public UUserWidget
 public:
     UFUNCTION()
     void RefreshWorlds();
+    void SelectWorld(const FString& WorldId);
 protected:
     virtual void NativeOnInitialized() override;
     virtual FReply NativeOnPreviewKeyDown(const FGeometry&,const FKeyEvent&) override;
@@ -29,6 +44,7 @@ private:
     UPROPERTY() TObjectPtr<UEditableTextBox> RenameInput;
     UPROPERTY() TObjectPtr<UComboBoxString> Worlds;
     UPROPERTY() TObjectPtr<UTextBlock> Status;
+    UPROPERTY() TObjectPtr<UVerticalBox> WorldCards;
     UFUNCTION() void CreateWorld();
     UFUNCTION() void LoadWorld();
     UFUNCTION() void RenameWorld();

@@ -143,7 +143,7 @@ public:
             Test->TestEqual(TEXT("Real camera receives applied motion blur"),Character->GetFirstPersonCameraComponent()->PostProcessSettings.MotionBlurAmount,Expected.bMotionBlur?0.5f:0.f);
             auto* HUD=ApplyWidget<UPFSurvivalHUD>(PC->GetWorld());
             auto* Label=HUD?Cast<UTextBlock>(HUD->WidgetTree->FindWidget(TEXT("PF_HealthLabel"))):nullptr;
-            if(Test->TestNotNull(TEXT("Actual vitals label exists"),Label)){Test->TestEqual(TEXT("HUD tick uses applied text scale"),Label->GetFont().Size,float(FMath::RoundToInt(22*Expected.HUDScale)));}
+            if(Test->TestNotNull(TEXT("Actual vitals label exists"),Label)){Test->TestEqual(TEXT("Compact HUD tick uses applied text scale"),Label->GetFont().Size,float(FMath::RoundToInt(14*Expected.HUDScale)));}
             Test->TestFalse(TEXT("Resume restores movement"),PC->IsMoveInputIgnored());
             Test->TestEqual(TEXT("Modal inputs do not consume or drop inventory"),PC->GetInventory()->Count(TEXT("Item_Wood")),Wood);
             Shot=Directory/TEXT("resumed.png");FScreenshotRequest::RequestScreenshot(Shot,true,false);

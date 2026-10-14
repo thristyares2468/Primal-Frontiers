@@ -14,6 +14,10 @@
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "UI/PFUITheme.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
+#include "Components/SizeBox.h"
+#include "Components/Image.h"
 #include "GameFramework/Pawn.h"
 
 void UPFStatUpgradeButton::InitializeChoice(UPFPlayerStatsMenu* Menu,EPFPlayerStat Stat)
@@ -35,6 +39,7 @@ void UPFPlayerStatsMenu::NativeOnInitialized()
     {
         auto* B=WidgetTree->ConstructWidget<UPFStatUpgradeButton>(UPFStatUpgradeButton::StaticClass(),FName(*FString::Printf(TEXT("PF_Stats%d_Button"),N)));
         B->InitializeChoice(this,static_cast<EPFPlayerStat>(N));auto* T=Label(FName(*FString::Printf(TEXT("PF_Stats%d_Label"),N)));B->SetContent(T);
+        const FName Ids[]={TEXT("Attack"),TEXT("Stamina"),TEXT("Weight"),TEXT("Craft")};PFUITheme::AddButtonIcon(WidgetTree,B,Ids[N]);
         Choices->AddChildToVerticalBox(B)->SetPadding(FMargin(0,0,0,10));Buttons.Add(B);Labels.Add(T);
     }
     Feedback=Label(TEXT("PF_StatsFeedback"));Feedback->SetColorAndOpacity(PFUITheme::Accent);Rows->AddChildToVerticalBox(Feedback)->SetPadding(FMargin(0,12,0,8));

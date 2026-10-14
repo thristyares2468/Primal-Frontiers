@@ -1,5 +1,25 @@
 # Trello test guides
 
+## G17 — Expedition UI and hotbar visual review (Personal 2)
+
+Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Main-menu entry `/Engine/Maps/Entry`. One normal rendered standalone Single player world, keyboard/mouse, latest rebuilt project.720p sufficient;1440p remains deferred. Do not use NullRHI, edit/save the editor map, grant items, delete saves or repeat the accepted climbing/ecology/building/persistence suite.
+
+Why Personal: automation verifies layouts, real transactions and authority; your readability/usability preference requires your observation. This is one bounded visual review, not a request to grind XP or unlock Copper. Existing pending physical controller/audio/stat-earned gates remain separate.
+
+Prerequisites: alive, normal starting camp, menus/console closed, one found inventory item. If bag empty, approach a labeled nearby wood or forage resource within2.5metres, aim and press E until its hit counter yields an item; use that real returned item. No new asset placement required. Save progress before optional End session.
+
+Start here: press Tab, click one stack and press1.
+
+1. Verify its original picture, exact quantity, weight and freshness details are readable. Press U to view upgrades, then Esc back to Items. Do not spend points for this review.
+2. Press Tab to close. Slot1 should show the assigned picture and current batch quantity. Press1 to select it; border highlights and text names that exact batch. For a resource/tool, Q must explain it is not consumable and preserve quantity. Tools/weapon benefits remain automatic; this does not equip a new model.
+3. Optional if you already found food/water: Tab, select that batch, press2, Tab, then2 and Q. Exactly one portion is consumed; nutrition/quantity updates. Food expiry continues normally. If it expires or is removed, shortcut says lost and Q refuses; it must not eat a different same-type batch. Reassign explicitly when needed. No wait-for-expiry requirement.
+4. C opens the centered illustrated recipe/detail view; missing ingredients are explicit. Esc out; B opens eight illustrated building choices with actual costs. Esc out. Existing chest only if one is available: aim within2.5metres/E and inspect pictured bag/chest batches, Sort/Quick Store/filter controls; no new shelter build required.
+5. P opens Pause; hotbar hides. Settings/Controls stay readable and Back returns correctly. Resume restores the hotbar. Inventory0 clears the currently selected/last-assigned shortcut without destroying its item.
+6. Optional after saving progress: End session to inspect the illustrated main menu/Single player world cards. Do not rename/delete personal worlds to prove the new art.
+
+Pass: pictures/text readable and accurately identify current definitions; no clipping/neighbor-sprite fragments, unintended item changes, wrong-batch use or input trap. Report `UI_HOTBAR PASS` with your resolution/HUD scale, or `UI_HOTBAR FAIL` and the first problem. Only optional food observation absent may be reported untested; no need to repeat other accepted checks.
+
+Evidence: Docs/UI_OVERHAUL_M11.md and HOTBAR_M11.md list exact automated runs. PNGs Saved/AutomationReports/ControlsUI/<run>; reports Saved/AutomationReports/<run>/index.json and run-summary.json; logs Saved/Logs/<run>.log. Current badges are provisional illustrations, not exact staged Fab-model likenesses. Shortcuts are session-local and reset on world/controller recreation; no persistent equipment claim. Reference sheet ArtSource/UI/Designs/ExpeditionInterfaceConcept.png is not a gameplay screenshot or extra recipe implementation.
 ## G16 — Continuous wall climbing (Personal 1)
 
 User WALL_CLIMB PASS accepted October14 for the prior version. Current follow-up makes stationary holding neutral (no loss/recovery); this guide is reproduction, not a request to repeat the accepted check. INVENTORY_UPGRADES_WALL_REST.md records new technical evidence.

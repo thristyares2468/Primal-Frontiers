@@ -32,9 +32,9 @@ void APFSurvivalPlayerController::BindGamepadControls()
     BindControl(EKeys::Gamepad_FaceButton_Left,&APFSurvivalPlayerController::GamepadPrimary,TEXT("Contextual"),TEXT("X: inventory consume; craft selected recipe; otherwise interact"));
     BindControl(EKeys::Gamepad_FaceButton_Right,&APFSurvivalPlayerController::GamepadBack,TEXT("General"),TEXT("B: close overlay / resume"));
     BindControl(EKeys::Gamepad_DPad_Up,&APFSurvivalPlayerController::GamepadUp,TEXT("Contextual"),TEXT("Inventory previous; crafting previous recipe; building next piece; otherwise toggle falling glide"));
-    BindControl(EKeys::Gamepad_DPad_Down,&APFSurvivalPlayerController::GamepadDown,TEXT("Contextual"),TEXT("Inventory next; crafting next recipe; building rotate"));
-    BindControl(EKeys::Gamepad_DPad_Left,&APFSurvivalPlayerController::GamepadLeft,TEXT("Contextual"),TEXT("Inventory split; crafting cancel; building store one"));
-    BindControl(EKeys::Gamepad_DPad_Right,&APFSurvivalPlayerController::GamepadRight,TEXT("Contextual"),TEXT("Inventory drop one; building take one"));
+    BindControl(EKeys::Gamepad_DPad_Down,&APFSurvivalPlayerController::GamepadDown,TEXT("Contextual"),TEXT("Inventory next; crafting next recipe; building rotate; gameplay use hotbar"));
+    BindControl(EKeys::Gamepad_DPad_Left,&APFSurvivalPlayerController::GamepadLeft,TEXT("Contextual"),TEXT("Inventory split; crafting cancel; building store one; gameplay previous hotbar"));
+    BindControl(EKeys::Gamepad_DPad_Right,&APFSurvivalPlayerController::GamepadRight,TEXT("Contextual"),TEXT("Inventory drop one; building take one; gameplay next hotbar"));
     BindControl(EKeys::Gamepad_RightTrigger,&APFSurvivalPlayerController::PlaceBuilding,TEXT("Building / world"),TEXT("RT: place preview; attack when overlays are closed"));
     BindControl(EKeys::Gamepad_LeftShoulder,&APFSurvivalPlayerController::DemolishBuilding,TEXT("Building"),TEXT("LB: demolish owned targeted piece"));
 }
@@ -78,6 +78,7 @@ void APFSurvivalPlayerController::GamepadDown()
     if(bInventoryOpen){InventoryNext();}
     else if(bCraftingOpen && CraftingHUD){CraftingHUD->MoveSelection(1);}
     else if(Building->bBuildMode){RotateBuilding();}
+    else{UseHotbar();}
 }
 
 /** D-left: split stack | cancel craft | store one item. */
@@ -87,6 +88,7 @@ void APFSurvivalPlayerController::GamepadLeft()
     if(bInventoryOpen){InventorySplit();}
     else if(bCraftingOpen){CancelCraft();}
     else if(Building->bBuildMode){StoreItem();}
+    else{CycleHotbar(-1);}
 }
 
 /** D-right: drop one | (nothing in crafting) | take one stored item. */
@@ -95,4 +97,5 @@ void APFSurvivalPlayerController::GamepadRight()
     if(bPauseMenuOpen){return;}
     if(bInventoryOpen){InventoryDrop();}
     else if(Building->bBuildMode){TakeStoredItem();}
+    else{CycleHotbar(1);}
 }

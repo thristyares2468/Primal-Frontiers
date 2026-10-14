@@ -15,6 +15,7 @@
 class UTextBlock;
 class UProgressBar;
 class APawn;
+class UPFItemPicture;
 
 UCLASS()
 class PRIMALFRONTIER_API UPFSurvivalHUD : public UUserWidget
@@ -39,6 +40,8 @@ protected:
 private:
     UPROPERTY(Transient) TObjectPtr<UTextBlock> AimMarker;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> InteractionLabel;
+    UPROPERTY(Transient) TObjectPtr<UTextBlock> Shortcuts;
+    UPROPERTY(Transient) TObjectPtr<UPFItemPicture> TargetPicture;
     float InteractionRefresh=0;   // seconds since the prompt text was last rebuilt
     UPROPERTY(Transient) TObjectPtr<UTextBlock> HealthLabel;
     UPROPERTY(Transient) TObjectPtr<UTextBlock> StaminaLabel;

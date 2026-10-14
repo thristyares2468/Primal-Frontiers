@@ -22,6 +22,7 @@
 #include "PrimalFrontierPlayerController.h"
 #include "Survival/PFControlHint.h"
 #include "Progression/PFProgressionRecord.h"
+#include "Inventory/PFHotbar.h"
 #include "PFSurvivalPlayerController.generated.h"
 class UPFSurvivalHUD;
 class UPFInventoryHUD;
@@ -119,6 +120,15 @@ public:
     bool HandleInventoryKey(FKey Key,bool bRepeat=false);
     /** Current row of selected stable ID, or INDEX_NONE if absent/expired. Never chooses a replacement. */
     int32 GetSelectedInventoryIndex() const;
+    /** UI selection resolves the current owned stable GUID; it cannot mutate items. */
+    bool SelectInventoryStack(FGuid Id);
+    void RequestInventoryAction(uint8 Action) {SendInventoryAction(Action);}
+    const FPFHotbar& GetHotbar() const {return Hotbar;}
+    bool HandleHotbarKey(FKey Key);
+    bool PinInventoryToHotbar(int32 Slot);
+    void ClearSelectedHotbar();
+    bool SelectHotbar(int32 Slot);
+    void UseHotbar();
     const FString& GetInventoryMessage() const {return InventoryMessage;}
     // Only operations on the owning player's existing stack IDs. No item-grant RPC.
     /** Action codes (PFInventoryAction in PFRequestCodes.h): 0 = split Quantity off, 1 = drop Quantity, 2 = eat one (Quantity must be 1). */
@@ -133,6 +143,14 @@ protected:
     UFUNCTION(Server, Reliable) void ServerInteract();
 
 private:
+    FPFHotbar Hotbar;
+    bool CanUseHotbar() const;
+    void RouteHotbar(int32 Slot);
+    void CycleHotbar(int32 Direction);
+    void HotbarOne(){RouteHotbar(0);} void HotbarTwo(){RouteHotbar(1);}
+    void HotbarThree(){RouteHotbar(2);} void HotbarFour(){RouteHotbar(3);}
+    void HotbarFive(){RouteHotbar(4);} void HotbarSix(){RouteHotbar(5);}
+    void HotbarSeven(){RouteHotbar(6);} void HotbarEight(){RouteHotbar(7);}
     bool bStatMenuOpen=false;
     void ToggleStatMenu();
     void StartSprint();

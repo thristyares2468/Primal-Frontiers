@@ -383,7 +383,8 @@ public:
             TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,UPFInventoryHUD::StaticClass(),false);
             if(!Test->TestEqual(TEXT("Actual loot inventory overlay"),Widgets.Num(),1)){return true;}auto* HUD=Widgets[0];
             const auto* Body=Cast<UTextBlock>(HUD->WidgetTree->FindWidget(TEXT("PF_InventoryPanel_Body")));const auto* Detail=Cast<UTextBlock>(HUD->WidgetTree->FindWidget(TEXT("PF_InventoryDetailBody")));
-            if(!Test->TestTrue(TEXT("Recovered three-food freshness row and consumable detail visible"),Body && Body->GetText().ToString().Contains(TEXT("Found food x3 [")) && Detail && Detail->GetText().ToString().Contains(TEXT("+35 food / +10 water")))){return true;}
+            bool bBatch=false;HUD->WidgetTree->ForEachWidget([&](UWidget* Widget){if(const auto* Label=Cast<UTextBlock>(Widget)){const FString Value=Label->GetText().ToString();bBatch |= Value.StartsWith(TEXT("> Found food")) && Value.Contains(TEXT("x3")) && Value.Contains(TEXT("fresh]"));}});
+            if(!Test->TestTrue(TEXT("Recovered three-food freshness slot and consumable detail visible"),Body && bBatch && Detail && Detail->GetText().ToString().Contains(TEXT("+35 food / +10 water")))){return true;}
             for(const auto* Label:{Body,Detail}){Test->TestTrue(TEXT("Loot text fits allocated height"),Label->GetDesiredSize().Y<=Label->GetCachedGeometry().GetLocalSize().Y+1);}
             Shot(TEXT("earned_creature_loot"));Wait(Now,.6,35);return false;
         }

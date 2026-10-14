@@ -153,13 +153,19 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindControl(EKeys::Up,&APFSurvivalPlayerController::InventoryPrevious,TEXT("Inventory"),TEXT("Select previous stack"));
     BindControl(EKeys::X,&APFSurvivalPlayerController::InventorySplit,TEXT("Inventory"),TEXT("Split selected stack"));
     BindControl(EKeys::G,&APFSurvivalPlayerController::InventoryDrop,TEXT("Inventory"),TEXT("Drop one selected item"));
-    BindControl(EKeys::Q,&APFSurvivalPlayerController::InventoryConsume,TEXT("Inventory"),TEXT("Consume one selected edible item"));
+    BindControl(EKeys::Q,&APFSurvivalPlayerController::InventoryConsume,TEXT("Inventory / Hotbar"),TEXT("Consume one selected edible inventory or hotbar batch"));
     // Crafting (M4)
     BindControl(EKeys::C,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Open / close crafting"));
     BindControl(EKeys::U,&APFSurvivalPlayerController::ToggleStatMenu,TEXT("General"),TEXT("Inventory Player upgrades tab: spend earned stat points; separate from technology"));
-    BindControl(EKeys::One,&APFSurvivalPlayerController::CraftTool,TEXT("Crafting"),TEXT("Craft primitive tool"));
-    BindControl(EKeys::Two,&APFSurvivalPlayerController::CookFood,TEXT("Crafting"),TEXT("Cook food"));
-    BindControl(EKeys::Three,&APFSurvivalPlayerController::DryFood,TEXT("Crafting"),TEXT("Dry food"));
+    BindControl(EKeys::One,&APFSurvivalPlayerController::HotbarOne,TEXT("Hotbar / Crafting"),TEXT("Hotbar1; inventory assign1; crafting primitive tool"));
+    BindControl(EKeys::Two,&APFSurvivalPlayerController::HotbarTwo,TEXT("Hotbar / Crafting"),TEXT("Hotbar2; inventory assign2; crafting cook food"));
+    BindControl(EKeys::Three,&APFSurvivalPlayerController::HotbarThree,TEXT("Hotbar / Crafting"),TEXT("Hotbar3; inventory assign3; crafting dry food"));
+    BindControl(EKeys::Four,&APFSurvivalPlayerController::HotbarFour,TEXT("Hotbar"),TEXT("Select4; inventory assign4"));
+    BindControl(EKeys::Five,&APFSurvivalPlayerController::HotbarFive,TEXT("Hotbar"),TEXT("Select5; inventory assign5"));
+    BindControl(EKeys::Six,&APFSurvivalPlayerController::HotbarSix,TEXT("Hotbar"),TEXT("Select6; inventory assign6"));
+    BindControl(EKeys::Seven,&APFSurvivalPlayerController::HotbarSeven,TEXT("Hotbar"),TEXT("Select7; inventory assign7"));
+    BindControl(EKeys::Eight,&APFSurvivalPlayerController::HotbarEight,TEXT("Hotbar"),TEXT("Select8; inventory assign8"));
+    BindControl(EKeys::Zero,&APFSurvivalPlayerController::ClearSelectedHotbar,TEXT("Inventory"),TEXT("Clear selected hotbar shortcut; keeps item"));
     BindControl(EKeys::R,&APFSurvivalPlayerController::RotateOrCancelCraft,TEXT("Crafting / Building"),TEXT("Rotate building clockwise; in crafting, cancel without consuming ingredients"));
     // Building (M5) and attack (M6, left click outside overlays)
     BindControl(EKeys::B,&APFSurvivalPlayerController::ToggleBuilding,TEXT("General"),TEXT("Open build picker; return to picker while placing; close picker"));
@@ -393,7 +399,7 @@ void APFSurvivalPlayerController::InventoryNext(){MoveInventorySelection(1);}
 void APFSurvivalPlayerController::InventoryPrevious(){MoveInventorySelection(-1);}
 void APFSurvivalPlayerController::InventorySplit(){SendInventoryAction(PFInventoryAction::Split);}
 void APFSurvivalPlayerController::InventoryDrop(){SendInventoryAction(PFInventoryAction::Drop);}
-void APFSurvivalPlayerController::InventoryConsume(){SendInventoryAction(PFInventoryAction::Consume);}
+void APFSurvivalPlayerController::InventoryConsume(){if(bInventoryOpen){SendInventoryAction(PFInventoryAction::Consume);}else{UseHotbar();}}
 
 void APFSurvivalPlayerController::SendInventoryAction(uint8 Action)
 {

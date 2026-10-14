@@ -4,6 +4,8 @@
 #include "Components/Image.h"
 #include "UI/PFUITheme.h"
 #include "Rendering/DrawElements.h"
+#include "Engine/Texture2D.h"
+#include "UI/PFUISprites.h"
 
 void UPFItemPicture::NativeOnInitialized()
 {
@@ -16,12 +18,54 @@ void UPFItemPicture::SetItem(const FPFItemDefinition* Item)
     const FName NextId=Item?Item->Id:NAME_None;
     const FSoftObjectPath NextPath=Item?Item->Icon.ToSoftObjectPath():FSoftObjectPath();
     if(NextId==ItemId && NextPath==IconPath){return;}
+    // This supported setter cancels old soft streaming, so a late callback from
+    // a previously selected custom icon cannot replace the new atlas sprite.
+    CatalogImage->SetBrushFromTexture(nullptr);
     ItemId=NextId;IconPath=NextPath;
     bSketch=IconPath.IsNull() || IconPath.ToString()==TEXT("/Engine/EngineResources/WhiteSquareTexture.WhiteSquareTexture");
+    // One original atlas, shared by every visible UImage. Custom catalog art wins.
+    static const TArray<FName> Cells={TEXT("Item_Wood"),TEXT("Item_Stone"),TEXT("Item_Food"),TEXT("Item_Fibre"),TEXT("Item_Water"),TEXT("Item_CookedFood"),TEXT("Item_DriedFood"),TEXT("Item_Cord"),TEXT("Item_WoodTool"),TEXT("Item_Tool"),TEXT("Item_BoundTool"),TEXT("Item_CopperPick"),TEXT("Item_Club"),TEXT("Item_BoundClub"),TEXT("Item_WovenGuard"),TEXT("Item_CopperOre")};
+    const int32 Cell=Cells.IndexOfByKey(ItemId);
+    if(bSketch && Cell!=INDEX_NONE){bSketch=!ApplyAtlas(TEXT("/Game/PrimalFrontier/UI/Textures/T_ExpeditionItems.T_ExpeditionItems"),Cell,4);}
+    if(bSketch && ItemId==TEXT("Item_CopperIngot")){bSketch=!ApplyAtlas(TEXT("/Game/PrimalFrontier/UI/Textures/T_ExpeditionStructures.T_ExpeditionStructures"),8,3);}
     CatalogImage->SetVisibility(bSketch?ESlateVisibility::Hidden:ESlateVisibility::HitTestInvisible);
     // Supported UImage asynchronous soft-texture path; only displayed rows load icons.
-    if(!bSketch){CatalogImage->SetBrushFromSoftTexture(Item->Icon);}
+    if(!bSketch && !IconPath.IsNull() && IconPath.ToString()!=TEXT("/Engine/EngineResources/WhiteSquareTexture.WhiteSquareTexture"))
+    {FSlateBrush Brush;CatalogImage->SetBrush(Brush);CatalogImage->SetBrushFromSoftTexture(Item->Icon);}
     InvalidateLayoutAndVolatility();
+}
+void UPFItemPicture::SetStructure(FName Id)
+{
+    ItemId=Id;IconPath.Reset();
+    CatalogImage->SetBrushFromTexture(nullptr);
+    static const TArray<FName> Cells={TEXT("Build_Foundation"),TEXT("Build_Wall"),TEXT("Build_Floor"),TEXT("Build_Ceiling"),TEXT("Build_Door"),TEXT("Build_Storage"),TEXT("Build_Window"),TEXT("Build_Stairs")};
+    bSketch=!ApplyAtlas(TEXT("/Game/PrimalFrontier/UI/Textures/T_ExpeditionStructures.T_ExpeditionStructures"),Cells.IndexOfByKey(Id),3);
+    CatalogImage->SetVisibility(bSketch?ESlateVisibility::Hidden:ESlateVisibility::HitTestInvisible);InvalidateLayoutAndVolatility();
+}
+bool UPFItemPicture::ApplyAtlas(const TCHAR* Path,int32 Cell,int32 Columns)
+{
+    if(Cell<0 || Columns<1 || IsRunningDedicatedServer()){return false;}
+    TSoftObjectPtr<UTexture2D> Atlas{FSoftObjectPath(Path)};
+    auto* Texture=Atlas.LoadSynchronous();if(!Texture){return false;}
+    FSlateBrush Brush;Brush.SetResourceObject(Texture);Brush.ImageSize=FVector2D(128,128);
+    const float Width=1.f/Columns;const FVector2D Min((Cell%Columns)*Width,(Cell/Columns)*Width);
+    // Exclude three border texels per cell; generated alpha may contain isolated
+    // edge specks and bilinear sampling must never borrow a neighboring sprite.
+    // The source is validated at1254px. An asynchronously compiling texture can
+    // temporarily expose a small proxy size; that must not change sprite UVs.
+    const FVector2D Gutter(3.f/1254.f,3.f/1254.f);
+    Brush.SetUVRegion(FBox2D(Min+Gutter,Min+FVector2D(Width,Width)-Gutter));CatalogImage->SetBrush(Brush);return true;
+}
+void UPFItemPicture::SetEncounter(FName Id)
+{
+    if(ItemId==Id){return;}ItemId=Id;IconPath.Reset();CatalogImage->SetBrushFromTexture(nullptr);bSketch=true;
+    FSoftObjectPath Path;FBox2D Region;
+    if(!IsRunningDedicatedServer() && PFUISprites::Resolve(Id,Path,Region))
+    {
+        TSoftObjectPtr<UTexture2D> Soft(Path);if(auto* Texture=Soft.LoadSynchronous())
+        {FSlateBrush Brush;Brush.SetResourceObject(Texture);Brush.ImageSize=FVector2D(128,128);const FVector2D Gutter(3.f/1254.f,3.f/1254.f);Brush.SetUVRegion(FBox2D(Region.Min+Gutter,Region.Max-Gutter));CatalogImage->SetBrush(Brush);bSketch=false;}
+    }
+    CatalogImage->SetVisibility(bSketch?ESlateVisibility::Hidden:ESlateVisibility::HitTestInvisible);InvalidateLayoutAndVolatility();
 }
 int32 UPFItemPicture::NativePaint(const FPaintArgs& Args,const FGeometry& G,const FSlateRect& Clip,FSlateWindowElementList& Draw,int32 Layer,const FWidgetStyle& Style,bool bEnabled) const
 {
@@ -41,7 +85,21 @@ int32 UPFItemPicture::NativePaint(const FPaintArgs& Args,const FGeometry& G,cons
         FSlateDrawElement::MakeLines(Draw,Layer,G.ToPaintGeometry(),Points,ESlateDrawEffect::None,Color*Style.GetColorAndOpacityTint(),true,Width*Side);
     };
     Box({0,0},{1,1},PFUITheme::Inset,0.12f);
-    if(ItemId==TEXT("Item_Tool") || ItemId==TEXT("Item_BoundTool") || ItemId==TEXT("Item_WoodTool") || ItemId==TEXT("Item_CopperPick"))
+    if(ItemId.ToString().StartsWith(TEXT("Build_")))
+    {
+        const auto Timber=PFUITheme::Accent;
+        if(ItemId==TEXT("Build_Stairs"))
+        {for(int32 N=0;N<4;++N){Box({.16f+.17f*N,.72f-.15f*N},{.20f,.12f},Timber,.02f);}}
+        else if(ItemId==TEXT("Build_Ceiling"))
+        {Line({{.12,.65},{.5,.22},{.88,.65}},Timber,.10f);Line({{.15,.65},{.85,.65}},PFUITheme::Muted,.04f);}
+        else if(ItemId==TEXT("Build_Foundation") || ItemId==TEXT("Build_Floor"))
+        {Box({.12,.50},{.76,.20},Timber,.02f);for(float X:{.25f,.45f,.65f}){Line({{X,.51},{X,.69}},PFUITheme::Inset,.025f);}}
+        else if(ItemId==TEXT("Build_Storage"))
+        {Box({.14,.28},{.72,.48},Timber,.03f);Line({{.14,.46},{.86,.46}},PFUITheme::Inset,.025f);Box({.46,.40},{.08,.18},PFUITheme::Text,.01f);}
+        else
+        {Box({.18,.15},{.64,.70},Timber,.02f);if(ItemId==TEXT("Build_Window")){Box({.32,.28},{.36,.28},PFUITheme::Inset,.02f);}else if(ItemId==TEXT("Build_Door")){Box({.37,.33},{.26,.52},PFUITheme::Inset,.02f);}else{for(float X:{.34f,.5f,.66f}){Line({{X,.2},{X,.8}},PFUITheme::Inset,.025f);}}}
+    }
+    else if(ItemId==TEXT("Item_Tool") || ItemId==TEXT("Item_BoundTool") || ItemId==TEXT("Item_WoodTool") || ItemId==TEXT("Item_CopperPick"))
     {
         const FLinearColor Head=ItemId==TEXT("Item_CopperPick")?FLinearColor(0.84f,0.43f,0.22f,1):ItemId==TEXT("Item_WoodTool")?FLinearColor(0.53f,0.32f,0.14f,1):FLinearColor(0.66f,0.72f,0.72f,1);
         Line({{0.28,0.82},{0.68,0.21}},FLinearColor(0.53f,0.32f,0.14f,1),0.11f);

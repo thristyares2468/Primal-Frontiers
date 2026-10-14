@@ -26,6 +26,11 @@ bool FPFInventorySelectionTest::RunTest(const FString&)
     Press(EKeys::Tab);TestEqual(TEXT("First opening selects first stack"),PC->GetSelectedInventoryIndex(),0);
     F.TickTestWorld(0.3f);I->PruneExpired();
     TestEqual(TEXT("Expired selection becomes none, not replacement wood"),PC->GetSelectedInventoryIndex(),INDEX_NONE);
+    TestFalse(TEXT("Mouse selection refuses expired or foreign identity"),PC->SelectInventoryStack(FGuid::NewGuid()));
+    TestTrue(TEXT("Mouse explicitly selects current owned stable identity"),PC->SelectInventoryStack(I->GetStacks()[0].StackId));
+    Press(EKeys::Tab);TestFalse(TEXT("Closed bag refuses mouse selection"),PC->SelectInventoryStack(I->GetStacks()[0].StackId));Press(EKeys::Tab);
+    // Remove/reintroduce the selected identity to retain the original expiry refusal path.
+    const auto SelectedWood=I->GetStacks()[0];TestTrue(TEXT("Remove selected mouse batch"),I->Remove(SelectedWood.StackId,SelectedWood.Quantity));TestTrue(TEXT("Replacement wood is a new identity"),I->Grant(TEXT("Item_Wood"),5));
     Press(EKeys::G);TestEqual(TEXT("Drop cannot silently act on replacement stack"),I->Count(TEXT("Item_Wood")),5);
     TestTrue(TEXT("Missing selection gives explicit reason"),PC->GetInventoryMessage().Contains(TEXT("Select")));
     Press(EKeys::Tab);Press(EKeys::Tab);

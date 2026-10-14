@@ -20,6 +20,8 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/ButtonSlot.h"
 #include "InputCoreTypes.h"
+#include "Components/SizeBox.h"
+#include "UI/PFItemPicture.h"
 
 namespace
 {
@@ -38,6 +40,7 @@ UTextBlock* Label(UWidgetTree* Tree,FName Name,const FString& Text,int32 Size=16
 UVerticalBox* Panel(UWidgetTree* Tree,FName Name)
 {
     auto* Root=Tree->ConstructWidget<UCanvasPanel>();Tree->RootWidget=Root;
+    PFUITheme::AddScrim(Tree,Root);
     auto* Frame=Tree->ConstructWidget<UBorder>(UBorder::StaticClass(),Name);
     Frame->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Surface,12.f,PFUITheme::Accent,1.f));Frame->SetPadding(FMargin(20));
     auto* Slot=Root->AddChildToCanvas(Frame);Slot->SetAnchors(FAnchors(0.08f,0.06f,0.92f,0.94f));Slot->SetOffsets(FMargin(0));
@@ -76,9 +79,11 @@ void UPFBuildingMenu::RefreshMenu()
             const auto& D=Catalog->Pieces[N];if(!Catalog->Find(D.Id)){continue;}
             auto* Choice=WidgetTree->ConstructWidget<UPFBuildChoiceButton>(UPFBuildChoiceButton::StaticClass(),FName(*(TEXT("PF_BuildChoice_")+D.Id.ToString())));
             Choice->InitializeChoice(this,D.Id);
-            Choice->SetContent(Label(WidgetTree,NAME_None,FString::Printf(TEXT("%d. %s\n%d Wood\n%s"),N+1,*D.Name.ToString(),D.WoodCost,*BuildHint(D.Kind))));
+            auto* Card=WidgetTree->ConstructWidget<UVerticalBox>();Choice->SetContent(Card);
+            auto* ArtBounds=WidgetTree->ConstructWidget<USizeBox>();ArtBounds->SetWidthOverride(100);ArtBounds->SetHeightOverride(100);auto* Picture=CreateWidget<UPFItemPicture>(GetOwningPlayer());Picture->SetStructure(D.Id);ArtBounds->SetContent(Picture);Card->AddChildToVerticalBox(ArtBounds)->SetHorizontalAlignment(HAlign_Center);
+            Card->AddChild(Label(WidgetTree,NAME_None,FString::Printf(TEXT("%d. %s\n%d Wood\n%s"),N+1,*D.Name.ToString(),D.WoodCost,*BuildHint(D.Kind))));
             CastChecked<UButtonSlot>(Choice->GetContent()->Slot)->SetHorizontalAlignment(HAlign_Fill);
-            Grid->AddChildToUniformGrid(Choice,N/2,N%2);
+            Grid->AddChildToUniformGrid(Choice,N/4,N%4);
         }
     }
     auto* Close=WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(),TEXT("PF_CloseBuildPicker"));Close->SetStyle(PFUITheme::NavigationButton(false));
@@ -122,6 +127,7 @@ void UPFStorageMenu::NativeOnInitialized()
         else if(Handler==1){Button->OnClicked.AddDynamic(this,&UPFStorageMenu::QuickStore);}
         else{Button->OnClicked.AddDynamic(this,&UPFStorageMenu::OpenSettings);}
         auto* Slot=Toolbar->AddChildToHorizontalBox(Button);Slot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));Slot->SetPadding(FMargin(4));
+        PFUITheme::AddButtonIcon(WidgetTree,Button,Handler==0?TEXT("Sort"):Handler==1?TEXT("QuickStore"):TEXT("Filter"));
     };
     Action(TEXT("PF_SortChest"),TEXT("Sort chest"),0);Action(TEXT("PF_QuickStore"),TEXT("Quick Store"),1);Action(TEXT("PF_ChestSettings"),TEXT("Chest settings"),2);
     Pages=WidgetTree->ConstructWidget<UWidgetSwitcher>();Rows->AddChildToVerticalBox(Pages)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
@@ -155,6 +161,7 @@ void UPFStorageMenu::BuildRows(UPFInventoryComponent* I,bool Deposit,UVerticalBo
     for(const auto& Stack:I->GetStacks())
     {
         auto* Row=WidgetTree->ConstructWidget<UHorizontalBox>();Rows->AddChildToVerticalBox(Row)->SetPadding(FMargin(0,6));
+        auto* ArtBounds=WidgetTree->ConstructWidget<USizeBox>();ArtBounds->SetWidthOverride(62);ArtBounds->SetHeightOverride(62);auto* Picture=CreateWidget<UPFItemPicture>(GetOwningPlayer());Picture->SetItem(I->Definition(Stack.ItemId));ArtBounds->SetContent(Picture);Row->AddChildToHorizontalBox(ArtBounds)->SetVerticalAlignment(VAlign_Center);
         auto* T=Label(WidgetTree,NAME_None,TEXT(""));Labels.Add(T);Row->AddChildToHorizontalBox(T)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
         for(int32 All=0;All<2;++All)
         {

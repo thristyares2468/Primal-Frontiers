@@ -67,7 +67,7 @@ void UPFCraftingHUD::NativeOnInitialized()
     CastChecked<UButtonSlot>(LearnLabel->Slot)->SetHorizontalAlignment(HAlign_Fill);
     LearnLabel->SetJustification(ETextJustify::Center);
     Details->AddChildToVerticalBox(LearnButton)->SetPadding(FMargin(0,0,0,10));
-    auto* PictureSize=WidgetTree->ConstructWidget<USizeBox>();PictureSize->SetWidthOverride(108);PictureSize->SetHeightOverride(108);
+    auto* PictureSize=WidgetTree->ConstructWidget<USizeBox>();PictureSize->SetWidthOverride(160);PictureSize->SetHeightOverride(160);
     Picture=CreateWidget<UPFItemPicture>(GetOwningPlayer(),UPFItemPicture::StaticClass(),TEXT("PF_SelectedItemPicture"));PictureSize->SetContent(Picture);Details->AddChildToVerticalBox(PictureSize)->SetHorizontalAlignment(HAlign_Center);
     DetailTitle=Label(TEXT("PF_CraftingDetail_Title"),PFUITheme::Text);Details->AddChildToVerticalBox(DetailTitle)->SetPadding(FMargin(0,8,0,8));
     DetailBody=Label(TEXT("PF_CraftingPanel_Body"),PFUITheme::Text);Details->AddChildToVerticalBox(DetailBody)->SetPadding(FMargin(0,0,0,12));
@@ -80,7 +80,7 @@ void UPFCraftingHUD::NativeOnInitialized()
     {
         auto* B=WidgetTree->ConstructWidget<UPFRecipeChoiceButton>(UPFRecipeChoiceButton::StaticClass(),Name);B->SetStyle(PFUITheme::NavigationButton(false));
         auto* T=Label(NAME_None,PFUITheme::Text);T->SetAutoWrapText(false);T->SetText(FText::FromString(Caption));B->SetContent(T);ButtonLabels.Add(T);
-        auto* ActionSlot=Actions->AddChildToHorizontalBox(B);ActionSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));ActionSlot->SetPadding(FMargin(0,0,8,0));return B;
+        auto* ActionSlot=Actions->AddChildToHorizontalBox(B);ActionSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));ActionSlot->SetPadding(FMargin(0,0,8,0));PFUITheme::AddButtonIcon(WidgetTree,B,Name==TEXT("PF_CraftSelected")?TEXT("Craft"):TEXT("Close"));return B;
     };
     CraftButton=Button(TEXT("PF_CraftSelected"),TEXT("Craft selected"));CraftButton->OnClicked.AddDynamic(this,&UPFCraftingHUD::CraftSelected);
     CancelButton=Button(TEXT("PF_CancelCraft"),TEXT("Cancel job"));CancelButton->OnClicked.AddDynamic(this,&UPFCraftingHUD::CancelCraft);

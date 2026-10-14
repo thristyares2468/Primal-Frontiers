@@ -18,6 +18,21 @@
 #include "GameFramework/Pawn.h"
 #include "Settings/PFGameUserSettings.h"
 #include "Building/PFBuildingComponent.h"
+#include "Components/Border.h"
+#include "Components/VerticalBoxSlot.h"
+#include "UI/PFUITheme.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
+#include "Components/Image.h"
+#include "UI/PFItemPicture.h"
+#include "Survival/PFInteraction.h"
+#include "Inventory/PFItemPickup.h"
+#include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFItemCatalog.h"
+#include "Crafting/PFResourceNode.h"
+#include "Crafting/PFCraftingCatalog.h"
+#include "Creatures/PFCreature.h"
+#include "Inventory/PFHotbarHUD.h"
 
 void UPFSurvivalHUD::NativeOnInitialized()
 {
@@ -51,11 +66,14 @@ void UPFSurvivalHUD::NativeOnInitialized()
     InteractionPlacement->SetAnchors(FAnchors(0.5f,0.62f));
     InteractionPlacement->SetAlignment(FVector2D(0.5f,0));
     InteractionPlacement->SetSize(FVector2D(800,140));
+    auto* TargetBounds=WidgetTree->ConstructWidget<USizeBox>();TargetBounds->SetWidthOverride(42);TargetBounds->SetHeightOverride(42);TargetPicture=CreateWidget<UPFItemPicture>(GetOwningPlayer(),UPFItemPicture::StaticClass(),TEXT("PF_TargetPicture"));TargetBounds->SetContent(TargetPicture);
+    auto* TargetSlot=Canvas->AddChildToCanvas(TargetBounds);TargetSlot->SetAnchors(FAnchors(.5f,.57f));TargetSlot->SetAlignment(FVector2D(.5f,1));TargetSlot->SetAutoSize(true);
 
     // Vitals panel, bottom-left.
     UVerticalBox* Panel = WidgetTree->ConstructWidget<UVerticalBox>();
     USizeBox* Bounds = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("PF_VitalsBounds"));
-    Bounds->SetWidthOverride(480); Bounds->AddChild(Panel);
+    Bounds->SetWidthOverride(360);
+    auto* Frame=WidgetTree->ConstructWidget<UBorder>();Frame->SetBrush(FSlateRoundedBoxBrush(FLinearColor(.012f,.02f,.026f,.82f),3.f,PFUITheme::Line,1.f));Frame->SetPadding(FMargin(16,12));Frame->SetContent(Panel);Bounds->SetContent(Frame);
     UCanvasPanelSlot* PanelSlot = Canvas->AddChildToCanvas(Bounds);
     PanelSlot->SetAnchors(FAnchors(0.f, 1.f));
     PanelSlot->SetAlignment(FVector2D(0.f, 1.f));
@@ -84,7 +102,23 @@ void UPFSurvivalHUD::NativeOnInitialized()
     DamageLabel->SetShadowColorAndOpacity(FLinearColor::Black);
     DamageLabel->SetShadowOffset(FVector2D(1,1));
     Panel->AddChild(DamageLabel);
+    // Small illustrated cues supplement text, never replace numeric values/warnings.
+    const auto Decorate=[&](UTextBlock* Label,FName Id)
+    {const int32 Index=Panel->GetChildIndex(Label);Panel->RemoveChild(Label);auto* Row=WidgetTree->ConstructWidget<UHorizontalBox>();auto* Art=WidgetTree->ConstructWidget<USizeBox>();Art->SetWidthOverride(24);Art->SetHeightOverride(24);Art->SetContent(PFUITheme::Icon(WidgetTree,Id,24));auto* ArtSlot=Row->AddChildToHorizontalBox(Art);ArtSlot->SetVerticalAlignment(VAlign_Center);ArtSlot->SetPadding(FMargin(0,0,8,0));Row->AddChildToHorizontalBox(Label)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));Panel->InsertChildAt(Index,Row);};
+    Decorate(HealthLabel,TEXT("Health"));Decorate(StaminaLabel,TEXT("Stamina"));Decorate(NeedsLabel,TEXT("Food"));
+    for(auto* Label:{HealthLabel.Get(),StaminaLabel.Get(),NeedsLabel.Get(),StateLabel.Get()}){Label->SetColorAndOpacity(PFUITheme::Text);}
+    for(auto* Bar:{HealthBar.Get(),StaminaBar.Get(),HungerBar.Get(),ThirstBar.Get()})
+    {
+        FProgressBarStyle Style;FSlateRoundedBoxBrush Background(PFUITheme::Inset,2.f);Background.ImageSize=FVector2D(300,6);
+        FSlateRoundedBoxBrush Fill(FLinearColor::White,2.f);Fill.ImageSize=FVector2D(300,6);Style.SetBackgroundImage(Background);Style.SetFillImage(Fill);Style.SetMarqueeImage(Fill);Bar->SetWidgetStyle(Style);
+        CastChecked<UVerticalBoxSlot>(Bar->Slot)->SetPadding(FMargin(0,3,0,7));
+    }
+    auto* Guide=WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),TEXT("PF_ExpeditionShortcuts"));Shortcuts=Guide;Guide->SetText(FText::FromString(TEXT("TAB  BAG    C  CRAFT    B  BUILD    P  PAUSE")));Guide->SetColorAndOpacity(PFUITheme::Text);auto GuideFont=Guide->GetFont();GuideFont.Size=14;Guide->SetFont(GuideFont);Guide->SetShadowColorAndOpacity(FLinearColor::Black);Guide->SetShadowOffset(FVector2D(1,1));
+    auto* GuideSlot=Canvas->AddChildToCanvas(Guide);GuideSlot->SetAnchors(FAnchors(1,1));GuideSlot->SetAlignment(FVector2D(1,1));GuideSlot->SetAutoSize(true);GuideSlot->SetPosition(FVector2D(-32,-24));
 
+    auto* Hotbar=CreateWidget<UPFHotbarHUD>(GetOwningPlayer(),UPFHotbarHUD::StaticClass(),TEXT("PF_Hotbar"));
+    auto* HotbarPlacement=Canvas->AddChildToCanvas(Hotbar);HotbarPlacement->SetAnchors(FAnchors(.5f,1));HotbarPlacement->SetAlignment(FVector2D(.5f,1));HotbarPlacement->SetAutoSize(true);HotbarPlacement->SetPosition(FVector2D(0,-24));
+    GuideSlot->SetPosition(FVector2D(-32,-145));
     // Purely visual: never steal mouse clicks from gameplay.
     SetVisibility(ESlateVisibility::HitTestInvisible);
 }
@@ -98,14 +132,31 @@ void UPFSurvivalHUD::NativeTick(const FGeometry& Geometry, float DeltaTime)
     const auto* Settings=UPFGameUserSettings::Get();
     for(auto* Label:{HealthLabel.Get(),StaminaLabel.Get(),NeedsLabel.Get(),StateLabel.Get(),DamageLabel.Get(),InteractionLabel.Get()})
     {
-        if(Label){auto Font=Label->GetFont();const int32 Size=FMath::RoundToInt(22*(Settings?Settings->Preferences.HUDScale:1.f));if(Font.Size!=Size){Font.Size=Size;Label->SetFont(Font);}}
+        if(Label){auto Font=Label->GetFont();const int32 Base=Label==InteractionLabel?18:14;const int32 Size=FMath::RoundToInt(Base*(Settings?Settings->Preferences.HUDScale:1.f));if(Font.Size!=Size){Font.Size=Size;Label->SetFont(Font);}}
     }
     const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
+    if(Shortcuts){Shortcuts->SetVisibility((!Settings || Settings->Preferences.bControlHints) && PC && !PC->IsPauseMenuOpen() && !PC->IsInventoryOpen() && !PC->IsCraftingOpen()?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);}
     const APawn* Pawn=GetOwningPlayerPawn();
     const auto* Survival=Pawn?Pawn->FindComponentByClass<UPFPlayerSurvivalComponent>():nullptr;
     const bool bAvailable=Survival!=nullptr;
     const bool bDead=bAvailable && Survival->IsDead();
     const bool bCanAim=bAvailable && !bDead && PC && !PC->IsPauseMenuOpen();
+    if(TargetPicture)
+    {
+        bool Shown=false;const bool Modal=PC && (PC->IsInventoryOpen() || PC->IsCraftingOpen() || PC->IsBuildingMenuOpen() || PC->IsStorageMenuOpen());
+        if(bCanAim && !Modal)
+        {
+            const auto* Target=PFInteraction::FindTarget(Pawn,500);
+            if(const auto* Pickup=Cast<APFItemPickup>(Target)){const auto* I=PC->GetInventory();TargetPicture->SetItem(I?I->Definition(Pickup->GetContents().ItemId):nullptr);Shown=I!=nullptr;}
+            else if(const auto* Node=Cast<APFResourceNode>(Target)){const auto* D=Node->Catalog?Node->Catalog->Resource(Node->ResourceId,Node->Items):nullptr;if(D){TargetPicture->SetItem(Node->Items->Find(D->YieldItem));Shown=true;}}
+            else
+            {
+                FVector Eye;FRotator View;Pawn->GetActorEyesViewPoint(Eye,View);FHitResult Hit;FCollisionQueryParams Params(SCENE_QUERY_STAT(PFUIEncounter),false,Pawn);
+                if(GetWorld()->LineTraceSingleByChannel(Hit,Eye,Eye+View.Vector()*500,ECC_Visibility,Params)){if(const auto* Creature=Cast<APFCreature>(Hit.GetActor())){TargetPicture->SetEncounter(Creature->DefinitionId);Shown=Creature->Definition()!=nullptr;}}
+            }
+        }
+        TargetPicture->SetVisibility(Shown?ESlateVisibility::HitTestInvisible:ESlateVisibility::Collapsed);
+    }
     if(AimMarker)
     {
         AimMarker->SetVisibility(bCanAim && (!Settings || Settings->Preferences.bCrosshair)?ESlateVisibility::HitTestInvisible:ESlateVisibility::Hidden);

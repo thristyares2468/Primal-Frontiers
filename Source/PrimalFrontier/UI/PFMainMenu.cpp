@@ -20,6 +20,14 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/DateTime.h"
 #include "Engine/World.h"
+#include "Components/Image.h"
+#include "Engine/Texture2D.h"
+#include "Components/ScrollBox.h"
+
+void UPFWorldCardButton::InitializeWorld(UPFMainMenu* InMenu,FString InSlot)
+{Menu=InMenu;WorldSlot=MoveTemp(InSlot);OnClicked.AddDynamic(this,&UPFWorldCardButton::Select);}
+void UPFWorldCardButton::Select(){if(Menu){Menu->SelectWorld(WorldSlot);}}
+void UPFMainMenu::SelectWorld(const FString& WorldId){Worlds->SetSelectedOption(WorldId);}
 
 APFMainMenuGameMode::APFMainMenuGameMode()
 {DefaultPawnClass=nullptr;PlayerControllerClass=APFMainMenuPlayerController::StaticClass();}
@@ -38,9 +46,12 @@ void UPFMainMenu::NativeOnInitialized()
 {
     Super::NativeOnInitialized();SetIsFocusable(true);
     auto* Canvas=WidgetTree->ConstructWidget<UCanvasPanel>();WidgetTree->RootWidget=Canvas;
-    auto* Shade=WidgetTree->ConstructWidget<UBorder>();Shade->SetBrushColor(PFUITheme::Surface);
+    auto* Landscape=WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(),TEXT("PF_MenuLandscape"));
+    TSoftObjectPtr<UTexture2D> Art(FSoftObjectPath(TEXT("/Game/PrimalFrontier/UI/Textures/T_FrontierMenu.T_FrontierMenu")));Landscape->SetBrushFromTexture(Art.LoadSynchronous());Landscape->SetVisibility(ESlateVisibility::HitTestInvisible);
+    auto* ArtSlot=Canvas->AddChildToCanvas(Landscape);ArtSlot->SetAnchors(FAnchors(0,0,1,1));ArtSlot->SetOffsets(FMargin(0));
+    auto* Shade=WidgetTree->ConstructWidget<UBorder>();Shade->SetBrushColor(FLinearColor(.005f,.01f,.015f,.24f));
     auto* Back=Canvas->AddChildToCanvas(Shade);Back->SetAnchors(FAnchors(0,0,1,1));Back->SetOffsets(FMargin(0));
-    auto* Panel=WidgetTree->ConstructWidget<UBorder>();Panel->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Inset,12.f));Panel->SetPadding(FMargin(32));
+    auto* Panel=WidgetTree->ConstructWidget<UBorder>();Panel->SetBrush(FSlateRoundedBoxBrush(FLinearColor(.018f,.025f,.033f,.94f),3.f,PFUITheme::Line,1.f));Panel->SetPadding(FMargin(32));
     auto* Size=WidgetTree->ConstructWidget<USizeBox>();Size->SetWidthOverride(1100);Size->SetContent(Panel);
     auto* Placement=Canvas->AddChildToCanvas(Size);Placement->SetAnchors(FAnchors(0.5f,0.5f));Placement->SetAlignment(FVector2D(0.5f,0.5f));Placement->SetAutoSize(true);
     auto* Columns=WidgetTree->ConstructWidget<UHorizontalBox>();Panel->SetContent(Columns);
@@ -50,13 +61,14 @@ void UPFMainMenu::NativeOnInitialized()
         auto* T=WidgetTree->ConstructWidget<UTextBlock>();T->SetText(FText::FromString(Caption));auto F=T->GetFont();F.Size=FontSize;T->SetFont(F);T->SetColorAndOpacity(PFUITheme::Text);T->SetAutoWrapText(true);
         Rows->AddChildToVerticalBox(T)->SetPadding(FMargin(0,0,0,12));return T;
     };
-    Text(TEXT("PRIMAL\nFRONTIER"),48);Text(TEXT("SURVIVE. BUILD. ADAPT."),18)->SetColorAndOpacity(PFUITheme::Accent);
+    Text(TEXT("PRIMAL\nFRONTIER"),52)->SetColorAndOpacity(PFUITheme::Accent);Text(TEXT("SURVIVE. BUILD. ADAPT."),16)->SetColorAndOpacity(PFUITheme::Text);
     Text(TEXT("A first-person survival frontier."),22)->SetColorAndOpacity(PFUITheme::Muted);
     auto Button=[&](const TCHAR* Caption,const TCHAR* Name)
     {
         auto* B=WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(),FName(Name));B->SetStyle(PFUITheme::NavigationButton(false));
         auto* T=WidgetTree->ConstructWidget<UTextBlock>();T->SetText(FText::FromString(Caption));auto F=T->GetFont();F.Size=24;T->SetFont(F);T->SetColorAndOpacity(PFUITheme::Text);B->SetContent(T);
-        CastChecked<UButtonSlot>(T->Slot)->SetPadding(FMargin(18,12));Rows->AddChildToVerticalBox(B)->SetPadding(FMargin(0,0,0,12));return B;
+        CastChecked<UButtonSlot>(T->Slot)->SetPadding(FMargin(18,12));Rows->AddChildToVerticalBox(B)->SetPadding(FMargin(0,0,0,12));
+        const FName Id=FString(Name).Contains(TEXT("SinglePlayer"))?TEXT("Single"):FString(Name).Contains(TEXT("Multiplayer"))?TEXT("Multi"):FString(Name).Contains(TEXT("Settings"))?TEXT("Settings"):FString(Name).Contains(TEXT("Rename"))?TEXT("Rename"):FString(Name).Contains(TEXT("Refresh"))?TEXT("Reset"):FString(Name).Contains(TEXT("Back"))?TEXT("Back"):FString(Name).Contains(TEXT("Quit"))?TEXT("Close"):TEXT("Save");PFUITheme::AddButtonIcon(WidgetTree,B,Id);return B;
     };
     Button(TEXT("Single player"),TEXT("PF_SinglePlayer"))->OnClicked.AddDynamic(this,&UPFMainMenu::SinglePlayer);
     Button(TEXT("Multiplayer"),TEXT("PF_Multiplayer"))->OnClicked.AddDynamic(this,&UPFMainMenu::Multiplayer);
@@ -76,8 +88,10 @@ void UPFMainMenu::NativeOnInitialized()
     Button(TEXT("Create new world"),TEXT("PF_NewWorld"))->OnClicked.AddDynamic(this,&UPFMainMenu::CreateWorld);
     Text(TEXT("Load a saved world"),24);
     Worlds=WidgetTree->ConstructWidget<UComboBoxString>(UComboBoxString::StaticClass(),TEXT("PF_SavedWorlds"));Worlds->OnGenerateWidgetEvent.BindDynamic(this,&UPFMainMenu::WorldOption);
+    auto SelectorStyle=Worlds->GetWidgetStyle();auto SelectorButton=SelectorStyle.ComboButtonStyle;SelectorButton.SetButtonStyle(PFUITheme::NavigationButton(false));SelectorButton.SetMenuBorderBrush(FSlateRoundedBoxBrush(PFUITheme::Surface,3.f,PFUITheme::Line,1.f));SelectorStyle.SetComboButtonStyle(SelectorButton);Worlds->SetWidgetStyle(SelectorStyle);
     Worlds->SetClipping(EWidgetClipping::ClipToBounds);
     Rows->AddChildToVerticalBox(Worlds)->SetPadding(FMargin(0,0,0,8));Worlds->OnSelectionChanged.AddDynamic(this,&UPFMainMenu::SelectionChanged);
+    auto* LibraryBounds=WidgetTree->ConstructWidget<USizeBox>();LibraryBounds->SetHeightOverride(110);auto* Library=WidgetTree->ConstructWidget<UScrollBox>();LibraryBounds->SetContent(Library);WorldCards=WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(),TEXT("PF_WorldLibrary"));Library->AddChild(WorldCards);Rows->AddChild(LibraryBounds);
     Button(TEXT("Load selected world"),TEXT("PF_LoadWorld"))->OnClicked.AddDynamic(this,&UPFMainMenu::LoadWorld);
     Button(TEXT("Refresh worlds"),TEXT("PF_RefreshWorlds"))->OnClicked.AddDynamic(this,&UPFMainMenu::RefreshWorlds);
     RenameInput=WidgetTree->ConstructWidget<UEditableTextBox>(UEditableTextBox::StaticClass(),TEXT("PF_RenameWorldName"));RenameInput->SetWidgetStyle(FieldStyle);RenameInput->SetHintText(FText::FromString(TEXT("New display name")));
@@ -97,6 +111,13 @@ void UPFMainMenu::NativeOnInitialized()
 void UPFMainMenu::RefreshWorlds()
 {
     const FString Before=Worlds->GetSelectedOption();Worlds->ClearOptions();const auto Entries=PFWorldMenuModel::List();
+    WorldCards->ClearChildren();
+    for(const auto& E:Entries)
+    {
+        auto* Card=WidgetTree->ConstructWidget<UPFWorldCardButton>();Card->InitializeWorld(this,E.Slot);Card->SetStyle(PFUITheme::NavigationButton(false));Card->SetIsEnabled(E.bLoadable);
+        auto* Label=WidgetTree->ConstructWidget<UTextBlock>();Label->SetColorAndOpacity(PFUITheme::Text);auto F=Label->GetFont();F.Size=16;Label->SetFont(F);Label->SetAutoWrapText(true);
+        Label->SetText(FText::FromString(PFWorldMenuModel::NameFor(E.Slot)+TEXT("\n")+(E.bLoadable?FString(TEXT("OPEN WORLD  /  "))+FDateTime::FromUnixTimestamp(E.SavedUtc).ToString(TEXT("%d %b %Y  %H:%M"))+TEXT(" UTC"):TEXT("Unavailable: ")+E.Issue)));Card->SetContent(Label);WorldCards->AddChildToVerticalBox(Card)->SetPadding(FMargin(0,0,0,6));
+    }
     for(const auto& E:Entries){Worlds->AddOption(E.Slot);}
     if(!Entries.IsEmpty()){Worlds->SetSelectedOption(Entries.ContainsByPredicate([&](const auto& E){return E.Slot==Before;})?Before:Entries[0].Slot);}
     else{Status->SetText(FText::FromString(TEXT("No saved worlds yet. Create a world, then Save in Pause.")));}
@@ -105,6 +126,7 @@ void UPFMainMenu::RefreshWorlds()
 void UPFMainMenu::SelectionChanged(FString SelectedWorldName,ESelectInfo::Type)
 {
     if(!Status){return;}FPFWorldMenuEntry E;PFWorldMenuModel::Inspect(SelectedWorldName,E);
+    if(WorldCards){for(auto* Child:WorldCards->GetAllChildren()){if(auto* Card=Cast<UPFWorldCardButton>(Child)){Card->SetStyle(PFUITheme::NavigationButton(Card->GetWorldId()==SelectedWorldName));}}}
     const FString MapLabel=E.Map==TEXT("L_PrimalFrontier_OpenWorld")?TEXT("Open-world frontier"):TEXT("Survival arena");
     Status->SetText(FText::FromString(E.bLoadable?MapLabel+TEXT("  |  saved ")+FDateTime::FromUnixTimestamp(E.SavedUtc).ToString()+TEXT(" UTC"):TEXT("Cannot load: ")+E.Issue));
 }

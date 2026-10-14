@@ -112,6 +112,7 @@ void UPFPauseMenu::NativeOnInitialized()
     Details->AddChildToVerticalBox(SaveFeedback)->SetPadding(FMargin(0,20,0,0));
     auto* Hint=Text(TEXT("Esc / P / Menu: resume\nArrows / D-pad: select | Enter / A: confirm\nIn Editor Play, Esc may end the session."),16);
     Hint->SetColorAndOpacity(PFUITheme::Muted);Rows->AddChildToVerticalBox(Hint)->SetPadding(FMargin(0,12,0,0));
+    PFUITheme::AddButtonIcon(WidgetTree,ResumeButton,TEXT("Resume"));PFUITheme::AddButtonIcon(WidgetTree,SettingsButton,TEXT("Settings"));PFUITheme::AddButtonIcon(WidgetTree,ControlsButton,TEXT("Controls"));PFUITheme::AddButtonIcon(WidgetTree,QuitButton,TEXT("Close"));PFUITheme::AddButtonIcon(WidgetTree,SaveButton,TEXT("Save"));
 }
 
 void UPFPauseMenu::Refresh()

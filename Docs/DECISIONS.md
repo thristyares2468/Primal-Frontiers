@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## October15 — Original expedition sprites and local hotbar
+
+Use five original shared sprite atlases plus a static title illustration, catalog soft-icon overrides, square image bounds and a three-source-texel UV inset. Registered source dimensions/seams remain stable while Unreal compiles proxy textures; cancel an old UImage soft request before switching selected art. No real-time 3D inventory previews, blur, new plugin or arbitrary Fab mesh assignment. Existing Fab packages are staged/unassigned, so illustrations are provisional until actual licensed meshes/materials are selected and visually compared. The three-screen concept sheet is reference-only, not a new recipe catalog. Runtime labels retain all quantities, expiry and refusal details independently of color/icon recognition.
+
+Hotbar uses eight session-local exact owned batch GUIDs, not copied inventory or replicated client-authoritative equipment. Inventory1–8 assigns/0 clears; gameplay1–8 selects and Q consumes through existing ServerInventoryAction with server ownership, life, rate and freshness validation. D-left/right cycles and D-down uses outside menus, preserving modal/build/craft contexts. No auto replacement after expiry/removal, no free items. Current best-carried tool/protection benefits remain automatic; selecting a tool is not an equipment claim. Shortcuts survive pawn respawn while this controller exists but reset on travel/new controller; persistent preferences/equipment are separate future work. Existing camp resources provide a reachable real-item fixture without modifying the map or persistent identities.
+
 ## October14 — Inventory owns upgrades; wall rest is neutral
 
 Reuse the existing stat presentation as an actual inventory child tab instead of creating a separate viewport modal or duplicate authority. Inventory owns input locks/cursor, page switch retains selection, nested Back→Items and Tab/View close; Pause has no competing entry. Keep all point requests/data budgets unchanged. Idle wall input costs0 and blocks recovery; moving still costs12/s and exact zero drops. Existing camp sign only, no geometry/identity/save migration. User WALL_CLIMB PASS records the prior behavior, not pre-acceptance of this follow-up. INVENTORY_UPGRADES_WALL_REST.md records fresh narrow proof.

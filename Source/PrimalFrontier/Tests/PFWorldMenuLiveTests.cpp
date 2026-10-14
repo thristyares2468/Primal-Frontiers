@@ -161,6 +161,8 @@ public:
             auto* Selector=Cast<UComboBoxString>(Main->WidgetTree->FindWidget(TEXT("PF_SavedWorlds")));
             if(!Test->TestNotNull(TEXT("Saved world selector exists"),Selector)){return true;}
             Selector->SetSelectedOption(Slot);Test->TestEqual(TEXT("Saved world available for explicit selection"),Selector->GetSelectedOption(),Slot);
+            UPFWorldCardButton* Card=nullptr;Main->WidgetTree->ForEachWidget([&](UWidget* Widget){if(auto* Candidate=Cast<UPFWorldCardButton>(Widget);Candidate && Candidate->GetWorldId()==Slot){Card=Candidate;}});
+            Test->TestNotNull(TEXT("Actual saved-world card exists"),Card);if(Card){Card->OnClicked.Broadcast();Test->TestEqual(TEXT("World card selects exact saved identity without travel"),Selector->GetSelectedOption(),Slot);}
             Phase=19;Until=Now+0.5;return false;
         }
         if(Phase==19)

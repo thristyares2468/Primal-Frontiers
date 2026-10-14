@@ -11,22 +11,24 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "UI/PFUITheme.h"
 
 void UPFControlsMenu::NativeOnInitialized()
 {
     Super::NativeOnInitialized();SetIsFocusable(true);
     auto* Canvas=WidgetTree->ConstructWidget<UCanvasPanel>();WidgetTree->RootWidget=Canvas;
-    auto* Panel=WidgetTree->ConstructWidget<UBorder>();Panel->SetBrushColor(FLinearColor(0.025f,0.035f,0.045f,1));Panel->SetPadding(FMargin(20));
+    PFUITheme::AddScrim(WidgetTree,Canvas);
+    auto* Panel=WidgetTree->ConstructWidget<UBorder>();Panel->SetBrush(FSlateRoundedBoxBrush(PFUITheme::Surface,3.f,PFUITheme::Line,1.f));Panel->SetPadding(FMargin(24));
     auto* Placement=Canvas->AddChildToCanvas(Panel);Placement->SetAnchors(FAnchors(0.06f,0.05f,0.94f,0.95f));Placement->SetOffsets(FMargin(0));
     auto* Body=WidgetTree->ConstructWidget<UVerticalBox>();Panel->SetContent(Body);
     auto Text=[&](const FString& Value,int32 Size)
     {
         auto* T=WidgetTree->ConstructWidget<UTextBlock>();T->SetText(FText::FromString(Value));
-        auto Font=T->GetFont();Font.Size=Size;T->SetFont(Font);T->SetAutoWrapText(true);return T;
+        auto Font=T->GetFont();Font.Size=Size;T->SetFont(Font);T->SetAutoWrapText(true);T->SetColorAndOpacity(PFUITheme::Text);return T;
     };
     Heading=Text(TEXT(""),26);Body->AddChild(Heading);
     auto* Tabs=WidgetTree->ConstructWidget<UHorizontalBox>();Body->AddChild(Tabs);
-    auto Button=[&](const TCHAR* Caption){auto* B=WidgetTree->ConstructWidget<UButton>();B->SetContent(Text(Caption,20));Tabs->AddChild(B);return B;};
+    auto Button=[&](const TCHAR* Caption){auto* B=WidgetTree->ConstructWidget<UButton>();B->SetStyle(PFUITheme::NavigationButton(false));B->SetContent(Text(Caption,20));Tabs->AddChild(B);PFUITheme::AddButtonIcon(WidgetTree,B,FString(Caption).Contains(TEXT("Back"))?TEXT("Back"):TEXT("Controls"));return B;};
     Button(TEXT(" Keyboard & mouse "))->OnClicked.AddDynamic(this,&UPFControlsMenu::Keyboard);
     Button(TEXT(" Controller (Xbox names) "))->OnClicked.AddDynamic(this,&UPFControlsMenu::Controller);
     Button(TEXT(" Back to Pause "))->OnClicked.AddDynamic(this,&UPFControlsMenu::Back);

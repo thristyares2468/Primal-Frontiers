@@ -10,6 +10,8 @@ class PRIMALFRONTIER_API UPFItemPicture : public UUserWidget
     GENERATED_BODY()
 public:
     void SetItem(const FPFItemDefinition* Item);
+    void SetStructure(FName Id);
+    void SetEncounter(FName Id);
     FName GetItemId() const {return ItemId;}
 protected:
     virtual void NativeOnInitialized() override;
@@ -19,4 +21,5 @@ private:
     FName ItemId;
     FSoftObjectPath IconPath;
     bool bSketch=true;
+    bool ApplyAtlas(const TCHAR* Path,int32 Cell,int32 Columns);
 };

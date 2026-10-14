@@ -2,6 +2,16 @@
 #include "Inventory/PFInventoryHUD.h"
 #include "Building/PFBuildingComponent.h"
 #include "GameFramework/PlayerInput.h"
+#include "Inventory/PFInventoryComponent.h"
+
+bool APFSurvivalPlayerController::SelectInventoryStack(FGuid Id)
+{
+    const auto* I=GetInventory();
+    if(!bInventoryOpen || bStatMenuOpen || bPauseMenuOpen || !I || !Id.IsValid()){return false;}
+    const double Now=UPFInventoryComponent::ServerTime(GetWorld());
+    if(!I->GetStacks().ContainsByPredicate([&](const auto& S){return S.StackId==Id && (S.ExpiresAt<=0 || S.ExpiresAt>Now);})){return false;}
+    SelectedInventoryStack=Id;bInventorySelectionInitialized=true;return true;
+}
 
 void APFSurvivalPlayerController::ToggleInventory(){if(!bPauseMenuOpen){SetInventoryOpen(!bInventoryOpen);}}
 void APFSurvivalPlayerController::SetInventoryOpen(bool Open)
@@ -42,6 +52,7 @@ bool APFSurvivalPlayerController::HandleInventoryKey(FKey K,bool Repeat)
     if(K==EKeys::C || K==EKeys::Gamepad_FaceButton_Top){SetInventoryOpen(false);SetCraftingMenuOpen(true);return true;}
     if(K==EKeys::B){SetInventoryOpen(false);ToggleBuilding();return true;}
     if(bStatMenuOpen){return false;}
+    if(HandleHotbarKey(K)){return true;}
     if(K==EKeys::Up || K==EKeys::Gamepad_DPad_Up){InventoryPrevious();return true;}
     if(K==EKeys::Down || K==EKeys::Gamepad_DPad_Down){InventoryNext();return true;}
     if(K==EKeys::X || K==EKeys::Gamepad_DPad_Left){InventorySplit();return true;}
