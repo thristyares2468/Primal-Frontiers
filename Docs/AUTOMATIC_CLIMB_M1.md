@@ -1,5 +1,7 @@
 # Automatic jump-contact climb — October 13, 2026
 
+**Historical short/prepaid mantle, now superseded by CONTINUOUS_CLIMB_M14.md.** Rising paid W+Space wall contact now attaches to the continuous custom mode; hold W to ascend, zero stamina falls. The ordinary20-stamina jump and automatic contact guards remain. New current gate G16, not the old cost/height instructions below.
+
 The requested automatic short-ledge climb is implemented and technically verified. A real paid ground jump contacting a wall while rising can mantle a clear walkable ledge 45–120 cm above the original ground feet, within the existing 1 m reach. Hold forward and jump (W + Space, or left stick + A); F/right-stick remains the manual alternative. This does not implement continuous tall-wall scaling.
 
 The server selects geometry and checks life, controller, modal UI, original height, capsule clearance, cooldown, weight and stamina. One automatic attempt is armed for 0.75 seconds by the first actual ground jump, not an airborne extra jump or walking off an edge. Default successful cost is 20 jump + 15 climb stamina. At 33 kg or more, jump/climb is refused; sprint/glide already stop above 30 kg. The acknowledged horizontal drive continues through normal swept falling physics after initial wall sliding, and clears on landing, cancellation, death or a new jump. Clients supply no target, origin or climb approval. Idle players incur no new recurring trace.

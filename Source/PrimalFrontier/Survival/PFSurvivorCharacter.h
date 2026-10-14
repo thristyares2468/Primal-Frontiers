@@ -43,13 +43,17 @@ public:
     void CancelTraversal();
     UFUNCTION(Server,Reliable) void ServerCancelTraversal();
     UFUNCTION(Server,Reliable) void ServerClimb();
-    /** Server derives the full wall height, stamina budget and capsule clearance; no client target. */
+    /** Server validates actual wall contact; custom movement spends stamina continuously. */
     bool TryClimb(FString& Reason);
-    /** Server-only mantle on real rising jump/wall contact; original ground anchors height. */
+    /** Server-only attachment on a real rising paid-jump contact; one attempt per jump. */
     bool TryAutomaticClimb(FString& Reason);
     void CancelAutomaticClimb() {AutomaticClimbUntil=0;}
+    /** Only authority supplies wall normal/state; clients send the existing F intention. */
+    UFUNCTION(Client,Reliable) void ClientWallClimbState(FVector_NetQuantizeNormal Normal,uint32 Sequence,bool bActive,bool bLanded);
+    void PublishWallClimbState(bool bActive,bool bLanded);
     UFUNCTION(Client,Reliable) void ClientClimbImpulse(FVector_NetQuantize100 Impulse,bool bAutomatic,float Duration,FVector_NetQuantize100 LandingTarget);
-    /** Legacy serialized name retained: base-cost height, not a maximum climb height. */
+    /** Inactive legacy serialized tuning retained for existing Blueprint compatibility.
+     * Tune WallClimbSpeed/WallClimbStaminaPerSecond/WallHoldStaminaPerSecond on movement instead. */
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="50",ClampMax="150",DisplayName="Base Cost Climb Height")) float MaxClimbHeight=120;
     UPROPERTY(EditDefaultsOnly,Category="Traversal",meta=(ClampMin="1",ClampMax="100")) float ClimbStaminaCost=15;
     /** Additional stamina per metre above the legacy short-ledge baseline; no fixed height ceiling. */
@@ -89,6 +93,9 @@ protected:
     UFUNCTION() void HandleDeath();
 
 private:
+    UPROPERTY(Replicated) FVector_NetQuantizeNormal ReplicatedWallNormal=FVector::ZeroVector;
+    uint32 WallClimbSequence=0;
+    uint32 LastWallClimbSequence=0;
     UPROPERTY(Replicated) bool bRemoteGliding=false;
     double NextClimbTime=0;
     double AutomaticClimbUntil=0;

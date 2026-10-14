@@ -64,6 +64,7 @@ void APFSurvivorCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
     DOREPLIFETIME(APFSurvivorCharacter,bHasGatheringTool);
     DOREPLIFETIME(APFSurvivorCharacter,HeldMeleeItem);
     DOREPLIFETIME_CONDITION(APFSurvivorCharacter,bRemoteGliding,COND_SimulatedOnly);
+    DOREPLIFETIME(APFSurvivorCharacter,ReplicatedWallNormal);
 }
 
 void APFSurvivorCharacter::Tick(float DeltaSeconds)
@@ -156,7 +157,7 @@ float APFSurvivorCharacter::TakeDamage(float Amount, const FDamageEvent& Event, 
 
 bool APFSurvivorCharacter::CanJumpInternal_Implementation() const
 {
-    return !IsTraversalInputBlocked() && Traversal()->CanCarryJump() && Survival->CanSpendStamina(JumpStaminaCost) && Super::CanJumpInternal_Implementation();
+    return !IsTraversalInputBlocked() && !Traversal()->IsWallClimbing() && Traversal()->CanCarryJump() && Survival->CanSpendStamina(JumpStaminaCost) && Super::CanJumpInternal_Implementation();
 }
 
 void APFSurvivorCharacter::OnJumped_Implementation()
@@ -179,7 +180,10 @@ void APFSurvivorCharacter::OnJumped_Implementation()
 
 void APFSurvivorCharacter::DoMove(float Right, float Forward)
 {
-    if (!Survival->IsDead()) { Super::DoMove(Right, Forward); }
+    if(Survival->IsDead() || IsTraversalInputBlocked()){return;}
+    if(Traversal()->IsWallClimbing())
+    {AddMovementInput(FVector::UpVector,Forward);AddMovementInput(Traversal()->WallRight(),Right);return;}
+    Super::DoMove(Right,Forward);
 }
 
 void APFSurvivorCharacter::HandleDeath()

@@ -144,7 +144,7 @@ finally {
                 }
             }
             if($TestCase -eq 'AutoClimb'){$contract=if($taskRun.Role -eq 'Server'){$text.Contains('Server automatic real jump/wall contact landing verified')}else{$text.Contains('Owner automatic jump/contact/acknowledged landing verified without F')}}
-            if($TestCase -eq 'AuthoredClimb'){$contract=if($taskRun.Role -eq 'Server'){$text.Contains('Authored server real map contact landings and exact costs verified')}else{$text.Contains('Authored owner both real map ledges, server acknowledgements and no item grants verified')}}
+            if($TestCase -eq 'AuthoredClimb'){$contract=if($taskRun.Role -eq 'Server'){$text.Contains('Continuous wall server actual authored attach, timed drain, clear4m landing and zero-stamina10m fall verified')}else{$text.Contains('Continuous wall owner actual F/W input, private authority refusal, timed stamina, top landing and exhaustion fall replicated')}}
             if($TestCase -eq 'Harvest'){
                 $contract=if($taskRun.Role -eq 'Server'){$text.Contains('Harvest server exact owned RPC phases, under/wrong/removed tool refusal, finite yield and all acknowledgements verified')}else{$text.Contains('Harvest owner ordered RPC phases, direct mutation refusal, exact private yield and depletion verified')}
                 if($taskRun.Role -ne 'Server'){foreach($phase in 8..13){$contract=$contract -and $text.Contains('Harvest client acknowledged phase='+$phase)}}

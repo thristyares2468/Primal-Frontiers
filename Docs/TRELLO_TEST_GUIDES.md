@@ -1,5 +1,27 @@
 # Trello test guides
 
+## G16 — Continuous wall climbing (Personal 1)
+
+Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Main menu: `/Engine/Maps/Entry`. One normal rendered standalone single-player session, keyboard/mouse; use your usual Single player > world, or create an unused test world. Not NullRHI, not Lvl_FirstPerson or the old arena. No editor asset save, map edit or two rendered clients required. 720p is sufficient;1440p stays deferred.
+
+Why Personal: the authority/physics/network/input/screenshot tests run automatically, but your ordinary control feel is not inferred. Old CLIMN_STAMINA PASS stays accepted for the old4mF behavior. Only this new continuous-climb check is requested now.
+
+Prerequisites: latest built project, alive/grounded, close menus and console, full recovered stamina and inventory weight at/below its displayed carry threshold. No stat upgrade or tech unlock needed. Do not climb a building with an overhang first.
+
+Start here: turn RIGHT/east from camp, pass around the low blocks and approach the first tall grey wall beside the **WALL CLIMB:4m/10m** sign.4m centre `(1850,-1100,200)`, west faceX1700;10m centre `(2450,-1100,500)`, west faceX2300;sign `(1550,-850,200)`. If restored elsewhere, optional solo console `PF.Teleport 1660 -1100 100`, require explicit PASS, close console and face east. If collision refuses, navigate normally; do not force or modify the level.
+
+1. Stand against the flat west face of the4m wall; release W and press **F once**. Expected: attach without instantly climbing or paying the whole height; holding still slowly drains stamina (4/s).
+2. Hold **W** for about1second, then release it. Expected: move up the wall, remain attached partway up and continue a slower stamina drain while holding. No recovery on the wall. Hold **S** briefly to move down; A/D moves sideways within the wall. Moving drains12/s. Do not intentionally go around the finite edge.
+3. Hold W until the clear top. Expected: swept mantle onto the walkable top and normal movement/look resumes. Or press F while attached to drop deliberately; no stuck input. Recover stamina on ground after its normal delay.
+4. Exhaustion check: at the10m wall, F attach and WAIT without movement until the stamina bar is about20–25, then hold W. Expected: climb partway, stamina reaches0 and you fall off before the top; visible **Climb ended: Stamina empty; fell off wall**, ordinary gravity/ground recovery, no automatic top teleport. Use this marked clear wall and do not save while falling. Use P to pause while reading on the ground; opening a menu cancels an active climb.
+
+Optional later: rising **W+Space** wall contact also attaches; ordinary jump spends20 stamina, W then climbs continuously. This automatic path/controller feel is separate if not tried. There is no arbitrary height ceiling, but collision/contact/weight/life/menu/cooldown restrictions remain; full10m ascent is not required for the exhaustion test.
+
+PASS: F attaches; you can stop midway while stamina continues draining; W/S responds; you reach a clear4m top or deliberately drop; zero stamina detaches/falls without a stuck state. FAIL: first failing step, exact feedback, input, stamina/kg and what happened. Reply **WALL_CLIMB PASS**, or **WALL_CLIMB FAIL + brief issue**. Normal food/water/health can change while unpaused; automated health markers97/94/93 are fixture-only. Save gameplay only if wanted, then end session normally.
+
+Evidence: `Docs/CONTINUOUS_CLIMB_M14.md`; ordinary `Saved/Logs/PrimalFrontier.log` or matching standalone log; optional `shot showui` in `Saved/Screenshots/WindowsEditor`. Technical report and inspected PNG paths are in the evidence doc. No private .pfs/reconnect credential upload. Copper/stat upgrades/controller/audio/1440p are separate; do not repeat the twelve accepted checks.
+
+
 ## Current acceptance - October13
 
 PLAYTEST_RESULTS_2026_10_13.md records the actual12namedPASS batch. G9 supported ecology encounter/dawn/loot and G5 WORLD_SPACING accepted; no repeat needed. G2 reportedBUILD_ROTATION/BUILD_PIECES/MENU_NAVIGATION/CRAFTING_UI plus earlierchest/Pause/Settings accepted. G3 supportedsolo andWORLD_RENAME accepted. SPRINT_WEIGHT/JUMP_WEIGHT/GLIDE accepted. CLIMB userFAIL led to full-height repair; new CLIMB_STAMINA acceptance pending, physicalCONTROLLER/AUDIO UNTESTED,1440 deferred. Unreported G2 expiry/displayrollback and optionalM12 earnedpacing not silently passed. Remaining guide text is reproduction or expressly unverified scope; old "keep open/pending" statements do not override accepted portions. Current focused retest: G10 CLIMB_STAMINA; G14 earned-point check separate. No repeat of previous passes.
@@ -236,6 +258,8 @@ Every new/updated test card starts with exact map package path (or NONE for non-
 
 ## G10 - Full-height stamina climb (Personal 1)
 
+**Historical guide accepted for the requested4mF scope by user CLIMN_STAMINA PASS. Current continuous behavior uses G16 below; do not follow this obsolete prepaid-cost guide on the new build.**
+
 Level: `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Main menu: `/Engine/Maps/Entry`. Use one normal rendered standalone `-game` single-player session. Not NullRHI, not Lvl_FirstPerson or the older arena. No Editor/map/assets need saving. Prefer 720p for the first check;1440p remains deferred. Automation has passed; this card needs your actual movement/usability observation after the reported FAIL. Do not repeat the twelve accepted tests.
 
 Prerequisites: latest built project, no competing test instance, keyboard/mouse, living grounded survivor, bag weight at/below its displayed carry threshold (default30kg) and full stamina. Clear solid wall/top required; the old1.2m ceiling is removed. Enough stamina must cover the whole height before climbing. Upgrading stamina capacity does not refill it.
@@ -260,7 +284,7 @@ Why Personal: verify your ordinary earned-point menu interaction and gameplay fe
 Start here: in a safe spot press **U**, or P > **Player upgrades**. Read Level/XP, STAT POINTS and TECHNOLOGY POINTS. Fresh level1/0XP should have disabled upgrade buttons. Ancient technology is labelled planned/unavailable, not an active reward pool.
 
 1. If at least 1 stat point is available, record both point counts and maximum stamina. Select **Stamina** once by click, or Up/Down then Enter. Expected: stat points decrease exactly1, stamina rank increases1 and maximum increases20 (100->120 for the first rank). Technology points and XP stay unchanged. Current stamina is not granted/refilled by the click.
-2. Press Esc/U to close and move/look. Wait for normal stamina recovery. Expected: input restored and HUD shows the upgraded maximum. You can use G10's optional10m F check after at least 103 current stamina; no need to do it now to report the menu result.
+2. Press Esc/U to close and move/look. Wait for normal stamina recovery. Expected: input restored and HUD shows the upgraded maximum. Current climbing follows G16 (continuous drain, no upfront height cost); no wall test is required to report this menu result.
 3. Optional later earned points: Attack adds10% of weapon/bare-hand damage; Weight adds10kg to the bag carry threshold; Crafting adds10% speed for NEW jobs. C shows the actual new-job time. A running job keeps its original deadline. Chest capacity remains60kg. Do not spend technology points to upgrade these stats.
 4. Optional save/load in your disposable test world: use Pause Save world, end, load the same named world and reopen U. Expected: same ranks/spent budgets; stamina may recover and needs drain normally. Keep desired personal progress; do not reset/discard anything to perform this check.
 

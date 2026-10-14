@@ -54,15 +54,18 @@ bool FPFTraversalRulesTest::RunTest(const FString&)
     P->Survival->ChangeStamina(100);M->ClearTraversal();M->StopMovementImmediately();P->SetActorLocation(FVector(-500,0,120));Tick(8);PC->SetControlRotation(FRotator::ZeroRotator);
     auto* Ledge=Box(FVector(-280,0,40),FVector(150,180,40));auto* Roof=Box(FVector(-450,0,240),FVector(200,200,15));FString Reason;
     const float ClimbBefore=P->Survival->GetVitals().Stamina;
-    TestFalse(TEXT("Blocked overhead climb refused"),P->TryClimb(Reason));TestEqual(TEXT("Refused climb spends no stamina"),P->Survival->GetVitals().Stamina,ClimbBefore);
-    Roof->Destroy();Tick(10);if(!TestTrue(TEXT("Clear actual low ledge climb accepted"),P->TryClimb(Reason))){AddError(Reason);return false;}
-    TestFalse(TEXT("Duplicate climb refused"),P->TryClimb(Reason));TestTrue(TEXT("Climb consumes server stamina"),P->Survival->GetVitals().Stamina<=ClimbBefore-P->ClimbStaminaCost);
-    Tick(26);TestTrue(TEXT("Pawn physically reaches walkable ledge top"),P->GetActorLocation().Z>170 && P->GetActorLocation().X>-430 && M->IsMovingOnGround());
+    TestTrue(TEXT("Contact attachment does not require preflight top"),P->TryClimb(Reason));TestEqual(TEXT("Attachment spends no upfront stamina"),P->Survival->GetVitals().Stamina,ClimbBefore);
+    TestFalse(TEXT("Duplicate native attachment refused"),P->TryClimb(Reason));P->CancelTraversal();Roof->Destroy();Tick(15);
+    if(!TestTrue(TEXT("Clear actual low ledge attaches"),P->TryClimb(Reason))){AddError(Reason);return false;}
+    for(int32 N=0;N<26;++N){if(M->IsWallClimbing()){P->AddMovementInput(FVector::UpVector);}F.TickTestWorld(.05f);}
+    TestTrue(TEXT("Continuous climb consumes elapsed stamina and reaches top"),P->Survival->GetVitals().Stamina<ClimbBefore && P->GetActorLocation().Z>170 && P->GetActorLocation().X>-430 && M->IsMovingOnGround());
     Ledge->Destroy();M->StopMovementImmediately();P->SetActorLocation(FVector(-500,1000,120));Tick(10);
     PC->SetCraftingMenuOpen(true);P->SetSprintHeld(true);TestFalse(TEXT("Modal menu blocks sprint"),M->IsSprinting());TestFalse(TEXT("Modal menu blocks jump"),P->CanJump());TestFalse(TEXT("Modal menu blocks climb"),P->TryClimb(Reason));PC->SetCraftingMenuOpen(false);
     P->SetRole(ROLE_AutonomousProxy);TestFalse(TEXT("Client cannot execute climb authority directly"),P->TryClimb(Reason));P->SetRole(ROLE_Authority);
     P->SetSprintHeld(true);P->LaunchCharacter(FVector(100,0,500),true,true);P->Survival->ApplyDamage(1000);TestFalse(TEXT("Death clears sprint"),M->bWantsSprint);TestFalse(TEXT("Dead pawn cannot climb"),P->TryClimb(Reason));
     TestFalse(TEXT("Death clears queued climb launch"),M->HandlePendingLaunch());
+    P->SetRole(ROLE_AutonomousProxy);P->ClientWallClimbState_Implementation(FVector(-1,0,0),100,true,false);
+    TestTrue(TEXT("Late continuous-climb owner acknowledgment cannot move corpse"),!M->IsWallClimbing() && M->MovementMode==MOVE_None);P->SetRole(ROLE_Authority);
     P->SetRole(ROLE_AutonomousProxy);P->ClientClimbImpulse_Implementation(FVector(100,0,500),false,1.5f,FVector::ZeroVector);TestFalse(TEXT("Late owner climb acknowledgment cannot relaunch corpse"),M->HandlePendingLaunch());P->SetRole(ROLE_Authority);
     P->SetRole(ROLE_AutonomousProxy);P->ClientClimbImpulse_Implementation(FVector(100,0,500),true,1.5f,FVector::ZeroVector);TestFalse(TEXT("Late automatic acknowledgment cannot relaunch corpse"),M->HandlePendingLaunch());TestTrue(TEXT("Dead owner has no automatic drive"),M->AutomaticClimbDrive.IsNearlyZero());P->SetRole(ROLE_Authority);
     F.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalTraversal] Real weight boundaries, movement/stamina, saved-move replay, falling glide, swept ledge climb, menus/death/client refusal checked."));return true;

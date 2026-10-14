@@ -4,15 +4,15 @@
 #include "Survival/PFPlayerSurvivalComponent.h"
 #include "Survival/PFTraversalMovement.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Settings/PFGameUserSettings.h"
+#include "Creatures/PFCreature.h"
+#include "Creatures/PFCreatureSpawner.h"
+#include "World/PFWorldClock.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/InputComponent.h"
-#include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
-#include "GameFramework/PlayerStart.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
-#include "UObject/Package.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
@@ -24,225 +24,124 @@
 
 namespace
 {
-struct FAuthoredClimbRecord {int32 Lane=0,Phase=0;float Stamina=100;double Landed=0;};
-class FAuthoredClimbExercise : public IAutomationLatentCommand
+struct FWallRecord {int32 Lane=0;bool Attached=false,Landed=false,Fell=false;float Walk=600;};
+class FWallLive : public IAutomationLatentCommand
 {
 public:
-    FAuthoredClimbExercise(FAutomationTestBase* InTest,FString InDirectory):Test(InTest),Directory(MoveTemp(InDirectory))
-    {FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);Manual=FParse::Param(FCommandLine::Get(),TEXT("PFManualClimb"));FullHeight=FParse::Param(FCommandLine::Get(),TEXT("PFFullHeightClimb"));}
+    FWallLive(FAutomationTestBase* T,FString D):Test(T),Directory(MoveTemp(D)){FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);}
+    ~FWallLive(){if(Scaled && UPFGameUserSettings::Get()){UPFGameUserSettings::Get()->Preferences.HUDScale=OldScale;}}
     bool Update() override
     {
-        const double Now=FPlatformTime::Seconds();if(Done){return Now-Done>(Client?8:15);}
-        if(Now-Started>100){Test->AddError(FString::Printf(TEXT("[PrimalTraversal] Authored climb timeout ownerStage=%d %s"),OwnerStage,*Diagnostic));return true;}
-        UWorld* W=nullptr;for(const auto& C:GEngine->GetWorldContexts()){if(C.World() && C.World()->IsGameWorld()){W=C.World();break;}}if(!W){return false;}
-        if(!W->GetOutermost()->GetName().Contains(TEXT("L_PrimalFrontier_OpenWorld"))){Test->AddError(TEXT("Requires actual open-world map"));return true;}
-        Client=W->GetNetMode()==NM_Client;
+        const double Now=FPlatformTime::Seconds();if(Now-Started>110){Test->AddError(FString::Printf(TEXT("Continuous wall timeout server%d owner%d %s"),ServerStage,OwnerStage,*Diagnostic));return true;}
+        if(Done){if(Now-Done<(Client?8:15)){return false;}for(const auto& S:Shots){Test->TestTrue(TEXT("Wall screenshot written"),IFileManager::Get().FileSize(*S)>0);}return true;}
+        UWorld* W=nullptr;for(const auto& X:GEngine->GetWorldContexts()){if(X.World() && X.World()->IsGameWorld()){W=X.World();break;}}if(!W){return false;}Client=W->GetNetMode()==NM_Client;
+        if(UWorld::RemovePIEPrefix(W->GetMapName())!=TEXT("L_PrimalFrontier_OpenWorld")){Test->AddError(TEXT("Actual OpenWorld required"));return true;}
         if(!Validated)
         {
-            for(int32 Lane=0;Lane<2;++Lane){for(int32 Kind=0;Kind<2;++Kind)
-            {
-                const FName Tag(*(FullHeight && Kind?FString::Printf(TEXT("PF.M14.Climb4_%c"),Lane?TEXT('B'):TEXT('A')):FString::Printf(TEXT("PF.M14.Ledge%d_%c"),Kind?110:80,Lane?TEXT('B'):TEXT('A'))));
-                AStaticMeshActor* Found=nullptr;for(TActorIterator<AStaticMeshActor> It(W);It;++It){if(It->ActorHasTag(Tag)){if(Found){Test->AddError(TEXT("Duplicate authored ledge"));return true;}Found=*It;}}
-                if(!Found){return false;}
-                const FVector At(FullHeight && Kind?(Lane?2250:1850):(Lane?(Kind?1600:1000):(Kind?1250:650)),Lane?-3000:-1100,Kind?(FullHeight?200:55):40),Scale(3,3.6,Kind?(FullHeight?4:1.1):.8);
-                if(!Found->GetActorLocation().Equals(At,.1f) || !Found->GetActorScale3D().Equals(Scale,.001f) ||
-                   !Found->GetStaticMeshComponent()->GetStaticMesh() || Found->GetStaticMeshComponent()->GetCollisionProfileName()!=TEXT("BlockAll"))
-                {Test->AddError(TEXT("Authored course geometry differs from saved contract"));return true;}
-                Ledges[Lane][Kind]=Found;
-            }}
-            int32 Starts=0;
-            for(TActorIterator<APlayerStart> It(W);It;++It)
-            {
-                const FVector Start=It->GetActorLocation(),Wall=Ledges[0][0]->GetActorLocation();
-                const float FaceDistance=Wall.X-150-Start.X;
-                if(FaceDistance<200 || FaceDistance>800 || FMath::Abs(Start.Y-Wall.Y)>10)
-                {Test->AddError(TEXT("Climb wall must be beside both unobstructed camp starts (2-8m to west face)"));return true;}
-                ++Starts;
-            }
-            if(Starts!=2){Test->AddError(TEXT("Expected both normal camp PlayerStarts"));return true;}
-            Validated=true;Test->AddInfo(FString::Printf(TEXT("[PrimalTraversal] Loaded four real authored 80/%dcm walls; near-spawn wall verified; no runtime geometry created"),FullHeight?400:110));
+            for(TActorIterator<AStaticMeshActor> It(W);It;++It)
+            {for(int32 Lane=0;Lane<2;++Lane){const FName Tag=Lane?FName(TEXT("PF.M14.Climb4_B")):FName(TEXT("PF.M14.Climb4_A"));if(It->ActorHasTag(Tag)){Walls[Lane]=*It;}}if(It->ActorHasTag(TEXT("PF.M14.Climb10_A"))){Tall=*It;}}
+            if(!Walls[0].IsValid() || !Walls[1].IsValid() || !Tall.IsValid()){return false;}
+            if(!Walls[0]->GetActorLocation().Equals({1850,-1100,200},.1) || !Walls[1]->GetActorLocation().Equals({2250,-3000,200},.1) || !Tall->GetActorLocation().Equals({2450,-1100,500},.1)){Test->AddError(TEXT("Saved fixture identities/layout differ"));return true;}
+            Validated=true;
         }
-        TArray<APFSurvivalPlayerController*> Players;
-        for(auto It=W->GetPlayerControllerIterator();It;++It){auto* PC=Cast<APFSurvivalPlayerController>(It->Get());if(PC && Cast<APFSurvivorCharacter>(PC->GetPawn()) && PC->GetInventory() && PC->GetInventory()->Catalog){Players.Add(PC);}}
+        TArray<APFSurvivalPlayerController*> Players;for(auto It=W->GetPlayerControllerIterator();It;++It){auto* PC=Cast<APFSurvivalPlayerController>(It->Get());if(PC && Cast<APFSurvivorCharacter>(PC->GetPawn()) && PC->GetInventory()){Players.Add(PC);}}
         if(Players.Num()!=(Client?1:Expected)){return false;}
         if(!Client)
         {
             if(!Initialized)
             {
-                for(int32 Lane=0;Lane<Players.Num();++Lane)
-                {
-                    auto* PC=Players[Lane];auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());
-                    if(!PC->GetInventory()->GetStacks().IsEmpty()){Test->AddError(TEXT("Requires fresh disposable player bag"));return true;}
-                    P->Survival->HungerDrainPerSecond=0;P->Survival->ThirstDrainPerSecond=0;P->Survival->StaminaRecoveryPerSecond=0;
-                    // Shift is only a fixture readiness/landing acknowledgement.
-                    // In-flight saved moves must not add unrelated sprint drain or
-                    // boost to the isolated single-attempt climb cost transaction.
-                    P->Traversal()->SprintStaminaPerSecond=0;P->Traversal()->SprintMultiplier=1;
-                    FAuthoredClimbRecord R;R.Lane=Lane;R.Stamina=P->Survival->GetVitals().Stamina;Records.Add(PC,R);
-                }
-                Initialized=true;
+                for(TActorIterator<APFWorldClock> It(W);It;++It){It->SetHour(10);It->SetActorTickEnabled(false);}for(TActorIterator<APFCreatureSpawner> It(W);It;++It){It->bAutoSpawn=false;}for(TActorIterator<APFCreature> It(W);It;++It){It->Destroy();}
+                int32 Lane=0;for(auto* PC:Players){auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());if(!PC->GetInventory()->GetStacks().IsEmpty()){Test->AddError(TEXT("Fresh isolated bag required"));return true;}P->Survival->HungerDrainPerSecond=0;P->Survival->ThirstDrainPerSecond=0;P->Survival->StaminaRecoveryPerSecond=0;P->Traversal()->SprintStaminaPerSecond=0;P->Traversal()->SprintMultiplier=1;FWallRecord R;R.Lane=Lane++;R.Walk=P->Traversal()->MaxWalkSpeed;Records.Add(PC,R);}Initialized=true;
             }
-            bool All=true;
-            for(auto* PC:Players)
+            if(ServerStage==0)
             {
-                auto& R=Records.FindChecked(PC);auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();
-                if(R.Phase==0 && M->bWantsSprint){Place(PC,R,0);P->Survival->SetHealth(97);R.Phase=1;Test->AddInfo(FString::Printf(TEXT("[PrimalTraversal] Placed lane%d at %s"),R.Lane,*P->GetActorLocation().ToString()));}
-                else if((R.Phase==1 || R.Phase==3) && Landed(P,R.Lane,R.Phase==3?1:0))
-                {
-                    M->StopMovementImmediately();Test->TestTrue(TEXT("Authored mantle spends exactly its manual or jump-contact cost"),
-                        FMath::IsNearlyEqual(P->Survival->GetVitals().Stamina,R.Stamina-(Manual?0:P->JumpStaminaCost)-P->ClimbStaminaCost-FMath::Max(0.,Top(R.Lane,R.Phase==3?1:0)-2.15-P->MaxClimbHeight)*P->ClimbStaminaPerMetre/100.,.5f));
-                    R.Landed=W->GetTimeSeconds();++R.Phase;
-                }
-                else if((R.Phase==2 || R.Phase==4) && M->bWantsSprint && W->GetTimeSeconds()-R.Landed>1.6)
-                {
-                    if(R.Phase==2){R.Stamina=P->Survival->GetVitals().Stamina;Place(PC,R,1);P->Survival->SetHealth(96);R.Phase=3;}
-                    else
-                    {
-                        M->ClearTraversal();
-                        if(!Directory.IsEmpty()){P->TeleportTo(FVector(-200,-850,100),FRotator::ZeroRotator,false,true);M->StopMovementImmediately();M->SetMovementMode(MOVE_Walking);}
-                        P->Survival->SetHealth(95);R.Phase=5;
-                    }
-                }
-                All &= R.Phase==5;
-                if(R.Phase!=5){Diagnostic=FString::Printf(TEXT("lane%d phase%d at%s stamina%.1f sprint%d"),R.Lane,R.Phase,*P->GetActorLocation().ToString(),P->Survival->GetVitals().Stamina,M->bWantsSprint);}
+                bool Ready=true;for(auto* PC:Players){Ready &= CastChecked<APFSurvivorCharacter>(PC->GetPawn())->Traversal()->bWantsSprint;}
+                if(Ready){for(auto* PC:Players){Place(PC,Records.FindChecked(PC),false);CastChecked<APFSurvivorCharacter>(PC->GetPawn())->Survival->SetHealth(97);}ServerStage=1;}
             }
-            // Health95 is each owner's completion signal. Wait for a distinct
-            // replicated view-yaw acknowledgement before broadcasting health94;
-            // otherwise adjacent snapshots can coalesce and hide95 from a client.
-            bool OwnersSawCompletion=true;
-            for(auto* PC:Players){OwnersSawCompletion &= FMath::Abs(FRotator::NormalizeAxis(PC->GetControlRotation().Yaw-123))<1;}
-            if(All && (W->GetNetMode()==NM_Standalone?OwnerComplete:OwnersSawCompletion))
-            {for(auto* PC:Players){CastChecked<APFSurvivorCharacter>(PC->GetPawn())->Survival->SetHealth(94);}Test->AddInfo(TEXT("[PrimalTraversal] Authored server real map contact landings and exact costs verified"));Done=Now;return false;}
+            else if(ServerStage==1)
+            {
+                bool All=true;for(auto* PC:Players)
+                {
+                    auto& R=Records.FindChecked(PC);auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();R.Attached |= M->IsWallClimbing();
+                    if(!R.Landed && R.Attached && M->IsMovingOnGround() && Feet(P)>395 && Feet(P)<405)
+                    {Test->TestTrue(TEXT("Server continuous4m landing spent elapsed stamina only"),P->Survival->GetVitals().Stamina>0 && P->Survival->GetVitals().Stamina<99);R.Landed=true;LandedAt=Now;M->MaxWalkSpeed=0;}
+                    All &= R.Landed && FMath::Abs(PC->GetControlRotation().Yaw-30)<2;
+                    Diagnostic=FString::Printf(TEXT("lane%d at%s mode%d stamina%.2f attached%d landed%d yaw%.1f"),R.Lane,*P->GetActorLocation().ToString(),int32(M->MovementMode),P->Survival->GetVitals().Stamina,R.Attached,R.Landed,PC->GetControlRotation().Yaw);
+                }
+                if(All && Now-LandedAt>.75){for(auto* PC:Players){Place(PC,Records.FindChecked(PC),true);CastChecked<APFSurvivorCharacter>(PC->GetPawn())->Survival->SetHealth(94);}ServerStage=3;}
+            }
+            else if(ServerStage==3)
+            {
+                bool All=true;for(auto* PC:Players)
+                {
+                    auto& R=Records.FindChecked(PC);auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();R.Attached |= M->IsWallClimbing();
+                    if(!R.Fell && R.Attached && M->IsFalling() && P->Survival->GetVitals().Stamina==0)
+                    {Test->TestTrue(TEXT("Server24stamina trial falls below10m top after partial climb"),Feet(P)>50 && Feet(P)<450);R.Fell=true;}
+                    All &= R.Fell && FMath::Abs(PC->GetControlRotation().Yaw-60)<2;
+                    Diagnostic=FString::Printf(TEXT("low lane%d at%s mode%d stamina%.2f attached%d fell%d yaw%.1f"),R.Lane,*P->GetActorLocation().ToString(),int32(M->MovementMode),P->Survival->GetVitals().Stamina,R.Attached,R.Fell,PC->GetControlRotation().Yaw);
+                }
+                if(All){for(auto* PC:Players){CastChecked<APFSurvivorCharacter>(PC->GetPawn())->Survival->SetHealth(93);}Test->AddInfo(TEXT("[PrimalAgentTools] Continuous wall server actual authored attach, timed drain, clear4m landing and zero-stamina10m fall verified"));ServerStage=9;if(W->GetNetMode()!=NM_Standalone){Done=Now;}}
+            }
         }
         if(Client || W->GetNetMode()==NM_Standalone)
         {
-            auto* PC=Players[0];auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();const float H=P->Survival->GetVitals().Health;
-            M->SprintStaminaPerSecond=0;M->SprintMultiplier=1;
-            Diagnostic=FString::Printf(TEXT("ready%d approaching%d prepare%.3f health%.1f at%s yaw%.1f grounded%d W%d ignored%d"),Ready,Approaching,Prepare,H,*P->GetActorLocation().ToString(),PC->GetControlRotation().Yaw,M->IsMovingOnGround(),PC->IsInputKeyDown(EKeys::W),PC->IsMoveInputIgnored());
-            if(TallPlaced && !OwnerComplete)
+            auto* PC=Players[0];auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();const float Health=P->Survival->GetVitals().Health;
+            if(!Directory.IsEmpty() && !Scaled){auto* S=UPFGameUserSettings::Get();OldScale=S->Preferences.HUDScale;float Scale=1;FParse::Value(FCommandLine::Get(),TEXT("PFHUDScale="),Scale);S->Preferences.HUDScale=Scale;Scaled=true;}
+            if(OwnerStage==0 && Health==100 && PC->PlayerInput && !P->IsTraversalInputBlocked()){Key(PC,EKeys::LeftShift,IE_Pressed);}
+            if((OwnerStage==0 && Health==97) || (OwnerStage==2 && Health==94))
             {
-                if(!TallPressed && M->IsMovingOnGround() && Now-TallAt>.5)
-                {Key(PC,EKeys::F,IE_Pressed);TallPressed=true;TallAt=Now;}
-                if(TallPressed && Now-TallAt>.6)
-                {
-                    Key(PC,EKeys::F,IE_Released);
-                    Test->TestTrue(TEXT("Actual tall landmark stamina refusal reaches owner HUD feedback"),PC->RecentInteractionMessage().Contains(TEXT("stamina")));
-                    Test->TestEqual(TEXT("Tall wall refusal grants no height or spends stamina"),P->Survival->GetVitals().Stamina,TallStamina);
-                    Test->TestTrue(TEXT("Tall landmark remains solid; player stays grounded"),M->IsMovingOnGround() && P->GetActorLocation().Z<110);
-                    Capture(TEXT("tall_wall_refusal"));OwnerComplete=true;
-                }
-                return false;
-            }
-            if(!Ready)
-            {
-                if(P->IsTraversalInputBlocked() || PC->GetPlayerSetupStatus()==EPFPlayerSetupStatus::Unconfirmed){return false;}
-                if(!Directory.IsEmpty())
-                {
-                    if(SpawnViewAt==0){SpawnViewAt=Now;PC->SetControlRotation(FRotator(-10,0,0));}
-                    if(Now-SpawnViewAt<.6){return false;}
-                    Capture(TEXT("spawn_wall"));
-                }
-                Key(PC,EKeys::LeftShift,IE_Pressed);Ready=true;ReadyAt=Now;
-            }
-            // Startup can flush pressed keys or clear traversal intent before the
-            // second client joins. Re-arm only the fixture's initial readiness cue;
-            // actual W/F/Space climb inputs are never retried or replaced with calls.
-            if(OwnerStage==0 && H==100 && !M->bWantsSprint && Now-ReadyAt>1 && !P->IsTraversalInputBlocked())
-            {Key(PC,EKeys::LeftShift,IE_Released);Key(PC,EKeys::LeftShift,IE_Pressed);ReadyAt=Now;Test->AddInfo(TEXT("[PrimalTraversal] Re-armed initial raw-key readiness cue before any climb"));}
-            const int32 Lane=FMath::Abs(P->GetActorLocation().Y+1100)<FMath::Abs(P->GetActorLocation().Y+3000)?0:1;
-            if((OwnerStage==0 && H==97) || (OwnerStage==2 && H==96))
-            {
-                const int32 Kind=OwnerStage==2?1:0;const auto* A=Ledges[Lane][Kind].Get();const float X=A->GetActorLocation().X-150-P->GetCapsuleComponent()->GetScaledCapsuleRadius()-200;
-                // Server reposition can be followed by replay of already-sent moves.
-                // Accept the same clear approach corridor, then use actual W until
-                // contact. Never retry or substitute the climb key itself.
-                if(M->IsMovingOnGround() && P->GetActorLocation().X>=X-150 && P->GetActorLocation().X<=X+50)
-                {
-                    if(Prepare==0){Prepare=Now;Key(PC,EKeys::LeftShift,IE_Released);PC->SetControlRotation(FRotator(-15,0,0));}
-                    if(!Directory.IsEmpty() && !Kind && Now-Prepare>.2 && !ApproachShot){Capture(TEXT("camp_approach"));ApproachShot=true;}
-                    if(!Approaching && Now-Prepare>(Directory.IsEmpty()?.4:.5)){Key(PC,EKeys::W,IE_Pressed);Approaching=true;}
-                }
-                // Real keyboard routing through PlayerInput/Enhanced Input. Walk
-                // into contact before F or Space rather than launch from an ideal gap.
-                if(Approaching && M->IsMovingOnGround() && P->GetActorLocation().X>=X+199)
-                {Key(PC,Manual?EKeys::F:EKeys::SpaceBar,IE_Pressed);ReleaseAt=Now+.15;Prepare=0;Approaching=false;++OwnerStage;}
+                const bool Low=Health==94;const FVector At=P->GetActorLocation();const float Face=Low?2300:(FMath::Abs(At.Y+1100)<200?1700:2100);
+                if(!M->IsMovingOnGround() || FMath::Abs(At.X-(Face-P->GetCapsuleComponent()->GetScaledCapsuleRadius()-4))>25 || (Low && FMath::Abs(P->Survival->GetVitals().Stamina-24)>.5)){return false;}
+                Key(PC,EKeys::LeftShift,IE_Released);PC->SetControlRotation(FRotator::ZeroRotator);
+                if(Client){FString Error;Test->TestFalse(TEXT("Client direct attach cannot authorize climbing"),P->TryClimb(Error));Test->TestFalse(TEXT("Client cannot grant server wall mode"),M->BeginWallClimb({-1,0,0}));}
+                Key(PC,EKeys::F,IE_Pressed);Key(PC,EKeys::F,IE_Released);OwnerStage=Low?3:1;HoldingAt=0;UpHeld=false;
             }
             if(OwnerStage==1 || OwnerStage==3)
             {
-                if(Now>=ReleaseAt){Key(PC,Manual?EKeys::F:EKeys::SpaceBar,IE_Released);}
-                const int32 Kind=OwnerStage==3?1:0;
-                if(!Acknowledged && Landed(P,Lane,Kind))
+                if(M->IsWallClimbing())
                 {
-                    Key(PC,EKeys::W,IE_Released);M->StopMovementImmediately();PC->SetControlRotation(FRotator(-55,0,0));Capture(Kind?(FullHeight?TEXT("climb_400_top"):TEXT("climb_110_top")):TEXT("climb_80_top"));
-                    Test->AddInfo(FString::Printf(TEXT("[PrimalTraversal] Owner real authored %.0fcm landing verified with raw W + %s input"),Top(Lane,Kind),Manual?TEXT("F"):TEXT("Space")));
-                    Key(PC,EKeys::LeftShift,IE_Pressed);Acknowledged=true;
+                    if(!HoldingAt){HoldingAt=Now;}
+                    if(!UpHeld && Now-HoldingAt>.6){Shot(OwnerStage==1?TEXT("wall_holding"):TEXT("wall_low_budget"));Key(PC,EKeys::W,IE_Pressed);UpHeld=true;}
+                    if(!AscendingShot && OwnerStage==1 && Feet(P)>150 && Now-HoldingAt>1){Test->TestTrue(TEXT("Owning HUD provider confirms continuous climb controls"),PC->InteractionPrompt().Contains(TEXT("W/S")));Shot(TEXT("wall_ascending"));AscendingShot=true;}
                 }
-                if(OwnerStage==1 && H==96){Test->TestTrue(TEXT("Owner saw80cm landing before next stage"),Acknowledged);Acknowledged=false;OwnerStage=2;}
+                if(Expected==2){for(TActorIterator<APFSurvivorCharacter> It(W);It;++It){if(*It!=P && It->Traversal()->IsWallClimbing() && Feet(*It)>30){RemoteSeen=true;}}}
+                if(OwnerStage==1 && UpHeld && M->IsMovingOnGround() && Feet(P)>395 && Feet(P)<405)
+                {Key(PC,EKeys::W,IE_Released);Test->TestTrue(TEXT("Owner saw wall state then real4m top"),HoldingAt>0 && P->Survival->GetVitals().Stamina<99);Shot(TEXT("wall_top"));PC->SetControlRotation({0,30,0});OwnerStage=2;}
+                if(OwnerStage==3 && HoldingAt>0 && M->IsFalling() && P->Survival->GetVitals().Stamina==0 && Feet(P)>20)
+                {Key(PC,EKeys::W,IE_Released);Test->TestTrue(TEXT("Owner sees exact zero and fall while below top"),Feet(P)<450);FallAt=Now;PC->SetControlRotation({0,60,0});OwnerStage=4;}
             }
-            if(OwnerStage==3 && H==95 && !OwnerComplete)
-            {
-                if(!Directory.IsEmpty())
-                {
-                    if(P->GetActorLocation().X>0){return false;}
-                    if(OverviewAt==0){OverviewAt=Now;PC->SetControlRotation(FRotator(0,0,0));}
-                    if(Now-OverviewAt<.5){return false;}
-                    if(!OverviewCaptured){Capture(TEXT("course_sign"));OverviewCaptured=true;OverviewAt=Now;return false;}
-                    if(Now-OverviewAt<.3){return false;} // Screenshot request is captured next frame.
-                }
-                Test->TestTrue(TEXT("Owner saw second wall landing before completion"),Acknowledged);Key(PC,EKeys::LeftShift,IE_Released);Key(PC,EKeys::W,IE_Released);Key(PC,EKeys::SpaceBar,IE_Released);Key(PC,EKeys::F,IE_Released);
-                Test->TestTrue(TEXT("Authored traversal never grants inventory"),PC->GetInventory()->GetStacks().IsEmpty());
-                if(Client){FString Reason;Test->TestFalse(TEXT("Client direct automatic mantle refused"),P->TryAutomaticClimb(Reason));}
-                Test->AddInfo(TEXT("[PrimalTraversal] Authored owner both real map ledges, server acknowledgements and no item grants verified"));
-                if(!Directory.IsEmpty())
-                {
-                    // Reproduce the reported ordinary attempt at the saved 4m landmark.
-                    M->ClearTraversal();M->StopMovementImmediately();M->ClearAccumulatedForces();
-                    P->TeleportTo(FVector(1500,4685,100),FRotator(0,90,0),false,true);M->SetMovementMode(MOVE_Walking);PC->SetControlRotation(FRotator(0,90,0));
-                    P->Survival->ChangeStamina(15-P->Survival->GetVitals().Stamina);TallStamina=15;TallAt=Now;TallPlaced=true;OwnerStage=4;return false;
-                }
-                OwnerComplete=true;if(Client){PC->SetControlRotation(FRotator(0,123,0));}return false;
-            }
-            // Keep each client connected until every server lane completed.
-            if(Client && OwnerComplete && H==94){Done=Now;}
+            if(OwnerStage==4 && FallAt && Now-FallAt>.15 && !FallShot){Test->TestTrue(TEXT("Owner distinguishes exhausted fall from attach refusal"),PC->RecentInteractionMessage().Contains(TEXT("Climb ended: Stamina empty")));Shot(TEXT("wall_exhausted_fall"));FallShot=true;}
+            if(OwnerStage==4 && Health==93 && (Directory.IsEmpty() || FallShot))
+            {if(Expected==2){Test->TestTrue(TEXT("Remote full-body player exposes climbing movement"),RemoteSeen);}Test->TestTrue(TEXT("No traversal grants items"),PC->GetInventory()->GetStacks().IsEmpty());Test->AddInfo(TEXT("[PrimalAgentTools] Continuous wall owner actual F/W input, private authority refusal, timed stamina, top landing and exhaustion fall replicated"));OwnerStage=9;Done=Now;}
         }
         return false;
     }
 private:
-    double Top(int32 Lane,int32 Kind) const {const auto* A=Ledges[Lane][Kind].Get();return A->GetActorLocation().Z+50*A->GetActorScale3D().Z;}
-    bool Landed(APFSurvivorCharacter* P,int32 Lane,int32 Kind) const
+    float Feet(APFSurvivorCharacter* P) const {return P->GetActorLocation().Z-P->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();}
+    void Place(APFSurvivalPlayerController* PC,FWallRecord& R,bool Low)
     {
-        const auto* A=Ledges[Lane][Kind].Get();const FVector At=P->GetActorLocation();
-        const float Height=Top(Lane,Kind),Half=P->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-        return P->Traversal()->IsMovingOnGround() && At.X>A->GetActorLocation().X-150 && At.X<A->GetActorLocation().X+150 && FMath::Abs(At.Y-A->GetActorLocation().Y)<160 && FMath::Abs(At.Z-Half-Height)<5;
+        auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();M->ClearTraversal();M->StopMovementImmediately();M->ClearAccumulatedForces();M->MaxWalkSpeed=R.Walk;
+        const auto* Wall=Low?Tall.Get():Walls[R.Lane].Get();FVector At=Wall->GetActorLocation();At.X-=150+P->GetCapsuleComponent()->GetScaledCapsuleRadius()+4;At.Z=P->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+3;if(Low && Expected==2){At.Y+=R.Lane?100:-100;}
+        P->SetActorLocation(At);P->SetActorRotation(FRotator::ZeroRotator);PC->SetControlRotation(FRotator::ZeroRotator);PC->ClientSetRotation(FRotator::ZeroRotator,false);M->SetMovementMode(MOVE_Walking);
+        P->Survival->ChangeStamina(-P->Survival->GetVitals().Stamina);P->Survival->ChangeStamina(Low?24:100);R.Attached=false;
     }
-    void Place(APFSurvivalPlayerController* PC,FAuthoredClimbRecord& R,int32 Kind)
-    {
-        auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());auto* M=P->Traversal();const auto* A=Ledges[R.Lane][Kind].Get();
-        M->ClearTraversal();M->StopMovementImmediately();M->ClearAccumulatedForces();
-        P->TeleportTo(FVector(A->GetActorLocation().X-150-P->GetCapsuleComponent()->GetScaledCapsuleRadius()-200,A->GetActorLocation().Y,100),FRotator::ZeroRotator,false,true);
-        M->SetMovementMode(MOVE_Walking);PC->SetControlRotation(FRotator::ZeroRotator);
-    }
-    void Key(APFSurvivalPlayerController* PC,FKey K,EInputEvent Event)
-    {
-        if(!PC->PlayerInput){Test->AddError(TEXT("Missing real player input"));return;}
-        PC->InputKey(FInputKeyEventArgs(nullptr,IPlatformInputDeviceMapper::Get().GetPrimaryInputDeviceForUser(PC->GetPlatformUserId()),K,Event,FPlatformTime::Cycles64()));
-    }
-    void Capture(const TCHAR* Name){if(!Directory.IsEmpty()){FScreenshotRequest::RequestScreenshot(Directory/(FString(Name)+TEXT(".png")),true,false);}}
-    FAutomationTestBase* Test;FString Directory,Diagnostic;TWeakObjectPtr<AStaticMeshActor> Ledges[2][2];TMap<TWeakObjectPtr<APFSurvivalPlayerController>,FAuthoredClimbRecord> Records;
-    double Started=FPlatformTime::Seconds(),Done=0,Prepare=0,ReleaseAt=0,OverviewAt=0,SpawnViewAt=0,TallAt=0,ReadyAt=0;float TallStamina=0;int32 Expected=1,OwnerStage=0;bool Client=false,Validated=false,Initialized=false,Ready=false,Acknowledged=false,OwnerComplete=false,ApproachShot=false,Manual=false,Approaching=false,TallPlaced=false,TallPressed=false,FullHeight=false,OverviewCaptured=false;
+    void Key(APFSurvivalPlayerController* PC,FKey K,EInputEvent Event){PC->InputKey(FInputKeyEventArgs(nullptr,IPlatformInputDeviceMapper::Get().GetPrimaryInputDeviceForUser(PC->GetPlatformUserId()),K,Event,FPlatformTime::Cycles64()));}
+    void Shot(const TCHAR* Name){if(!Directory.IsEmpty()){const FString Path=Directory/(FString(Name)+TEXT(".png"));Shots.Add(Path);FScreenshotRequest::RequestScreenshot(Path,true,false);}}
+    FAutomationTestBase* Test;FString Directory,Diagnostic;TArray<FString> Shots;TWeakObjectPtr<AStaticMeshActor> Walls[2],Tall;TMap<TWeakObjectPtr<APFSurvivalPlayerController>,FWallRecord> Records;
+    int32 Expected=1,ServerStage=0,OwnerStage=0;bool Client=false,Initialized=false,Validated=false,UpHeld=false,RemoteSeen=false,AscendingShot=false,FallShot=false,Scaled=false;float OldScale=1;
+    double Started=FPlatformTime::Seconds(),Done=0,HoldingAt=0,FallAt=0,LandedAt=0;
 };
 }
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFAuthoredClimbLiveTest,"PF.Traversal.AuthoredLive",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFAuthoredClimbLiveTest,"PF.Traversal.AuthoredLive",EAutomationTestFlags::ClientContext|EAutomationTestFlags::ServerContext|EAutomationTestFlags::EngineFilter)
 bool FPFAuthoredClimbLiveTest::RunTest(const FString&)
 {
-    if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunAuthoredClimbLiveTests"))){AddError(TEXT("Requires isolated authored-climb runner"));return false;}
+    int32 Expected=0;if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunAuthoredClimbLiveTests")) || !FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected) || (Expected!=1 && Expected!=2)){AddError(TEXT("Requires isolated authored continuous-wall runner1|2players"));return false;}
     FString Directory,Label;if(!FParse::Param(FCommandLine::Get(),TEXT("nullrhi")))
     {
-        FParse::Value(FCommandLine::Get(),TEXT("PFControlsEvidence="),Label);if(Label.IsEmpty() || Label.Len()>48){AddError(TEXT("Invalid evidence label"));return false;}
-        for(TCHAR C:Label){if(!FChar::IsAlnum(C) && C!=TEXT('_')){AddError(TEXT("Invalid evidence label"));return false;}}
-        Directory=FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("AutomationReports/ControlsUI")/Label);
-        if(IFileManager::Get().DirectoryExists(*Directory)){AddError(TEXT("Refusing reused screenshot directory"));return false;}IFileManager::Get().MakeDirectory(*Directory,true);
+        FParse::Value(FCommandLine::Get(),TEXT("PFControlsEvidence="),Label);if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunControlsUITest")) || Label.IsEmpty() || Label.Len()>48){return false;}
+        for(TCHAR C:Label){if(!FChar::IsAlnum(C) && C!=TEXT('_')){return false;}}Directory=FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("AutomationReports/ControlsUI")/Label);
+        if(IFileManager::Get().DirectoryExists(*Directory)){AddError(TEXT("Refusing reused screenshots"));return false;}IFileManager::Get().MakeDirectory(*Directory,true);
     }
-    ADD_LATENT_AUTOMATION_COMMAND(FAuthoredClimbExercise(this,Directory));return true;
+    ADD_LATENT_AUTOMATION_COMMAND(FWallLive(this,Directory));return true;
 }
 #endif

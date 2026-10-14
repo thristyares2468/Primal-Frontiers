@@ -51,7 +51,7 @@ bool UPFTraversalMovement::CanSprint() const
 bool UPFTraversalMovement::CanGlide() const
 {
     const auto* P=Cast<APFSurvivorCharacter>(CharacterOwner);
-    return P && P->Survival->CanSpendStamina(1) && !P->IsTraversalInputBlocked() && CarryRatio()<=1 && IsFalling() && GetWorld()->GetTimeSeconds()>=ClimbUntil;
+    return P && P->Survival->CanSpendStamina(1) && !P->IsTraversalInputBlocked() && CarryRatio()<=1 && IsFalling() && !IsWallClimbing();
 }
 bool UPFTraversalMovement::IsSprinting() const {return bWantsSprint && CanSprint();}
 bool UPFTraversalMovement::IsGliding() const
@@ -61,9 +61,10 @@ bool UPFTraversalMovement::IsGliding() const
     return bWantsGlide && CanGlide();
 }
 void UPFTraversalMovement::ClearTraversal()
-{bWantsSprint=false;bWantsGlide=false;ClimbUntil=0;AutomaticClimbDrive=FVector::ZeroVector;ClimbLandingTarget=FVector::ZeroVector;if(auto* P=Cast<APFSurvivorCharacter>(CharacterOwner)){P->CancelAutomaticClimb();}}
+{if(IsWallClimbing()){EndWallClimb(false,TEXT("Climb cancelled"));}bWantsSprint=false;bWantsGlide=false;ClimbUntil=0;AutomaticClimbDrive=FVector::ZeroVector;ClimbLandingTarget=FVector::ZeroVector;if(auto* P=Cast<APFSurvivorCharacter>(CharacterOwner)){P->CancelAutomaticClimb();}}
 float UPFTraversalMovement::GetMaxSpeed() const
 {
+    if(IsWallClimbing()){return WallClimbSpeed*CarrySpeedFraction();}
     const float Base=Super::GetMaxSpeed();
     return (IsMovingOnGround() || IsFalling())?Base*CarrySpeedFraction()*(IsSprinting()?SprintMultiplier:1.f):Base;
 }
@@ -83,11 +84,7 @@ void UPFTraversalMovement::UpdateCharacterStateBeforeMovement(float Delta)
     if(!IsFalling())
     {
         bWantsGlide=false;
-        // UE processes queued LaunchCharacter after this callback. Preserve a
-        // bounded manual mantle drive for that pending launch, but clear on landing.
-        const FVector ToLanding=ClimbLandingTarget-P->GetActorLocation();
-        const bool Reached=ToLanding.SizeSquared2D()<=100 && FMath::Abs(ToLanding.Z)<5;
-        if(GetWorld()->GetTimeSeconds()>=ClimbUntil || (PendingLaunchVelocity.IsZero() && Reached)){AutomaticClimbDrive=FVector::ZeroVector;}
+        AutomaticClimbDrive=FVector::ZeroVector;
         P->CancelAutomaticClimb();
     }
 }
@@ -100,29 +97,14 @@ void UPFTraversalMovement::HandleImpact(const FHitResult& Hit,float TimeSlice,co
 }
 void UPFTraversalMovement::PhysFalling(float Delta,int32 Iterations)
 {
-    const bool Glide=IsGliding(),Climb=GetWorld()->GetTimeSeconds()<ClimbUntil;
-    TGuardValue<float> Air(AirControl,Climb?0.f:(Glide?0.75f:AirControl));
-    TGuardValue<float> Brake(BrakingDecelerationFalling,Climb?0.f:BrakingDecelerationFalling);
-    // A contact-triggered launch initially touches the wall. UE correctly strips
-    // horizontal velocity there; reapply only the server-approved bounded drive
-    // until the capsule rises clear. Swept falling collision still runs normally.
-    if(Climb && !AutomaticClimbDrive.IsNearlyZero())
-    {Velocity.X=AutomaticClimbDrive.X;Velocity.Y=AutomaticClimbDrive.Y;}
+    const bool Glide=IsGliding();
+    TGuardValue<float> Air(AirControl,Glide?0.75f:AirControl);
     if(Glide){Velocity.Z=FMath::Max(Velocity.Z,-GlideDescentSpeed);}
     Super::PhysFalling(Delta,Iterations);
     if(IsGliding()){Velocity.Z=FMath::Max(Velocity.Z,-GlideDescentSpeed);}
 }
 void UPFTraversalMovement::PhysWalking(float Delta,int32 Iterations)
 {
-    // Rounded capsule contact can become a walkable perch before the feet reach
-    // the top. Finish the already-validated mantle using normal swept walking
-    // and step-up; never clear the drive merely because the edge became walkable.
-    if(GetWorld()->GetTimeSeconds()<ClimbUntil && !AutomaticClimbDrive.IsNearlyZero())
-    {
-        Velocity.X=AutomaticClimbDrive.X;Velocity.Y=AutomaticClimbDrive.Y;
-        TGuardValue<float> Brake(BrakingDecelerationWalking,0.f),Friction(GroundFriction,0.f);
-        Super::PhysWalking(Delta,Iterations);return;
-    }
     Super::PhysWalking(Delta,Iterations);
 }
 void UPFTraversalMovement::UpdateFromCompressedFlags(uint8 Flags)

@@ -1,5 +1,7 @@
 # M1/M3 carry weight and traversal - October 12, 2026
 
+Current October14 climbing supersedes the older ledge/prepayment sections: F attach/drop, W/S vertical/A/D sideways,12/s move/4/s hold, no wall recovery, exact-zero fall. [CONTINUOUS_CLIMB_M14.md](CONTINUOUS_CLIMB_M14.md) records current proof and G16 WALL_CLIMB. Sprint/weight/glide accepted earlier remain accepted; old4mF CLIMN_STAMINA PASS does not accept new continuous behavior.
+
 ## October13 automatic-climb addition
 
 Hold forward and jump into a clear45–120cm ledge to trigger one server-approved mantle without F. Default20jump+15climb stamina; original-ground height, collision and existing weight/life/modal guards apply. F/right-stick manual alternative retained. Editor/Game/native/networkone/two/render720/manualF regression all pass; [AUTOMATIC_CLIMB_M1.md](AUTOMATIC_CLIMB_M1.md) contains exact10records/fourselectors, failures and limits. User CLIMB remains NOT TESTED because of geometry; older evidence below remains historical.

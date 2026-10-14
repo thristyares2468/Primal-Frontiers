@@ -1,5 +1,7 @@
 # M14 - Full-height stamina climbing
 
+**Historical prepaid implementation, superseded October14 by [CONTINUOUS_CLIMB_M14.md](CONTINUOUS_CLIMB_M14.md).** User CLIMN_STAMINA PASS accepts the old requested4mF only. Current F attaches, W/S/A/D moves,4/s hold and12/s movement drain; zero drops. Do not use the older cost/preflight instructions below for the current build. New manual gate G16/WALL_CLIMB.
+
 The October13 request supersedes the old45-120cm ledge limit. F from grounded wall contact, or W + Space during a rising paid jump, requests a full climb. The server finds the wall/top and checks a walkable landing and swept capsule/overhead clearance. No target, height or cost is accepted from the client. Death, menus, encumbrance and cooldown still refuse.
 
 Cost is15 stamina through1.2m, then10 per additional metre. W + Space additionally pays the ordinary20-stamina jump. The entire cost must be affordable before launch; a refusal spends no climb stamina. A100-stamina survivor can therefore use F on roughly9.7m, or jump-contact climbing on roughly7.7m. Greater stamina capacity increases reach; there is no arbitrary gameplay wall-height ceiling. Coordinate/finite-value safety limits remain. The legacy serialized `MaxClimbHeight` property now means base-cost height and is displayed accordingly.

@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October14 — stamina limits duration instead of prepaying wall height
+
+Replace full-height ballistic launch with server-approved custom CharacterMovement, swept up/down/sideways motion and4/s holding versus12/s moving drain. Do not scan a whole tall wall or require enough stamina for its top; exhaustion releases into normal gravity. Allow only a local short clear walkable mantle, no collision bypass. Retain native saved-move input and sequenced owner acknowledgment instead of accepting client normals/targets/costs. Preserve serialized legacy fields as inert compatibility shims; no save/content-layout migration. Keep existing4m/10m wall identities and migrate only reviewed sign text. Old4m user PASS stays accepted in its original scope; the changed feel gets separate WALL_CLIMB/G16 acceptance. Exact tests/limits in CONTINUOUS_CLIMB_M14.md.
+
 ## October14 — one earned Copper slice and reviewed runtime layout edge
 
 Ship the first mineral loop before later tiers: optional Wood tool cannot mine Copper; existing Stone/Bound stone Pick+Axe capabilities unlock it, Copper Pick improves compatible speed to4hits without larger total yield. Append portable ore+Wood refinement and reuse FieldTools knowledge gate; no station/charge/durability claim. Preserve original old15resource identities and add only a tagged near-camp node/sign through supported Editor Python. Server Load/startup approves only that exact manifest and preserves a verified original outside A/B before apply using originalUTC; do not immediately rewrite remaining food-life values with a new timestamp. Ordinary Save captures aged runtime16. Unsupported layouts block safely, no general mapping guessed. Real earned native/UI and actual server restart use isolated profiles/sources; human pacing is a separate gate before more tiers.

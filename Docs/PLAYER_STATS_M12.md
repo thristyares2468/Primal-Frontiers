@@ -1,5 +1,7 @@
 # M12 - Level-earned player upgrades
 
+October14 traversal update: CONTINUOUS_CLIMB_M14.md supersedes the historical prepaid costs below. Stamina rank increases capacity without refill; wall attachment does not prepay height, movement/holding drains12/4 per second and zero makes you fall. Native StatRuntime and actual rendered PlayerStatsLive10m continuous climb passed; current technical evidence is in that M14 doc. G14 stat gate remains separate/unverified; old4m user CLIMN_STAMINA PASS accepted only its prior scope. Current wall guide G16.
+
 One player stat point is earned per level after level1, using the existing server-owned gathering and first-craft XP. Level2 starts at100XP. The current greybox supports levels1-10, so there are9 total stat points. Existing technology earns3 points per level and spends them on learned recipes; the ledgers are independent. Ancient technology rewards/unlocks are still planned and are labelled unavailable in the menu. No boss rewards, free XP or item grants were added to ordinary gameplay.
 
 Press **U**, or Pause > **Player upgrades**, to open the centered native placeholder screen. Click an upgrade or use arrows/D-pad and Enter/A. U/Esc/B returns to gameplay; P/Menu opens Pause. The stats screen does not pause the world. Disabled buttons explain the no-points state; the screen shows current level/XP, next threshold, separate budgets and each allocation. Keyboard/gamepad selection scrolls the chosen row into view. Physical controller feel remains a separate untested gate.
@@ -23,7 +25,7 @@ The progression envelope is now **PFXP V3** when allocations exist. Four ranks f
 
 ## Climb integration
 
-`STAMINA_CLIMB_M14.md` describes the new full-height stamina budget. New primitive4m and10m walls are east/right of normal camp spawn in `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`, at `(1850,-1100,200)` and `(2450,-1100,500)`. F from grounded contact requires about43 stamina for4m and103 for10m. Ordinary W+Space additionally pays20 jump stamina. Thus a full rank1 stamina capacity120 permits F on10m, while automatic10m climbing needs rank2 capacity140. Recover stamina first; allocating a point does not refill it.
+`CONTINUOUS_CLIMB_M14.md` describes the current duration-based stamina drain. Primitive4m and10m walls are east/right of camp in `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`, at `(1850,-1100,200)` and `(2450,-1100,500)`. F attaches with at least1 stamina; W then moves up, S down, A/D sideways, F drops. Hold4/s/move12/s with no recovery on wall; at zero fall. Ordinary W+Space still pays20 jump stamina before attachment. More capacity lets you climb longer; no whole-height affordability check. Recover first; allocating a point does not refill it. Current G16 checks midway holding/exhaustion, rather than the old103-stamina refusal.
 
 The10m native extension found a real perched-capsule edge bug. The server now retains its bounded approved drive until the complete landing target is reached, using Unreal's swept walking/step-up after the rounded edge becomes walkable. The owner receives that server-approved target; no client target RPC is added. New jumps, death, cancellation, completed landing and expiry clear it. This is greybox ascent/mantle movement, not a wall-hanging animation system.
 

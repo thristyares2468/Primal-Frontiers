@@ -12,6 +12,7 @@
 #include "NativeGameplayTags.h"
 #include "Net/UnrealNetwork.h"
 #include "Survival/PFSurvivalHazard.h"
+#include "Survival/PFTraversalMovement.h"
 
 DEFINE_LOG_CATEGORY(LogPFSurvival);
 
@@ -138,7 +139,8 @@ void UPFPlayerSurvivalComponent::TickComponent(float DeltaTime, ELevelTick TickT
     AdvanceNeeds(DeltaTime);
 
     // 3) Stamina recovery: only after the delay, with food and water left and no exposure.
-    if (CanMutate() && Vitals.Stamina < Vitals.MaxStamina && GetWorld()->GetTimeSeconds() >= RecoveryStartsAt &&
+    const auto* Traversal=GetOwner()->FindComponentByClass<UPFTraversalMovement>();
+    if (CanMutate() && (!Traversal || !Traversal->IsWallClimbing()) && Vitals.Stamina < Vitals.MaxStamina && GetWorld()->GetTimeSeconds() >= RecoveryStartsAt &&
         Vitals.Hunger > 0.f && Vitals.Thirst > 0.f && Vitals.Exposure == 0.f &&
         FMath::IsFinite(StaminaRecoveryPerSecond) && StaminaRecoveryPerSecond > 0.f)
     {

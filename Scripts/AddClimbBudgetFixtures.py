@@ -10,7 +10,8 @@ SPECS = [("4_A", (1850, -1100, 200), (3, 3.6, 4)),
          ("4_B", (2250, -3000, 200), (3, 3.6, 4)),
          ("10_A", (2450, -1100, 500), (3, 3.6, 10))]
 SIGN_AT = (1550, -850, 200)
-SIGN = "STAMINA CLIMB: 4m / 10m\nW + Space or F: cover FULL climb cost\nRecover stamina; U: player upgrades"
+LEGACY_SIGN = "STAMINA CLIMB: 4m / 10m\nW + Space or F: cover FULL climb cost\nRecover stamina; U: player upgrades"
+SIGN = "WALL CLIMB: 4m / 10m\nF attach/drop; W/S up/down; A/D sideways\nHold: 4 stamina/s; move: 12/s; empty = fall"
 levels = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 actors_api = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 def load():
@@ -49,7 +50,7 @@ def verify(rows, allow_legacy=False):
         if not position_ok or any(abs(x-y)>.001 for x,y in zip(xyz(a.get_actor_scale3d()),scale)) or a.get_editor_property('is_spatially_loaded') or not a.actor_has_tag(unreal.Name('PF.M14.Climb'+name)) or str(a.static_mesh_component.get_collision_profile_name())!='BlockAll':
             raise RuntimeError("Custom wall configuration "+name)
     s=found.get(PREFIX+'Sign')
-    if not s or xyz(s.get_actor_location())!=list(SIGN_AT) or str(s.get_component_by_class(unreal.TextRenderComponent).get_editor_property('text'))!=SIGN: raise RuntimeError("Unexpected sign")
+    if not s or xyz(s.get_actor_location())!=list(SIGN_AT) or str(s.get_component_by_class(unreal.TextRenderComponent).get_editor_property('text')) not in ([SIGN,LEGACY_SIGN] if allow_legacy else [SIGN]): raise RuntimeError("Unexpected sign")
     return {name:identity(a) for name,a in found.items()}
 rows=load();before=snapshot(rows);mutations=0
 if any(a.get_actor_label().startswith(PREFIX) for a in rows):
@@ -58,8 +59,12 @@ if any(a.get_actor_label().startswith(PREFIX) for a in rows):
     if xyz(wall.get_actor_location())==[1850,-3000,200]:
         wall.modify();wall.static_mesh_component.modify()
         wall.set_actor_location(unreal.Vector(2250,-3000,200),False,True);mutations+=1
-        if verify(rows)!=ids or snapshot(rows)!=before: raise RuntimeError('Fixture relocation guard failed')
-        if not levels.save_current_level(): raise RuntimeError('Relocation save failed')
+    sign=next(a for a in rows if a.get_actor_label()==PREFIX+'Sign')
+    text=sign.get_component_by_class(unreal.TextRenderComponent)
+    if str(text.get_editor_property('text'))==LEGACY_SIGN:
+        sign.modify();text.modify();text.set_text(SIGN);mutations+=1
+    if verify(rows)!=ids or snapshot(rows)!=before: raise RuntimeError('Fixture update guard failed')
+    if mutations and not levels.save_current_level(): raise RuntimeError('Fixture update save failed')
 else:
     cube=unreal.load_asset('/Engine/BasicShapes/Cube.Cube')
     rock=unreal.load_asset('/Game/PrimalFrontier/World/Greybox/MI_M7Rock')

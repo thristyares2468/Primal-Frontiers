@@ -10,6 +10,7 @@
 #include "Progression/PFProgressionComponent.h"
 #include "Progression/PFPlayerStatsMenu.h"
 #include "Survival/PFSurvivorCharacter.h"
+#include "Survival/PFTraversalMovement.h"
 #include "PFRequestCodes.h"
 #include "Survival/PFSurvivalHUD.h"
 #include "Survival/PFRecoveryPickup.h"
@@ -138,7 +139,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindGamepadControls();
     BindControl(EKeys::LeftShift,&APFSurvivalPlayerController::StartSprint,TEXT("Traversal"),TEXT("Hold to sprint; requires stamina and weight within carry limit"));
     InputComponent->BindKey(EKeys::LeftShift,IE_Released,this,&APFSurvivalPlayerController::StopSprint);
-    BindControl(EKeys::F,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Climb a clear wall ahead when the full height stamina cost is affordable"));
+    BindControl(EKeys::F,&APFSurvivalPlayerController::Climb,TEXT("Traversal"),TEXT("Attach to wall / drop; W/S climb, A/D sideways; stamina drains until you fall"));
     BindControl(EKeys::V,&APFSurvivalPlayerController::Glide,TEXT("Traversal"),TEXT("Toggle glide while falling; uses stamina, unavailable overweight"));
     // Legacy key bindings for the greybox survival actions. Movement/look/jump come
     // from the template Enhanced Input context (IMC_Default) via the base class.
@@ -326,6 +327,7 @@ void APFSurvivalPlayerController::ServerInteract_Implementation()
 FString APFSurvivalPlayerController::InteractionPrompt() const
 {
     if(bPauseMenuOpen || !GetPawn()){return FString();}
+    if(auto* P=Cast<APFSurvivorCharacter>(GetPawn())){if(P->Traversal()->IsWallClimbing()){return TEXT("Climbing - W/S up/down | A/D sideways | F drop | stamina drains");}}
     if(AActor* Target=PFInteraction::FindTarget(GetPawn()))
     {
         if(auto* Item=Cast<APFItemPickup>(Target))

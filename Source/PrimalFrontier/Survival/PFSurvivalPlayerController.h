@@ -90,7 +90,7 @@ public:
     /** Last server feedback message, shown for 4 seconds after it arrives. */
     FString RecentInteractionMessage() const;
     /** Server result presented only to the owning player; does not authorize movement. */
-    void NotifyTraversalFeedback(bool bAccepted,const FString& Reason);
+    void NotifyTraversalFeedback(bool bAccepted,const FString& Reason,bool bEnded=false);
 
     // ---- Accessors for components that live on the PlayerState ----
     UPFInventoryComponent* GetInventory() const;

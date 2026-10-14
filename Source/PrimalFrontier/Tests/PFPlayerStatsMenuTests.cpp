@@ -111,10 +111,11 @@ public:
             auto* P=CastChecked<APFSurvivorCharacter>(PC->GetPawn());const float Feet=P->GetActorLocation().Z-P->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
             if(!P->Traversal()->IsMovingOnGround() || FMath::Abs(Feet-1000)>5 || P->GetActorLocation().X<2300 || !P->Traversal()->AutomaticClimbDrive.IsNearlyZero()){return false;}
             ReleaseForward();P->Traversal()->StopMovementImmediately();PC->SetControlRotation(FRotator(-55,0,0));
-            Test->TestTrue(TEXT("Actual authored10m F landing and visible full-cost feedback"),PC->RecentInteractionMessage().Contains(TEXT("10.0 m")) && PC->RecentInteractionMessage().Contains(TEXT("102.")));
+            Test->TestTrue(TEXT("Actual authored10m F/W landing after continuous drain"),P->Survival->GetVitals().Stamina>0 && P->Survival->GetVitals().Stamina<140 && PC->RecentInteractionMessage().Contains(TEXT("Reached clear wall top")));
             Test->TestEqual(TEXT("Actual gameplay retains upgraded maximum"),P->Survival->GetVitals().MaxStamina,140.f);
-            Shot(TEXT("stats_10m_climb"));Wait(Now,27);return false;
+            Wait(Now,27);return false;
         }
+        if(Stage==27){Shot(TEXT("stats_10m_climb"));Wait(Now,28);return false;}
         Test->TestFalse(TEXT("U closes modal and restores input"),PC->IsStatMenuOpen() || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
         Test->TestTrue(TEXT("UI allocations never grant items"),PC->GetInventory()->GetStacks().IsEmpty());
         for(const TCHAR* F:{TEXT("stats_fresh"),TEXT("stats_unspent"),TEXT("stats_spent"),TEXT("stats_crafting_scroll"),TEXT("stats_pause"),TEXT("stats_10m_climb")}){Test->TestTrue(TEXT("Fresh screenshot artifact"),IFileManager::Get().FileSize(*(Directory/(FString(F)+TEXT(".png"))))>0);}

@@ -92,7 +92,7 @@ public:
                 {Test->TestTrue(TEXT("Server overweight jump request remains grounded"),M->IsMovingOnGround());Test->TestFalse(TEXT("Server110percent disables jump"),P->CanJump());I->RemoveItem(TEXT("Item_Wood"),66);M->ClearTraversal();M->StopMovementImmediately();const float AtX=Automatic?-435-P->GetCapsuleComponent()->GetScaledCapsuleRadius():-500;P->TeleportTo(FVector(AtX,P->GetActorLocation().Y,3100),FRotator::ZeroRotator,false,true);M->SetMovementMode(MOVE_Walking);PC->SetControlRotation(FRotator::ZeroRotator);P->Survival->SetHealth(97);R.StartStamina=P->Survival->GetVitals().Stamina;Next(R,3,Now);}
                 else if(R.Phase==3 && P->GetActorLocation().Z>3170 && P->GetActorLocation().X>-430 && M->IsMovingOnGround())
                 {
-                    if(R.Landed==0){R.Landed=Now;Test->TestTrue(TEXT("Server physically climbed with authoritative stamina cost"),P->Survival->GetVitals().Stamina<R.StartStamina-10);if(Automatic){Test->TestTrue(TEXT("Automatic contact spends jump plus climb, not repeated climb"),P->Survival->GetVitals().Stamina<=R.StartStamina-P->JumpStaminaCost-P->ClimbStaminaCost+1);}}
+                    if(R.Landed==0){R.Landed=Now;Test->TestTrue(TEXT("Server physically climbed with elapsed stamina drain"),P->Survival->GetVitals().Stamina<R.StartStamina);if(Automatic){Test->TestTrue(TEXT("Automatic contact pays jump then continuous climb"),P->Survival->GetVitals().Stamina<R.StartStamina-P->JumpStaminaCost);}}
                     if(Now-R.Landed>1){M->ClearTraversal();M->StopMovementImmediately();P->TeleportTo(FVector(-800,P->GetActorLocation().Y,4300),FRotator::ZeroRotator,false,true);M->SetMovementMode(MOVE_Falling);M->Velocity=FVector(0,0,-600);R.StartStamina=P->Survival->GetVitals().Stamina;P->Survival->SetHealth(96);Next(R,4,Now);}
                 }
                 else if(R.Phase==4 && M->IsGliding() && M->Velocity.Z>=-M->GlideDescentSpeed-2 && P->Survival->GetVitals().Stamina<R.StartStamina-3)
@@ -128,7 +128,8 @@ public:
             {P->StopJumping();PC->SetControlRotation(FRotator::ZeroRotator);if(ClimbRequest==0){ClimbRequest=Now+.35;}if(Now>=ClimbRequest){FString Reason;if(ClientOnly){Test->TestFalse(TEXT("Client direct climb authority refused"),P->TryClimb(Reason));}if(Automatic){P->Jump();JumpRelease=Now+.15;}else{Press(PC,EKeys::F);}Stage=4;}}
             else if(Stage==4)
             {
-                if(Automatic && !SawClimb){P->AddMovementInput(FVector(1,0,0));if(Now>=JumpRelease){P->StopJumping();}}
+                if(!SawClimb && M->IsWallClimbing()){P->AddMovementInput(FVector::UpVector);}
+                if(Automatic && !SawClimb && !M->IsWallClimbing()){P->AddMovementInput(FVector(1,0,0));if(Now>=JumpRelease){P->StopJumping();}}
                 if(Health==97 && P->GetActorLocation().Z>3170 && M->IsMovingOnGround()){SawClimb=true;PC->SetControlRotation(FRotator(-20,0,0));CaptureOnce(TEXT("ledge_top"));}
                 if(Health==96 && M->CanGlide()){Test->TestTrue(TEXT("Owner saw physical climb landing before falling fixture"),SawClimb);Press(PC,EKeys::V);Stage=5;}
             }
