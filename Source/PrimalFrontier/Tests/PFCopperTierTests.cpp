@@ -108,6 +108,16 @@ bool FPFCopperMigrationTest::RunTest(const FString&)
     Old.Resources.RemoveAll([](const auto& R){return R.Definition==TEXT("Node_Copper");});TArray<uint8> Bytes;
     TestTrue(TEXT("Synthetic previous15-layout whole data valid"),F.Save->Validate(Old,Error));F.Save->Encode(Old,Bytes,Error);TestTrue(TEXT("Write unique previous-layout source"),FPFSaveFileStore::Write(Slot,Bytes,Error));
     F.Copper->HitsRemaining=1;F.P->Survival->SetHealth(99);
+    FPFSavedFile BeforeInspection,AfterInspection;FPFSaveInspection Inspection;
+    TestTrue(TEXT("Read prior layout before inspection"),FPFSaveFileStore::Read(Slot,BeforeInspection,Error));
+    for(int32 Repeat=0;Repeat<2;++Repeat)
+    {
+        TestTrue(TEXT("Read-only inspection accepts reviewed prior layout"),F.Save->InspectSave(Slot,Inspection,Error));
+        TestTrue(TEXT("Inspection explicitly requires Copper migration with prepared count"),Inspection.bRequiresCopperMigration && Inspection.Resources==16 && !Inspection.bRecoveredBackup);
+        TestTrue(TEXT("Inspection leaves live old/current state and actors intact"),F.Copper->HitsRemaining==1 && F.P->Survival->GetVitals().Health==99 && IsValid(Chest) && Chest->PersistentId==ChestId && Chest->Storage->Count(TEXT("Item_Wood"))==7 && F.Save->ActiveSlot.IsEmpty());
+        TestTrue(TEXT("Inspection does not create migration archive"),IFileManager::Get().FileSize(*FPFSaveFileStore::OriginalPath(Slot,TEXT("M12CopperLayout1")))<0);
+        TestTrue(TEXT("Inspection preserves source payload generation and UTC"),FPFSaveFileStore::Read(Slot,AfterInspection,Error) && AfterInspection.Payload==BeforeInspection.Payload && AfterInspection.Generation==BeforeInspection.Generation && AfterInspection.SavedUtc==BeforeInspection.SavedUtc);
+    }
     if(!TestTrue(TEXT("Real server Load applies approved15->16 edge"),F.Save->Load(Slot,Error))){AddError(Error);return false;}
     TestTrue(TEXT("Old depleted state and new default retained"),F.Nodes[0]->HitsRemaining==0 && F.Copper->HitsRemaining==6 && F.Clock->Hour==21);
     TestTrue(TEXT("Upgraded vitals and food batch preserved"),F.P->Survival->GetVitals().Health==33 && F.P->Survival->GetVitals().Stamina==112 && F.P->Survival->GetVitals().MaxStamina==120 && F.I->Count(TEXT("Item_Food"))==2 && F.I->GetStacks()[0].StackId==FoodBatch);
@@ -116,6 +126,7 @@ bool FPFCopperMigrationTest::RunTest(const FString&)
     FPFSavedFile Original,Source;TestTrue(TEXT("Verified original exact bytes"),FPFSaveFileStore::ReadOriginal(Slot,TEXT("M12CopperLayout1"),Original,Error) && Original.Payload==Bytes);
     TestTrue(TEXT("Load preserves original source and time anchor"),FPFSaveFileStore::Read(Slot,Source,Error) && Source.Payload==Bytes && Source.SavedUtc==Original.SavedUtc);
     TestTrue(TEXT("Ordinary save captures expanded aged runtime"),F.Save->Save(Slot,Error));F.Copper->HitsRemaining=2;
+    TestTrue(TEXT("Inspection distinguishes current layout without applying it"),F.Save->InspectSave(Slot,Inspection,Error) && !Inspection.bRequiresCopperMigration && F.Copper->HitsRemaining==2);
     TestTrue(TEXT("Current-layout repeated load"),F.Save->Load(Slot,Error));TestEqual(TEXT("Current node state restored without duplicate/reset edge"),F.Copper->HitsRemaining,6);
     FPFWorldSaveData Now;TestTrue(TEXT("Exactly16 resources after reload"),F.Save->Capture(Now,Error) && Now.Resources.Num()==16 && Now.Players.Num()==1);
     TestTrue(TEXT("Original survives new current save generation"),FPFSaveFileStore::ReadOriginal(Slot,TEXT("M12CopperLayout1"),Original,Error) && Original.Payload==Bytes);

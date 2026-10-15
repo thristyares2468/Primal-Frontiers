@@ -104,6 +104,7 @@ const TArray<FCommandSpec>& CommandSpecs()
         // Persistence (M8). Local server console only; never saves editor maps.
         {TEXT("PF.SaveWorld"), TEXT("[slot] Server: save bounded gameplay state under Saved/Persistence (default Survival)."), TEXT(""), 0, 1, false, true},
         {TEXT("PF.LoadWorld"), TEXT("[slot] Server: restore validated gameplay state on the same map (default Survival)."), TEXT(""), 0, 1, false, true},
+        {TEXT("PF.CheckSave"), TEXT("[slot] Server: inspect saved file/catalog/map/layout and connected membership without loading or writing (default Survival); not a restore guarantee."), TEXT(""), 0, 1},
         // Gathering/crafting (M4) and building (M5).
         {TEXT("PF.TestGathering"), TEXT("Server: validate loaded resource definitions and node state; no harvesting."), TEXT(""), 0, 0},
         {TEXT("PF.TestCrafting"), TEXT("Server: validate player recipe catalogs and queue state; no item grants."), TEXT(""), 0, 0},
@@ -140,7 +141,7 @@ static bool Number(const FString& Text, double& Out)
 FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
 {
     if (A.Num() < S.MinArgs || A.Num() > S.MaxArgs) { return TEXT("Wrong argument count. Usage: ") + S.Name + TEXT(" ") + S.Help; }
-    if ((S.Name == TEXT("PF.SaveWorld") || S.Name == TEXT("PF.LoadWorld")) && !A.IsEmpty() && !FPFSaveFileStore::ValidSlot(A[0]))
+    if ((S.Name == TEXT("PF.SaveWorld") || S.Name == TEXT("PF.LoadWorld") || S.Name==TEXT("PF.CheckSave")) && !A.IsEmpty() && !FPFSaveFileStore::ValidSlot(A[0]))
     { return TEXT("Save slot requires 1-64 ASCII letters, digits or underscores; paths are refused."); }
     if (S.Name == TEXT("PF.GiveItem") || S.Name == TEXT("PF.RemoveItem"))
     {
@@ -501,7 +502,7 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
         if (EditorCommand && (!World || World->WorldType == EWorldType::Editor)) { R = EditorCommand(Name, Args, World); }
         else { R.bNotImplemented = true; R.Add(TEXT("Info"), TEXT("NOT IMPLEMENTED"), FString(), TEXT("Requires editor backend outside PIE. Runtime gameplay reset/screenshot adapter is unavailable.")); }
     }
-    else if (Name == TEXT("PF.SaveWorld") || Name == TEXT("PF.LoadWorld") || Name == TEXT("PF.TestPersistence"))
+    else if (Name == TEXT("PF.SaveWorld") || Name == TEXT("PF.LoadWorld") || Name == TEXT("PF.CheckSave") || Name == TEXT("PF.TestPersistence"))
     {
         if (!World || !World->IsGameWorld() || World->GetNetMode() == NM_Client || !World->GetAuthGameMode())
         { Fail(R, TEXT("NotAuthority"), TEXT("Requires a server gameplay world; no save/load RPC exists.")); }
@@ -509,7 +510,19 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
         {
             auto* Persistence = World->GetSubsystem<UPFWorldPersistence>(); FString Why;
             const FString Slot = Args.IsEmpty() ? TEXT("Survival") : Args[0]; bool Passed = false;
-            if (Name == TEXT("PF.SaveWorld")) { Passed = Persistence->Save(Slot, Why); }
+            if(Name==TEXT("PF.CheckSave"))
+            {
+                FPFSaveInspection Info;Passed=Persistence->InspectSave(Slot,Info,Why);
+                if(Passed){
+                    R.Counts.Add(TEXT("Players"),Info.Players);R.Counts.Add(TEXT("Structures"),Info.Structures);
+                    R.Counts.Add(TEXT("Resources"),Info.Resources);R.Counts.Add(TEXT("Spawners"),Info.Spawners);
+                    R.Counts.Add(TEXT("Creatures"),Info.Creatures);R.Counts.Add(TEXT("Pickups"),Info.Pickups);
+                    R.Counts.Add(TEXT("BackupRecovery"),Info.bRecoveredBackup?1:0);R.Counts.Add(TEXT("RequiresCopperMigration"),Info.bRequiresCopperMigration?1:0);
+                    R.Add(TEXT("Info"),TEXT("SaveInspected"),Slot,FString::Printf(
+                    TEXT("Read-only inspection: map=%s worldVersion=%d generation=%llu savedUtc=%lld players=%d structures=%d resources=%d spawners=%d creatures=%d pickups=%d backupRecovery=%d requiresCopperMigration=%d. No load/write; actor allocation, placement and full restore are not guaranteed."),
+                    *Info.Map,Info.WorldVersion,Info.Generation,Info.SavedUtc,Info.Players,Info.Structures,Info.Resources,Info.Spawners,Info.Creatures,Info.Pickups,Info.bRecoveredBackup,Info.bRequiresCopperMigration));}
+            }
+            else if (Name == TEXT("PF.SaveWorld")) { Passed = Persistence->Save(Slot, Why); }
             else if (Name == TEXT("PF.LoadWorld")) { Passed = Persistence->Load(Slot, Why); }
             else
             {
@@ -519,7 +532,7 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
                 if (!Passed && Why.IsEmpty()) { Why = TEXT("World codec round trip changed data"); }
             }
             if (!Passed) { Fail(R, TEXT("PersistenceRejected"), Why); }
-            else { R.Add(TEXT("Info"), TEXT("PersistenceValidated"), Name == TEXT("PF.TestPersistence") ? FString() : Slot,
+            else if(Name!=TEXT("PF.CheckSave")) { R.Add(TEXT("Info"), TEXT("PersistenceValidated"), Name == TEXT("PF.TestPersistence") ? FString() : Slot,
                 Name == TEXT("PF.TestPersistence") ? TEXT("Captured and round-tripped current records only; restart/reconnect/playtesting is separate.") :
                 Name == TEXT("PF.SaveWorld") ? TEXT("Server gameplay save completed. Live world was not loaded or reset; no editor asset was saved.") : TEXT("Server gameplay load completed; no editor asset was saved.")); }
         }

@@ -10,6 +10,8 @@ See [DEVELOPER_COMMANDS.md](DEVELOPER_COMMANDS.md) for the current commands, int
 
 ## M8 persistence adapters
 
+M18 adds `PF.CheckSave [slot]`: read-only server inspection of existing file/catalog/map/layout and connected-player membership, with schema/generation/UTC/counts/recovery/reviewed Copper migration indication. No restore, backup, source rewrite or active-slot change. A pass is not a guarantee of full restoration. [Contract and evidence](../../Docs/SAVE_INSPECTION_M18.md).
+
 PF.SaveWorld [slot] and PF.LoadWorld [slot] call real server-only world-save APIs (default Survival); PF.TestPersistence validates a read-only record round-trip. These commands never save editor assets or forward client requests. Slots use 1–64 ASCII letters/digits/underscore. Opt-in PF.Persistence.Live exercises a disposable NullRHI create/save/load and separate restart/reconnect, for one/two clients. PF.Help and all commands remain non-Shipping. See [persistence contract](../../Docs/PERSISTENCE_M8.md) and DEVELOPER_COMMANDS.md for flags/evidence and pending manual gates.
 
 ## Enable and use

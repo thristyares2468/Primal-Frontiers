@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October15 — inspect compatibility without restoring a save
+
+Keep `UPFWorldPersistence::InspectSave` separate from destructive restoration. Reuse the actual layout predicate and validated codecs, prepare only a local copy of the reviewed Copper addition, and return sanitized schema/generation/UTC/counts/recovery/migration metadata atomically. Do not invoke Apply, Save or original-backup publication; a successful inspection cannot guarantee actor allocation or placement. `PF.CheckSave` uses the existing non-Shipping server-only command registry/history, with no client RPC or new dependency. [SAVE_INSPECTION_M18.md](SAVE_INSPECTION_M18.md) records bounded verification. Hosting/accounts/database/voice provisioning is deferred by the user; no provider or production authentication change is made.
+
 ## October15 — infrastructure setup guidance before voice implementation
 
 User requests server/database/voice-hosting steps first. Recommend prove source-built/cooked WindowsServer locally before renting a private host; keep current .pfs authoritative until an explicit PostgreSQL+authenticated HTTPS backend/migration exists. Proposed future clients never receive DB credentials. Recommend EOS-managed media rather than renting a separate voice VM, with trusted room-token service and verified authoritative proximity integration; no provider/host/service selected or installed here. Source access requires account owner; next91ZwTwxp Personal1. SERVER_DATABASE_VOICE_SETUP_M15.md records exact current-build steps, proposed sizing/dependency boundaries and remaining gates. No actual architecture migration completed.

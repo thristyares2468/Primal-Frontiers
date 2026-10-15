@@ -178,7 +178,10 @@ public:
             FString Error;
             Test->TestFalse(TEXT("Client direct save rejected"), Persistence->Save(Slot, Error));
             Test->TestFalse(TEXT("Client direct load rejected"), Persistence->Load(Slot, Error));
-            for (const TCHAR* Name : {TEXT("PF.SaveWorld"), TEXT("PF.LoadWorld"), TEXT("PF.TestPersistence")})
+            FPFSaveInspection ClientInspection;ClientInspection.Map=TEXT("Unchanged");
+            Test->TestFalse(TEXT("Client direct inspection rejected"),Persistence->InspectSave(Slot,ClientInspection,Error));
+            Test->TestEqual(TEXT("Client inspection refusal preserves output"),ClientInspection.Map,FString(TEXT("Unchanged")));
+            for (const TCHAR* Name : {TEXT("PF.SaveWorld"), TEXT("PF.LoadWorld"), TEXT("PF.CheckSave"), TEXT("PF.TestPersistence")})
             { Test->TestTrue(TEXT("Client PF persistence command rejected"), PF::AgentTools::ExecuteCommand(Name, {}, W, false).HasErrors()); }
             Test->TestFalse(TEXT("Client cannot create items"), PC->GetInventory()->Grant(TEXT("Item_Wood"), 1));
             Test->TestFalse(TEXT("Client cannot replace progression"),Progression->Restore({},Error));
@@ -325,6 +328,12 @@ public:
             FPFWorldSaveData Original;
             if (!Check(TEXT("Capture saved state"), Persistence->Capture(Original, Error))) { Test->AddError(Error); return true; }
             PC->GetInventory()->Grant(TEXT("Item_Stone"), 1); V->SetHealth(90); Clock->SetHour(9);
+            const auto Inspection=PF::AgentTools::ExecuteCommand(TEXT("PF.CheckSave"),{Slot},W);
+            if(!Check(TEXT("PF server save inspection"),!Inspection.HasErrors())){return true;}
+            Test->TestTrue(TEXT("Inspection reports actual saved counts and explicit limits"),Inspection.Counts.FindRef(TEXT("Players"))==Expected && Inspection.Counts.FindRef(TEXT("Structures"))==2 && Inspection.Counts.FindRef(TEXT("Resources"))==Original.Resources.Num() && Inspection.Issues.ContainsByPredicate([](const auto& Issue){return Issue.Code==TEXT("SaveInspected") && Issue.Message.Contains(TEXT("full restore are not guaranteed"));}));
+            Test->TestEqual(TEXT("Inspection preserves unsaved item"),PC->GetInventory()->Count(TEXT("Item_Stone")),1);
+            Test->TestEqual(TEXT("Inspection preserves unsaved vitals"),V->GetVitals().Health,90.f);
+            Test->TestEqual(TEXT("Inspection preserves unsaved clock"),Clock->Hour,9.f);
             if (!Check(TEXT("PF server world load"), !PF::AgentTools::ExecuteCommand(TEXT("PF.LoadWorld"), {Slot}, W).HasErrors())) { return true; }
             Test->TestEqual(TEXT("Loading removes unsaved item"), PC->GetInventory()->Count(TEXT("Item_Stone")), 0);
             FPFWorldSaveData Restored;

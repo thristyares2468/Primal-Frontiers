@@ -308,15 +308,15 @@ void UPFWorldPersistence::ApplyStartup()
     bPending = false;
 }
 
-bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FString& Error)
+bool UPFWorldPersistence::CheckLayout(const FPFWorldSaveData& Data,FString& Error)
 {
-    if (!Validate(Data, Error) || Data.Map != PersistenceMapName(GetWorld())) { Error = TEXT("Save validation or map identity mismatch"); return false; }
+    if(Data.Map!=PersistenceMapName(GetWorld())){Error=TEXT("Saved map differs from active map");return false;}
     TMap<FString, APFResourceNode*> Nodes; TMap<FString, APFCreatureSpawner*> SpawnPoints;
-    TArray<APFWorldClock*> Clocks; TArray<APFBuildPiece*> OldPieces; TArray<APFCreature*> OldCreatures; TArray<APFItemPickup*> OldPickups;
+    int32 ClockCount=0;
     for (TActorIterator<APFResourceNode> It(GetWorld()); It; ++It) { Nodes.Add(It->GetName(), *It); }
     for (TActorIterator<APFCreatureSpawner> It(GetWorld()); It; ++It) { SpawnPoints.Add(It->GetName(), *It); }
-    for (TActorIterator<APFWorldClock> It(GetWorld()); It; ++It) { Clocks.Add(*It); }
-    if (Clocks.Num() != 1 || Nodes.Num() != Data.Resources.Num() || SpawnPoints.Num() != Data.Spawners.Num())
+    for (TActorIterator<APFWorldClock> It(GetWorld()); It; ++It) { ++ClockCount; }
+    if (ClockCount != 1 || Nodes.Num() != Data.Resources.Num() || SpawnPoints.Num() != Data.Spawners.Num())
     { Error = TEXT("Map clock/resource/spawner layout changed; migration required"); return false; }
     for (const auto& R : Data.Resources)
     {
@@ -325,6 +325,42 @@ bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FS
         { Error = TEXT("Resource layout/definition mismatch"); return false; }
     }
     for (const auto& S : Data.Spawners) { if (!SpawnPoints.Contains(S.Name)) { Error = TEXT("Spawner layout mismatch"); return false; } }
+    return true;
+}
+
+bool UPFWorldPersistence::InspectSave(const FString& Slot,FPFSaveInspection& Out,FString& Error)
+{
+    Error.Reset();
+    if(!FPFSaveFileStore::ValidSlot(Slot) || Slot.StartsWith(TEXT("Identity_"),ESearchCase::IgnoreCase) || Slot.StartsWith(TEXT("Metadata_"),ESearchCase::IgnoreCase))
+    {Error=TEXT("Invalid or reserved world-save slot");return false;}
+    if(!Authority(Error)){return false;}
+    FPFSavedFile File;FPFWorldSaveData Data;
+    if(!FPFSaveFileStore::Read(Slot,File,Error) || !Decode(File.Payload,Data,Error)){return false;}
+    bool Changed=false;
+    // This prepares only a local value copy. PreserveOriginal/Apply/Save must never run here.
+    if(!PrepareCopperLayout(Data,Changed,Error) || !CheckLayout(Data,Error)){return false;}
+    for(auto It=GetWorld()->GetPlayerControllerIterator();It;++It)
+    {
+        const auto* PC=Cast<APFSurvivalPlayerController>(It->Get());
+        const auto* PS=PC?PC->GetPlayerState<APFInventoryPlayerState>():nullptr;
+        if(!PS || !Data.Players.ContainsByPredicate([&](const auto& P){return P.PlayerId==PS->PersistentPlayerId;}))
+        {Error=TEXT("Connected player absent from save; inspect before joining or use the correct world");return false;}
+    }
+    FPFSaveInspection Candidate;Candidate.Map=Data.Map;Candidate.WorldVersion=Data.Version;
+    Candidate.Generation=File.Generation;Candidate.SavedUtc=File.SavedUtc;Candidate.bRecoveredBackup=File.bRecoveredBackup;
+    Candidate.bRequiresCopperMigration=Changed;Candidate.Players=Data.Players.Num();Candidate.Structures=Data.Structures.Num();
+    Candidate.Resources=Data.Resources.Num();Candidate.Spawners=Data.Spawners.Num();Candidate.Creatures=Data.Creatures.Num();Candidate.Pickups=Data.Pickups.Num();
+    Out=MoveTemp(Candidate);return true;
+}
+
+bool UPFWorldPersistence::Apply(const FPFWorldSaveData& Data, int64 SavedUtc, FString& Error)
+{
+    if(!Validate(Data,Error) || !CheckLayout(Data,Error)){return false;}
+    TMap<FString, APFResourceNode*> Nodes;TMap<FString, APFCreatureSpawner*> SpawnPoints;
+    TArray<APFWorldClock*> Clocks;TArray<APFBuildPiece*> OldPieces;TArray<APFCreature*> OldCreatures;TArray<APFItemPickup*> OldPickups;
+    for(TActorIterator<APFResourceNode> It(GetWorld());It;++It){Nodes.Add(It->GetName(),*It);}
+    for(TActorIterator<APFCreatureSpawner> It(GetWorld());It;++It){SpawnPoints.Add(It->GetName(),*It);}
+    for(TActorIterator<APFWorldClock> It(GetWorld());It;++It){Clocks.Add(*It);}
     struct FPlayerRestore { APFSurvivalPlayerController* PC; FPFPlayerSaveData Data; FPFProgressionRecord Progression; double Age; };
     TArray<FPlayerRestore> Players;
     for (auto It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
