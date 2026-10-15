@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October15 — infrastructure setup guidance before voice implementation
+
+User requests server/database/voice-hosting steps first. Recommend prove source-built/cooked WindowsServer locally before renting a private host; keep current .pfs authoritative until an explicit PostgreSQL+authenticated HTTPS backend/migration exists. Proposed future clients never receive DB credentials. Recommend EOS-managed media rather than renting a separate voice VM, with trusted room-token service and verified authoritative proximity integration; no provider/host/service selected or installed here. Source access requires account owner; next91ZwTwxp Personal1. SERVER_DATABASE_VOICE_SETUP_M15.md records exact current-build steps, proposed sizing/dependency boundaries and remaining gates. No actual architecture migration completed.
+
 ## October15 — keep provider selection explicit after transport audit
 
 Current multiplayer uses direct-IP/IpNetDriver/engineNullfallback, no productiononlinevoiceidentity/token setup. InstalledEOS positionalupdate isunimplemented; genericinterface/legacy mute forwarding does not enforce distancepolicy by itself. Recommend boundedLANvoicefirst, but user product-scope decision91ZwTwxp remainspending before newtransport dependencies or service setup. No provider chosen/installed, no credentials requested, no absentmicrophonetest. VOICE_TRANSPORT_AUDIT_M15.md records exact available APIs/limits and secure nextgate.

@@ -1,10 +1,12 @@
 # M15 voice transport readiness — October15
 
+User follow-up: wants server/database setup and voice hosting guidance first, not an immediate transport implementation. SERVER_DATABASE_VOICE_SETUP_M15.md supersedes the handoff below: verify source access for packaged Server first (91ZwTwxp nowPersonal1), retain .pfs, propose privatePostgreSQL/API and EOS-managed media without selecting/provisioning services. Historical audit/results remain valid; no audio integration or newcloud/DBpass.
+
 Audit task https://trello.com/c/i7Lh8WDt ProgrammingDone/complete readback. Next user scope choice https://trello.com/c/91ZwTwxp (Personal 2), MainToDo/incomplete confirmed. Documentation only: no plugin/module/provider/account/netdriver/config/audio capture change or new build. Policy3117b35 and actual authority bridgee65bf35 are pushed; metadata tests are not an audio implementation.
 
 ## Actual project
 
-- PFSessionGameInstance manages solo world intent/OpenLevel; multiplayer join is direct IP/ClientTravel through existing menu/controller. No production online lobby/account/session provider selected in project Config/Build.cs/uproject.
+- PFSessionGameInstance manages solo world intent/OpenLevel; multiplayer diagnostics join via a direct network URL or engine open command. No current menu server browser or production online lobby/account/session provider is claimed in project Config/Build.cs/uproject.
 - Uncooked dedicated diagnostics actually mount the engine's OnlineSubsystemNull and use IpNetDriver; development PersistentPlayerId/reconnect GUID is not EOS ProductUserId, Steam account auth or an Internet identity.
 - Build.cs has no active Voice/VoiceChat/OnlineSubsystem dependency (only historical comments). Engine-installed VoiceChat interface/EOSVoiceChat/OnlineSubsystemNull packages exist; presence on disk/default Null fallback is not project integration.
 - Native metadata grants no client transport/API/device rights and does not create channels. Full M15 still needs device settings/PTT UI, rate/queue bounds, join/leave/token/identity handling and physical listening.

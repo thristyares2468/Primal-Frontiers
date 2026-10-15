@@ -1,5 +1,9 @@
 # Trello task workflow
 
+Setupguide27xZNBDw nowProgrammingDone/complete confirmed with evidence/boundaries; Personal1sourceaccess91ZwTwxp ToDo/incomplete and parentM15Doing reconciled, oldchoiceguide retainedhistorically. Two launchsamples parserchecked only, no newUnrealrun/serviceprovisioningclaim. Future host/provider/backend choices remain explicit; no unrelated due/member/privacy/status changes.
+
+October15 user requests infrastructure instructions first. Bounded AIguide27xZNBDw createdProgrammingDoing, source/currentstate/officialdocs reviewed. Original91ZwTwxp choice guide preserved ascomment, title changed to (Personal 1) verify Unreal source access, exact single no-level/no-launch/no-purchase action+SOURCE_ACCESS PASS; ToDo/incomplete readback. No source download, provider/host/DB purchase/integration or pass inferred. SERVER_DATABASE_VOICE_SETUP_M15.md holds fullfuturesequence and existing private command. GuideDone/readback/publication follow.
+
 October15 voice transport audit i7Lh8WDt ProgrammingDone/complete readback. MainM15 Ki5GLWPM remainsDoing with current policy/actualsnapshot proof, no audio; new (Personal 2)91ZwTwxp MainToDo/incomplete for product-scope decision LANfirst versus intendedonlineprovider. Exact no-level/no-Unreal single-line choice/background is in description and VOICE_TRANSPORT_AUDIT_M15.md. Separate existingPersonal gates/members/deadlines preserved; nextAItransport implementation only after scope recorded.
 
 October15 VbaQfuF2 (AI) M15 authoritative metadata snapshot ProgrammingDone/complete readback after native3/3, actual one2/2 and impairedtwo3/3, finalEditor/Game. Exact level/runner/steps/contracts/failure repairs/evidence/limits retained in card and PROXIMITY_VOICE_AUTHORITY_M15.md. FullM15 staysDoing; next transport/backend audit. No microphonetest requested or Personal acceptance inferred.
