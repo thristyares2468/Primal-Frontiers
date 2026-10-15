@@ -1,5 +1,7 @@
 # Server, database and voice setup — current build
 
+**Superseded current setup:** [October15 free/low-cost guide and tested local scripts](MULTIPLAYER_SETUP_2026_10_15.md). Source access has now been independently verified through GitHub API, and the owner account-link step below is complete. Only48.26GiB free remains; build storage is the next prerequisite. Latest user permits very low cost as well as free hosting. This document retains the earlier guide and budget history; its deferred/free-only/source-access-first instructions are historical. No hosted game/SQL/audible voice has been provisioned.
+
 ## User budget update: free online hosting only
 
 The user subsequently specified a zero-cost online game host. This supersedes the paid Windows-VM recommendation below; no billable VM, paid database or trial-to-paid upgrade is selected. Official offers checked October15; no account/resource created.

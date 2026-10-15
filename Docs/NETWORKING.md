@@ -1,5 +1,7 @@
 # Current networking objective - October13, 2026
 
+October15 current infrastructure scope reopened: [free/low-cost setup](MULTIPLAYER_SETUP_2026_10_15.md). Source access verified; separate source build/package blocked by48.26GiB disk availability. Localhost launcher is plan-only by default, scripts/contracts12/12; no runtime networking/provider/SQL/firewall change. Prior deferred/source-link-first notes are historical. Keep .pfs world authority; future DB/API and EOS media require integration and separate deployment/listening proof.
+
 October15 actual authority snapshot bridge now passes native3/3 and one2/2/two3/3 roles with75ms/1% impairment. Native metadata setters reject real client worlds; server derives connected public identity/position/life and routes near/far/mute/block. No microphone/capture/audio packets, client preference RPC, provider/session-account or transportsecurity claim. PROXIMITY_VOICE_AUTHORITY_M15.md documents exact contract/fixture/evidence; previous note's upcoming snapshot gate is now technically passed.
 
 October15 M15 bounded metadata voice-policy helper passes PF.Voice.Policy/PolicyValidation and Editor/Game builds. Default-off consent/PTT/range/volume/mute/block rules only, trusted caller contract; actual server snapshot adapter is next. No capture/audio transport/service/plugin/RPC/UI/live networking or physical listening claim. PROXIMITY_VOICE_POLICY_M15.md supersedes older wholly-planned notes only for this native helper, not full proximity voice/M15.

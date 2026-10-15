@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October15 — staged low-cost infrastructure preparation
+
+User reopens infrastructure with a free-or-low-cost budget. Keep existing server-owned .pfs saves as world authority; SQL is optional for initial hosting and future account/metadata services require a separate authenticated backend. Research candidates are Linux x64 VPS, Neon Free PostgreSQL and EOS-managed media; none is provisioned/selected by account agreement. EOS positional/range admission needs proof, not a client-volume-only privacy claim. GitHub source access is verified; disk space blocks the separate source-engine/package gate. No engine association, provider dependency, runtime behavior, credentials or firewall changed. [Current guide](MULTIPLAYER_SETUP_2026_10_15.md) records exact prerequisites,12 setup contract checks and deployment/listening limits.
+
 ## October15 — offline home-world progression and additive layout
 
 Keep trusted server tool family/grade and existing inventory/crafting transactions; append original home-world content through Titanium in a focused catalog module. New minerals share the existing Stone gather-XP window, not an independent reward budget per ore; legacy Copper reward behavior is unchanged. Knowledge costs fit the existing level10/27-point maximum and remain separate from stat points. Physical stations and later powered/dimensional materials stay explicit future scope; present refinements say portable greybox. Existing original sprites serve as tinted category placeholders, with custom catalog art taking precedence.

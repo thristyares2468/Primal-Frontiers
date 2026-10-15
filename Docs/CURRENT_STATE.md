@@ -2,6 +2,8 @@
 
 Updated October 15, 2026. This is the current handoff. The previous chronological journal is preserved byte-for-byte in [History](History/CURRENT_STATE_JOURNAL_2026_10_15.md); its old pending statements are historical, not current instructions. Detailed test history belongs in the evidence documents linked below.
 
+**M15 setup reopened, free or low cost:** [current server/database/voice guide](MULTIPLAYER_SETUP_2026_10_15.md). GitHub API confirms Epic source access and the5.8.3-release tag; no account linking is needed. Only C: detected,48.26GiB free: source-engine/package work needs a separate build location (planning400–500GiB free).12/12 PowerShell setup contracts pass; sanitized readiness and localhost NullRHI launch plan generated under Saved/AutomationReports/M15Infrastructure_20261015. Launcher defaults to plan-only; live launch was not tested. No runtime/assets/settings/private-save change, C++ build, cloud/DB/voice provisioning or new gameplay pass. Next owner action: identify suitable build storage, not rent a server yet.
+
 **Publication restored:** user reports GitHub account LFS budgetUSD10; other product budgets remain0. Ordinary retry pushed M12 Eryndor `a6a8b0d` and blocker receipt `3b04006` to origin/master,11/11LFSobjects56KB uploaded. Local/remote SHA equality and clean tree confirmed. No force push, asset omission, history rewrite or other service enabled. LFS allowance task can close; no other GitHub budget increase is required for this local development/push workflow. This is successful publication, not a final billing-usage statement.
 
 ## Current game
@@ -53,7 +55,7 @@ Earlier completed `PF.CheckSave [slot]` is discoverable, server-only and non-Shi
 | M11 | Named building/menu/crafting/chest/Pause/Settings and UI_HOTBAR accepted. Unreported UI/device/performance observations remain separate. |
 | M12 | Home-world resources/tool ladder through Titanium, six knowledge nodes and earlier combat/stats technically pass. COPPER_LOOP and earned STATS_UPGRADE remain unreported; stations/Deepforge/Riftglass/ancient path incomplete. |
 | M13/M14 | Ecology encounters/dawn/loot, world spacing and WALL_CLIMB accepted. Neutral wall rest/inventory upgrades have technical evidence. Expanded worlds/dimensions remain future. Do not reopen accepted climbing. |
-| M15 | Voice metadata/policy technical checks pass. Audible voice/provider/cloud/database are not implemented; infrastructure/account/source access is explicitly deferred. |
+| M15 | Voice metadata/policy technical checks pass. Free/low-cost setup reopened; source access verified, source packaging blocked by disk space. Audible voice/provider/cloud/database remain unimplemented. |
 | M16/M17 | Wider measured optimization/listening acceptance open. Physical controller/audio untested;1440p traversal explicitly deferred. |
 | M18 | **Doing, incomplete.** Inspection, exact Copper edge, refusal tests and one frozen V1 writer fixture verified. Generic migrations/rollback, wider version/catalog/engine coverage and crash/power-loss durability not certified. |
 | M19–M25 | Future content/alpha/beta/release plans; no release acceptance implied. |
@@ -66,7 +68,7 @@ Trello: bounded [inspection](https://trello.com/c/DcXavHs8), [refusal](https://t
 
 Vein `(0,-850,60)`, sign `(-230,-910,150)`, camp starts `(-250,-1100,100)` / `(250,-1100,100)`. P pauses while reading in solo. Full controls/costs/timings/quantities are on the card. This ordinary-input pacing/usability observation remains unverified; latest user authorization permits independently tested offline implementation while it waits.
 
-Hosting/source access/database/voice can remain deferred. No credentials, account/download/payment setup needed for Copper. Other Personal checks stay separate; already accepted results need no repeat.
+Current infrastructure request is active: source access already works; build storage is the next owner prerequisite for packaging. No credentials or hosting payment needed yet. Copper and other Personal gameplay checks stay separate; already accepted results need no repeat.
 
 ## Environment, warnings and limits
 
@@ -80,4 +82,4 @@ Hosting/source access/database/voice can remain deferred. No credentials, accoun
 
 ## Continue workflow
 
-Read this page, [MILESTONES](MILESTONES.md), relevant evidence and [TRELLO_SYNC](TRELLO_SYNC.md); inspect live Trello before selecting an eligible bounded task. Keep it Doing, verify before completion, update evidence/Done immediately, make scoped commits with Sol coauthor. Preserve unrelated work and unverified Personal observations. Latest user scope authorizes remaining offline features in tested slices; do not provision deferred online infrastructure. Update this page after meaningful changes/results instead of appending another chronological journal.
+Read this page, [MILESTONES](MILESTONES.md), relevant evidence and [TRELLO_SYNC](TRELLO_SYNC.md); inspect live Trello before selecting an eligible bounded task. Keep it Doing, verify before completion, update evidence/Done immediately, make scoped commits with Sol coauthor. Preserve unrelated work and unverified Personal observations. User authorizes offline features and current free/low-cost infrastructure preparation; no paid resource or new service agreement has been accepted. Source fetch/build waits for adequate storage. Update this page after meaningful changes/results instead of appending another chronological journal.

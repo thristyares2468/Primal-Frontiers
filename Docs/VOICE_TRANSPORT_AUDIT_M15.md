@@ -1,5 +1,7 @@
 # M15 voice transport readiness — October15
 
+Current follow-up: [MULTIPLAYER_SETUP_2026_10_15.md](MULTIPLAYER_SETUP_2026_10_15.md) supersedes account-link-first/deferred notes below. GitHub source access is verified, disk blocks source packaging. User permits free or low-cost preparation; no provider product, token service, microphone or audible transport is configured. Installed positional limitation below remains current.
+
 User follow-up: wants server/database setup and voice hosting guidance first, not an immediate transport implementation. SERVER_DATABASE_VOICE_SETUP_M15.md supersedes the handoff below: verify source access for packaged Server first (91ZwTwxp nowPersonal1), retain .pfs, propose privatePostgreSQL/API and EOS-managed media without selecting/provisioning services. Historical audit/results remain valid; no audio integration or newcloud/DBpass.
 
 Audit task https://trello.com/c/i7Lh8WDt ProgrammingDone/complete readback. Next user scope choice https://trello.com/c/91ZwTwxp (Personal 2), MainToDo/incomplete confirmed. Documentation only: no plugin/module/provider/account/netdriver/config/audio capture change or new build. Policy3117b35 and actual authority bridgee65bf35 are pushed; metadata tests are not an audio implementation.
