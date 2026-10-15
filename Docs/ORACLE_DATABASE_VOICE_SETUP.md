@@ -1,5 +1,7 @@
 # Oracle, database and proximity voice: setup checklist
 
+**Superseded:** user reports Oracle signup failed. Follow [PlayFab setup](PLAYFAB_DATABASE_VOICE_SETUP.md); no Oracle VM/signup retry is currently requested. This guide retains previous research/preparation. The SSH key remains private and unused; no Oracle account readiness or ARM deployment is inferred.
+
 October15,2026. Current decision: try Oracle Always Free first; do not purchase an OVH VM. Preparation only: no Oracle account/VM, Neon project, EOS product or credentials have been supplied/created/connected. Owner account steps may be prepared in parallel; a LinuxARM64 Server package must pass before gameplay deployment. This supersedes provider recommendations in MULTIPLAYER_SETUP_2026_10_15.md; its prior evidence remains valid.
 
 ## 1. Oracle account — owner

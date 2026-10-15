@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October15 — M15 PlayFab replacement setup guide
+
+Oracle signup failed per user. [PLAYFAB_DATABASE_VOICE_SETUP.md](PLAYFAB_DATABASE_VOICE_SETUP.md) replaces owner VM instructions with title/account, metered-MPS enablement/quota review, Neon, proposed Workers Free backend and EOS development setup. Correct prior implication: Microsoft requires a payment method for MPS enablement; free evaluation is limited, not no-card/no-risk24/7 hosting. Persistent progress must survive recycled sessions through authenticated durable checkpoints, not container-local Saved alone. No SDK/provider install, account/paid agreement, schema/checkpoint/audio integration, C++/asset/settings/private-save change or new build/playtest. Source packaging/storage still blocked; prior local12/12 prep isn't cloud acceptance. Bounded documentation/link/Trello update only; M15 incomplete.
+
 ## October15 — M15 Oracle-first account/deployment guide
 
 User requests full Oracle/Neon/EOS instructions and feasible preparation. [ORACLE_DATABASE_VOICE_SETUP.md](ORACLE_DATABASE_VOICE_SETUP.md) gives exact owner/account/VM/key/database/product steps and agent integration/acceptance gates. Dedicated ED25519 key created outsideGit, final owner-only ACL/fingerprint verified after native ACL repair. Refreshed source access PASS,12/12 PowerShell contracts PASS, UBT LinuxArm64/aarch64 declarations located; no project-platform success inferred. Source build storage still blocked (onlyC:48.09GiB), LINUX_MULTIARCH_ROOT unset (not exhaustive SDK discovery). No Unreal/C++/assets/settings/private-world change or build/launch/service/SQL/audio/cloud test; M15 incomplete. Generated sanitized evidence Saved/AutomationReports/M15OraclePreparation_20261015.

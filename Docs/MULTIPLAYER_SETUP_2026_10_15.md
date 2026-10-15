@@ -1,5 +1,7 @@
 # Multiplayer setup: server, database and proximity voice
 
+**Latest:** Oracle signup failed; [PlayFab / Neon / backend / EOS guide](PLAYFAB_DATABASE_VOICE_SETUP.md) is current. Payment method required for MPS enablement and recycled-session checkpoint durability are explicit gates. All provider recommendations below are historical alternatives, not current deployment proof.
+
 **Current free-first choice:** follow [Oracle / database / voice checklist](ORACLE_DATABASE_VOICE_SETUP.md). The OVH recommendation below is now a researched paid fallback, not a selected purchase. Dedicated Oracle public key and current owner steps are in the new guide; ARM packaging and account/capacity gates remain unverified.
 
 Current recommendation and audit: October 15, 2026. User now permits free **or very low-cost** services. This replaces the earlier free-only/deferred direction in [the original guide](SERVER_DATABASE_VOICE_SETUP_M15.md). No subscription, account, database or online voice service was created.

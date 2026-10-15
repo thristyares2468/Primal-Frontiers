@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October15 — replace unsuccessful Oracle signup with PlayFab evaluation plan
+
+User requests replacement setup after Oracle signup failure. Plan PlayFab x64 evaluation, retaining Neon and EOS candidate; proposed Cloudflare Workers Free provides a separate authenticated API host rather than assuming a persistent service inside a recycled MPS container. Explain this additional service before any implementation/dependency. Review required MPS payment method/account-specific quota first; no purchase or zero-cost guarantee. Add durable, bounded, versioned checkpoint/reallocation design before cloud use; preserve .pfs envelope/expiry semantics and single-world authority. No schema/storage migration/GSDK/API/provider implementation is made here. [Current guide](PLAYFAB_DATABASE_VOICE_SETUP.md).
+
 ## October15 — try Oracle Always Free before paid hosting
 
 Follow the user's requested free-first direction with Oracle A1 ARM feasibility, Neon Free metadata/account storage and EOS-managed voice candidate. This supersedes the paidLinuxx64 candidate as the first route; no platform compatibility, availability or media admission guarantee is implied. Prepare a dedicated SSH key outsideGit with owner-only private-file access, but perform no cloud operations without an actual configured account/endpoint. Keep .pfs world authority and existing engine/project association; source-build disk/ARM/plugin and real backend/voice gates remain. [Exact checklist](ORACLE_DATABASE_VOICE_SETUP.md).
