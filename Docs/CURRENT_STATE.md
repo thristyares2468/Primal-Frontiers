@@ -2,7 +2,7 @@
 
 Updated October 15, 2026. This is the current handoff. The previous chronological journal is preserved byte-for-byte in [History](History/CURRENT_STATE_JOURNAL_2026_10_15.md); its old pending statements are historical, not current instructions. Detailed test history belongs in the evidence documents linked below.
 
-**Publication blocked:** verified M12 Eryndor changes are committed locally as `a6a8b0d` with Sol coauthor. Normal push failed: GitHub says the repository exceeded its LFS budget;0/11objects uploaded. Remote master remains `9c29ea8`. No force push, asset omission or history rewrite. Owner must review account LFS usage/payment/budget or choose an approved storage alternative before publication; local offline implementation remains possible. Do not claim these assets/code are pushed.
+**Publication restored:** user reports GitHub account LFS budgetUSD10; other product budgets remain0. Ordinary retry pushed M12 Eryndor `a6a8b0d` and blocker receipt `3b04006` to origin/master,11/11LFSobjects56KB uploaded. Local/remote SHA equality and clean tree confirmed. No force push, asset omission, history rewrite or other service enabled. LFS allowance task can close; no other GitHub budget increase is required for this local development/push workflow. This is successful publication, not a final billing-usage statement.
 
 ## Current game
 

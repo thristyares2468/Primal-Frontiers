@@ -2,7 +2,7 @@
 
 October15 offline expansion. Bounded task: https://trello.com/c/zg9mp2Tl. This implements home-world progression through Titanium, not the entire offline roadmap, dimensional travel, powered Tech or a release-ready technology tree.
 
-Publication: local scoped commit `a6a8b0d`,40files, M12 title/Sol coauthor, clean tree after commit. Normal push rejected by GitHub LFS budget;0/11objects uploaded and remote master remains `9c29ea8`. Implementation/Trello technical Done does not mean published. No force push/history rewrite or missing-asset bypass. Owner capacity/budget action required for publishing, not for future local work.
+Publication restored October15: scoped source `a6a8b0d`,40files, M12 title/Sol coauthor, plus initial blocker receipt `3b04006` pushed to origin/master after user set LFS budgetUSD10. Ordinary retry uploaded11/11LFSobjects56KB; local/remote SHA equality and clean tree confirmed. Initial quota rejection remains historical evidence, now resolved. No other GitHub budget change, force push/history rewrite or missing-asset bypass. Broader offline work remains incomplete.
 
 ## Content and controls
 
