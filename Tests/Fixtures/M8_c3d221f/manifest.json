@@ -1,0 +1,37 @@
+{
+  "Fixture": "SyntheticM8WorldV1",
+  "WriterCommit": "c3d221fdd3a68daacb58b72d0e8a021fff19d9c3",
+  "Engine": {
+    "MajorVersion": 5,
+    "MinorVersion": 8,
+    "PatchVersion": 3,
+    "Changelist": 58210709,
+    "CompatibleChangelist": 55116800,
+    "IsLicenseeVersion": 0,
+    "IsPromotedBuild": 1,
+    "BranchName": "++UE5+Release-5.8"
+  },
+  "SourceArchiveSha256": "b47f1686c896946ea78a23e2222e025cd5001b5e4fa794ae474c20d8c867ab73",
+  "ProductionSourcesSha256": {
+    "Source/PrimalFrontier/Persistence/PFWorldSaveFormat.cpp": "790f86e7198adae37dc30828498af25fc1c7b50eff814f59af501ea96caca42d",
+    "Source/PrimalFrontier/Persistence/PFWorldSaveData.h": "b604eab9bb97016d4dcb7003df90fe5c8899da1d8d53592394f9ccca4ffd0ed6",
+    "Source/PrimalFrontier/Persistence/PFPlayerSaveFormat.cpp": "603e3603f2c4578a373015e1658c73c9bb305997fbe23b57dc5f24beac6a319b",
+    "Source/PrimalFrontier/Persistence/PFPlayerSaveFormat.h": "7a0d724e7ca2e6acc531ee3ff50159aa952c34462485d54b8f3d3bcaab3ddcf3",
+    "Source/PrimalFrontier/Persistence/PFSaveFileStore.cpp": "ede2095ae80129e989028ad50e647d4961dec1a1b9c28e382e45ce31c2cca18d",
+    "Source/PrimalFrontier/Inventory/PFItemCatalog.cpp": "b8f95010b8f6fb55dd14260add2065b00fa8bede755e67cfa52ec219dfaf8643",
+    "Source/PrimalFrontier/Building/PFBuildingCatalog.cpp": "e209baeff702119b7687d4c74e7ce86abcc34ec075310afd9d78698c38915775",
+    "Source/PrimalFrontier/Crafting/PFCraftingCatalog.cpp": "04193692681e2c11086db2ec31c29fb8e2450ba87b7ac7ed1524b112a4df2757",
+    "Source/PrimalFrontier/Creatures/PFCreatureCatalog.cpp": "6421191377cfe08442552aa675ca4f9792e0ead839dd4ef89deed7be02fbff67"
+  },
+  "HarnessSha256": "58caeb01b3d1d565ba183d332bf5bb178f7ad38e1d14dee88e127c76c8807820",
+  "PayloadSha256": "2122aaee5ef21be959edd3dd80f2d030b0990d3c19e605ac24428380a7154fd9",
+  "EnvelopeSha256": "47d0a2035da74393511ea2f39463de0a4eea822fc0d822584e3799ab899a17ed",
+  "PayloadMd5": "966e6fb048b10f9ab9ad88ca84f23c56",
+  "EnvelopeMd5": "fbbe20ce3e77ffbe44faa2917d0f1837",
+  "PayloadBytes": 2022,
+  "EnvelopeBytes": 2054,
+  "SavedUtc": 1792032698,
+  "CapturedUtc": 1792032698,
+  "Generation": 1,
+  "Limit": "Historical production source compiled now with installed engine and added synthetic harness, not an archived historical executable or private save. Temporary launch config uses Engine Entry; no historical Content."
+}

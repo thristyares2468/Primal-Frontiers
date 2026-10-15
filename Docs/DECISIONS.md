@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October15 — preserve immutable historical-writer fixture bytes
+
+Build production persistence sources from known historical commit c3d221f in an isolated source-only project with a new synthetic harness. Freeze the emitted world/file bytes and source/SHA256/engine provenance once; current tests read them directly rather than recreating old records with today's encoder. Regeneration writes a separate candidate, never replaces the reviewed baseline. All identities are fake; generated binaries/archive/logs remain untracked. This proves old-source reader compatibility on installed5.8.3, not an archived historical executable or production/private-world acceptance. [FROZEN_WRITER_M18.md](FROZEN_WRITER_M18.md).
+
 ## October15 — inspect compatibility without restoring a save
 
 Keep `UPFWorldPersistence::InspectSave` separate from destructive restoration. Reuse the actual layout predicate and validated codecs, prepare only a local copy of the reviewed Copper addition, and return sanitized schema/generation/UTC/counts/recovery/migration metadata atomically. Do not invoke Apply, Save or original-backup publication; a successful inspection cannot guarantee actor allocation or placement. `PF.CheckSave` uses the existing non-Shipping server-only command registry/history, with no client RPC or new dependency. [SAVE_INSPECTION_M18.md](SAVE_INSPECTION_M18.md) records bounded verification. Hosting/accounts/database/voice provisioning is deferred by the user; no provider or production authentication change is made.

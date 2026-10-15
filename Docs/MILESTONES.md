@@ -1,5 +1,7 @@
 # Primal Frontier milestone evidence
 
+October15 M18 historical-writer fixture: actual c3d221f source rebuilt in isolated source-only temporary project and clean LegacyWriterExport1/1; exact frozenV1 payload/envelope+SHA256 manifest. Current Editor23.70s/Game29.09s, four native selectors and expired-food restore replay1/1 PASS/clean logs. Actual startup/login/repeatedLoad/currentV2save preserves identities/quantities/neutral defaults/sourceUTC and refuses future/truncation; no free progression or renewed food. [FROZEN_WRITER_M18.md](FROZEN_WRITER_M18.md). Initial generator directory warning repaired without altering historical production source. Source rebuilt on current5.8.3, not original historical executable/5.8.2/network/private-world/fullM18 acceptance.
+
 October15 M18 migration-backup refusal: test-only CopperBackupFailure exercises manual/startup × corrupt original/occupied original directory/corrupt sibling, exact runtime/source/active-craft preservation and failed-startup login/capture/save block. Editor6.21s/Game14.00s and native4/4 PASS17.57s, no compiler/raw/test severity/ensure/fatal. No production fix needed. [MIGRATION_REFUSAL_M18.md](MIGRATION_REFUSAL_M18.md); no real disk fault/crash/archived-writer/private-world/full-M18 pass.
 
 ## October15 — M18 read-only save inspection (bounded)

@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October15 frozen historical-writer M7OVzrdS updated with source-only provenance, exact generation/current/expiry reports and no-level reproduction; Done/complete read back. ParentM18 JnS1fkkf corrected to Doing/incomplete because bounded backend implementation is active, retaining original future guide and unimplemented matrix/migration limits. No Personal pass or member/deadline change. Prior backup-refusal4be10db published/remote equal; scoped Sol frozen-fixture publication follows.
+
 October15 M18 cMbhLES7 backup-refusal task updated with six-scenario contract/exact no-level native guide and4/4 evidence, moved ProgrammingDone/complete and read back. No runtime fix needed; Editor/Game clean, exact source/live/active-craft preservation. FullM18 and Personal gates unchanged; parent retains broader scope. Scoped Sol source-test/docs publication follows before next bounded older-writer task.
 
 M18 bounded inspection DcXavHs8 updated with complete reproduction/evidence/limits, moved ProgrammingDone, marked complete and read back Done/true. ParentM18 JnS1fkkf retains broader ToDo/incomplete scope with technical evidence comment. FinalEditor/Game/native7distinct/nineexecutions/live10roles all pass; no raw severity additions/private settings changes. Source-access remains deferred; no unrelated Personal acceptance/member/deadline edits. Source/test/docs b81edda pushed with Sol coauthor, remote equality/clean confirmed; publication comment recorded on the completed card. This receipt changes no compiled source or test result.
