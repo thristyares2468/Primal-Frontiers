@@ -1,12 +1,12 @@
-# Offline implementation scope — October15
+# Offline implementation scope — October16
 
 Latest user direction authorizes planned resources, the technology tree and remaining offline features. It supersedes the former wait-for-COPPER_LOOP implementation stop, without asserting a human PASS. Existing server authority remains mandatory; no hosting, account/backend/database, voice transport, matchmaking or new online services are being implemented.
 
-Work stays incremental and verified. First active task is [Eryndor minerals](https://trello.com/c/zg9mp2Tl): coal, flint, iron, diamond, gold, silver, quartz, obsidian and titanium; real refinement/upgrades, four additional knowledge branches, additive saved catalogs, reachable marked fixture and explicit old-layout compatibility. Native/generated fixtures and rendered assisted interaction are distinct from human pacing acceptance.
+Work stays incremental and verified. [Eryndor minerals](https://trello.com/c/zg9mp2Tl) is published: coal, flint, iron, diamond, gold, silver, quartz, obsidian and titanium; real refinement/upgrades, six total knowledge branches, additive catalogs and reviewed old-layout compatibility. [Public camp stations](https://trello.com/c/FdCrP124) now passes its bounded Editor/Game/native/rendered/network gates; exact controls/evidence in CAMP_CRAFTING_STATIONS_M12.md. These stateless public bonuses do not complete player-built/fueled processing. Native/generated fixtures and rendered assisted interaction are distinct from human pacing acceptance. Hosting/database/voice remain deferred; no signup prompt is required for the next offline slice.
 
 Subsequent offline objectives, each requiring implementation and its own tests:
 
-1. Physical crafting stations, useful conductive/optical intermediates and a complete navigable technology view; keep ordinary survival accessible.
+1. Useful conductive/optical intermediate consumers, player-built/fueled station progression and further technology navigation; public camp workbench/refinery and the six-node tree are implemented. Keep ordinary survival accessible.
 2. Low-memory Frontier access/region identities, original volcanic/crystalline resources and Deepforge/Riftglass manufacture. No advanced material on a starter island that contradicts its dimensional origin; first crossing uses home-world materials only.
 3. Real powered-tool charge, refuelling and persisted energy before Tech harvesting is valid. Ancient/challenge points need independent authority, reward rules and versioned records before appearing as spendable currency.
 4. Remaining offline combat, ecology, exploration, adaptation/modifier research and save compatibility from the existing roadmap. Adaptations require refreshed primary-source research and original names/mechanics, not copied content.

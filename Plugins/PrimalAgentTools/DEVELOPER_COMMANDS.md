@@ -1,5 +1,7 @@
 # Development command interface
 
+M12 camp stations: existing authoritative `PF.Craft <recipe>` and ordinary C/Enter crafting automatically use the nearest eligible public bonus; no new grant/target/multiplier command or client authority is exposed. Native selectors `PF.Crafting.Stations` / `PF.Crafting.Transactions`; actual opt-in station network runner `Scripts/RunPersistenceAutomation.ps1 -Players 1 -Stations` (then2 with SimulateLagLoss). This branch is Create-only/no save slot, not a persistence/restart certificate. Rendered saved-fixture runner `Scripts/RunControlsAutomation.ps1 -TestCase Stations -Resolution 720 -HUDScale 1.5`. Exact level, controls, safety prerequisites, reports/failures and authority limits: Docs/CAMP_CRAFTING_STATIONS_M12.md.
+
 ## Integration and availability
 
 `PrimalAgentToolsRuntime` uses `APlayerController`, `APlayerState::GetPlayerId`, `ACharacter`, its capsule and CharacterMovement, `UWorld` collision queries, `TeleportTo`, and `ForceNetUpdate`. The project's `APrimalFrontierCharacter` and `APrimalFrontierPlayerController` inherit these APIs, so the first-person camera/input setup is preserved. The existing Blueprint game mode selects the project pawn. No character, controller, game mode or binary asset was changed.

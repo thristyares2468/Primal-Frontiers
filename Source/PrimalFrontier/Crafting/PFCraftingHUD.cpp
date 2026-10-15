@@ -1,5 +1,6 @@
 #include "Crafting/PFCraftingHUD.h"
 #include "Crafting/PFCraftingComponent.h"
+#include "Crafting/PFCraftingStation.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Blueprint/WidgetTree.h"
@@ -208,6 +209,14 @@ void UPFCraftingHUD::RefreshMenu()
     DetailTitle->SetText(View.Title);DetailBody->SetText(View.Body);
     if(D && Progression)
     {DetailTitle->SetText(FText::FromString(FString::Printf(TEXT("%s | %.1fs at %.0f%% crafting speed"),*D->DisplayName.ToString(),D->Duration/FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()),100*FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()))));}
+    if(D && !Technology)
+    {
+        auto* Station=APFCraftingStation::FindBest(*D,PC?PC->GetPawn():nullptr,false);
+        const float Bonus=Station?Station->SpeedMultiplier:1;
+        const float StatsSpeed=Progression?FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()):1;
+        DetailTitle->SetText(FText::FromString(FString::Printf(TEXT("%s | %.1fs"),*D->DisplayName.ToString(),D->Duration/(StatsSpeed*Bonus))));
+        DetailBody->SetText(FText::FromString(DetailBody->GetText().ToString()+TEXT("\n\n")+(Station?FString::Printf(TEXT("%s: %.0f%% station speed. Stay within reach until complete."),*Station->DisplayName(),Bonus*100):TEXT("Portable crafting: no station bonus."))));
+    }
     if(D && !bAccess){DetailBody->SetText(FText::FromString(AccessError+TEXT("\n")+View.Body.ToString()));}
     if(Technology && Knowledge)
     {
@@ -242,6 +251,7 @@ void UPFCraftingHUD::RefreshMenu()
     ItemStats->SetText(FText::FromString(Stats));
     FString Status=C?(C->ActiveRecipe.IsNone()?TEXT("Job: idle"):FString::Printf(TEXT("Job: %.1fs remaining"),FMath::Max(0.0,C->FinishAt-UPFInventoryComponent::ServerTime(GetWorld())))):TEXT("Waiting for server crafting state");
     if(C){Status+=TEXT(" | ")+(C->Feedback.IsEmpty()?FString(TEXT("No server result yet")):C->Feedback);}
+    if(C && !C->ActiveStation.IsEmpty()){Status+=TEXT("\nStation: ")+C->ActiveStation+FString::Printf(TEXT(" | %.0f%% station speed"),100*C->ActiveStationMultiplier);}
     if(Progression && !Progression->GetKnowledgeFeedback().IsEmpty()){Status+=TEXT("\nKnowledge: ")+Progression->GetKnowledgeFeedback();}
     if(PC && PC->GetInventoryMessage().StartsWith(TEXT("Craft "))){Status+=TEXT("\nLast request: ")+PC->GetInventoryMessage();}
     Result->SetText(FText::FromString(Status));CraftButton->SetIsEnabled(!Technology && bAccess && bAlive);CancelButton->SetIsEnabled(C && !C->ActiveRecipe.IsNone());

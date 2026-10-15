@@ -20,6 +20,7 @@
 #include "Inventory/PFInventoryComponent.h"
 #include "PFCraftingComponent.generated.h"
 class APawn;
+class APFCraftingStation;
 UCLASS(ClassGroup=(PrimalFrontier),meta=(BlueprintSpawnableComponent))
 class PRIMALFRONTIER_API UPFCraftingComponent : public UActorComponent
 {
@@ -38,6 +39,9 @@ public:
     UPROPERTY(Replicated,BlueprintReadOnly) double FinishAt=0;
     /** Last status message ("Completed", "Cancelled ...", "Failed ..."). */
     UPROPERTY(Replicated,BlueprintReadOnly) FString Feedback;
+    /** Owner-only server snapshot. Station bonuses never multiply each other. */
+    UPROPERTY(Replicated,BlueprintReadOnly) FString ActiveStation;
+    UPROPERTY(Replicated,BlueprintReadOnly) float ActiveStationMultiplier=1;
 
     /** Server: begin RecipeId for Pawn (must be this player's living survivor). False if busy or unaffordable. */
     bool Start(FName RecipeId,APawn* Pawn);
@@ -60,6 +64,7 @@ private:
     TArray<FPFItemStack> Inputs;
     /** The pawn that started the job; if it dies or is replaced the job cancels. */
     TWeakObjectPtr<APawn> CraftPawn;
+    TWeakObjectPtr<APFCraftingStation> CraftStation;
     bool ValidPawn(APawn* Pawn) const;
     /** Clear the job and publish Message. */
     void Finish(const FString& Message);

@@ -1,5 +1,7 @@
 # Technical Architecture
 
+October16 M12: replicated APFCraftingStation offers public, stateless camp speed bonuses with native GameplayTag type and actual authority/range/sight checks. Crafting retains server-owned exact-batch conversion, snapshots the best nonstacking station and earned speed, revalidates the same actor until completion and cancels safely on loss. Owner-only job context drives feedback; client proximity preview never grants authority. Static authored station identities are not new persistent player structures; no save schema or resource-layout change. Dedicated servers skip stripped TextRender presentation. CAMP_CRAFTING_STATIONS_M12.md records actual tests and limits.
+
 October15 M15 follow-up: UPFVoiceAuthority derives actual server-world public ID/connection/pawn position/life and ephemeralspace; no client supplied route inputs. Weak controller consent/preferences reset on reconnect, no tick/capture/provider/RPC/save fields. Native3/3 and actual one2/2/impairedtwo3/3 headless gates passed; PROXIMITY_VOICE_AUTHORITY_M15.md holds failure repairs and limits. This is metadata bridge, not playable voice.
 
 October15 M15: Voice/PFProximityVoicePolicy is a pure metadata helper with bounded public participant/space snapshots and default-off consent/PTT/range/mute/block routing. No audio/provider/plugin/RPC added. Caller authority is an explicit upcoming adapter gate; see PROXIMITY_VOICE_POLICY_M15.md for contract, native proof and limits.

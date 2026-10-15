@@ -23,6 +23,7 @@
 #include "PFCommands.h"
 #if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
 #include "Crafting/PFCraftingComponent.h"
+#include "Crafting/PFCraftingStation.h"
 #include "Crafting/PFResourceNode.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -39,6 +40,7 @@ public:
     explicit FPFCraftingLiveExercise(FAutomationTestBase* In):Test(In),Started(FPlatformTime::Seconds())
     {
         FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);
+        bStations=FParse::Param(FCommandLine::Get(),TEXT("PFRunStationNetworkTests"));
     }
 
     /** Called every frame by the automation framework; returning true ends the test. */
@@ -64,10 +66,19 @@ public:
         auto* PC=Players[0];
         auto* I=PC->GetInventory();
         auto* C=PC->GetCrafting();
+        if(bStations && !Client)
+        {
+            for(auto* P:Players){if(P->GetCrafting()->ActiveRecipe==TEXT("Recipe_Tool") && P->GetCrafting()->ActiveStationMultiplier==1.25f && P->GetCrafting()->ActiveStation==TEXT("Camp workbench")){StationServerSeen.Add(P);}}
+        }
 
         // This player's fixture node (spawned by the server with the pawn as owner).
         APFResourceNode* Node=nullptr;
         for(TActorIterator<APFResourceNode> It(W);It;++It){if(It->GetOwner()==PC->GetPawn()){Node=*It;break;}}
+        // The original M4 fixture assumed a horizontal camera. Authored open-world
+        // spawn rotation and floor settling differ: aim locally at the real node.
+        if(bStations && Client && Node)
+        {FVector Eye;FRotator Look;PC->GetPawn()->GetActorEyesViewPoint(Eye,Look);PC->SetControlRotation((Node->GetActorLocation()-Eye).Rotation());}
+        if(bStations && Client && Stage==2 && I->Count(TEXT("Item_Wood"))==2 && GatherConfirmedAt==0){GatherConfirmedAt=Now;}
         auto Advance=[&](int32 Next)
         {
             Stage=Next;
@@ -90,6 +101,11 @@ public:
                     const float Y=600.f+400.f*Index++;
                     P->GetPawn()->SetActorLocation(FVector(-400,Y,100));
                     P->SetControlRotation(FRotator::ZeroRotator);
+                    if(bStations)
+                    {
+                        FActorSpawnParameters StationParams;StationParams.Owner=P->GetPawn();
+                        W->SpawnActor<APFCraftingStation>(FVector(-400,Y+140,0),FRotator::ZeroRotator,StationParams);
+                    }
                     FActorSpawnParameters Params;
                     Params.Owner=P->GetPawn();
                     W->SpawnActor<APFResourceNode>(FVector(-220,Y,130),FRotator::ZeroRotator,Params);
@@ -120,6 +136,7 @@ public:
                 // Wait for every fixture node to respawn (full hits, no deadline).
                 for(TActorIterator<APFResourceNode> It(W);It;++It){if(It->GetOwner() && (It->HitsRemaining!=3 || It->RespawnAt!=0)){return false;}}
                 Test->TestFalse(TEXT("Server export"),PF::AgentTools::ExecuteCommand(TEXT("PF.ExportTestReport"),{TEXT("M4LiveServer")},W).HasErrors());
+                if(bStations){Test->TestEqual(TEXT("Every actual server-owned craft used station"),StationServerSeen.Num(),Expected);Test->AddInfo(TEXT("Station network server bonus, owned RPC conservation and portable cooking verified"));}
                 Advance(99);
             }
         }
@@ -145,7 +162,7 @@ public:
                 PC->Interact();
                 Advance(2);
             }
-            else if(Stage==2 && I->Count(TEXT("Item_Wood"))==2 && Now-Changed>0.6)
+            else if(Stage==2 && I->Count(TEXT("Item_Wood"))==2 && Now-Changed>0.6 && (!bStations || Now-GatherConfirmedAt>1.0))
             {
                 // Second bare-hand gather: 4 wood.
                 PC->Interact();
@@ -158,6 +175,14 @@ public:
             }
             else if(Stage==4 && C->ActiveRecipe==TEXT("Recipe_Tool") && Now-Changed>0.6)
             {
+                if(bStations)
+                {
+                    Test->TestEqual(TEXT("Owner received server station name"),C->ActiveStation,FString(TEXT("Camp workbench")));
+                    Test->TestEqual(TEXT("Owner received server-only bonus"),C->ActiveStationMultiplier,1.25f);
+                    auto* Station=APFCraftingStation::FindBest(*C->Catalog->Recipe(TEXT("Recipe_Tool"),I->Catalog),PC->GetPawn(),false);
+                    Test->TestTrue(TEXT("Actual replicated station discovered"),Station && Station->GetOwner()==PC->GetPawn());
+                    Test->TestTrue(TEXT("Client cannot authorize station use"),!Station || !Station->CanUse(*C->Catalog->Recipe(TEXT("Recipe_Tool"),I->Catalog),PC->GetPawn(),true));
+                }
                 // Duplicate start while already crafting: must not charge twice.
                 PC->ServerCraftAction(TEXT("Recipe_Tool"),false);
                 Advance(5);
@@ -203,6 +228,7 @@ public:
                 for(TActorIterator<APFResourceNode> It(W);It;++It){if(It->GetOwner() && It->GetOwner()!=PC->GetPawn()){++OtherNodes;}}
                 Test->TestEqual(TEXT("Other player's resource actor replicated"),OtherNodes,Expected-1);
                 Test->TestFalse(TEXT("Client export"),PF::AgentTools::ExecuteCommand(TEXT("PF.ExportTestReport"),{TEXT("M4LiveClient")},W).HasErrors());
+                if(bStations){Test->AddInfo(TEXT("Station network client replicated bonus, owned RPC conservation and refusal verified"));}
                 Advance(99);
             }
         }
@@ -211,9 +237,11 @@ public:
 
 private:
     FAutomationTestBase* Test;
-    double Started,Changed=0;
+    double Started,Changed=0,GatherConfirmedAt=0;
     int32 Stage=0,Expected=1;
     bool bClientSession=false;
+    bool bStations=false;
+    TSet<APFSurvivalPlayerController*> StationServerSeen;
 };
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFCraftingLiveTest,"PF.Crafting.Live",EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::EngineFilter)
@@ -223,5 +251,11 @@ bool FPFCraftingLiveTest::RunTest(const FString&)
     if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunCraftingLiveTests"))){AddError(TEXT("Requires isolated M4 session -PFRunCraftingLiveTests -PFExpectedPlayers=1|2"));return false;}
     ADD_LATENT_AUTOMATION_COMMAND(FPFCraftingLiveExercise(this));
     return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFStationNetworkTest,"PF.Crafting.StationsNetwork",EAutomationTestFlags::ClientContext|EAutomationTestFlags::ServerContext|EAutomationTestFlags::EngineFilter)
+bool FPFStationNetworkTest::RunTest(const FString&)
+{
+    if(!FParse::Param(FCommandLine::Get(),TEXT("PFRunCraftingLiveTests")) || !FParse::Param(FCommandLine::Get(),TEXT("PFRunStationNetworkTests"))){AddError(TEXT("Requires isolated station network runner"));return false;}
+    ADD_LATENT_AUTOMATION_COMMAND(FPFCraftingLiveExercise(this));return true;
 }
 #endif

@@ -11,6 +11,7 @@
 #include "Building/PFBuildPiece.h"
 #include "Crafting/PFCraftingCatalog.h"
 #include "Crafting/PFResourceNode.h"
+#include "Crafting/PFCraftingStation.h"
 #include "Creatures/PFCreatureCatalog.h"
 #include "Creatures/PFCreature.h"
 #include "Creatures/PFCreatureSpawner.h"
@@ -140,6 +141,7 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
     Floor->SetActorLocation(FVector(0, 0, -25));
     W->SpawnActor<APlayerStart>(FVector(-500, 0, 120), FRotator::ZeroRotator);
     auto* Clock = W->SpawnActor<APFWorldClock>();
+    auto* CampStation = W->SpawnActor<APFCraftingStation>(FVector(1800,-600,0),FRotator::ZeroRotator);
     auto* Node = W->SpawnActor<APFResourceNode>(FVector(0, 1000, 0), FRotator::ZeroRotator);
     auto* SpawnPoint = W->SpawnActorDeferred<APFCreatureSpawner>(APFCreatureSpawner::StaticClass(), FTransform(FVector(1200, 0, 50)));
     SpawnPoint->bAutoSpawn = false; SpawnPoint->FinishSpawning(FTransform(FVector(1200, 0, 50)));
@@ -229,6 +231,9 @@ bool FPFWorldRestoreTest::RunTest(const FString&)
         }
         TestEqual(TEXT("No duplicate structures including windows/stairs"), PieceCount, 4); TestEqual(TEXT("No duplicate pickups"), PickupCount, 1);
         TestEqual(TEXT("No duplicate creatures"), CreatureCount, 1);
+        int32 StationCount=0;for(TActorIterator<APFCraftingStation> It(W);It;++It){++StationCount;TestTrue(TEXT("Load retains same authored public station"),*It==CampStation);}
+        TestEqual(TEXT("Stateless camp station not duplicated by world restore"),StationCount,1);
+        TestTrue(TEXT("Public station configuration retained"),IsValid(CampStation) && CampStation->StationType==APFCraftingStation::WorkbenchType() && CampStation->SpeedMultiplier==1.25f && CampStation->GetActorLocation().Equals(FVector(1800,-600,0)));
         TestTrue(TEXT("Spawner rebound to restored resident"), IsValid(SpawnPoint->Resident) && SpawnPoint->Resident->PersistentId == CreatureId);
     }
     TestFalse(TEXT("Unknown credential refused"), Persistence->CheckLogin(TEXT("?PFReconnect=") + FGuid::NewGuid().ToString(EGuidFormats::Digits), Error));

@@ -1,6 +1,7 @@
 // PFCraftingComponent.cpp — see PFCraftingComponent.h for the craft lifecycle.
 
 #include "Crafting/PFCraftingComponent.h"
+#include "Crafting/PFCraftingStation.h"
 #include "PFAssetPaths.h"
 #include "Progression/PFProgressionComponent.h"
 #include "Progression/PFProgressionCatalog.h"
@@ -30,6 +31,8 @@ void UPFCraftingComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
     DOREPLIFETIME_CONDITION(UPFCraftingComponent,ActiveRecipe,COND_OwnerOnly);
     DOREPLIFETIME_CONDITION(UPFCraftingComponent,FinishAt,COND_OwnerOnly);
     DOREPLIFETIME_CONDITION(UPFCraftingComponent,Feedback,COND_OwnerOnly);
+    DOREPLIFETIME_CONDITION(UPFCraftingComponent,ActiveStation,COND_OwnerOnly);
+    DOREPLIFETIME_CONDITION(UPFCraftingComponent,ActiveStationMultiplier,COND_OwnerOnly);
 }
 
 UPFInventoryComponent* UPFCraftingComponent::Inventory() const {return GetOwner()->FindComponentByClass<UPFInventoryComponent>();}
@@ -75,9 +78,12 @@ bool UPFCraftingComponent::Start(FName Id,APawn* Pawn)
     PendingRecipe=*Recipe;
     Inputs=MoveTemp(Selected);
     CraftPawn=Pawn;
+    CraftStation=APFCraftingStation::FindBest(*Recipe,Pawn,true);
+    ActiveStation=CraftStation.IsValid()?CraftStation->DisplayName():FString();
+    ActiveStationMultiplier=CraftStation.IsValid()?CraftStation->SpeedMultiplier:1.f;
     ActiveRecipe=Id;
     // Snapshot at job start. Later allocations cannot shorten an already running job.
-    FinishAt=UPFInventoryComponent::ServerTime(GetWorld())+Recipe->Duration/(Progression?FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()):1.f);
+    FinishAt=UPFInventoryComponent::ServerTime(GetWorld())+Recipe->Duration/((Progression?FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()):1.f)*ActiveStationMultiplier);
     Feedback=TEXT("Crafting: keep ingredients in your bag until complete");
     GetOwner()->ForceNetUpdate();
     UE_LOG(LogPFSurvival,Display,TEXT("[PrimalCrafting] Started %s owner=%s finish=%.2f"),*Id.ToString(),*GetOwner()->GetName(),FinishAt);
@@ -98,6 +104,7 @@ void UPFCraftingComponent::Finish(const FString& Message)
     FinishAt=0;
     Inputs.Reset();
     CraftPawn.Reset();
+    CraftStation.Reset();ActiveStation.Empty();ActiveStationMultiplier=1;
     Feedback=Message;
     GetOwner()->ForceNetUpdate();
 }
@@ -108,6 +115,8 @@ void UPFCraftingComponent::TickComponent(float Delta,ELevelTick Type,FActorCompo
     if(!GetOwner()->HasAuthority() || ActiveRecipe.IsNone()){return;}
     // Death or respawn (new pawn) cancels the job.
     if(!ValidPawn(CraftPawn.Get())){Finish(TEXT("Cancelled: survivor died or changed"));return;}
+    if(!ActiveStation.IsEmpty() && (!CraftStation.IsValid() || !CraftStation->CanUse(PendingRecipe,CraftPawn.Get(),true) || CraftStation->SpeedMultiplier!=ActiveStationMultiplier || CraftStation->DisplayName()!=ActiveStation))
+    {Finish(TEXT("Cancelled: station unavailable or out of reach; ingredients kept"));return;}
     if(UPFInventoryComponent::ServerTime(GetWorld())<FinishAt){return;}
     // Atomic conversion of the exact reserved batches; fails cleanly if anything changed.
     auto* I=Inventory();
