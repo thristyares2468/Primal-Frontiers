@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October15 — M15 Oracle-first account/deployment guide
+
+User requests full Oracle/Neon/EOS instructions and feasible preparation. [ORACLE_DATABASE_VOICE_SETUP.md](ORACLE_DATABASE_VOICE_SETUP.md) gives exact owner/account/VM/key/database/product steps and agent integration/acceptance gates. Dedicated ED25519 key created outsideGit, final owner-only ACL/fingerprint verified after native ACL repair. Refreshed source access PASS,12/12 PowerShell contracts PASS, UBT LinuxArm64/aarch64 declarations located; no project-platform success inferred. Source build storage still blocked (onlyC:48.09GiB), LINUX_MULTIARCH_ROOT unset (not exhaustive SDK discovery). No Unreal/C++/assets/settings/private-world change or build/launch/service/SQL/audio/cloud test; M15 incomplete. Generated sanitized evidence Saved/AutomationReports/M15OraclePreparation_20261015.
+
 ## October15 — M15 low-cost infrastructure readiness
 
 User reopens server/database/proximity voice preparation with free-or-low-cost scope. [Current guide](MULTIPLAYER_SETUP_2026_10_15.md) records live official offers, actual source access PASS, reviewed5.8.3 tag, onlyC:48.26GiB free and source-build storage blocker. Three local PowerShell helpers: sanitized inventory, explicit New/Load localhost NullRHI plan/opt-in launch, disposable contract suite. Final12/12 contract checks pass; actual launch plan remains PLAN_ONLY, no Unreal launch/build needed for scripts/docs-only changes. Initial argument-array/harness-shadow failures fixed and replayed. No hosted game, SQL, audible voice, C++/assets/settings/private-save mutation or gameplay acceptance. Source-access91ZwTwxp is independently verified/Done; owner storage [svt4pL1Y](https://trello.com/c/svt4pL1Y) is the next prerequisite. ParentM15 remains incomplete. Reports Saved/AutomationReports/M15Infrastructure_20261015.
