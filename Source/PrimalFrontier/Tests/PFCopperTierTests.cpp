@@ -24,6 +24,9 @@
 #include "Components/BoxComponent.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Misc/CommandLine.h"
 #include "HAL/FileManager.h"
 #include "Tests/AutomationCommon.h"
 
@@ -138,5 +141,82 @@ bool FPFCopperMigrationTest::RunTest(const FString&)
     TestTrue(TEXT("Refused edge preserves runtime and creates no invented original"),F.Copper->HitsRemaining==2 && F.P->Survival->GetVitals().Health==HealthBefore && IFileManager::Get().FileSize(*FPFSaveFileStore::OriginalPath(RefusedSlot,TEXT("M12CopperLayout1")))<0);
     TestTrue(TEXT("Refused source payload remains unchanged"),FPFSaveFileStore::Read(RefusedSlot,Source,Error) && Source.Payload==InvalidLayout);
     F.Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] CopperLayout: actual server15->16 Load, whole owner/vitals/stats/food/storage/filter/support/depletion/clock conservation, verified original and unchanged source UTC, normal save/reload/no duplicates. Synthetic old-layout source, not archived writer/private save."));return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFCopperBackupFailureTest,"PF.Persistence.CopperBackupFailure",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FPFCopperBackupFailureTest::RunTest(const FString&)
+{
+    AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"),EAutomationExpectedMessageFlags::Contains,0);
+    AddExpectedError(TEXT("Startup Copper layout refused:"),EAutomationExpectedErrorFlags::Contains,3);
+    for(bool Startup:{false,true})
+    {
+        for(int32 Fault=0;Fault<3;++Fault)
+        {
+            FCopperWorld F;if(!TestTrue(TEXT("Actual Copper world for refusal"),F.Start())){return false;}
+            FString Error;const FString Slot=TEXT("AutomationCopperFail")+FGuid::NewGuid().ToString(EGuidFormats::Digits),LiveSlot=Slot+TEXT("Live");
+            const FString Original=FPFSaveFileStore::OriginalPath(Slot,TEXT("M12CopperLayout1"));
+            ON_SCOPE_EXIT
+            {
+                F.Save->ActiveSlot.Reset();
+                for(const auto& OwnedSlot:{Slot,LiveSlot}){for(bool Second:{false,true}){IFileManager::Get().Delete(*FPFSaveFileStore::Path(OwnedSlot,Second));}}
+                if(IFileManager::Get().DirectoryExists(*Original)){IFileManager::Get().DeleteDirectory(*Original,false,false);}
+                else{IFileManager::Get().Delete(*Original);}
+                IFileManager::Get().DeleteDirectory(*FPaths::GetPath(Original),false,false);
+            };
+            TestTrue(TEXT("Seed actual bag"),F.I->Grant(TEXT("Item_Wood"),4) && F.I->Grant(TEXT("Item_Fibre"),6));
+            F.P->Survival->SetHealth(33);F.Clock->SetHour(21);
+            if(!TestTrue(TEXT("Save current live slot"),F.Save->Save(LiveSlot,Error))){AddError(Error);return false;}
+            FPFWorldSaveData Old;TArray<uint8> Payload;
+            if(!TestTrue(TEXT("Capture real prior-layout candidate"),F.Save->Capture(Old,Error))){return false;}
+            Old.Resources.RemoveAll([](const auto& R){return R.Definition==TEXT("Node_Copper");});
+            if(!TestTrue(TEXT("Install valid unique old-layout file"),F.Save->Encode(Old,Payload,Error) && FPFSaveFileStore::Write(Slot,Payload,Error))){AddError(Error);return false;}
+            const TArray<uint8> Corrupt={1,2,3};
+            if(Fault==0)
+            {
+                TestTrue(TEXT("Create test original folder"),IFileManager::Get().MakeDirectory(*FPaths::GetPath(Original),true));
+                TestTrue(TEXT("Install corrupt original evidence"),FFileHelper::SaveArrayToFile(Corrupt,*Original));
+            }
+            else if(Fault==1){TestTrue(TEXT("Original destination occupied by directory"),IFileManager::Get().MakeDirectory(*Original,true));}
+            else{TestTrue(TEXT("Install corrupt sibling evidence"),FFileHelper::SaveArrayToFile(Corrupt,*FPFSaveFileStore::Path(Slot,true)));}
+            TArray<uint8> SourceBefore,LiveBefore;
+            TestTrue(TEXT("Snapshot source envelope"),FFileHelper::LoadFileToArray(SourceBefore,*FPFSaveFileStore::Path(Slot,false)));
+            TestTrue(TEXT("Snapshot current live save envelope"),FFileHelper::LoadFileToArray(LiveBefore,*FPFSaveFileStore::Path(LiveSlot,false)));
+            TestTrue(TEXT("Unsaved inventory change"),F.I->Grant(TEXT("Item_Stone"),1));F.P->Survival->SetHealth(99);F.Clock->SetHour(9);F.Copper->HitsRemaining=1;
+            if(!TestTrue(TEXT("Actual active job before failure"),F.C->Start(TEXT("Recipe_Cord"),F.P))){return false;}
+            const FName Recipe=F.C->ActiveRecipe;const auto Finish=F.C->FinishAt;
+            TSet<AActor*> Actors;for(TActorIterator<AActor> It(F.W);It;++It){Actors.Add(*It);}
+            const auto Preserved=[&]()
+            {
+                TestTrue(TEXT("Failure preserves unsaved vitals time resource and items"),F.P->Survival->GetVitals().Health==99 && F.Clock->Hour==9 && F.Copper->HitsRemaining==1 && F.I->Count(TEXT("Item_Stone"))==1 && F.I->Count(TEXT("Item_Wood"))==4 && F.I->Count(TEXT("Item_Fibre"))==6);
+                TestTrue(TEXT("Failure does not cancel or restart active craft"),F.C->ActiveRecipe==Recipe && F.C->FinishAt==Finish);
+                TSet<AActor*> After;for(TActorIterator<AActor> It(F.W);It;++It){After.Add(*It);}TestEqual(TEXT("No actor count change on failure"),After.Num(),Actors.Num());for(auto* Actor:Actors){TestTrue(TEXT("Same actual actors after failure"),After.Contains(Actor));}
+                TArray<uint8> Bytes;TestTrue(TEXT("Source envelope remains byte exact"),FFileHelper::LoadFileToArray(Bytes,*FPFSaveFileStore::Path(Slot,false)) && Bytes==SourceBefore);
+                TestTrue(TEXT("Other live save envelope remains byte exact"),FFileHelper::LoadFileToArray(Bytes,*FPFSaveFileStore::Path(LiveSlot,false)) && Bytes==LiveBefore);
+                if(Fault==0){TestTrue(TEXT("Corrupt original not deleted or repaired"),FFileHelper::LoadFileToArray(Bytes,*Original) && Bytes==Corrupt);}
+                else if(Fault==1){TestTrue(TEXT("Occupied original directory retained"),IFileManager::Get().DirectoryExists(*Original));}
+                else{TestTrue(TEXT("Corrupt sibling not deleted or repaired"),FFileHelper::LoadFileToArray(Bytes,*FPFSaveFileStore::Path(Slot,true)) && Bytes==Corrupt);TestFalse(TEXT("Refused source creates no original"),IFileManager::Get().FileExists(*Original));}
+            };
+            FPFSaveInspection Info;TestTrue(TEXT("Inspection does not claim archive publication readiness"),F.Save->InspectSave(Slot,Info,Error) && Info.bRequiresCopperMigration && Info.bRecoveredBackup==(Fault==2));Preserved();
+            if(Startup)
+            {
+                const FString Previous(FCommandLine::Get());
+                {ON_SCOPE_EXIT{FCommandLine::Set(*Previous);};FCommandLine::Set(*(Previous+TEXT(" -PFSaveSlot=")+Slot+TEXT(" -PFLoadSave")));F.Save->ConfigureStartup();F.Save->ApplyStartup();}
+                TestFalse(TEXT("Failed migration startup blocks login"),F.Save->CheckLogin(TEXT(""),Error));
+                FPFWorldSaveData Output;Output.Map=TEXT("Sentinel");TestFalse(TEXT("Failed migration startup blocks capture"),F.Save->Capture(Output,Error));TestEqual(TEXT("Failed capture preserves output"),Output.Map,FString(TEXT("Sentinel")));
+                TestFalse(TEXT("Failed startup cannot overwrite target with defaults"),F.Save->Save(Slot,Error));
+                TestFalse(TEXT("Failed startup cannot overwrite previous live slot"),F.Save->Save(LiveSlot,Error));Preserved();
+            }
+            else
+            {
+                for(int32 Repeat=0;Repeat<2;++Repeat)
+                {
+                    TestFalse(TEXT("Actual migration Load refuses backup failure"),F.Save->Load(Slot,Error));
+                    const TCHAR* Reason=Fault==0?TEXT("Corrupt original"):Fault==1?TEXT("directory"):TEXT("Corrupt source");TestTrue(TEXT("Refusal identifies actual backup problem"),Error.Contains(Reason));
+                    TestEqual(TEXT("Rejected manual migration retains active live slot"),F.Save->ActiveSlot,LiveSlot);Preserved();
+                }
+            }
+            F.Fixture.ForwardErrorMessages(this);
+        }
+    }
+    AddInfo(TEXT("[PrimalAgentTools] CopperBackupFailure: corrupt original, occupied original directory and corrupt sibling exercise repeated actual Load and startup refusal; source/evidence, unsaved world/craft and manual active slot preserved, failed startup blocks login/capture/save. Synthetic files only; not crash injection or archived writer proof."));return true;
 }
 #endif

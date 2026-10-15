@@ -1,5 +1,7 @@
 # Primal Frontier milestone evidence
 
+October15 M18 migration-backup refusal: test-only CopperBackupFailure exercises manual/startup × corrupt original/occupied original directory/corrupt sibling, exact runtime/source/active-craft preservation and failed-startup login/capture/save block. Editor6.21s/Game14.00s and native4/4 PASS17.57s, no compiler/raw/test severity/ensure/fatal. No production fix needed. [MIGRATION_REFUSAL_M18.md](MIGRATION_REFUSAL_M18.md); no real disk fault/crash/archived-writer/private-world/full-M18 pass.
+
 ## October15 — M18 read-only save inspection (bounded)
 
 User defers hosting/account/database/voice provisioning; no source download or provider selection is requested now. Independent backend task [DcXavHs8](https://trello.com/c/DcXavHs8) adds `PF.CheckSave [slot]`: same-map file/catalog/layout and connected-owner membership inspection with generation/UTC/counts/recovery/reviewed Copper migration indication. No world/file/active-slot mutation or full restore guarantee. Final Editor15.65s/Game40.97s passed without compiler warnings; seven distinct native selectors passed across nine executions. Actual one-client4/4 and impaired two-client6/6 NullRHI Create/Restart reports passed, zero test severity/exit/fatal/ensure; all raw startup messages match known baseline. Private/settings snapshots unchanged. Exact contract/evidence/limits: [SAVE_INSPECTION_M18.md](SAVE_INSPECTION_M18.md). No rendered FPS/stutter/private-world/human/full-M18 claim; existing Personal gates stay open, no new Personal test for this backend command.
