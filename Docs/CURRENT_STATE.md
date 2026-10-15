@@ -2,6 +2,8 @@
 
 Updated October 15, 2026. This is the current handoff. The previous chronological journal is preserved byte-for-byte in [History](History/CURRENT_STATE_JOURNAL_2026_10_15.md); its old pending statements are historical, not current instructions. Detailed test history belongs in the evidence documents linked below.
 
+**Publication blocked:** verified M12 Eryndor changes are committed locally as `a6a8b0d` with Sol coauthor. Normal push failed: GitHub says the repository exceeded its LFS budget;0/11objects uploaded. Remote master remains `9c29ea8`. No force push, asset omission or history rewrite. Owner must review account LFS usage/payment/budget or choose an approved storage alternative before publication; local offline implementation remains possible. Do not claim these assets/code are pushed.
+
 ## Current game
 
 First-person, server-authoritative C++ survival prototype with Blueprint presentation. Playable development level: **`/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`**, a small400×400m World Partition greybox, not a completed production-sized world. `/Engine/Maps/Entry` is the main-menu entry. Earlier maps remain regression fixtures.
