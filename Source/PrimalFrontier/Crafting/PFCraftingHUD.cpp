@@ -24,6 +24,9 @@
 #include "Inventory/PFInventoryPlayerState.h"
 #include "UI/PFItemPicture.h"
 #include "Settings/PFGameUserSettings.h"
+#include "NativeGameplayTags.h"
+
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_TechnologyView,"UI.Crafting.Technology");
 
 UPFRecipeChoiceButton::UPFRecipeChoiceButton(){InitIsFocusable(true);}
 void UPFRecipeChoiceButton::InitializeChoice(UPFCraftingHUD* Menu,FName Id)
@@ -144,6 +147,15 @@ void UPFCraftingHUD::RefreshMenu()
     const auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());const auto* C=PC?PC->GetCrafting():nullptr;const auto* I=PC?PC->GetInventory():nullptr;
     TArray<FName> Ids;TArray<FGameplayTag> Tags;Tags.Add(FGameplayTag());
     if(C && C->Catalog && I){for(const auto& D:C->Catalog->Recipes){if(C->Catalog->Recipe(D.Id,I->Catalog)){Tags.AddUnique(D.Category);if(!CategoryFilter.IsValid() || D.Category.MatchesTag(CategoryFilter)){Ids.Add(D.Id);}}}}
+    Tags.Add(TAG_PF_TechnologyView);
+    const bool Technology=CategoryFilter==TAG_PF_TechnologyView;
+    if(Technology && C && C->Catalog && I)
+    {
+        Ids.Reset();
+        for(const auto& Node:GetDefault<UPFProgressionCatalog>()->Knowledge)
+        {if(!Node.Recipes.IsEmpty() && C->Catalog->Recipe(Node.Recipes[0],I->Catalog)){Ids.Add(Node.Recipes[0]);}}
+    }
+    Heading->SetText(FText::FromString(Technology?TEXT("TECHNOLOGY TREE — ERYNDOR"):TEXT("CRAFTING")));
     if(Tags!=CategoryIds){RebuildCategories(Tags);}
     if(Ids!=RecipeIds){RebuildRecipes(Ids);}
     const auto* Settings=UPFGameUserSettings::Get();const float Requested=Settings?Settings->Preferences.HUDScale:1;
@@ -157,6 +169,20 @@ void UPFCraftingHUD::RefreshMenu()
     {
         const auto* D=C->Catalog->Recipe(RecipeIds[N],I->Catalog);const auto* Output=I->Definition(D->Output);
         RecipeTitles[N]->SetText(D->DisplayName);RecipeBodies[N]->SetText(FText::FromString(FString::Printf(TEXT("Makes %d %s | %.1fs"),D->OutputQuantity,*Output->DisplayName.ToString(),D->Duration)));
+        if(Technology)
+        {
+            const auto* Catalog=GetDefault<UPFProgressionCatalog>();
+            const auto* Node=Catalog->Knowledge.FindByPredicate([&](const auto& K){return K.Recipes.Contains(D->Id);});
+            if(Node)
+            {
+                TArray<FString> Parents;for(FName Parent:Node->Prerequisites){Parents.Add(Catalog->Find(Parent)->DisplayName.ToString());}
+                const auto* State=PC?PC->GetPlayerState<APFInventoryPlayerState>():nullptr;
+                const bool Learned=State && State->Progression && State->Progression->GetRecord().Knowledge.Contains(Node->Id);
+                RecipeTitles[N]->SetText(Node->DisplayName);
+                const FString ParentText=Parents.IsEmpty()?FString(TEXT("Starting branch")):TEXT("Requires: ")+FString::Join(Parents,TEXT(" + "));
+                RecipeBodies[N]->SetText(FText::FromString(FString::Printf(TEXT("Level %d | %d points | %s\n%s"),Node->MinimumLevel,Node->PointCost,Learned?TEXT("Learned"):TEXT("Locked"),*ParentText)));
+            }
+        }
         Font(RecipeTitles[N],16);Font(RecipeBodies[N],12);RecipeButtons[N]->SetStyle(PFUITheme::NavigationButton(SelectedRecipe==D->Id));RecipePictures[N]->SetItem(Output);
     }
     const auto* D=C && C->Catalog && I?C->Catalog->Recipe(SelectedRecipe,I->Catalog):nullptr;
@@ -165,6 +191,7 @@ void UPFCraftingHUD::RefreshMenu()
     const auto ProgressionView=PFProgressionDetails::Describe(Progression?&Progression->GetRecord():nullptr,
         Progression?Progression->GetAvailablePoints():INDEX_NONE,D?D->Id:NAME_None);
     ProgressionSummary->SetText(ProgressionView.Summary);ProgressionReward->SetText(ProgressionView.RecipeReward);
+    if(Technology){ProgressionReward->SetText(FText::FromString(TEXT("Learning spends technology points. It gives no items or XP.")));}
     const auto* KnowledgeCatalog=GetDefault<UPFProgressionCatalog>();const FPFKnowledgeDefinition* Knowledge=nullptr;
     if(D){for(const auto& Entry:KnowledgeCatalog->Knowledge){if(Entry.Recipes.Contains(D->Id)){Knowledge=&Entry;break;}}}
     SelectedKnowledge=Knowledge?Knowledge->Id:NAME_None;
@@ -182,6 +209,12 @@ void UPFCraftingHUD::RefreshMenu()
     if(D && Progression)
     {DetailTitle->SetText(FText::FromString(FString::Printf(TEXT("%s | %.1fs at %.0f%% crafting speed"),*D->DisplayName.ToString(),D->Duration/FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()),100*FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()))));}
     if(D && !bAccess){DetailBody->SetText(FText::FromString(AccessError+TEXT("\n")+View.Body.ToString()));}
+    if(Technology && Knowledge)
+    {
+        FString Unlocks=TEXT("Unlocks recipes (items still require materials):\n");
+        for(FName Id:Knowledge->Recipes){if(const auto* Recipe=C->Catalog->Recipe(Id,I->Catalog)){Unlocks+=TEXT("- ")+Recipe->DisplayName.ToString()+TEXT("\n");}}
+        DetailTitle->SetText(Knowledge->DisplayName);DetailBody->SetText(FText::FromString(Unlocks+TEXT("\nLearn here, then choose a crafting category to manufacture. Stat points are separate. Ancient/challenge technology is not implemented yet.")));
+    }
     if(SelectedRecipe.IsNone() && !RecipeIds.IsEmpty())
     {
         DetailTitle->SetText(FText::FromString(TEXT("CHOOSE A RECIPE")));
@@ -211,7 +244,7 @@ void UPFCraftingHUD::RefreshMenu()
     if(C){Status+=TEXT(" | ")+(C->Feedback.IsEmpty()?FString(TEXT("No server result yet")):C->Feedback);}
     if(Progression && !Progression->GetKnowledgeFeedback().IsEmpty()){Status+=TEXT("\nKnowledge: ")+Progression->GetKnowledgeFeedback();}
     if(PC && PC->GetInventoryMessage().StartsWith(TEXT("Craft "))){Status+=TEXT("\nLast request: ")+PC->GetInventoryMessage();}
-    Result->SetText(FText::FromString(Status));CraftButton->SetIsEnabled(bAccess && bAlive);CancelButton->SetIsEnabled(C && !C->ActiveRecipe.IsNone());
+    Result->SetText(FText::FromString(Status));CraftButton->SetIsEnabled(!Technology && bAccess && bAlive);CancelButton->SetIsEnabled(C && !C->ActiveRecipe.IsNone());
     Hints->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?NavigationHelp():TEXT("The world keeps running.")));
 }
 void UPFCraftingHUD::SelectRecipe(FName Id)

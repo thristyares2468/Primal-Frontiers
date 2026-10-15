@@ -5,6 +5,7 @@
 // unlocks and durability are future work.
 
 #include "Crafting/PFCraftingCatalog.h"
+#include "Crafting/PFEryndorProgression.h"
 #include "Inventory/PFItemCatalog.h"
 #include "NativeGameplayTags.h"
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_CraftTool,"Recipe.Category.Tool");
@@ -55,6 +56,7 @@ UPFCraftingCatalog::UPFCraftingCatalog()
     AddResource(TEXT("Node_Water"),TEXT("Freshwater collection"),TEXT("Item_Water"));
     AddResource(TEXT("Node_Copper"),TEXT("Copper vein"),TEXT("Item_CopperOre"));
     Resources.Last().Hits=6;Resources.Last().HarvestRequirement.Family=PFHarvest::Pick();Resources.Last().HarvestRequirement.MinimumGrade=EPFHarvestGrade::Stone;
+    PFEryndor::AddCrafting(*this);
 }
 
 const FPFRecipeDefinition* UPFCraftingCatalog::Recipe(FName Id,const UPFItemCatalog* Items) const

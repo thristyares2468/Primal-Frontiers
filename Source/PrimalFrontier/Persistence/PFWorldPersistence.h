@@ -20,6 +20,7 @@ struct FPFSaveInspection
     int32 Players=0,Structures=0,Resources=0,Spawners=0,Creatures=0,Pickups=0;
     bool bRecoveredBackup=false;
     bool bRequiresCopperMigration=false;
+    bool bRequiresEryndorMigration=false;
 };
 
 /** Server-only orchestration; records contain values, never arbitrary actor classes. */

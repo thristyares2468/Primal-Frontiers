@@ -1,7 +1,7 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation','Traversal','AuthoredEcology','CreatureVariety','AutoClimb','AuthoredClimb','PlayerStats','Copper','Sprites','Hotbar')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation','Traversal','AuthoredEcology','CreatureVariety','AutoClimb','AuthoredClimb','PlayerStats','Copper','Eryndor','Sprites','Hotbar')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [string]$SettingsSourceRun='',
       [switch]$LowShadowDiagnostic,
@@ -51,6 +51,7 @@ if($TestCase -eq 'BuildingMenus'){$filter='PF.UI.BuildingMenusLive'}
 if($TestCase -eq 'MenuNavigation'){$filter='PF.UI.MenuNavigationLive'}
 if($TestCase -eq 'PlayerStats'){$filter='PF.UI.PlayerStatsLive'}
 if($TestCase -eq 'Copper'){$filter='PF.UI.CopperLive'}
+if($TestCase -eq 'Eryndor'){$filter='PF.Eryndor.Live'}
 if($TestCase -eq 'Sprites'){$filter='PF.UI.TargetSpritesLive'}
 if($TestCase -eq 'Hotbar'){$filter='PF.UI.HotbarLive'}
 if($TestCase -eq 'Traversal'){$filter='PF.Traversal.Live'}
@@ -89,6 +90,7 @@ if($OffscreenDiagnostic){$arguments+=' -RenderOffScreen'}
 if($TestCase -eq 'EcologyPreview'){$arguments=$arguments.Replace(' /Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld',' /Game/PrimalFrontier/Maps/L_M7SurvivalArena');$arguments+=' -PFRunEcologyPreviewTest'}
 if($TestCase -eq 'BuildingMenus'){$arguments+=' -PFRunBuildingMenusTest'}
 if($TestCase -eq 'Copper'){$arguments+=' -PFRunCopperUITest'}
+if($TestCase -eq 'Eryndor'){$arguments+=' -PFRunEryndorUITest'}
 if($TestCase -eq 'AuthoredEcology'){$arguments+=' -PFRunAuthoredPreviewTest'}
 if($TestCase -eq 'CreatureVariety'){$arguments+=' -PFRunVarietyPreviewTest'}
 if($TestCase -eq 'Traversal'){$arguments+=' -PFRunTraversalLiveTests -PFExpectedPlayers=1'}

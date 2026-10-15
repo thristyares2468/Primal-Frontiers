@@ -25,9 +25,26 @@ void UPFItemPicture::SetItem(const FPFItemDefinition* Item)
     bSketch=IconPath.IsNull() || IconPath.ToString()==TEXT("/Engine/EngineResources/WhiteSquareTexture.WhiteSquareTexture");
     // One original atlas, shared by every visible UImage. Custom catalog art wins.
     static const TArray<FName> Cells={TEXT("Item_Wood"),TEXT("Item_Stone"),TEXT("Item_Food"),TEXT("Item_Fibre"),TEXT("Item_Water"),TEXT("Item_CookedFood"),TEXT("Item_DriedFood"),TEXT("Item_Cord"),TEXT("Item_WoodTool"),TEXT("Item_Tool"),TEXT("Item_BoundTool"),TEXT("Item_CopperPick"),TEXT("Item_Club"),TEXT("Item_BoundClub"),TEXT("Item_WovenGuard"),TEXT("Item_CopperOre")};
-    const int32 Cell=Cells.IndexOfByKey(ItemId);
+    FName SpriteId=ItemId;
+    const bool EryndorPick=ItemId==TEXT("Item_IronPick") || ItemId==TEXT("Item_DiamondPick") || ItemId==TEXT("Item_TitaniumPick");
+    const bool EryndorIngot=ItemId==TEXT("Item_IronIngot") || ItemId==TEXT("Item_TitaniumIngot") || ItemId==TEXT("Item_GoldIngot") || ItemId==TEXT("Item_SilverIngot");
+    static const TArray<FName> Minerals={TEXT("Item_Coal"),TEXT("Item_Flint"),TEXT("Item_IronOre"),TEXT("Item_Diamond"),TEXT("Item_GoldOre"),TEXT("Item_SilverOre"),TEXT("Item_Quartz"),TEXT("Item_Obsidian"),TEXT("Item_TitaniumOre")};
+    if(EryndorPick){SpriteId=TEXT("Item_CopperPick");}
+    if(Minerals.Contains(ItemId)){SpriteId=TEXT("Item_CopperOre");}
+    if(ItemId==TEXT("Item_ObsidianBlade")){SpriteId=TEXT("Item_BoundClub");}
+    if(ItemId==TEXT("Item_ConductiveParts")){SpriteId=TEXT("Item_Cord");}
+    if(ItemId==TEXT("Item_QuartzLens")){SpriteId=TEXT("Item_Stone");}
+    const int32 Cell=Cells.IndexOfByKey(SpriteId);
     if(bSketch && Cell!=INDEX_NONE){bSketch=!ApplyAtlas(TEXT("/Game/PrimalFrontier/UI/Textures/T_ExpeditionItems.T_ExpeditionItems"),Cell,4);}
-    if(bSketch && ItemId==TEXT("Item_CopperIngot")){bSketch=!ApplyAtlas(TEXT("/Game/PrimalFrontier/UI/Textures/T_ExpeditionStructures.T_ExpeditionStructures"),8,3);}
+    if(bSketch && (ItemId==TEXT("Item_CopperIngot") || EryndorIngot)){bSketch=!ApplyAtlas(TEXT("/Game/PrimalFrontier/UI/Textures/T_ExpeditionStructures.T_ExpeditionStructures"),8,3);}
+    // Original category sprites are placeholders; exact names and capabilities stay visible.
+    CatalogImage->SetColorAndOpacity(FLinearColor::White);
+    if(bSketch==false && (EryndorPick || EryndorIngot || Minerals.Contains(ItemId)) && IconPath.ToString()==TEXT("/Engine/EngineResources/WhiteSquareTexture.WhiteSquareTexture"))
+    {
+        const FString Name=ItemId.ToString();
+        const FLinearColor Tint=Name.Contains(TEXT("Gold"))?FLinearColor(1,.8f,.25f):Name.Contains(TEXT("Diamond"))?FLinearColor(.4f,.95f,1):Name.Contains(TEXT("Obsidian")) || Name.Contains(TEXT("Coal"))?FLinearColor(.3f,.3f,.4f):FLinearColor(.7f,.85f,1);
+        CatalogImage->SetColorAndOpacity(Tint);
+    }
     CatalogImage->SetVisibility(bSketch?ESlateVisibility::Hidden:ESlateVisibility::HitTestInvisible);
     // Supported UImage asynchronous soft-texture path; only displayed rows load icons.
     if(!bSketch && !IconPath.IsNull() && IconPath.ToString()!=TEXT("/Engine/EngineResources/WhiteSquareTexture.WhiteSquareTexture"))

@@ -10,7 +10,7 @@ Implemented supported systems:
 
 - Health/stamina/hunger/thirst, exposure, authoritative damage, death/respawn, first-person HUD and replicated remote-player body.
 - Inventory/pickup/drop/stacking/splitting, finite expiring food and cooking. Stackable items cap999,000; gear1. Overweight progressively slows movement and disables sprint, then jump. Chests retain hard capacity.
-- Finite gathering/regrowth, timed crafting/cancellation, primitive tools/weapons/protection, server-owned XP and separate stat/technology budgets. Ancient rewards and broader technology remain planned.
+- Finite gathering/regrowth, timed crafting/cancellation, home-world tools through Titanium, primitive weapons/protection, six-node technology view, server-owned XP and separate stat/technology budgets. Physical stations, ancient rewards and dimensional/powered technology remain planned.
 - Primitive foundations/walls/doors/windows/stairs/floors/ceilings/storage, validated placement/ownership/support/collision, R rotation, chest UI/Quick Store/Sort/item filters.
 - Sprint/glide and continuous wall climbing. Movement spends stamina; holding still is neutral; zero stamina drops the player. Upgrades are in inventory. [Current traversal/upgrades](INVENTORY_UPGRADES_WALL_REST.md).
 - Four greybox creature definitions, bounded ecology/spawning/combat/death/loot, day/night clock, landmarks/hazards.
@@ -23,7 +23,7 @@ User-added Fab/model assets are preserved; staged models are not integrated into
 
 Planned ladder: **Wood → Stone → Copper → Iron → Diamond → Titanium → Deepforge Alloy → Riftglass (Tech)**. Later dimensional sources are required by design; Frontier maps/travel and powered Tech are not implemented.
 
-Wood/Stone/Copper is technically implemented/tested: one near-camp vein, ore/ingot/refinement, FieldTools-gated pick and backed-up old15→current16 resource-layout compatibility. Current catalogs:17items/11recipes/six resource definitions. **Iron and later playable tiers wait for ordinary COPPER_LOOP.** [Copper evidence](COPPER_TIERS_M12.md), [tier plan](RESOURCE_TIERS_M12.md).
+October15 user authorizes all remaining offline features, starting with resources/technology. The former wait-for-COPPER_LOOP implementation restriction is superseded; that human result remains unverified. [Eryndor extension](https://trello.com/c/zg9mp2Tl) technically passes: nine minerals, Iron/Diamond/Titanium upgrades and four new knowledge branches. Thirteen distinct native selectors pass, including new content/chest/filter save restoration, exact manual/startup migrations and old-writer compatibility. Rendered720p/HUD1 and1.5 tree/craft/harvest pass with inspected PNGs; one-client4/two-client6 impaired NullRHI create/restart reports pass. Editor/Game build; private/settings guards unchanged and0new raw severity. Catalogs36items/21recipes/15definitions/six knowledge nodes; saved map25nodes/97actors, all87 original actor packages unchanged. Dimensional/poweredTech and broader offline roadmap remain incomplete. [Evidence](ERYNDOR_TIERS_M12.md), [offline queue](OFFLINE_IMPLEMENTATION.md).
 
 ## Latest completed independent work
 
@@ -31,6 +31,7 @@ Two bounded M18 tasks are pushed with Codex GPT-6.1 Sol coauthor:
 
 | Task | Final verification | Evidence |
 | --- | --- | --- |
+| M12 Eryndor minerals/technology | Editor12.86s/Game43.27s;13distinct native selectors,2rendered runs,10network-role reports pass. Boundary-seeded rendering is not ordinary earned pacing. | [Eryndor tiers](ERYNDOR_TIERS_M12.md) |
 | Migration-backup refusal,4be10db | Editor6.21s/Game14.00s; native4/4. Six manual/startup refusal scenarios preserve live state/active craft/files/evidence; failed startup blocks login/capture/save. No production repair needed. | [Migration refusal](MIGRATION_REFUSAL_M18.md) |
 | Frozen historical M8 writer,b5ee144 | Historical source generation1/1; current Editor23.70s/Game29.09s; current native4/4 and expired-food replay1/1. Startup/repeated Load/currentV2 Save-Load conserve owners/items/identities/neutral defaults without renewing food. | [Frozen writer](FROZEN_WRITER_M18.md) |
 
@@ -48,7 +49,7 @@ Earlier completed `PF.CheckSave [slot]` is discoverable, server-only and non-Shi
 | M7/M8 | User accepted supported world check and solo Save/Load/chest quantities/filter/vitals. Current automated one/two-client persistence/restart passes; human rendered multiplayer/packaged-server acceptance remains open. Do not repeat accepted solo tests unnecessarily. |
 | M9/M10 | Staged-asset source/license mapping and real model integration remain future. Original UI sprites do not complete production art. |
 | M11 | Named building/menu/crafting/chest/Pause/Settings and UI_HOTBAR accepted. Unreported UI/device/performance observations remain separate. |
-| M12 | Tool/combat/progression/stat/Copper technical slices pass. COPPER_LOOP and earned STATS_UPGRADE remain unreported; full ladder incomplete. |
+| M12 | Home-world resources/tool ladder through Titanium, six knowledge nodes and earlier combat/stats technically pass. COPPER_LOOP and earned STATS_UPGRADE remain unreported; stations/Deepforge/Riftglass/ancient path incomplete. |
 | M13/M14 | Ecology encounters/dawn/loot, world spacing and WALL_CLIMB accepted. Neutral wall rest/inventory upgrades have technical evidence. Expanded worlds/dimensions remain future. Do not reopen accepted climbing. |
 | M15 | Voice metadata/policy technical checks pass. Audible voice/provider/cloud/database are not implemented; infrastructure/account/source access is explicitly deferred. |
 | M16/M17 | Wider measured optimization/listening acceptance open. Physical controller/audio untested;1440p traversal explicitly deferred. |
@@ -57,11 +58,11 @@ Earlier completed `PF.CheckSave [slot]` is discoverable, server-only and non-Shi
 
 Trello: bounded [inspection](https://trello.com/c/DcXavHs8), [refusal](https://trello.com/c/cMbhLES7) and [historical writer](https://trello.com/c/M7OVzrdS) are Done; [parent M18](https://trello.com/c/JnS1fkkf) is Doing/incomplete. Personal cards require named user results; unrelated deadlines/membership were preserved.
 
-## Next required playable gate
+## Unverified playable observation
 
 **One next action: [COPPER_LOOP — Personal 2](https://trello.com/c/jzDHaiGJ).** Use a normal rendered standalone Single player world on `L_PrimalFrontier_OpenWorld`. Start at **MINING TEST: Wood > Stone > Copper**, a few metres north of camp. Follow the card's G15 earned route: Stone tool → ore → refinement/cord → FieldTools knowledge → Copper pick. No item/XP grants. Report `COPPER_LOOP PASS` or `COPPER_LOOP FAIL` with the first problem.
 
-Vein `(0,-850,60)`, sign `(-230,-910,150)`, camp starts `(-250,-1100,100)` / `(250,-1100,100)`. P pauses while reading in solo. Full controls/costs/timings/quantities are on the card. This ordinary-input pacing/usability gate is required before adding the next playable tier; automated/assisted evidence does not replace it.
+Vein `(0,-850,60)`, sign `(-230,-910,150)`, camp starts `(-250,-1100,100)` / `(250,-1100,100)`. P pauses while reading in solo. Full controls/costs/timings/quantities are on the card. This ordinary-input pacing/usability observation remains unverified; latest user authorization permits independently tested offline implementation while it waits.
 
 Hosting/source access/database/voice can remain deferred. No credentials, account/download/payment setup needed for Copper. Other Personal checks stay separate; already accepted results need no repeat.
 
@@ -77,4 +78,4 @@ Hosting/source access/database/voice can remain deferred. No credentials, accoun
 
 ## Continue workflow
 
-Read this page, [MILESTONES](MILESTONES.md), relevant evidence and [TRELLO_SYNC](TRELLO_SYNC.md); inspect live Trello before selecting an eligible bounded task. Keep it Doing, verify before completion, update evidence/Done immediately, make scoped commits with Sol coauthor. Preserve unrelated work and Personal gates. Do not expand playable tiers past COPPER_LOOP or provision deferred infrastructure. Update this page after meaningful changes/results instead of appending another chronological journal.
+Read this page, [MILESTONES](MILESTONES.md), relevant evidence and [TRELLO_SYNC](TRELLO_SYNC.md); inspect live Trello before selecting an eligible bounded task. Keep it Doing, verify before completion, update evidence/Done immediately, make scoped commits with Sol coauthor. Preserve unrelated work and unverified Personal observations. Latest user scope authorizes remaining offline features in tested slices; do not provision deferred online infrastructure. Update this page after meaningful changes/results instead of appending another chronological journal.

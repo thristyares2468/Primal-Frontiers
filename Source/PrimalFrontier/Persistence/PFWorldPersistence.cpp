@@ -260,8 +260,8 @@ bool UPFWorldPersistence::Load(const FString& Slot, FString& Error)
     FPFSavedFile File; FPFWorldSaveData Data;
     if (!Authority(Error) || !FPFSaveFileStore::Read(Slot, File, Error) || !Decode(File.Payload, Data, Error)) { return false; }
     bool AddedCopper=false;
-    if(!PrepareCopperLayout(Data,AddedCopper,Error) || (AddedCopper && !FPFSaveFileStore::PreserveOriginal(Slot,TEXT("M12CopperLayout1"),Error)) || !Apply(Data,File.SavedUtc,Error)){return false;}
-    if(AddedCopper){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalPersistence] Copper layout 15->16 applied; verified original retained, source UTC preserved until ordinary save"));}
+    if(!PrepareCopperLayout(Data,AddedCopper,Error) || (AddedCopper && !FPFSaveFileStore::PreserveOriginal(Slot,Data.Resources.Num()==25?TEXT("M12EryndorLayout1"):TEXT("M12CopperLayout1"),Error)) || !Apply(Data,File.SavedUtc,Error)){return false;}
+    if(AddedCopper){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalPersistence] Reviewed resource layout applied (%d nodes); verified original retained, source UTC preserved until ordinary save"),Data.Resources.Num());}
     ActiveSlot = Slot; bLoadedWorld = true;
     UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Loaded slot=%s generation=%llu backupRecovery=%d"), *Slot, File.Generation, File.bRecoveredBackup);
     return true;
@@ -301,9 +301,9 @@ void UPFWorldPersistence::ApplyStartup()
     // InitGame has not run resource BeginPlay yet. Inspect the actual reviewed
     // actors/catalogs only after StartPlay, before applying or publishing state.
     bool AddedCopper=false;
-    if(!PrepareCopperLayout(Pending,AddedCopper,Error) || (AddedCopper && !FPFSaveFileStore::PreserveOriginal(ActiveSlot,TEXT("M12CopperLayout1"),Error)))
+    if(!PrepareCopperLayout(Pending,AddedCopper,Error) || (AddedCopper && !FPFSaveFileStore::PreserveOriginal(ActiveSlot,Pending.Resources.Num()==25?TEXT("M12EryndorLayout1"):TEXT("M12CopperLayout1"),Error)))
     {bStartupBlocked=true;bPending=false;UE_LOG(LogPFSurvival,Error,TEXT("[PrimalAgentTools] Startup Copper layout refused: %s"),*Error);return;}
-    if(AddedCopper){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalPersistence] Startup Copper layout 15->16 prepared; original/UTC preserved"));}
+    if(AddedCopper){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalPersistence] Startup reviewed resource layout prepared (%d nodes); original/UTC preserved"),Pending.Resources.Num());}
     if (!Apply(Pending, PendingUtc, Error)) { bStartupBlocked = true; UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Startup world restore refused: %s"), *Error); }
     bPending = false;
 }
@@ -336,7 +336,7 @@ bool UPFWorldPersistence::InspectSave(const FString& Slot,FPFSaveInspection& Out
     if(!Authority(Error)){return false;}
     FPFSavedFile File;FPFWorldSaveData Data;
     if(!FPFSaveFileStore::Read(Slot,File,Error) || !Decode(File.Payload,Data,Error)){return false;}
-    bool Changed=false;
+    const int32 SourceResourceCount=Data.Resources.Num();bool Changed=false;
     // This prepares only a local value copy. PreserveOriginal/Apply/Save must never run here.
     if(!PrepareCopperLayout(Data,Changed,Error) || !CheckLayout(Data,Error)){return false;}
     for(auto It=GetWorld()->GetPlayerControllerIterator();It;++It)
@@ -348,7 +348,7 @@ bool UPFWorldPersistence::InspectSave(const FString& Slot,FPFSaveInspection& Out
     }
     FPFSaveInspection Candidate;Candidate.Map=Data.Map;Candidate.WorldVersion=Data.Version;
     Candidate.Generation=File.Generation;Candidate.SavedUtc=File.SavedUtc;Candidate.bRecoveredBackup=File.bRecoveredBackup;
-    Candidate.bRequiresCopperMigration=Changed;Candidate.Players=Data.Players.Num();Candidate.Structures=Data.Structures.Num();
+    Candidate.bRequiresCopperMigration=Changed && SourceResourceCount==15;Candidate.bRequiresEryndorMigration=Changed && Data.Resources.Num()==25;Candidate.Players=Data.Players.Num();Candidate.Structures=Data.Structures.Num();
     Candidate.Resources=Data.Resources.Num();Candidate.Spawners=Data.Spawners.Num();Candidate.Creatures=Data.Creatures.Num();Candidate.Pickups=Data.Pickups.Num();
     Out=MoveTemp(Candidate);return true;
 }

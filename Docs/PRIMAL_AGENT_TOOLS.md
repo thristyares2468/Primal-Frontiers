@@ -1,5 +1,7 @@
 # Primal Agent Tools
 
+October15 resource expansion: `PF.CheckSave` reports `RequiresEryndorMigration` separately from `RequiresCopperMigration`, including reviewed prior15/16→current25 layouts. Read-only preflight never publishes an archive or applies the world. [Current migration evidence](ERYNDOR_TIERS_M12.md).
+
 M18 adds `PF.CheckSave [slot]`, a non-Shipping authoritative read-only saved-file/catalog/map/layout/connected-membership inspection. It records structured metadata in normal command history without loading, saving or publishing migration backups. [Save inspection contract and evidence](SAVE_INSPECTION_M18.md) separates its pass from actual restoration.
 
 The plugin now separates non-Shipping runtime developer commands from editor-only asset and fixture tools. See [the command interface](../Plugins/PrimalAgentTools/DEVELOPER_COMMANDS.md), [plugin documentation](../Plugins/PrimalAgentTools/README.md), and [verification evidence](../Plugins/PrimalAgentTools/VERIFICATION.md).

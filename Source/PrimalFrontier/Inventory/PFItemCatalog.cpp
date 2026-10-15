@@ -6,6 +6,7 @@
 // that ID from recipes/resources/loot.
 
 #include "Inventory/PFItemCatalog.h"
+#include "Crafting/PFEryndorProgression.h"
 #include "NativeGameplayTags.h"
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Resource,"Item.Category.Resource");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_Food,"Item.Category.Food");
@@ -66,6 +67,7 @@ UPFItemCatalog::UPFItemCatalog()
     Add(TEXT("Item_CopperPick"),TEXT("Copper pick"),2.5f,TAG_PF_Tool);
     Items.Last().StackLimit=1;Items.Last().GatheringHits=4;Items.Last().MeleeDamage=35;
     Items.Last().HarvestGrade=EPFHarvestGrade::Copper;Items.Last().HarvestFamilies.AddTag(PFHarvest::Pick());
+    PFEryndor::AddItems(*this);
 }
 
 const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const

@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## October15 — offline home-world progression and additive layout
+
+Keep trusted server tool family/grade and existing inventory/crafting transactions; append original home-world content through Titanium in a focused catalog module. New minerals share the existing Stone gather-XP window, not an independent reward budget per ore; legacy Copper reward behavior is unchanged. Knowledge costs fit the existing level10/27-point maximum and remain separate from stat points. Physical stations and later powered/dimensional materials stay explicit future scope; present refinements say portable greybox. Existing original sprites serve as tinted category placeholders, with custom catalog art taking precedence.
+
+The exact prior15- or16-node open-world layout may append the reviewed nine fixed Eryndor identities (and Copper when absent), preserving original envelope/generation/UTC before applying. Current layout25 must match exactly; renamed/partial/unknown nodes refuse. Read-only inspection reports the two migration requirements separately and never creates a backup. No save schema/capacity change, deleted legacy record or guessed remapping. [OFFLINE_IMPLEMENTATION.md](OFFLINE_IMPLEMENTATION.md).
+
 ## October15 — preserve immutable historical-writer fixture bytes
 
 Build production persistence sources from known historical commit c3d221f in an isolated source-only project with a new synthetic harness. Freeze the emitted world/file bytes and source/SHA256/engine provenance once; current tests read them directly rather than recreating old records with today's encoder. Regeneration writes a separate candidate, never replaces the reviewed baseline. All identities are fake; generated binaries/archive/logs remain untracked. This proves old-source reader compatibility on installed5.8.3, not an archived historical executable or production/private-world acceptance. [FROZEN_WRITER_M18.md](FROZEN_WRITER_M18.md).

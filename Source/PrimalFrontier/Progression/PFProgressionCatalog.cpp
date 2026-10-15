@@ -1,4 +1,5 @@
 #include "Progression/PFProgressionCatalog.h"
+#include "Crafting/PFEryndorProgression.h"
 #include "Crafting/PFCraftingCatalog.h"
 #include "Inventory/PFItemCatalog.h"
 #include "NativeGameplayTags.h"
@@ -23,6 +24,7 @@ UPFProgressionCatalog::UPFProgressionCatalog()
     D.Recipes.Add(TEXT("Recipe_BoundTool"));D.Recipes.Add(TEXT("Recipe_CopperPick"));Knowledge.Add(D);
     FPFKnowledgeDefinition Weapon;Weapon.Id=TEXT("Tech_FieldWeapons");Weapon.DisplayName=FText::FromString(TEXT("Field weapon knowledge"));Weapon.Category=TAG_PF_KnowledgeWeapon;
     Weapon.MinimumLevel=3;Weapon.PointCost=3;Weapon.Prerequisites={TEXT("Tech_FieldTools")};Weapon.Recipes={TEXT("Recipe_BoundClub")};Knowledge.Add(Weapon);
+    PFEryndor::AddKnowledge(*this);
 }
 const FPFKnowledgeDefinition* UPFProgressionCatalog::Find(FName Id) const
 {

@@ -42,7 +42,7 @@ public:
         {
             Clock->SetActorTickEnabled(false);for(TActorIterator<APFCreatureSpawner> It(W);It;++It){It->bAutoSpawn=false;}
             for(TActorIterator<APFCreature> It(W);It;++It){It->Destroy();}
-            for(TActorIterator<APFResourceNode> It(W);It;++It){It->SetActorTickEnabled(false);}Frozen=true;
+            CurrentResources=0;for(TActorIterator<APFResourceNode> It(W);It;++It){It->SetActorTickEnabled(false);++CurrentResources;}Frozen=true;
         }
         TArray<APFSurvivalPlayerController*> Players;
         for(auto It=W->GetPlayerControllerIterator();It;++It){auto* PC=Cast<APFSurvivalPlayerController>(It->Get());if(PC && Cast<APFSurvivorCharacter>(PC->GetPawn()) && PC->GetInventory() && PC->GetInventory()->Catalog){Players.Add(PC);}}
@@ -64,6 +64,9 @@ private:
             {
                 if(!Check(Copper && Copper->ResourceId==TEXT("Node_Copper") && Copper->HitsRemaining==6,TEXT("Actual authored Copper fixture exists"))){return true;}
                 Copper->Destroy(); // Old executable layout simulated in disposable runtime only.
+                // Later reviewed home-world fixtures must also be absent from the
+                // synthetic historical executable layout, never from the saved editor map.
+                for(TActorIterator<APFResourceNode> It(W);It;++It){if(It->ActorHasTag(TEXT("PF.M12.EryndorTest"))){It->Destroy();}}
                 int32 Role=0;
                 for(auto* PC:Players)
                 {
@@ -79,7 +82,9 @@ private:
             else
             {
                 FPFSavedFile Original;FPFWorldSaveData Old;
-                if(!Check(FPFSaveFileStore::ReadOriginal(Slot,TEXT("M12CopperLayout1"),Original,Error) && Save->Decode(Original.Payload,Old,Error) && Old.Resources.Num()==15,TEXT("Actual startup preserved verified old15 original"))){Test->AddError(Error);return true;}
+                if(!Check(FPFSaveFileStore::ReadOriginal(Slot,CurrentResources==25?TEXT("M12EryndorLayout1"):TEXT("M12CopperLayout1"),Original,Error) && Save->Decode(Original.Payload,Old,Error) && Old.Resources.Num()==15,TEXT("Actual startup preserved verified old15 original"))){Test->AddError(Error);return true;}
+                if(!Check(CurrentResources==16 || CurrentResources==25,TEXT("Only reviewed current layouts accepted"))){return true;}
+                for(TActorIterator<APFResourceNode> It(W);It;++It){if(It->ActorHasTag(TEXT("PF.M12.EryndorTest"))){Check(It->HitsRemaining==8,TEXT("New home-world mineral initialized once after startup"));}}
                 if(!Check(Copper && Copper->HitsRemaining==6,TEXT("New default appears once after actual server restart"))){return true;}
                 int32 Lane=0;
                 for(auto* PC:Players)
@@ -114,8 +119,8 @@ private:
         if(!Check(Copper && Copper->HitsRemaining==6-2*Expected && Total==4*Expected,TEXT("Shared authored node cannot duplicate finite yield"))){return true;}
         if(!Check(Save->Save(Slot,Error),TEXT("Normal post-migration save captures current aged runtime"))){Test->AddError(Error);return true;}
         FPFSavedFile Current,Original;FPFWorldSaveData Data,Old;
-        if(!Check(FPFSaveFileStore::Read(Slot,Current,Error) && Save->Decode(Current.Payload,Data,Error) && Data.Resources.Num()==16 && Data.Players.Num()==Expected && FPFSaveFileStore::ReadOriginal(Slot,TEXT("M12CopperLayout1"),Original,Error) && Save->Decode(Original.Payload,Old,Error) && Old.Resources.Num()==15,TEXT("Current16 saved and immutable old15 retained after rotation"))){return true;}
-        Test->AddInfo(TEXT("[PrimalAgentTools] Copper restart server actual migration, preserved original, independent owners, finite shared gather and current16 save verified"));Clock->SetHour(14);Done(Now);return false;
+        if(!Check(FPFSaveFileStore::Read(Slot,Current,Error) && Save->Decode(Current.Payload,Data,Error) && Data.Resources.Num()==CurrentResources && Data.Players.Num()==Expected && FPFSaveFileStore::ReadOriginal(Slot,CurrentResources==25?TEXT("M12EryndorLayout1"):TEXT("M12CopperLayout1"),Original,Error) && Save->Decode(Original.Payload,Old,Error) && Old.Resources.Num()==15,TEXT("Reviewed current layout saved and immutable old15 retained after rotation"))){return true;}
+        Test->AddInfo(FString::Printf(TEXT("[PrimalAgentTools] Copper restart server actual migration, preserved original, independent owners, finite shared gather and current%d save verified"),CurrentResources));Clock->SetHour(14);Done(Now);return false;
     }
     bool Owner(UWorld* W,APFSurvivalPlayerController* PC,APFWorldClock* Clock,APFResourceNode* Copper,double Now)
     {
@@ -143,7 +148,7 @@ private:
         const auto* WaterStack=I->GetStacks().FindByPredicate([](const auto& S){return S.ItemId==TEXT("Item_Water");});if(!WaterStack){return false;}
         PC->ServerInventoryAction(WaterStack->StackId,PFInventoryAction::Consume,1);Stage=PhaseId;return false;
     }
-    FAutomationTestBase* Test;FString Slot;int32 Expected=1,Stage=0,Observed=0;bool Restart=false,Client=false,Frozen=false;
+    FAutomationTestBase* Test;FString Slot;int32 Expected=1,Stage=0,Observed=0,CurrentResources=16;bool Restart=false,Client=false,Frozen=false;
     double Started=FPlatformTime::Seconds(),Changed=0,ObservedAt=0;
 };
 }

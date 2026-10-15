@@ -1,4 +1,5 @@
 #include "Progression/PFProgressionRecord.h"
+#include "Crafting/PFEryndorProgression.h"
 #include "Progression/PFProgressionCatalog.h"
 #include "Crafting/PFCraftingCatalog.h"
 #include "Inventory/PFItemCatalog.h"
@@ -17,7 +18,9 @@ FGameplayTag FPFProgressionTransactions::GatherCategoryForItem(FName Item)
 {
     if(Item==TEXT("Item_Wood")){return TAG_PF_GatherWood;}if(Item==TEXT("Item_Stone")){return TAG_PF_GatherStone;}
     if(Item==TEXT("Item_Fibre")){return TAG_PF_GatherFibre;}if(Item==TEXT("Item_Food")){return TAG_PF_GatherFood;}
-    if(Item==TEXT("Item_Water")){return TAG_PF_GatherWater;}return {};
+    if(Item==TEXT("Item_Water")){return TAG_PF_GatherWater;}
+    // Shared mineral window: changing ore cannot multiply the five-category XP budget.
+    if(PFEryndor::IsMineral(Item)){return TAG_PF_GatherStone;}return {};
 }
 int32 FPFProgressionTransactions::ExperienceForLevel(int32 Level)
 {

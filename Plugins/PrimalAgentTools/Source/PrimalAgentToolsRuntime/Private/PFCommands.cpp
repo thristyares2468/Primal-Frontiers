@@ -518,9 +518,10 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
                     R.Counts.Add(TEXT("Resources"),Info.Resources);R.Counts.Add(TEXT("Spawners"),Info.Spawners);
                     R.Counts.Add(TEXT("Creatures"),Info.Creatures);R.Counts.Add(TEXT("Pickups"),Info.Pickups);
                     R.Counts.Add(TEXT("BackupRecovery"),Info.bRecoveredBackup?1:0);R.Counts.Add(TEXT("RequiresCopperMigration"),Info.bRequiresCopperMigration?1:0);
+                    R.Counts.Add(TEXT("RequiresEryndorMigration"),Info.bRequiresEryndorMigration?1:0);
                     R.Add(TEXT("Info"),TEXT("SaveInspected"),Slot,FString::Printf(
-                    TEXT("Read-only inspection: map=%s worldVersion=%d generation=%llu savedUtc=%lld players=%d structures=%d resources=%d spawners=%d creatures=%d pickups=%d backupRecovery=%d requiresCopperMigration=%d. No load/write; actor allocation, placement and full restore are not guaranteed."),
-                    *Info.Map,Info.WorldVersion,Info.Generation,Info.SavedUtc,Info.Players,Info.Structures,Info.Resources,Info.Spawners,Info.Creatures,Info.Pickups,Info.bRecoveredBackup,Info.bRequiresCopperMigration));}
+                    TEXT("Read-only inspection: map=%s worldVersion=%d generation=%llu savedUtc=%lld players=%d structures=%d resources=%d spawners=%d creatures=%d pickups=%d backupRecovery=%d requiresCopperMigration=%d requiresEryndorMigration=%d. No load/write; actor allocation, placement and full restore are not guaranteed."),
+                    *Info.Map,Info.WorldVersion,Info.Generation,Info.SavedUtc,Info.Players,Info.Structures,Info.Resources,Info.Spawners,Info.Creatures,Info.Pickups,Info.bRecoveredBackup,Info.bRequiresCopperMigration,Info.bRequiresEryndorMigration));}
             }
             else if (Name == TEXT("PF.SaveWorld")) { Passed = Persistence->Save(Slot, Why); }
             else if (Name == TEXT("PF.LoadWorld")) { Passed = Persistence->Load(Slot, Why); }

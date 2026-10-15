@@ -35,7 +35,8 @@ bool FPFHarvestDataTest::RunTest(const FString&)
 {
     auto* Items=NewObject<UPFItemCatalog>();auto* Craft=NewObject<UPFCraftingCatalog>();
     for(const auto& D:Items->Items){TestNotNull(TEXT("All legacy item definitions remain valid"),Items->Find(D.Id));}
-    for(const auto& D:Craft->Resources){TestNotNull(TEXT("All nodes have valid requirements"),Craft->Resource(D.Id,Items));if(D.Id!=TEXT("Node_Copper")){TestFalse(TEXT("No implicit legacy access gate"),D.HarvestRequirement.Family.IsValid());}}
+    const TArray<FName> Baseline={TEXT("Node_Wood"),TEXT("Node_Stone"),TEXT("Node_Food"),TEXT("Node_Fibre"),TEXT("Node_Water")};
+    for(const auto& D:Craft->Resources){TestNotNull(TEXT("All nodes have valid requirements"),Craft->Resource(D.Id,Items));if(Baseline.Contains(D.Id)){TestFalse(TEXT("No implicit legacy access gate"),D.HarvestRequirement.Family.IsValid());}}
     using namespace PFHarvestFixture;
     for(auto Grade:{EPFHarvestGrade::Wood,EPFHarvestGrade::Stone,EPFHarvestGrade::Copper,EPFHarvestGrade::Iron,EPFHarvestGrade::Diamond,EPFHarvestGrade::Titanium,EPFHarvestGrade::Deepforge})
     {TestTrue(TEXT("Mechanical grades supported as data, not shipped items"),PFHarvest::ValidRequirement(Required(PFHarvest::Pick(),Grade)));}

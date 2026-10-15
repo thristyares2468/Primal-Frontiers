@@ -219,4 +219,136 @@ bool FPFCopperBackupFailureTest::RunTest(const FString&)
     }
     AddInfo(TEXT("[PrimalAgentTools] CopperBackupFailure: corrupt original, occupied original directory and corrupt sibling exercise repeated actual Load and startup refusal; source/evidence, unsaved world/craft and manual active slot preserved, failed startup blocks login/capture/save. Synthetic files only; not crash injection or archived writer proof."));return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEryndorRuntimeTest,"PF.Eryndor.Runtime",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FPFEryndorRuntimeTest::RunTest(const FString&)
+{
+    AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"),EAutomationExpectedMessageFlags::Contains,0);
+    FCopperWorld F;if(!F.Start()){return false;}FString Error;
+    // Deliberate capability boundary setup, using the real eight-slot bag and ordinary craft timers.
+    F.I->Catalog=NewObject<UPFItemCatalog>(F.I);F.C->Catalog=NewObject<UPFCraftingCatalog>(F.C);
+    FPFProgressionRecord R;R.Experience=700;
+    if(!TestTrue(TEXT("Level5 boundary record"),F.G->Restore(R,Error))){return false;}
+    for(FName Id:{FName(TEXT("Tech_FieldTools")),FName(TEXT("Tech_Metalwork")),FName(TEXT("Tech_Gemwork")),FName(TEXT("Tech_Titanium"))})
+    {TestTrue(TEXT("Real server knowledge purchase"),F.G->RequestKnowledge(Id,F.P,Error));F.Tick(.6f);}
+    auto Grant=[&](FName Id,int32 Count){return TestTrue(*Id.ToString(),F.I->Grant(Id,Count));};
+    Grant(TEXT("Item_CopperPick"),1);Grant(TEXT("Item_IronOre"),6);Grant(TEXT("Item_Coal"),3);Grant(TEXT("Item_Flint"),3);Grant(TEXT("Item_Cord"),1);
+    TestFalse(TEXT("Unowned Diamond upgrade cannot start"),F.C->Start(TEXT("Recipe_DiamondPick"),F.P));
+    TestTrue(TEXT("Start real iron then cancel"),F.C->Start(TEXT("Recipe_IronRefine"),F.P));TestTrue(TEXT("Cancel"),F.C->Cancel());
+    TestEqual(TEXT("Cancel consumes no ore"),F.I->Count(TEXT("Item_IronOre")),6);
+    for(int32 N=0;N<3;++N){TestTrue(TEXT("Real iron refinement"),F.Craft(TEXT("Recipe_IronRefine")));}
+    TestTrue(TEXT("Upgrade consumes old pick once"),F.Craft(TEXT("Recipe_IronPick")));TestEqual(TEXT("Old pick removed"),F.I->Count(TEXT("Item_CopperPick")),0);
+    auto* Node=F.W->SpawnActorDeferred<APFResourceNode>(APFResourceNode::StaticClass(),FTransform(FVector(3500,-1100,60)));
+    Node->ResourceId=TEXT("Node_Diamond");Node->FinishSpawning(FTransform(FVector(3500,-1100,60)));
+    TestTrue(TEXT("Real first-person aim"),F.Aim(Node));TestTrue(TEXT("Iron actually gathers diamond"),Node->Gather(F.P));F.Tick(.6f);
+    TestEqual(TEXT("Finite compatible five hits yields ten"),F.I->Count(TEXT("Item_Diamond")),10);
+    Grant(TEXT("Item_Cord"),1);TestTrue(TEXT("Diamond upgrade starts"),F.C->Start(TEXT("Recipe_DiamondPick"),F.P));F.Tick(15);
+    TestEqual(TEXT("Diamond pick output"),F.I->Count(TEXT("Item_DiamondPick")),1);TestEqual(TEXT("Iron consumed exactly once"),F.I->Count(TEXT("Item_IronPick")),0);
+    Grant(TEXT("Item_TitaniumOre"),6);Grant(TEXT("Item_Coal"),6);Grant(TEXT("Item_Obsidian"),3);Grant(TEXT("Item_Cord"),1);
+    for(int32 N=0;N<3;++N){TestTrue(TEXT("Titanium refine starts"),F.C->Start(TEXT("Recipe_TitaniumRefine"),F.P));F.Tick(13);TestTrue(TEXT("Titanium complete"),F.C->Feedback.StartsWith(TEXT("Completed")));}
+    TestTrue(TEXT("Titanium upgrade starts"),F.C->Start(TEXT("Recipe_TitaniumPick"),F.P));F.Tick(17);
+    TestTrue(TEXT("Final single upgrade, no duplication"),F.I->Count(TEXT("Item_TitaniumPick"))==1 && F.I->Count(TEXT("Item_DiamondPick"))==0 && F.I->Count(TEXT("Item_TitaniumIngot"))==0);
+    int32 Hits=0;TestTrue(TEXT("Titanium resolves actual Diamond requirement"),F.I->ResolveHarvest(F.C->Catalog->Resource(TEXT("Node_Titanium"),F.I->Catalog)->HarvestRequirement,Hits,Error));TestEqual(TEXT("Seven hits"),Hits,7);
+    TestFalse(TEXT("No duplicate final craft"),F.C->Start(TEXT("Recipe_TitaniumPick"),F.P));
+    // The transient interaction probe is not an authored layout identity.
+    Node->Destroy();
+    const FString Slot=TEXT("AutomationEryndorRuntime")+FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    ON_SCOPE_EXIT{F.Save->ActiveSlot.Reset();for(bool B:{false,true}){IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot,B));}};
+    F.P->Survival->SetHealth(44);F.P->Survival->SetHunger(55);F.P->Survival->SetThirst(66);
+    auto* Buildings=NewObject<UPFBuildingCatalog>();
+    auto Piece=[&](FName Id,FVector At,APFBuildPiece* Parent){const FTransform T(At);auto* A=F.W->SpawnActorDeferred<APFBuildPiece>(APFBuildPiece::StaticClass(),T);A->Initialize(*Buildings->Find(Id),F.PC->PlayerState,Parent);A->FinishSpawning(T);return A;};
+    auto* Base=Piece(TEXT("Build_Foundation"),FVector(2500,-1100,10),nullptr);auto* Chest=Piece(TEXT("Build_Storage"),FVector(2500,-1100,60),Base);
+    Chest->bRestrictStorageItems=true;Chest->AllowedStorageItems={TEXT("Item_Quartz"),TEXT("Item_TitaniumIngot")};
+    TestTrue(TEXT("New mineral storage"),Chest->Storage->Grant(TEXT("Item_Quartz"),7));const FGuid ChestId=Chest->PersistentId,Owner=Chest->PersistentOwnerId;
+    TestTrue(TEXT("Actual save with new tool/knowledge/minerals/filter"),F.Save->Save(Slot,Error));
+    for(int32 N=0;N<2;++N)
+    {
+        TestTrue(TEXT("Unsaved tool removal"),F.I->RemoveItem(TEXT("Item_TitaniumPick"),1));F.P->Survival->SetHealth(99);
+        TestTrue(TEXT("Actual world restore"),F.Save->Load(Slot,Error));
+        TestTrue(TEXT("New tool/knowledge/vitals restore once"),F.I->Count(TEXT("Item_TitaniumPick"))==1 && F.G->GetRecord().Knowledge.Contains(TEXT("Tech_Titanium")) && F.P->Survival->GetVitals().Health==44 && F.P->Survival->GetVitals().Hunger==55 && F.P->Survival->GetVitals().Thirst==66);
+        APFBuildPiece* Restored=nullptr;int32 Matches=0;for(TActorIterator<APFBuildPiece> It(F.W);It;++It){if(It->PersistentId==ChestId){Restored=*It;++Matches;}}
+        TestTrue(TEXT("New content storage/ownership/filter restored without duplication"),Matches==1 && Restored && Restored->PersistentOwnerId==Owner && Restored->Storage->Count(TEXT("Item_Quartz"))==7 && Restored->AllowedStorageItems==TArray<FName>{TEXT("Item_Quartz"),TEXT("Item_TitaniumIngot")} && Restored->bRestrictStorageItems);
+    }
+    F.Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Eryndor.Runtime: actual eight-slot transactions, owned knowledge, timed refine/cancel/upgrade, traced Diamond gather and consumed tool chain. Explicit level/material boundary seeds, not ordinary earned pacing."));return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEryndorLayoutTest,"PF.Eryndor.Layout",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FPFEryndorLayoutTest::RunTest(const FString&)
+{
+    AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"),EAutomationExpectedMessageFlags::Contains,0);
+    FCopperWorld F;if(!F.Start()){return false;}FString Error;FPFWorldSaveData Old;
+    F.P->Survival->SetHealth(33);TestTrue(TEXT("Existing finite food"),F.I->Grant(TEXT("Item_Food"),2));F.Nodes[0]->RestorePersistence(0,12);
+    if(!TestTrue(TEXT("Capture actual sixteen-node source"),F.Save->Capture(Old,Error))){return false;}
+    const TCHAR* Names[]={TEXT("Coal"),TEXT("Flint"),TEXT("Iron"),TEXT("Diamond"),TEXT("Gold"),TEXT("Silver"),TEXT("Quartz"),TEXT("Obsidian"),TEXT("Titanium")};
+    TArray<APFResourceNode*> Added;
+    for(int32 N=0;N<9;++N)
+    {
+        FActorSpawnParameters P;P.Name=FName(*(FString(TEXT("PF_Eryndor_"))+Names[N]));P.bDeferConstruction=true;
+        auto* A=F.W->SpawnActor<APFResourceNode>(FVector(4000,N*400,60),FRotator::ZeroRotator,P);
+        A->ResourceId=FName(*(FString(TEXT("Node_"))+Names[N]));A->Tags.Add(TEXT("PF.M12.EryndorTest"));A->FinishSpawning(FTransform(FVector(4000,N*400,60)));Added.Add(A);
+    }
+    for(int32 SourceCount:{16,15})
+    {
+        auto Source=Old;if(SourceCount==15){Source.Resources.RemoveAll([](const auto& D){return D.Definition==TEXT("Node_Copper");});}
+        const FString Slot=TEXT("AutomationEryndor")+FGuid::NewGuid().ToString(EGuidFormats::Digits);TArray<uint8> Bytes;
+        ON_SCOPE_EXIT{F.Save->ActiveSlot.Reset();for(bool B:{false,true}){IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot,B));}IFileManager::Get().Delete(*FPFSaveFileStore::OriginalPath(Slot,TEXT("M12EryndorLayout1")));};
+        TestTrue(TEXT("Encode/write prior layout"),F.Save->Encode(Source,Bytes,Error) && FPFSaveFileStore::Write(Slot,Bytes,Error));
+        FPFSaveInspection Info;Added[0]->HitsRemaining=1;F.P->Survival->SetHealth(99);
+        TestTrue(TEXT("Read-only preflight"),F.Save->InspectSave(Slot,Info,Error));TestTrue(TEXT("Correct two migration indicators"),Info.bRequiresEryndorMigration && Info.bRequiresCopperMigration==(SourceCount==15) && Info.Resources==25);
+        TestTrue(TEXT("Preflight leaves live state"),Added[0]->HitsRemaining==1 && F.P->Survival->GetVitals().Health==99);
+        for(int32 N=0;N<2;++N)
+        {
+            if(!TestTrue(TEXT("Actual reviewed Load"),F.Save->Load(Slot,Error))){AddError(Error);return false;}
+            TestTrue(TEXT("Legacy state restored, new default once"),Added[0]->HitsRemaining==8 && F.Nodes[0]->HitsRemaining==0 && F.P->Survival->GetVitals().Health==33 && F.I->Count(TEXT("Item_Food"))==2);
+            FPFSavedFile Original,Current;TestTrue(TEXT("Original/source payload and time anchor conserved"),FPFSaveFileStore::ReadOriginal(Slot,TEXT("M12EryndorLayout1"),Original,Error) && FPFSaveFileStore::Read(Slot,Current,Error) && Original.Payload==Bytes && Current.Payload==Bytes && Original.SavedUtc==Current.SavedUtc && Original.Generation==Current.Generation);
+        }
+        const FString Previous(FCommandLine::Get());
+        {ON_SCOPE_EXIT{FCommandLine::Set(*Previous);};FCommandLine::Set(*(Previous+TEXT(" -PFSaveSlot=")+Slot+TEXT(" -PFLoadSave")));F.Save->ConfigureStartup();F.Save->ApplyStartup();}
+        TestTrue(TEXT("Actual startup applies the same reviewed edge"),Added[0]->HitsRemaining==8 && F.P->Survival->GetVitals().Health==33);
+        const FString FailSlot=Slot+TEXT("Fail"),BadOriginal=FPFSaveFileStore::OriginalPath(FailSlot,TEXT("M12EryndorLayout1"));
+        ON_SCOPE_EXIT{for(bool B:{false,true}){IFileManager::Get().Delete(*FPFSaveFileStore::Path(FailSlot,B));}IFileManager::Get().Delete(*BadOriginal);};
+        TestTrue(TEXT("Write distinct refusal source"),FPFSaveFileStore::Write(FailSlot,Bytes,Error));
+        IFileManager::Get().MakeDirectory(*FPaths::GetPath(BadOriginal),true);const TArray<uint8> Corrupt={1,2,3};FFileHelper::SaveArrayToFile(Corrupt,*BadOriginal);
+        F.P->Survival->SetHealth(99);Added[0]->HitsRemaining=1;
+        TestFalse(TEXT("Eryndor original corruption refuses before apply"),F.Save->Load(FailSlot,Error));
+        TestTrue(TEXT("Refusal retains actual live state and slot"),F.P->Survival->GetVitals().Health==99 && Added[0]->HitsRemaining==1 && F.Save->ActiveSlot==Slot);
+        TArray<uint8> OriginalAfter;TestTrue(TEXT("Refusal does not replace corrupt evidence"),FFileHelper::LoadFileToArray(OriginalAfter,*BadOriginal) && OriginalAfter==Corrupt);
+        TestTrue(TEXT("Valid source remains loadable"),F.Save->Load(Slot,Error));
+        TestTrue(TEXT("Ordinary new-layout Save/Load"),F.Save->Save(Slot,Error) && F.Save->Load(Slot,Error));
+        TestTrue(TEXT("Current layout needs no migration"),F.Save->InspectSave(Slot,Info,Error) && !Info.bRequiresEryndorMigration && !Info.bRequiresCopperMigration);
+        FPFWorldSaveData Now;TestTrue(TEXT("Exactly25 nodes no duplicated identities"),F.Save->Capture(Now,Error) && Now.Resources.Num()==25);
+        Added.Last()->ResourceId=TEXT("Node_Wood");TestFalse(TEXT("Unknown authored definition refuses"),F.Save->Load(Slot,Error));Added.Last()->ResourceId=TEXT("Node_Titanium");
+    }
+    F.Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Eryndor.Layout: exact15/16->25 manifests, read-only preflight, original envelope/UTC, repeated Load/current Save and unknown-definition refusal verified."));return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEryndorHarvestMatrixTest,"PF.Eryndor.HarvestMatrix",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FPFEryndorHarvestMatrixTest::RunTest(const FString&)
+{
+    AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"),EAutomationExpectedMessageFlags::Contains,0);
+    FCopperWorld F;if(!F.Start()){return false;}FString Error;
+    F.I->Catalog=NewObject<UPFItemCatalog>(F.I);F.C->Catalog=NewObject<UPFCraftingCatalog>(F.C);
+    const TCHAR* Names[]={TEXT("Coal"),TEXT("Flint"),TEXT("Iron"),TEXT("Diamond"),TEXT("Gold"),TEXT("Silver"),TEXT("Quartz"),TEXT("Obsidian"),TEXT("Titanium")};
+    TestTrue(TEXT("Real carried top mechanical tool"),F.I->Grant(TEXT("Item_TitaniumPick"),1));
+    for(int32 N=0;N<9;++N)
+    {
+        const FTransform At(FVector(3500,N*400,60));auto* Node=F.W->SpawnActorDeferred<APFResourceNode>(APFResourceNode::StaticClass(),At);
+        Node->ResourceId=FName(*(FString(TEXT("Node_"))+Names[N]));Node->FinishSpawning(At);
+        const auto* D=F.C->Catalog->Resource(Node->ResourceId,F.I->Catalog);
+        if(!TestNotNull(TEXT("Actual saved definition"),D)){return false;}
+        TestTrue(TEXT("Actual first-person trace for each mineral"),F.Aim(Node));
+        TestTrue(TEXT("Compatible owned gather for each mineral"),Node->Gather(F.P,&Error));F.Tick(.6f);
+        TestTrue(TEXT("Seven hits exactly fourteen yield; one hit left"),Node->HitsRemaining==1 && F.I->Count(D->YieldItem)==14);
+        TestTrue(TEXT("Recover bag capacity without deleting other item types"),F.I->RemoveItem(D->YieldItem,14));
+        TestTrue(TEXT("Second finite action"),Node->Gather(F.P,&Error));F.Tick(.6f);
+        TestTrue(TEXT("Remaining one hit yields two"),Node->HitsRemaining==0 && F.I->Count(D->YieldItem)==2);
+        const int32 XP=F.G->GetExperience();TestFalse(TEXT("Depleted node cannot duplicate"),Node->Gather(F.P,&Error));
+        TestEqual(TEXT("Failed request yields no XP"),F.G->GetExperience(),XP);
+        TestTrue(TEXT("Remove actual two yields"),F.I->RemoveItem(D->YieldItem,2));
+        TestTrue(TEXT("Remove actual tool"),F.I->RemoveItem(TEXT("Item_TitaniumPick"),1));
+        TestTrue(TEXT("Reset finite fixture before denial"),Node->RestorePersistence(D->Hits,0));
+        TestFalse(TEXT("No cached capability after removal"),Node->Gather(F.P,&Error));TestEqual(TEXT("Denied mineral unchanged"),Node->HitsRemaining,D->Hits);
+        TestTrue(TEXT("Reacquire actual capability"),F.I->Grant(TEXT("Item_TitaniumPick"),1));F.Tick(.6f);
+    }
+    TestEqual(TEXT("All nine ores share one bounded five-action XP window"),F.G->GetExperience(),25);
+    F.Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] Eryndor.HarvestMatrix: all9 actual traced mineral nodes; exact finite yield/depletion, tool removal refusal and shared25XP cap; explicit carried-tool seed, no earned-tier claim."));return true;
+}
 #endif

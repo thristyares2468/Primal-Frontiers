@@ -1,5 +1,7 @@
 # Trello task workflow
 
+October15 current scope supersedes historical no-Iron-before-Copper statements below: user authorizes remaining OFFLINE features in independently tested slices. COPPER_LOOP remains unreported but is not an implementation stop. Eryndor task zg9mp2Tl has completed Editor/Game,13distinct native tests,2renders and10network-role reports; exact evidence ERYNDOR_TIERS_M12.md. Update its bounded Done status before the next task. MainM12/eight-tier parent remain incomplete for stations, dimensions/Deepforge/poweredRiftglass/ancient path; hosting/database/voice remain deferred. Personal observations and unrelated assignments/deadlines are preserved.
+
 Archive staging exposed pre-existing mixed CRLF/trailing whitespace in the byte-preserved journal. Retain its verified bytes rather than edit history; exact archive path additionally unsets whitespace checks, leaving current source/docs checks unchanged. This is a historical formatting exception, not compiler/test suppression. Recheck staged archive identity and current-document diff before publication.
 
 Current-state reconciliation HceFnIRH Done/complete readback after archive SHA256 equality,80-line current handoff,0missing relative links/0stale running claims and exact archive text/filter attribute verification. All three bounded tasks this continuation are complete; parentM18 remainsDoing/incomplete, existing Personal2 COPPER_LOOP is the next required playable progression gate. No new user task/acceptance or Unreal launch. Documentation-only scoped Sol publication follows.
