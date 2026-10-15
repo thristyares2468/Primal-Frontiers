@@ -1,3 +1,5 @@
 *.psd filter=lfs diff=lfs merge=lfs -text
 *.uasset filter=lfs diff=lfs merge=lfs -text
 *.umap filter=lfs diff=lfs merge=lfs -text
+# Preserve the archived status journal's verified bytes across Windows checkouts.
+Docs/History/CURRENT_STATE_JOURNAL_2026_10_15.md -text -whitespace
