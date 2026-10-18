@@ -16,17 +16,51 @@ namespace
     {
         TUniquePtr<FArchive> File(IFileManager::Get().CreateFileReader(*Path, FILEREAD_Silent));
         if (!File || File->TotalSize() < HeaderBytes || File->TotalSize() > HeaderBytes + FPFSaveFileStore::MaxPayloadBytes) { return false; }
-        uint32 Magic = 0, Version = 0, Length = 0, Crc = 0;
-        FPFSavedFile Candidate;
-        *File << Magic << Version << Candidate.Generation << Candidate.SavedUtc << Length << Crc;
-        if (File->IsError() || Magic != FileMagic || Version != FileVersion || Candidate.Generation == 0 ||
-            Candidate.SavedUtc <= 0 || Candidate.SavedUtc > FDateTime::UtcNow().ToUnixTimestamp() + 60 ||
-            Length == 0 || Length != static_cast<uint32>(File->TotalSize() - HeaderBytes)) { return false; }
-        Candidate.Payload.SetNumUninitialized(Length);
-        File->Serialize(Candidate.Payload.GetData(), Length);
-        if (File->IsError() || FCrc::MemCrc32(Candidate.Payload.GetData(), Length) != Crc || !File->Close()) { return false; }
-        Out = MoveTemp(Candidate); return true;
+        TArray<uint8> Bytes;
+        Bytes.SetNumUninitialized(static_cast<int32>(File->TotalSize()));
+        File->Serialize(Bytes.GetData(), Bytes.Num());
+        if (File->IsError() || !File->Close()) { return false; }
+        FString Error;
+        return FPFSaveFileStore::DecodeEnvelope(Bytes, Out, Error);
     }
+}
+
+bool FPFSaveFileStore::DecodeEnvelope(const TArray<uint8>& Bytes, FPFSavedFile& Out, FString& Error)
+{
+    Error.Reset();
+    if (Bytes.Num() < HeaderBytes || Bytes.Num() > HeaderBytes + MaxPayloadBytes)
+    { Error = TEXT("Invalid save envelope size"); return false; }
+    FMemoryReader Reader(Bytes, true);
+    uint32 Magic=0, Version=0, Length=0, Crc=0;
+    FPFSavedFile Candidate;
+    Reader << Magic << Version << Candidate.Generation << Candidate.SavedUtc << Length << Crc;
+    if (Reader.IsError() || Magic!=FileMagic || Version!=FileVersion || Candidate.Generation==0 ||
+        Candidate.SavedUtc<=0 || Candidate.SavedUtc>FDateTime::UtcNow().ToUnixTimestamp()+60 ||
+        Length==0 || Length!=static_cast<uint32>(Bytes.Num()-HeaderBytes))
+    { Error=TEXT("Invalid save envelope header"); return false; }
+    Candidate.Payload.SetNumUninitialized(Length);
+    Reader.Serialize(Candidate.Payload.GetData(),Length);
+    if (Reader.IsError() || FCrc::MemCrc32(Candidate.Payload.GetData(),Length)!=Crc)
+    { Error=TEXT("Save envelope checksum mismatch"); return false; }
+    Out=MoveTemp(Candidate); return true;
+}
+
+bool FPFSaveFileStore::EncodeEnvelope(const FPFSavedFile& File, TArray<uint8>& Out, FString& Error)
+{
+    Error.Reset();
+    if (File.Payload.IsEmpty() || File.Payload.Num()>MaxPayloadBytes)
+    { Error=TEXT("Invalid save payload size"); return false; }
+    TArray<uint8> Bytes;
+    FMemoryWriter Writer(Bytes,true);
+    uint32 Magic=FileMagic, Version=FileVersion, Length=File.Payload.Num();
+    uint64 Generation=File.Generation;
+    int64 Utc=File.SavedUtc;
+    uint32 Crc=FCrc::MemCrc32(File.Payload.GetData(),File.Payload.Num());
+    Writer << Magic << Version << Generation << Utc << Length << Crc;
+    Bytes.Append(File.Payload);
+    FPFSavedFile Checked;
+    if (!DecodeEnvelope(Bytes,Checked,Error)) { return false; }
+    Out=MoveTemp(Bytes); return true;
 }
 
 bool FPFSaveFileStore::ValidSlot(const FString& Slot)

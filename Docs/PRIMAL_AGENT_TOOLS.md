@@ -1,5 +1,7 @@
 # Primal Agent Tools
 
+October18 M15: `PF.UploadCheckpoint Slot WorldId` and `PF.VerifyCheckpoint WorldId` expose dedicated-server-only asynchronous development checkpoint upload/verification. Pending and terminal command history/logs are distinct; no remote-load or automatic world-reset behavior. [Transport scope/evidence](CHECKPOINT_TRANSPORT_M15.md).
+
 October15 resource expansion: `PF.CheckSave` reports `RequiresEryndorMigration` separately from `RequiresCopperMigration`, including reviewed prior15/16→current25 layouts. Read-only preflight never publishes an archive or applies the world. [Current migration evidence](ERYNDOR_TIERS_M12.md).
 
 M18 adds `PF.CheckSave [slot]`, a non-Shipping authoritative read-only saved-file/catalog/map/layout/connected-membership inspection. It records structured metadata in normal command history without loading, saving or publishing migration backups. [Save inspection contract and evidence](SAVE_INSPECTION_M18.md) separates its pass from actual restoration.

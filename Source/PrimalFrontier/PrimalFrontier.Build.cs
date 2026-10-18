@@ -30,7 +30,9 @@ public class PrimalFrontier : ModuleRules
 		});
 
 		// Built-in bounded world-save metadata conversion (M8); no external plugin.
-		PrivateDependencyModuleNames.AddRange(new string[] { "Json", "JsonUtilities" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Json", "JsonUtilities", "HTTP" });
+		// The generic platform SHA256 asserts on Windows; use the engine's bundled OpenSSL.
+		AddEngineThirdPartyPrivateStaticDependencies(Target, "OpenSSL");
 		// Real keyboard automation uses the engine's platform input-device mapper.
 		PrivateDependencyModuleNames.Add("ApplicationCore");
 

@@ -35,6 +35,11 @@ bool FPFArgumentsTest::RunTest(const FString&)
         const FCommandSpec* S = CommandSpecs().FindByPredicate([&](const FCommandSpec& Entry) { return Entry.Name == Name; });
         return S && ValidateArguments(*S, Args).IsEmpty();
     };
+    TestTrue(TEXT("Upload command grammar"),Valid(TEXT("PF.UploadCheckpoint"),{TEXT("TestSlot"),TEXT("dev-world:1")}));
+    TestFalse(TEXT("Upload refuses paths"),Valid(TEXT("PF.UploadCheckpoint"),{TEXT("../Private"),TEXT("dev-world")}));
+    TestFalse(TEXT("Fetch refuses URL injection"),Valid(TEXT("PF.VerifyCheckpoint"),{TEXT("world?token=x")}));
+    TestTrue(TEXT("Checkpoint upload without dedicated server refused"),ExecuteCommand(TEXT("PF.UploadCheckpoint"),{TEXT("TestSlot"),TEXT("world")},nullptr,false).HasErrors());
+    TestTrue(TEXT("Checkpoint verify without dedicated server refused"),ExecuteCommand(TEXT("PF.VerifyCheckpoint"),{TEXT("world")},nullptr,false).HasErrors());
     for (const FCommandSpec& S : CommandSpecs())
     {
         TestNotNull(*S.Name, IConsoleManager::Get().FindConsoleObject(*S.Name));

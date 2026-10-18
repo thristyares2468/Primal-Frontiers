@@ -106,3 +106,5 @@ Config/                         Unreal project configuration
 ```
 
 For a file-by-file map of the C++ code, the authority pattern and how to add content, see `CODEBASE_GUIDE.md`.
+
+October18 M15 transport: `PFCheckpointClient` is an opt-in dedicated-server HTTP adapter, with process-environment credentials read only after authority checks, an allowlisted HTTPS endpoint,30s timeout and6MiB streamed response bound. `PFCheckpointProtocol` preserves the exact fileV1 .pfs envelope as Base64, originalUTC/generation, SHA256 (engine-bundled OpenSSL) and existing CRC. Public memory envelope APIs share the ordinary file reader's validation. Developer adapters asynchronously upload inspected existing saves or verify fetched bytes without publishing/restoring them; pending requests never report successful saves. Catalog/map/layout restore, production identity, writer leases and automatic startup/admission remain follow-up work. [Contract and evidence](CHECKPOINT_TRANSPORT_M15.md).

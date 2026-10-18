@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October18 — preserve local save bytes at the development HTTP boundary
+
+Carry the exact existing .pfs envelope, including generation and original saveUTC, inside the development checkpoint payload rather than converting item/owner/expiry records to a new database schema. Use SHA256 plus existing CRC and bound incoming bytes. Built-in Unreal HTTP and engine-bundled OpenSSL are the only added build dependencies; no plugin/download. The generic platform SHA256 function asserts on this installed Windows engine; a retained failed run demonstrated it, and OpenSSL replay passed. Restrict entrypoints to dedicated-server gameplay worlds before reading process-only secrets. No automatic remote restore or file overwrite in this first bridge; local save acknowledgment must not imply remote durability. Production identity, active-writer fencing, timeout reconciliation and admission-blocked restoration require their own gate. Details: CHECKPOINT_TRANSPORT_M15.md.
+
 ## October15 — replace unsuccessful Oracle signup with PlayFab evaluation plan
 
 User requests replacement setup after Oracle signup failure. Plan PlayFab x64 evaluation, retaining Neon and EOS candidate; proposed Cloudflare Workers Free provides a separate authenticated API host rather than assuming a persistent service inside a recycled MPS container. Explain this additional service before any implementation/dependency. Review required MPS payment method/account-specific quota first; no purchase or zero-cost guarantee. Add durable, bounded, versioned checkpoint/reallocation design before cloud use; preserve .pfs envelope/expiry semantics and single-world authority. No schema/storage migration/GSDK/API/provider implementation is made here. [Current guide](PLAYFAB_DATABASE_VOICE_SETUP.md).

@@ -53,6 +53,8 @@
 #include "World/PFWorldClock.h"
 #include "Persistence/PFWorldPersistence.h"
 #include "Persistence/PFSaveFileStore.h"
+#include "Persistence/PFCheckpointClient.h"
+#include "Persistence/PFCheckpointProtocol.h"
 #include "PFAssetPaths.h"
 
 namespace PF::AgentTools
@@ -103,6 +105,8 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.Teleport"), TEXT("X Y Z [PlayerId]: authority-only character teleport; collision, floor, 1km bounds; one player unless ID given."), TEXT(""), 3, 4, false, true},
         // Persistence (M8). Local server console only; never saves editor maps.
         {TEXT("PF.SaveWorld"), TEXT("[slot] Server: save bounded gameplay state under Saved/Persistence (default Survival)."), TEXT(""), 0, 1, false, true},
+        {TEXT("PF.UploadCheckpoint"), TEXT("Slot WorldId Dedicated server: asynchronously upload an existing inspected local save to the development backend; no local save or reset."), TEXT(""), 2, 2, false, true},
+        {TEXT("PF.VerifyCheckpoint"), TEXT("WorldId Dedicated server: asynchronously fetch/verify the remote envelope in memory; does not load a world or publish a file."), TEXT(""), 1, 1},
         {TEXT("PF.LoadWorld"), TEXT("[slot] Server: restore validated gameplay state on the same map (default Survival)."), TEXT(""), 0, 1, false, true},
         {TEXT("PF.CheckSave"), TEXT("[slot] Server: inspect saved file/catalog/map/layout and connected membership without loading or writing (default Survival); not a restore guarantee."), TEXT(""), 0, 1},
         // Gathering/crafting (M4) and building (M5).
@@ -143,6 +147,9 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
     if (A.Num() < S.MinArgs || A.Num() > S.MaxArgs) { return TEXT("Wrong argument count. Usage: ") + S.Name + TEXT(" ") + S.Help; }
     if ((S.Name == TEXT("PF.SaveWorld") || S.Name == TEXT("PF.LoadWorld") || S.Name==TEXT("PF.CheckSave")) && !A.IsEmpty() && !FPFSaveFileStore::ValidSlot(A[0]))
     { return TEXT("Save slot requires 1-64 ASCII letters, digits or underscores; paths are refused."); }
+    if (S.Name==TEXT("PF.UploadCheckpoint") && !FPFSaveFileStore::ValidSlot(A[0])) { return TEXT("Invalid local save slot"); }
+    if ((S.Name==TEXT("PF.UploadCheckpoint") || S.Name==TEXT("PF.VerifyCheckpoint")) && !FPFCheckpointProtocol::ValidWorldId(A.Last()))
+    { return TEXT("World ID requires 1-128 ASCII letters, digits, dot, underscore, colon or hyphen"); }
     if (S.Name == TEXT("PF.GiveItem") || S.Name == TEXT("PF.RemoveItem"))
     {
         int64 Quantity = 0;
@@ -501,6 +508,23 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
         // Editor commands only run in the editor world (not PIE or game processes).
         if (EditorCommand && (!World || World->WorldType == EWorldType::Editor)) { R = EditorCommand(Name, Args, World); }
         else { R.bNotImplemented = true; R.Add(TEXT("Info"), TEXT("NOT IMPLEMENTED"), FString(), TEXT("Requires editor backend outside PIE. Runtime gameplay reset/screenshot adapter is unavailable.")); }
+    }
+    else if (Name==TEXT("PF.UploadCheckpoint") || Name==TEXT("PF.VerifyCheckpoint"))
+    {
+        const FString RequestId=FGuid::NewGuid().ToString(EGuidFormats::Digits);
+        auto Complete=[Name,Map,Timestamp,RequestId,bLog](FPFCheckpointResult Result)
+        {
+            FResult Finished(Name,RequestId); Finished.Map=Map; Finished.StartedUtc=Timestamp;
+            Finished.Counts.Add(TEXT("HttpStatus"),Result.HttpStatus);
+            Finished.Add(Result.bSucceeded?TEXT("Info"):TEXT("Error"),Result.bSucceeded?TEXT("CheckpointComplete"):TEXT("CheckpointRejected"),RequestId,Result.Details);
+            History.Add(Finished); if(bLog){LogResult(Finished);}
+        };
+        FString Why;
+        const bool Started=Name==TEXT("PF.UploadCheckpoint") ?
+            FPFCheckpointClient::UploadSavedSlot(World,Args[0],Args[1],MoveTemp(Complete),Why) :
+            FPFCheckpointClient::Fetch(World,Args[0],1,MoveTemp(Complete),Why);
+        if (!Started) { Fail(R,TEXT("CheckpointRejected"),Why); }
+        else { R.Scope=RequestId; R.Add(TEXT("Warning"),TEXT("CheckpointPending"),RequestId,TEXT("Request queued; NOT a completed remote save/load. Wait for matching CheckpointComplete or CheckpointRejected, then export history.")); }
     }
     else if (Name == TEXT("PF.SaveWorld") || Name == TEXT("PF.LoadWorld") || Name == TEXT("PF.CheckSave") || Name == TEXT("PF.TestPersistence"))
     {

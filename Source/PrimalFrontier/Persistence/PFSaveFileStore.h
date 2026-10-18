@@ -19,6 +19,9 @@ public:
     static FString Path(const FString& Slot, bool bSecond);
     static bool Read(const FString& Slot, FPFSavedFile& Out, FString& Error);
     static bool Write(const FString& Slot, const TArray<uint8>& Payload, FString& Error);
+    /** Exact existing .pfs envelope for remote transport. No file/world mutation; failures preserve Out. */
+    static bool EncodeEnvelope(const FPFSavedFile& File, TArray<uint8>& Out, FString& Error);
+    static bool DecodeEnvelope(const TArray<uint8>& Bytes, FPFSavedFile& Out, FString& Error);
     /** Trusted migration preparation only; not called by normal Save/Load yet.
      *  Existing originals are never overwritten, including corrupt originals. */
     static FString OriginalPath(const FString& Slot,const FString& Edge);
