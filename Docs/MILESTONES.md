@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October19 — M15 live transport gate complete
+
+Fresh NullRHI dedicated process on the same open-world map fetched/verified the earlier remote file envelope at03:18:15.538UTC (request39E1C5EA45F5C0FF2435918DC4703A19); same-generation reupload safely returned expectedHTTP409 (975424F6473171D1D3C804BD781EA0A8). With prior upload acknowledgment, real Unreal→Cloudflare→Neon upload/read/duplicate gate passes. Exact `_Verify.log` and limits in CHECKPOINT_TRANSPORT_M15.md.24known startup warnings/14Python errors plus2Pendingwarnings/1expected409error; no fatal/ensure observed. AI could verify disposable port/PID/start time but Windows denied stopping it; owner cleanup command provided. No new code/build, automatic restore, played-progress, hosted/GSDK/EOS/voice or fullM15 acceptance.
+
 ## October19 — M15 real HTTPS upload checkpoint
 
 Owner-launched NullRHI dedicated server/open-world disposable slot `M15Cloud_d219dd365ca24ee88444666586217337`: local PF.SaveWorld PASS then real PF.UploadCheckpoint terminal PASS at03:12:56.649UTC, requestBC53D9054DF3364668E4FB83EED64A72 matching remote generation/checksum.0players/structures/pickups,2304payload bytes; not a played-progress/restoration test. Matching unique log under Saved/Logs reviewed:24known startup warnings/14Python startup errors and1expected Pending warning, no fatal/ensure observed. Live fetch/duplicate still pending; no code/build/new native run or fullM15 acceptance. Details CHECKPOINT_TRANSPORT_M15.md. Owner's parent PowerShell secret is not available to this chat's process; remaining diagnostic launch uses that same parent.
