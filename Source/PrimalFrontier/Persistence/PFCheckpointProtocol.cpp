@@ -8,13 +8,13 @@
 
 namespace
 {
-    bool Refuse(FString& Error, const TCHAR* Reason) { Error=Reason; return false; }
+    bool RefuseCheckpointRecord(FString& Error, const TCHAR* Reason) { Error=Reason; return false; }
 
     bool Checksum(const TArray<uint8>& Bytes, FString& Out, FString& Error)
     {
         uint8 Signature[SHA256_DIGEST_LENGTH];
         if (!SHA256(Bytes.GetData(),Bytes.Num(),Signature))
-        { return Refuse(Error,TEXT("SHA256 unavailable; checkpoint refused")); }
+        { return RefuseCheckpointRecord(Error,TEXT("SHA256 unavailable; checkpoint refused")); }
         Out=TEXT("sha256:")+BytesToHex(Signature,SHA256_DIGEST_LENGTH).ToLower(); return true;
     }
 
@@ -40,7 +40,7 @@ namespace
     {
         Error.Reset();
         if (!FPFCheckpointProtocol::ValidWorldId(WorldId) || Json.IsEmpty() || Json.Len()>FPFCheckpointProtocol::MaxResponseBytes)
-        { return Refuse(Error,TEXT("Invalid checkpoint identifier or response size")); }
+        { return RefuseCheckpointRecord(Error,TEXT("Invalid checkpoint identifier or response size")); }
         TSharedPtr<FJsonObject> Root;
         const TSharedPtr<FJsonObject>* Record=nullptr;
         bool Ok=false; FString Id; double Version=0;
@@ -48,14 +48,14 @@ namespace
             !Root->TryGetBoolField(TEXT("ok"),Ok) || !Ok || !Root->TryGetObjectField(TEXT("checkpoint"),Record) ||
             !(*Record)->TryGetStringField(TEXT("world_id"),Id) || Id!=WorldId ||
             !(*Record)->TryGetNumberField(TEXT("envelope_version"),Version) || Version!=1 || !SafeGeneration(*Record,Generation))
-        { return Refuse(Error,TEXT("Invalid checkpoint identity, version or generation")); }
+        { return RefuseCheckpointRecord(Error,TEXT("Invalid checkpoint identity, version or generation")); }
         const TSharedPtr<FJsonValue> Expiry=(*Record)->TryGetField(TEXT("expires_at"));
-        if (!Expiry) { return Refuse(Error,TEXT("Missing checkpoint expiration metadata")); }
+        if (!Expiry) { return RefuseCheckpointRecord(Error,TEXT("Missing checkpoint expiration metadata")); }
         if (Expiry->Type!=EJson::Null)
         {
             FString Text; FDateTime Date;
             if (!Expiry->TryGetString(Text) || !FDateTime::ParseIso8601(*Text,Date) || Date<=FDateTime::UtcNow())
-            { return Refuse(Error,TEXT("Expired or invalid checkpoint expiration")); }
+            { return RefuseCheckpointRecord(Error,TEXT("Expired or invalid checkpoint expiration")); }
         }
         Out=*Record; return true;
     }
@@ -72,7 +72,7 @@ bool FPFCheckpointProtocol::ValidWorldId(const FString& Id)
 bool FPFCheckpointProtocol::BuildUpload(const FString& WorldId,const FPFSavedFile& File,FString& Out,FString& Error)
 {
     Error.Reset(); TArray<uint8> Bytes; FString Digest;
-    if (!ValidWorldId(WorldId) || File.Generation>MaxGeneration) { return Refuse(Error,TEXT("Invalid world identity or unsafe remote generation")); }
+    if (!ValidWorldId(WorldId) || File.Generation>MaxGeneration) { return RefuseCheckpointRecord(Error,TEXT("Invalid world identity or unsafe remote generation")); }
     if (!FPFSaveFileStore::EncodeEnvelope(File,Bytes,Error) || !Checksum(Bytes,Digest,Error)) { return false; }
     auto Root=MakeShared<FJsonObject>(); auto Payload=MakeShared<FJsonObject>();
     Root->SetStringField(TEXT("world_id"),WorldId);
@@ -85,7 +85,7 @@ bool FPFCheckpointProtocol::BuildUpload(const FString& WorldId,const FPFSavedFil
     Root->SetObjectField(TEXT("payload"),Payload);
     FString Json;
     if (!FJsonSerializer::Serialize(Root,TJsonWriterFactory<TCHAR,TCondensedJsonPrintPolicy<TCHAR>>::Create(&Json)))
-    { return Refuse(Error,TEXT("Checkpoint serialization failed")); }
+    { return RefuseCheckpointRecord(Error,TEXT("Checkpoint serialization failed")); }
     Out=MoveTemp(Json); return true;
 }
 
@@ -93,19 +93,19 @@ bool FPFCheckpointProtocol::ReadDownload(const FString& WorldId,uint64 MinimumGe
 {
     TSharedPtr<FJsonObject> Record; uint64 Generation=0;
     if (!ReadRecord(Json,WorldId,Record,Generation,Error)) { return false; }
-    if (MinimumGeneration>MaxGeneration || Generation<MinimumGeneration) { return Refuse(Error,TEXT("Stale checkpoint generation refused")); }
+    if (MinimumGeneration>MaxGeneration || Generation<MinimumGeneration) { return RefuseCheckpointRecord(Error,TEXT("Stale checkpoint generation refused")); }
     const TSharedPtr<FJsonObject>* Payload=nullptr; FString Format,Encoded,Expected;
     if (!Record->TryGetObjectField(TEXT("payload"),Payload) || !(*Payload)->TryGetStringField(TEXT("format"),Format) ||
         Format!=TEXT("pf-pfs-base64-v1") || !(*Payload)->TryGetStringField(TEXT("envelope"),Encoded) ||
         Encoded.Len()>((FPFSaveFileStore::MaxPayloadBytes+34)/3)*4 || !Record->TryGetStringField(TEXT("checksum"),Expected))
-    { return Refuse(Error,TEXT("Invalid checkpoint payload format or size")); }
+    { return RefuseCheckpointRecord(Error,TEXT("Invalid checkpoint payload format or size")); }
     TArray<uint8> Bytes; FString Actual;
-    if (!FBase64::Decode(Encoded,Bytes) || FBase64::Encode(Bytes)!=Encoded) { return Refuse(Error,TEXT("Invalid checkpoint base64 envelope")); }
+    if (!FBase64::Decode(Encoded,Bytes) || FBase64::Encode(Bytes)!=Encoded) { return RefuseCheckpointRecord(Error,TEXT("Invalid checkpoint base64 envelope")); }
     if (!Checksum(Bytes,Actual,Error)) { return false; }
     FPFSavedFile Candidate;
-    if (Expected!=Actual) { return Refuse(Error,TEXT("Remote checkpoint SHA256 mismatch")); }
+    if (Expected!=Actual) { return RefuseCheckpointRecord(Error,TEXT("Remote checkpoint SHA256 mismatch")); }
     if (!FPFSaveFileStore::DecodeEnvelope(Bytes,Candidate,Error)) { return false; }
-    if (Candidate.Generation!=Generation) { return Refuse(Error,TEXT("Remote and envelope generation differ")); }
+    if (Candidate.Generation!=Generation) { return RefuseCheckpointRecord(Error,TEXT("Remote and envelope generation differ")); }
     Out=MoveTemp(Candidate); return true;
 }
 
@@ -116,6 +116,6 @@ bool FPFCheckpointProtocol::ReadAcknowledgement(const FString& WorldId,const FPF
     TArray<uint8> Bytes; FString Actual,Expected;
     if (!FPFSaveFileStore::EncodeEnvelope(Sent,Bytes,Error) || !Checksum(Bytes,Actual,Error)) { return false; }
     if (Generation!=Sent.Generation || !Record->TryGetStringField(TEXT("checksum"),Expected) || Expected!=Actual)
-    { return Refuse(Error,TEXT("Checkpoint acknowledgement does not match sent generation/checksum")); }
+    { return RefuseCheckpointRecord(Error,TEXT("Checkpoint acknowledgement does not match sent generation/checksum")); }
     return true;
 }

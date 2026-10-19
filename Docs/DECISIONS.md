@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## October19 — isolate source-engine server preparation
+
+Storage/access now permit the previously blocked source-server work. Match the installed actual5.8.3 patch with Epic's pinned5.8.3-release source in C:\UnrealSource; keep Launcher installation and main project engine association unchanged. Build against a managed isolated project worktree so generated source-engine binaries cannot replace ordinary Launcher-editor DLLs or touch personal saves. First gate Windows source Server compilation, then Editor/cook/local package and reviewed GSDK lifecycle. Limit compile concurrency for the32GB host; no paid hosted capacity before local verification. GSDK is downloaded outside the repo for review, not yet a game dependency. [Build gate](PLAYFAB_SERVER_BUILD_M15.md).
+
+First actual source Server build exposed checkpoint-private helper names colliding with legacy persistence files in unity. Rename those two helpers rather than disable unity or weaken warnings. Explicit `-DisableAdaptiveUnity` replay keeps the original four files together and passes; Editor and eight checkpoint/player-save regressions pass. No protocol/save behavior or schema change. Source compilation is now verified; cooking/packaging and GSDK remain separate gates.
+
 ## October18 — preserve local save bytes at the development HTTP boundary
 
 Carry the exact existing .pfs envelope, including generation and original saveUTC, inside the development checkpoint payload rather than converting item/owner/expiry records to a new database schema. Use SHA256 plus existing CRC and bound incoming bytes. Built-in Unreal HTTP and engine-bundled OpenSSL are the only added build dependencies; no plugin/download. The generic platform SHA256 function asserts on this installed Windows engine; a retained failed run demonstrated it, and OpenSSL replay passed. Restrict entrypoints to dedicated-server gameplay worlds before reading process-only secrets. No automatic remote restore or file overwrite in this first bridge; local save acknowledgment must not imply remote durability. Production identity, active-writer fencing, timeout reconciliation and admission-blocked restoration require their own gate. Details: CHECKPOINT_TRANSPORT_M15.md.

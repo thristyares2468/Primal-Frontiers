@@ -1,5 +1,7 @@
 # Multiplayer setup: server, database and proximity voice
 
+**October 19 current source result:** storage/source access and actual source5.8.3 Server compilation now pass. Two private checkpoint helper names were fixed for unity; explicit unity Server replay, Editor and8/8 focused regressions pass. The earlier48GiB blocker below is historical. Follow [current build/package gate](PLAYFAB_SERVER_BUILD_M15.md); no cooked/packaged/hosted/GSDK pass yet. Development Unreal→Cloudflare→Neon transport is separately verified in [checkpoint evidence](CHECKPOINT_TRANSPORT_M15.md).
+
 **Latest:** Oracle signup failed; [PlayFab / Neon / backend / EOS guide](PLAYFAB_DATABASE_VOICE_SETUP.md) is current. Payment method required for MPS enablement and recycled-session checkpoint durability are explicit gates. All provider recommendations below are historical alternatives, not current deployment proof.
 
 **Current free-first choice:** follow [Oracle / database / voice checklist](ORACLE_DATABASE_VOICE_SETUP.md). The OVH recommendation below is now a researched paid fallback, not a selected purchase. Dedicated Oracle public key and current owner steps are in the new guide; ARM packaging and account/capacity gates remain unverified.

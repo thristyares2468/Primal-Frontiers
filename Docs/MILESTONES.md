@@ -1,5 +1,11 @@
 # Primal Frontier milestone evidence
 
+## October 19 — M15 source Server target verified
+
+Separate official source5.8.3 at396c9f059903aed5fec78ecd3d437a40c6415368, isolated project33487b4 plus two helper renames. Dependencies exit0 /128672files/22526.4MiB;7301localLFS assets hydrated. Source Server explicit unity replay PASS52.15s/exit0; Editor PASS84.26s/exit0; no final compiler warnings/errors. Confirmed same unity source includes checkpoint/client/player-save files, not adaptive exclusion. Native `Automation_M15UnityFix_20261019_050439165_254032fb` passes8/8 existing checkpoint/player-save tests,60.8s/exits0/zero test+raw severity;2.986working/2.881privateGiB sampledpeak. Existing12setup contracts also pass. [Full evidence and artifact hash](PLAYFAB_SERVER_BUILD_M15.md).
+
+Initial dotted-argument RulesError and actual4798.78s/exit6 unity compilation failure retained. C4459 Endpoint shadowing and C2084 duplicate Refuse (24cascades) fixed only by file-specific checkpoint-private names; URL/protocol/save/schema/assets unchanged. Storage svt4pL1Y and source build aUP5dgfc Done/complete. Next bounded EGunz5f8 Doing: actual cook/stage/local package. No cook/GSDK/local-agent/hosted multiplayer/voice/fullM15 pass, paid allocation or private-world operation inferred.
+
 ## October19 — M15 live transport gate complete
 
 Fresh NullRHI dedicated process on the same open-world map fetched/verified the earlier remote file envelope at03:18:15.538UTC (request39E1C5EA45F5C0FF2435918DC4703A19); same-generation reupload safely returned expectedHTTP409 (975424F6473171D1D3C804BD781EA0A8). With prior upload acknowledgment, real Unreal→Cloudflare→Neon upload/read/duplicate gate passes. Exact `_Verify.log` and limits in CHECKPOINT_TRANSPORT_M15.md.24known startup warnings/14Python errors plus2Pendingwarnings/1expected409error; no fatal/ensure observed. AI could verify disposable port/PID/start time but Windows denied stopping it; owner cleanup command provided. No new code/build, automatic restore, played-progress, hosted/GSDK/EOS/voice or fullM15 acceptance.

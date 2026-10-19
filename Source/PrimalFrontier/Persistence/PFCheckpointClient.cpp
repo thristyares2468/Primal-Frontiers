@@ -11,7 +11,7 @@
 namespace
 {
     // Deliberate endpoint allowlist: environment credentials cannot be redirected to an arbitrary configured host.
-    const FString Endpoint=TEXT("https://primalfrontier-backend.jackherbig09.workers.dev/v1/checkpoints");
+    const FString CheckpointApiEndpoint=TEXT("https://primalfrontier-backend.jackherbig09.workers.dev/v1/checkpoints");
 
     class FBoundedCheckpointResponse final : public FArchive
     {
@@ -61,7 +61,7 @@ bool FPFCheckpointClient::Start(UWorld* World,const FString& WorldId,const FPFSa
     if (Secret.IsEmpty() || Secret.Len()>512 || Secret.Contains(TEXT("\r")) || Secret.Contains(TEXT("\n")))
     { Error=TEXT("Server process PF_API_SHARED_SECRET missing or invalid; no request sent"); return false; }
     TWeakObjectPtr<UWorld> WeakWorld=World;
-    return Send(Upload?Endpoint:Endpoint+TEXT("/")+WorldId,Secret,WorldId,Upload,MinimumGeneration,
+    return Send(Upload?CheckpointApiEndpoint:CheckpointApiEndpoint+TEXT("/")+WorldId,Secret,WorldId,Upload,MinimumGeneration,
         [WeakWorld]{return EligibleWorld(WeakWorld.Get());},MoveTemp(Complete),Error);
 }
 
