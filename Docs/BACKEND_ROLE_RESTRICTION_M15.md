@@ -1,9 +1,10 @@
 # M15 development checkpoint role correction preparation
 
 October21,2026. Trello8CGVNsjq. **Local12/12 and combined62/62 PASS.**
-No live correction executed. Owner grantor query is complete; current next action
-is preparing a NEW restricted NOLOGIN role through the tested script below.
-Existing managed pf_app/Worker connection stays unchanged. FullM15/audit incomplete.
+Owner has now executed the preparation and returned PF_RESTRICTED_ROLE_PREPARED
+with expected pf_checkpoint_app permissions and login disabled; [exact source](BACKEND_ROLE_OWNER_RESULT_M15.json).
+No agent-side live mutation. Existing managed pf_app/Worker connection stays
+unchanged. Private login/cutover and fullM15/audit remain incomplete.
 
 ## Finding / provenance
 
@@ -133,7 +134,8 @@ Expect62/62/exit0 and unchanged legacy marker. Narrow replay:
 `node --test --test-concurrency=1 --test-reporter=tap --test-name-pattern="exact role patch restricts app" role-permissions.test.mjs`.
 Any failed/missing test stops expansion; preserve log and fix only this scope.
 
-Owner **current** next action (Personal1 hKddPkEg):
+Owner preparation guide below is now COMPLETE per actual returned result; retain
+for reproduction, do not request it again unnecessarily:
 
 1. Open project aged-resonance-28932410 > Development br-red-fog-a7mp3ux7 > SQL Editor.
 2. Confirm database neondb and role neondb_owner. Do not select Production.
@@ -153,3 +155,24 @@ connection and disposable write/read/duplicate verification pass; then retire ol
 runtime credential separately. No current live restriction/authentication/branch
 binding/hosted-fencing pass implied. SQL-created role branching/password behavior
 needs its own deployment policy; no automatic password-rotation claim.
+
+## Current next action — Development endpoint hostname only
+
+No level/net mode/Unreal required. Start here: Neon Development branch > Connect.
+Confirm Development br-red-fog-a7mp3ux7 and database neondb. The role in this
+dialog may remain an existing role; only the shared branch endpoint host is
+needed, not an owner credential. If SQL-created pf_checkpoint_app is absent from
+the dropdown, do not recreate it through Console/API (that would grant managed
+privileges again). Read the hostname between @ and /neondb in the shown URL;
+send ONLY that hostname, e.g. ep-example-pooler.ap-southeast-2.aws.neon.tech.
+Do not send the full URL/password. Pooled host is fine; note which compute/branch
+is selected. If no connection string is shown, return the visible issue instead
+of guessing a host or selecting Production.
+
+Reference: [Neon connection details](https://neon.com/docs/connect/connect-from-any-app).
+The SQL row/database name cannot identify a Neon branch endpoint. This missing
+nonsecret target prevents preparing the exact private credential/cutover step;
+agent tools currently expose no Neon endpoint lookup and native browser use
+stopped on URL-confidence enforcement. Host provision will not by itself prove
+the existing encrypted Worker binding. Keep role NOLOGIN until separately
+reviewed credential provisioning; existing connection stays available.

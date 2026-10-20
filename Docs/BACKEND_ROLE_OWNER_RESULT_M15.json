@@ -25,6 +25,18 @@
     { "granted_role": "neon_superuser", "member": "neondb_owner", "granted_by": "cloud_admin", "admin_option": false, "inherit_option": true, "set_option": true },
     { "granted_role": "neon_superuser", "member": "pf_app", "granted_by": "cloud_admin", "admin_option": false, "inherit_option": true, "set_option": true }
   ],
-  "assessment": "Current Worker source needs SELECT and INSERT only; least privilege fails due elevated role attributes/membership and UPDATE/DELETE. Both managed grants are by cloud_admin without owner ADMIN option shown. Reject in-place demotion; prepare a separate SQL-created restricted staging role. No correction executed.",
+  "preparedRoleResult": {
+    "source": "Owner-pasted result after running Scripts/PrepareDevelopmentCheckpointRole.sql on reported Development/neondb on October21 2026",
+    "status": "PF_RESTRICTED_ROLE_PREPARED",
+    "app_role": "pf_checkpoint_app",
+    "login_enabled": false,
+    "can_create_database": false,
+    "can_create_roles": false,
+    "can_read": true,
+    "can_insert": true,
+    "can_update": false,
+    "can_delete": false
+  },
+  "assessment": "Owner confirms restricted staging role prepared with expected permissions and login disabled. Old managed pf_app remains elevated and unchanged. Private login, exact Development endpoint and Worker credential cutover/old credential retirement remain pending; full least-privilege runtime audit is not complete.",
   "limits": "SQL result does not authenticate the reported Neon branch, reveal current Worker binding, inspect all role ownership or certify later hosted-fencing authorization. Production untouched."
 }
