@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October20 — M15 live development schema metadata verified
+
+Restored Neon connection succeeds: project primalfrontier-dev/aged-resonance-28932410, Sydney/PG18; explicit Development br-red-fog-a7mp3ux7/neondb, parent production untouched. Three metadata reads succeed; five actual-result comparisons pass for exact seven-column contract, primary key, generation/version bounds and descending latest index. Development tree shows no pf_world_leases. Snapshot BACKEND_SCHEMA_SNAPSHOT_M15.json and exact no-level reproduction/limits in BACKEND_ACCESS_AUDIT_M15.md. No row/payload reads requested. Tools omit SQL and local Neon CLI absent: pf_app grants/membership, ownership/RLS and Worker branch binding remain unverified; prepared audit SQL unexecuted. Connection/URL owner actions resolved, hKddPkEg AI/ProgrammingDoing for remaining audit and parentM15 incomplete. No runtime/schema/Worker/plan/capacity change, build/Unreal launch or full hosted pass. Next independent AI scope is offline reviewed writer-fencing contract; live changes require remaining audit and isolated migration validation first. Earlier unavailable-tool entries below are historical.
+
 ## October20 — M15 branch targeting resolved, connection unavailable
 
 Owner supplied project aged-resonance-28932410, development br-red-fog-a7mp3ux7, production br-twilight-bread-a7rjhss5 and neondb. Development is the explicit read-only audit target; production remains untouched. Fresh capability inventory contains no Neon tools and discovery reports installed:false, superseding earlier connection snapshots. No live query/schema verification or migration executed; owner only re-enables/connects Neon for this chat, no repeated URLs/credentials/database setup. hKddPkEg and parent status reconciled; M15 remains incomplete. Exact targets and limits: BACKEND_ACCESS_AUDIT_M15.md.

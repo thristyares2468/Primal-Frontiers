@@ -1,0 +1,165 @@
+{
+  "recordedUtc": "2026-10-20T03:19:41Z",
+  "scope": "Read-only development metadata; no saved payloads",
+  "project": {
+    "id": "aged-resonance-28932410",
+    "name": "primalfrontier-dev",
+    "region": "aws-ap-southeast-2",
+    "pgVersion": 18,
+    "reportedSubscription": "launch_v3",
+    "projectDefaultEndpointSettings": {
+      "autoscaling_limit_min_cu": 0.25,
+      "autoscaling_limit_max_cu": 8,
+      "suspend_timeout_seconds": 0
+    }
+  },
+  "branch": {
+    "id": "br-red-fog-a7mp3ux7",
+    "name": "Development",
+    "parentId": "br-twilight-bread-a7rjhss5",
+    "default": false,
+    "protected": false,
+    "database": "neondb"
+  },
+  "toolsUsed": [
+    "describe_project",
+    "describe_branch",
+    "describe_table_schema"
+  ],
+  "table": "public.pf_checkpoints",
+  "schema": {
+    "columns": [
+      {
+        "name": "world_id",
+        "type": "text",
+        "nullable": false,
+        "default": null,
+        "description": null
+      },
+      {
+        "name": "generation",
+        "type": "bigint",
+        "nullable": false,
+        "default": null,
+        "description": null
+      },
+      {
+        "name": "envelope_version",
+        "type": "integer",
+        "nullable": false,
+        "default": null,
+        "description": null
+      },
+      {
+        "name": "checksum",
+        "type": "text",
+        "nullable": false,
+        "default": null,
+        "description": null
+      },
+      {
+        "name": "payload",
+        "type": "jsonb",
+        "nullable": false,
+        "default": null,
+        "description": null
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "nullable": false,
+        "default": "now()",
+        "description": null
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "nullable": true,
+        "default": null,
+        "description": null
+      }
+    ],
+    "indexes": [
+      {
+        "name": "pf_checkpoints_pkey",
+        "definition": "CREATE UNIQUE INDEX pf_checkpoints_pkey ON public.pf_checkpoints USING btree (world_id, generation)",
+        "size": "8192 bytes"
+      },
+      {
+        "name": "pf_checkpoints_world_latest_idx",
+        "definition": "CREATE INDEX pf_checkpoints_world_latest_idx ON public.pf_checkpoints USING btree (world_id, generation DESC)",
+        "size": "8192 bytes"
+      }
+    ],
+    "constraints": [
+      {
+        "name": "pf_checkpoints_checksum_not_null",
+        "type": "CHECK",
+        "definition": "NOT NULL checksum"
+      },
+      {
+        "name": "pf_checkpoints_created_at_not_null",
+        "type": "CHECK",
+        "definition": "NOT NULL created_at"
+      },
+      {
+        "name": "pf_checkpoints_envelope_version_check",
+        "type": "CHECK",
+        "definition": "CHECK ((envelope_version > 0))"
+      },
+      {
+        "name": "pf_checkpoints_envelope_version_not_null",
+        "type": "CHECK",
+        "definition": "NOT NULL envelope_version"
+      },
+      {
+        "name": "pf_checkpoints_generation_check",
+        "type": "CHECK",
+        "definition": "CHECK ((generation >= 0))"
+      },
+      {
+        "name": "pf_checkpoints_generation_not_null",
+        "type": "CHECK",
+        "definition": "NOT NULL generation"
+      },
+      {
+        "name": "pf_checkpoints_payload_not_null",
+        "type": "CHECK",
+        "definition": "NOT NULL payload"
+      },
+      {
+        "name": "pf_checkpoints_pkey",
+        "type": "PRIMARY KEY",
+        "definition": "PRIMARY KEY (world_id, generation)"
+      },
+      {
+        "name": "pf_checkpoints_world_id_not_null",
+        "type": "CHECK",
+        "definition": "NOT NULL world_id"
+      }
+    ],
+    "tableSize": "0 bytes",
+    "indexSize": "24 kB",
+    "totalSize": "24 kB"
+  },
+  "contractChecks": {
+    "sevenColumnContract": true,
+    "primaryKey": true,
+    "generationBound": true,
+    "versionBound": true,
+    "latestIndex": true
+  },
+  "objectTreeFinding": "pf_checkpoints and two indexes returned; pf_world_leases not shown",
+  "unverified": [
+    "runtime pf_app existence/memberships/grants",
+    "table/schema ownership and RLS policies",
+    "Cloudflare runtime secret branch/role binding",
+    "full metadata SQL transaction",
+    "production schema or data"
+  ],
+  "limitations": [
+    "No run_sql/inspect_database exposed; no Neon CLI command found",
+    "Snapshot sizes are provider estimates, not a row count",
+    "No migration, grants, deployment or gameplay test"
+  ]
+}
