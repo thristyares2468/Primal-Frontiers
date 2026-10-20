@@ -12,6 +12,8 @@ Owner's second query now reports BOTH neon_superuser memberships (neondb_owner a
 
 Update October21: owner executed the preparation script and returned PF_RESTRICTED_ROLE_PREPARED for pf_checkpoint_app: login/createDatabase/createRoles/update/delete false, read/insert true. Exact owner-result snapshot now includes preparedRoleResult. Operator preparation is COMPLETE; private credential activation/actual Development endpoint/Worker cutover and retirement remain pending. Next owner supplies only the Development hostname from Connect; no repeated role query/account setup/password request. Old managed role is not silently treated as restricted, and full audit remains incomplete.
 
+Latest October21: owner supplies Development pooled hostname ep-autumn-cell-a7d9uojb-pooler.ap-southeast-2.aws.neon.tech; endpoint-target input resolved (owner provenance, not existing Worker binding proof). [One-time login preparation](CHECKPOINT_LOGIN_SETUP_M15.md) passes5focused/67combined local tests; actual activation/private fresh login/cutover still pending. No generated credential values enter this audit. Owner next action is exact activation script/private output, not another hostname/role/account query.
+
 ## Verified development target
 
 Authenticated project description succeeds for project `aged-resonance-28932410`, named `primalfrontier-dev`, region `aws-ap-southeast-2` (Sydney), PostgreSQL18. Explicit development description confirms name `Development`, branch `br-red-fog-a7mp3ux7`, parent `br-twilight-bread-a7rjhss5`, non-default and not protected. Database inspected: `neondb`. Production branch was not queried directly or modified. Project metadata necessarily identifies the parent; it does not verify production schema/data.

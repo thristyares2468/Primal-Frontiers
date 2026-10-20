@@ -26,7 +26,7 @@ On this host, pnpm is available at
 Node is on PATH; use the full pnpm path if required. First installation needs
 the public package registry. Test execution itself needs no network.
 
-Expect **62 tests PASS** (30SQL/composed +20ingress +12role-preparation/safety), process exit0, `LEGACY_PUBLIC_FIXTURE_UNCHANGED true` and
+Expect **67 tests PASS** (30SQL/composed +20ingress +17role-preparation/login/safety), process exit0, `LEGACY_PUBLIC_FIXTURE_UNCHANGED true` and
 the actual database version/RSS printed. On any assertion/SQL failure, stop;
 preserve output, fix this bounded prototype and replay the failed selector.
 Use `--test-name-pattern="exact test title"` before the filename for a narrow
@@ -50,6 +50,13 @@ failure-safety tests, including unmanageable original grantor. Owner evidence
 shows cloud_admin managed grants; do NOT use that rejected script on Neon.
 No DSN/network call; Neon administration/fresh-login behavior is not emulated.
 Read Docs/BACKEND_ROLE_RESTRICTION_M15.md for the actual phased handoff.
+
+Five additional tests exercise the exact one-time activation script with synthetic
+credentials only: exact-host private URL/SCRAM, refused retry without rotation,
+unsafe permissions/missing role/wrong owner and transaction-local URL cleanup.
+Generated passwords/URLs/verifiers must never be printed in test output. This
+does not test a real Neon password login; Docs/CHECKPOINT_LOGIN_SETUP_M15.md has
+the current owner action and private-output handling.
 
 - One retained `worlds` row per world serializes acquire, renew, release and
   checkpoint commit using `SELECT ... FOR UPDATE`. Never delete that row to

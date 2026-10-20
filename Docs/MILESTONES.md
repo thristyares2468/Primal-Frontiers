@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October21 — M15 one-time restricted login preparation PASS locally
+
+Owner supplies Development pooled hostname, completing target-input prerequisite. Exact activation script validates inactive restricted role/context/effective rights, generates private exact-host URL/password in PostgreSQL, enables LOGIN once with SCRAM and clears transaction-local output; rejects accidental rerun/unsafe contexts. Five focused/67combined local tests PASS, final5.219s/exit0/no skipped/cancel/todo, legacy fixture and old app/data unchanged; generated secrets absent from output. No C++/Unreal build needed, no real Neon activation/network authentication/Worker change or fullM15 pass. Evidence and one-script owner guide CHECKPOINT_LOGIN_SETUP_M15.md. Current next Personal1 action is activation/private result with CHECKPOINT_LOGIN_READY; candidate connection verification/cutover remains future.
+
 ## October21 — owner confirms restricted development role prepared
 
 Owner SQL result PF_RESTRICTED_ROLE_PREPARED exactly matches staged pf_checkpoint_app expectations: login/createDB/createRole/update/delete false, read/insert true. Recorded with owner provenance in BACKEND_ROLE_OWNER_RESULT_M15.json. Preparation action complete; no repeat script requested. Old managed app/Worker unchanged; no login/password/cutover or full audit/M15 pass. Next owner supplies nonsecret Development endpoint hostname only so AI can prepare exact private connection flow. Documentation/metadata validation only; no new build/Unreal test warranted.

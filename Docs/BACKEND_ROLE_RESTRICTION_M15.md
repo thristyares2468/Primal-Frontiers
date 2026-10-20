@@ -130,7 +130,7 @@ evidence remains separate. No rendered/FPS/gameplay/manual/provider acceptance.
 
 AI local test: no level, net mode, Unreal instance or credentials. Start here in
 Tools/BackendFencingPrototype with pinned install from README, run pnpm test.
-Expect62/62/exit0 and unchanged legacy marker. Narrow replay:
+Current checkout expects67/67/exit0 (five login tests added by [follow-up](CHECKPOINT_LOGIN_SETUP_M15.md)); recorded62-run above remains historical. Expect unchanged legacy marker. Narrow replay:
 `node --test --test-concurrency=1 --test-reporter=tap --test-name-pattern="exact role patch restricts app" role-permissions.test.mjs`.
 Any failed/missing test stops expansion; preserve log and fix only this scope.
 
@@ -156,7 +156,7 @@ runtime credential separately. No current live restriction/authentication/branch
 binding/hosted-fencing pass implied. SQL-created role branching/password behavior
 needs its own deployment policy; no automatic password-rotation claim.
 
-## Current next action — Development endpoint hostname only
+## Hostname handoff — completed, retained for reference
 
 No level/net mode/Unreal required. Start here: Neon Development branch > Connect.
 Confirm Development br-red-fog-a7mp3ux7 and database neondb. The role in this
@@ -176,3 +176,8 @@ agent tools currently expose no Neon endpoint lookup and native browser use
 stopped on URL-confidence enforcement. Host provision will not by itself prove
 the existing encrypted Worker binding. Keep role NOLOGIN until separately
 reviewed credential provisioning; existing connection stays available.
+
+October21 owner supplies ep-autumn-cell-a7d9uojb-pooler.ap-southeast-2.aws.neon.tech;
+hostname action COMPLETE, do not request it again. Current next action is the
+[tested one-time private login script](CHECKPOINT_LOGIN_SETUP_M15.md), pending
+owner execution. Old Worker credential/connection unchanged.

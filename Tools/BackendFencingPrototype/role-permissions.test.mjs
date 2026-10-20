@@ -7,6 +7,7 @@ import { PGlite } from '@electric-sql/pglite';
 // staging script run on synthetic PG18 roles/data only; no Neon-admin emulation.
 const patch = await readFile(new URL('./rejected-inplace-role.sql', import.meta.url), 'utf8');
 const prepare = await readFile(new URL('../../Scripts/PrepareDevelopmentCheckpointRole.sql', import.meta.url), 'utf8');
+const activate = await readFile(new URL('../../Scripts/ActivateDevelopmentCheckpointLogin.sql', import.meta.url), 'utf8');
 const baseline = await readFile(new URL('./baseline.sql', import.meta.url), 'utf8');
 let db;
 let peakRss = 0;
@@ -176,4 +177,55 @@ test('PUBLIC broad rights roll back new role creation without changing other rol
   await db.exec('ROLLBACK');
   assert.equal((await db.query("SELECT count(*)::int AS count FROM pg_roles WHERE rolname='pf_checkpoint_app'")).rows[0].count, 0);
   assert.deepEqual(await appMetadata(), oldRole);
+});
+
+test('one-time activation generates private exact-host URL and SCRAM hash without changing old app/data', async () => {
+  await db.exec(prepare);
+  const oldRole = await appMetadata(); const rows = await data();
+  const result = (await db.exec(activate)).find(r => r.rows[0]?.neon_database_url)?.rows[0];
+  assert.ok(result?.status === 'PF_CHECKPOINT_LOGIN_ENABLED');
+  // Never log generated passwords, URLs, hashes or assertion operands containing them.
+  const url = new URL(result.neon_database_url);
+  assert.ok(url.username === 'pf_checkpoint_app');
+  assert.ok(url.hostname === 'ep-autumn-cell-a7d9uojb-pooler.ap-southeast-2.aws.neon.tech');
+  assert.ok(url.pathname === '/neondb' && url.searchParams.get('sslmode') === 'require');
+  assert.ok(/^[a-f0-9]{64}$/.test(url.password));
+  assert.deepEqual(await appMetadata(), oldRole);
+  assert.deepEqual(await data(), rows);
+  assert.equal((await db.query("SELECT rolcanlogin FROM pg_roles WHERE rolname='pf_checkpoint_app'")).rows[0].rolcanlogin, true);
+  await db.exec('RESET ROLE');
+  assert.equal((await db.query(`SELECT rolpassword IS NOT NULL AND rolpassword LIKE 'SCRAM-SHA-256$%' AS hashed
+    FROM pg_authid WHERE rolname='pf_checkpoint_app'`)).rows[0].hashed, true);
+  const local = (await db.query("SELECT current_setting('pf.private_checkpoint_url',true) AS value")).rows[0].value;
+  assert.ok(!local, 'private transaction-local URL must not survive COMMIT');
+});
+test('activation retry refuses without replacing the first credential', async () => {
+  await db.exec(prepare); await db.exec(activate);
+  await db.exec('RESET ROLE');
+  const original = (await db.query("SELECT rolpassword FROM pg_authid WHERE rolname='pf_checkpoint_app'")).rows[0].rolpassword;
+  await db.exec('SET ROLE neondb_owner');
+  await assert.rejects(db.exec(activate), /PF_LOGIN_REFUSED: login already enabled/);
+  await db.exec('ROLLBACK; RESET ROLE');
+  const current = (await db.query("SELECT rolpassword FROM pg_authid WHERE rolname='pf_checkpoint_app'")).rows[0].rolpassword;
+  assert.ok(current === original, 'refused retry must not reset a credential');
+});
+test('activation refuses extra effective mutation privilege and leaves staging disabled', async () => {
+  await db.exec(prepare);
+  await db.exec('GRANT UPDATE ON public.pf_checkpoints TO pf_checkpoint_app');
+  await assert.rejects(db.exec(activate), /PF_LOGIN_REFUSED: effective checkpoint privileges/);
+  await db.exec('ROLLBACK');
+  assert.equal((await db.query("SELECT rolcanlogin FROM pg_roles WHERE rolname='pf_checkpoint_app'")).rows[0].rolcanlogin, false);
+});
+test('activation refuses missing staging role without creating credentials or touching old app', async () => {
+  const oldRole = await appMetadata();
+  await assert.rejects(db.exec(activate), /PF_LOGIN_REFUSED: restricted staging role/);
+  await db.exec('ROLLBACK');
+  assert.deepEqual(await appMetadata(), oldRole);
+});
+test('activation refuses wrong inspection identity and clears private URL on rollback', async () => {
+  await db.exec(prepare); await db.exec('RESET ROLE');
+  await assert.rejects(db.exec(activate), /PF_LOGIN_REFUSED: select Development\/neondb and neondb_owner/);
+  await db.exec('ROLLBACK');
+  assert.ok(!(await db.query("SELECT current_setting('pf.private_checkpoint_url',true) AS value")).rows[0].value);
+  assert.equal((await db.query("SELECT rolcanlogin FROM pg_roles WHERE rolname='pf_checkpoint_app'")).rows[0].rolcanlogin, false);
 });
