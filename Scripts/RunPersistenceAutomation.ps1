@@ -15,7 +15,9 @@ param(
     [ValidateRange(1024, 65535)][int]$Port = 17989,
     [ValidateRange(30, 600)][int]$TimeoutSeconds = 210,
     [string]$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8',
-    [string]$ProjectRoot = ''
+    [string]$ProjectRoot = '',
+    # Optional cooked WindowsServer archive; clients still use the isolated Editor project.
+    [string]$PackagedServerRoot = ''
 )
 
 Set-StrictMode -Version Latest
@@ -51,6 +53,22 @@ try {
     foreach ($required in @($projectFile, $editor, $inspector)) {
         if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw 'Required project, engine or verdict tool missing' }
     }
+    $packageRoot = $null; $serverExecutable = $null
+    if (-not [string]::IsNullOrWhiteSpace($PackagedServerRoot)) {
+        if (@(@($ToolProgression,$WeaponProgression,$Protection,$Knowledge,$WeaponKnowledge,$AuthoredEcology,$PlayerStats,$Copper,$Stations) | Where-Object { $_ }).Count) {
+            throw 'Packaged baseline supports only PF.Persistence.Live; choose no additional fixture'
+        }
+        $packageRoot = Get-SafeFullPath $PackagedServerRoot
+        $serverExecutable = Join-Path $packageRoot 'PrimalFrontier\Binaries\Win64\PrimalFrontierServer.exe'
+        $packagePaks = Join-Path $packageRoot 'PrimalFrontier\Content\Paks'
+        $reportTemplate = Join-Path $packageRoot 'Engine\Content\Automation\Report-Template.html'
+        if (!(Test-Path -LiteralPath $serverExecutable -PathType Leaf) -or
+            !(Test-Path -LiteralPath $reportTemplate -PathType Leaf) -or
+            !(Test-Path -LiteralPath $packagePaks -PathType Container) -or
+            !@(Get-ChildItem -LiteralPath $packagePaks -File -Filter '*.utoc').Count) {
+            throw 'Packaged Server executable, automation report template or cooked IoStore containers missing'
+        }
+    }
     if (@(Get-Process -Name UnrealEditor, UnrealEditor-Cmd -ErrorAction SilentlyContinue).Count) {
         throw 'Existing Editor session; finish it before live automation'
     }
@@ -69,6 +87,7 @@ try {
     if($PlayerStats){$prefix='M12StatsLive'+$Players+'_'+$stamp;$testFilter='PF.Progression.StatsLive';$testFlag='-PFRunStatsTests'}
     if($Copper){$prefix='M12CopperLive'+$Players+'_'+$stamp;$testFilter='PF.Persistence.CopperLive';$testFlag='-PFRunCopperMigrationTests'}
     if($Stations){$prefix='M12StationLive'+$Players+'_'+$stamp;$testFilter='PF.Crafting.StationsNetwork';$testFlag='-PFRunCraftingLiveTests -PFRunStationNetworkTests'}
+    if($packageRoot){$prefix='M8PackagedLive'+$Players+'_'+$stamp}
     $slot = 'Automation' + $prefix
     # Profiles are private local test state. Same aliases and endpoint survive both phases.
     $profile = 'PF' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
@@ -96,7 +115,8 @@ try {
         SimulatedOutgoingLossPercent = $(if ($SimulateLagLoss) { 1 } else { 0 })
         PhaseTimeoutSeconds = $TimeoutSeconds; Phases = @(); Failure = $null
         PrivateFileCount=$privateBefore.Count; PrivateFilesUnchanged=$false
-        Limit = 'Automation only; raw log review, rendering, manual gameplay, packaged server and 16GB certification remain separate'
+        PackagedServerRoot=$packageRoot
+        Limit = $(if($packageRoot){'Packaged Server with uncooked NullRHI Editor clients only; cooked client, rendering, manual gameplay, hosting/GSDK and 16GB certification remain separate'}else{'Automation only; raw log review, rendering, manual gameplay, packaged server and 16GB certification remain separate'})
     }
     $exitCode = 1
     # Stations are a stateless crafting/network fixture, not a save/restart certificate.
@@ -119,7 +139,25 @@ try {
                 $arguments = '"{0}" {1} {2} -nullrhi -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig {3} {9} -PFExpectedPlayers={4} -PFSaveSlot={5} {6} -ExecCmds="Automation RunTests {10}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{7}" -abslog="{8}"' -f $projectFile, $url, $mode, $network, $Players, $slot, $load, $report, $log, $testFlag, $testFilter
                 if($Stations){$arguments=$arguments.Replace(' -PFSaveSlot='+$slot,'')}
                 if($AuthoredEcology -or $Copper){$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120';$arguments=$arguments.Replace('Automation RunTests '+$testFilter,'t.MaxFPS 120,Automation RunTests '+$testFilter)}
-                $process = Start-Process -FilePath $editor -ArgumentList $arguments -WorkingDirectory $root -WindowStyle Hidden -PassThru
+                $executable=$editor; $workingDirectory=$root
+                if($packageRoot){
+                    # Explicitly isolate BOTH roles from AppData/default private profiles.
+                    # Same per-role directory and alias survive Create -> Restart.
+                    $userRole=if($i -eq 0){'Server'}else{'Client'+$i}
+                    $userDir=(Join-Path $summaryDirectory ('UserData\'+$userRole)).Replace('\','/')+'/'
+                    $arguments+=' -UserDir="'+$userDir+'"'
+                    if($i -eq 0){
+                        $projectPrefix='"'+$projectFile+'" '
+                        if(!$arguments.StartsWith($projectPrefix)){throw 'Unexpected server argument prefix'}
+                        $arguments=$arguments.Substring($projectPrefix.Length)
+                        $arguments+=' -MULTIHOME=127.0.0.1'
+                        $executable=$serverExecutable; $workingDirectory=$packageRoot
+                    }
+                }
+                $process = Start-Process -FilePath $executable -ArgumentList $arguments -WorkingDirectory $workingDirectory -WindowStyle Hidden -PassThru
+                # Cache the owned handle now; GUI-subsystem Server executables otherwise
+                # return asynchronously to PowerShell and can lose their exit status.
+                $null=$process.Handle
                 $run = [pscustomobject]@{ Name = $name; Role = $role; Process = $process; Report = $report; Log = $log; Working = 0L; Private = 0L }
                 $runs += $run
                 if ($i -eq 0) {
@@ -191,11 +229,15 @@ try {
                     if($Copper){$contract=$text -match $(if($run.Role -eq 'Server'){if($phase -eq 'Restart'){'Copper restart server actual migration, preserved original, independent owners, finite shared gather and current(16|25) save verified'}else{'Copper create server actual old15 layout and independent owners saved'}}else{if($phase -eq 'Restart'){'Copper restart client actual saved owner, private state and owned authored gather verified'}else{'Copper create client old-layout seed and private acknowledgement verified'}})}
                     if($Stations){$contract=$text -match $(if($run.Role -eq 'Server'){'Station network server bonus, owned RPC conservation and portable cooking verified'}else{'Station network client replicated bonus, owned RPC conservation and refusal verified'})}
                     $exactTest = $verdict.TestCount -eq 1 -and @($verdict.Tests | Where-Object { $_.Name -eq $testFilter }).Count -eq 1
+                    $packagedReportClean = !$packageRoot -or $run.Role -ne 'Server' -or (
+                        $text -notmatch '(?im)\bWarning:|\bError:' -and
+                        (Test-Path -LiteralPath (Join-Path $run.Report 'index.html') -PathType Leaf))
                     $entry = [ordered]@{
-                        Run = $run.Name; Role = $run.Role; Passed = ($reportExit -eq 0 -and $verdict.Passed -and $exactTest -and $fatal -eq 0 -and $contract -and $networkApplied)
+                        Run = $run.Name; Role = $run.Role; Passed = ($reportExit -eq 0 -and $verdict.Passed -and $exactTest -and $fatal -eq 0 -and $contract -and $networkApplied -and $packagedReportClean)
                         EngineExit = $run.Process.ExitCode; ReportVerdictExit = $reportExit
-                        Tests = $verdict.Tests; ReportReasons = $verdict.Reasons; FatalEnsure = $fatal
+                        Tests = $verdict.Tests; ReportReasons = @($verdict.Reasons) + $(if(!$packagedReportClean){'Packaged Server requires a clean raw log and an exported index.html'}); FatalEnsure = $fatal
                         ContractEvidence = $contract; NetworkSettingsConfirmed = $networkApplied
+                        PackagedServerReportClean = $packagedReportClean
                         StorageOwnerRole = ($run.Role -ne 'Server' -and $ownerRole)
                         StorageForeignRole = ($run.Role -ne 'Server' -and $foreignRole)
                         WorkingGiB = [Math]::Round($run.Working / 1GB, 3); PrivateGiB = [Math]::Round($run.Private / 1GB, 3)
@@ -218,7 +260,8 @@ try {
         if ($phaseRecord.CleanupFailures.Count -or -not $allPassed -or -not $rolesCovered) { throw 'Live report, cleanup or RPC/privacy/profile evidence failed' }
         $phaseRecord.Passed = $true
     }
-    $summary.PrivateFilesUnchanged=@(Compare-Object $privateBefore @(Get-PrivateSnapshot)).Count -eq 0
+    # Empty isolated workspaces are valid; Compare-Object rejects empty input arrays.
+    $summary.PrivateFilesUnchanged=[string]::Join("`n",[string[]]$privateBefore) -ceq [string]::Join("`n",[string[]]@(Get-PrivateSnapshot))
     if(!$summary.PrivateFilesUnchanged){throw 'Private saves or default settings changed'}
     $summary.Passed = $true
     $exitCode = 0

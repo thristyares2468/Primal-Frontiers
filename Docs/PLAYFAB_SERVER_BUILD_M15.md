@@ -1,5 +1,62 @@
 # M15 source-server and PlayFab package gate
 
+## Final local package acceptance — October 20
+
+**PASS for the local package gate only.**48 files /3111219005bytes (2.898GiB, including debug PDB), archive `C:\UnrealSource\Packages\M15ReportTemplate\WindowsServer`. Inner Server executable SHA256 `C37FAE32CBD465C2B76C03279EB0F6F8B800BD63C2072D103EF1A55DB8DD9B9E`. No generated package or symbols committed to Git. No GSDK/lifecycle/hosted capacity, remote restore, cooked-client or voice-media acceptance.
+
+Final build/stage receipts under C:\UnrealSource\BuildLogs:
+
+- `PrimalFrontierServer_LocalVersion`: PASS46.73s wall/43.14s UBT, exit0, no compiler warnings/errors.
+- `PrimalFrontierServer_ReportTemplate`: PASS8.00s wall/5.85s UBT, exit0, receipt-only dependency staging change.
+- `PrimalFrontierEditor_ReportTemplate`: PASS88.74s wall/88.34s UBT, exit0, no compiler warnings/errors.
+- `PFStage_WindowsServer_ReportTemplate`: PASS41.29s wall, exit0. Installed matching UAT resolves the23,353-byte engine report shell; source engine's corresponding file is22,727bytes. Neither file was modified; actual HTML/JSON export is verified. Catalog cook remains577packages/9platform-skipped/0cookseverity.
+- `PackagedRunnerRefusals.json`:2/2 expected exit2 preflights (missing HTML shell; unsupported packaged fixture), no launch. PowerShell parser0errors.
+
+Final test reports under `C:\Users\jackh\.codex\worktrees\m15-source-server\PrimalFrontier\Saved\AutomationReports`:
+
+| Run | PF.Persistence.Live reports | Create / Restart duration | Result |
+| --- | --- | --- | --- |
+| M8PackagedLive1_20261020_000342359_09651695 |4: Server+Client1 in both phases|63.85s /34.26s|PASS|
+| M8PackagedLive2_20261020_000556890_e003ca4d |6: Server+Client1+Client2 in both phases|62.11s /37.65s|PASS|
+
+All10 final role reports: native warnings/errors0, process/verdict exits0, authority/refusal/privacy/network contracts true, no timeout/cleanup failure/fatal/ensure. Exact `index.json` plus server `index.html` in each role directory; per-run `run-summary.json`; unique `PF<run><phase><role>.log` under isolated Saved/Logs. Separate owner/foreign storage privacy and real file-backed process-restart identities/inventories/progression/ownership verified; private-file hash guards unchanged. This is10 role executions of one existing native test selector, not10 distinct test definitions. Earlier8/8 checkpoint/player-save native regressions remain separately listed below.
+
+Isolation limit: PrivateFileCount0 in each final run means the snapshot guard has no pre-existing nonfixture private save/settings to compare. This is not a checksum certificate for personal saves. Fresh explicit per-role UserDir and synthetic slots avoided loading primary/private Saved data.
+
+Final Server raw logs have **zero warnings/errors** in all four phases. Existing Editor-client Python/toolset/HLOD startup baseline retained: one-client26/14 then24/14 warnings/error lines; two-client Create26/14 and27/14, Restart24/14 and25/14. All14 errors per client are the known StateTreeToolset/ToolsetRegistry `unreal.ToolsetDefinition` / `unreal.PythonTestRunner` startup tracebacks. Concurrent Client2 adds a Trace Server startup warning; Create adds two settings-priority warnings preserving motion blur/depth-of-field0. These are not suppressed or presented as clean Editor logs. The early immediate-quit Recast warning did not recur in sustained final runs; existing creature fixtures spawn/restore. No new gameplay failure observed.
+
+Sampled peaks: Server up to0.319GiB working/0.247GiB private; clients up to1.992working/1.983privateGiB each. No rendered frames, GPU performance/stutter, all-day memory or16GiB minimum certification. Free disk602.0GiB at final package measurement.
+
+### Reproduce the verified bounded test
+
+Prerequisites: supported source Server build and installed-engine Editor/cook/stage described below; close other Unreal instances. Level is `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`, map assets unchanged. Start here: PowerShell in C:\UnrealProjects\PrimalFrontier. No account/API credentials, private save or manual rendered input required.
+
+```powershell
+.\Scripts\RunPersistenceAutomation.ps1 -Players 1 -ProjectRoot C:/Users/jackh/.codex/worktrees/m15-source-server/PrimalFrontier -PackagedServerRoot C:/UnrealSource/Packages/M15ReportTemplate/WindowsServer -Port 17995 -TimeoutSeconds 240
+# Only after its complete Create+Restart pass:
+.\Scripts\RunPersistenceAutomation.ps1 -Players 2 -ProjectRoot C:/Users/jackh/.codex/worktrees/m15-source-server/PrimalFrontier -PackagedServerRoot C:/UnrealSource/Packages/M15ReportTemplate/WindowsServer -Port 17995 -TimeoutSeconds 240
+```
+
+Runner uses NullRHI, per-role private UserDir and disposable AutomationM8 slot/profile, loopback-only server, PktLag0/PktLoss0 (not an impairment certificate), owned handles/cleanup and original native assertions. Require both phases PASS, expected4/6 exact reports, exit0, original/private files unchanged, clean Server raw log and actual HTML/JSON exports. STOP on refusal/failure; do not delete/reset personal saves or bypass version checks. Missing package HTML or unsupported advanced-fixture switches refuse before launch. Additional named fixtures remain uncooked-runner scope until separately packaged/tested.
+
+### Exact isolated source metadata input
+
+Only Engine/Build/Build.version in C:\UnrealSource\UE_5.8.3 changed: Major5/Minor8/Patch3, Changelist2026102001, CompatibleChangelist55116800, IsLicenseeVersion1, IsPromotedBuild0, BranchName `RiftBoundGames+UE5.8.3+396c9f0+LocalServer`. Local build number identifies our build, not Epic's depot sync. Leave BuildId auto-generated. Supported file-based metadata stamping follows [Epic's build version documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/versioning-of-assets-and-packages-in-unreal-engine). Do not copy Launcher Build.version wholesale or set runtime network overrides. Source checkout commit and this local metadata patch must accompany future build provenance.
+
+The remaining sections retain earlier failures and intermediate progress chronologically; the acceptance above is the current result.
+
+## October 20 compatibility replay in progress
+
+Compatibility replay `M8PackagedLive1_20261019_235915377_12000c72` completed4/4 native role reports (Create/Restart x Server/Client1), all exit0 / zero test warnings/errors / exact authority/privacy contracts passed. Server and client both report NetCL55116800/checksum3283589285; no runtime override. Private-file guard unchanged. However each packaged Server emitted one real packaging error: AutomationController could not read Engine/Content/Automation/Report-Template.html. JSON reports still pass, but this run is not a clean-log package certificate. Narrow fix adds that existing23KB engine file as NonUFS RuntimeDependency in the non-Shipping PrimalAgentToolsRuntime Server build rules. Server receipt regeneration passes5.85s UBT/8.00s wall, exit0; installed Editor rebuild and fresh UAT staging/replay pending. No new plugin/content download or gameplay change. Final package must export both HTML and JSON without this error.
+
+Catalog-only cook fix:577 cooked packages/9 platform-skipped, zero cook warnings/errors; restaging passed. Packaged smoke `C:\UnrealSource\TestRuns\M15PackCats_e3ded01cc833` passed PF.SaveWorld, PF.CheckSave, PF.ExportTestReport and confirmed exit0 (2.69s; startup-only sampled working0.292/private0.237GiB). One immediate-quit Recast/Crowd warning remains to check during sustained execution. Receipt `C:\UnrealSource\BuildLogs\PFPackageSmoke_Catalogs.result.json`.
+
+First packaged-server/Launcher-client full-loop run `M8PackagedLive1_20261019_053550731_64300861` failed connection: source NetCL0, client NetCL55116800; both engine network protocol44/game0/project1.0.0.0. No state/restart pass inferred. Owned children stopped; summary retained under isolated Saved/AutomationReports/<run>/run-summary.json.
+
+Root cause: UBT BuildVersion.EffectiveCompatibleChangelist returns0 when Changelist is0, despite the official source tag declaring CompatibleChangelist55116800. Following [Epic's documented Build.version metadata workflow](https://dev.epicgames.com/documentation/en-us/unreal-engine/versioning-of-assets-and-packages-in-unreal-engine), only the isolated source engine's Engine/Build/Build.version is stamped with local licensee build number2026102001, IsLicenseeVersion1 and BranchName `RiftBoundGames+UE5.8.3+396c9f0+LocalServer`. This number identifies our local build, **not** an Epic/Perforce changelist; official source commit396c9f059903aed5fec78ecd3d437a40c6415368 is unchanged. Major/minor/patch, IsPromotedBuild0 and the tag's declared CompatibleChangelist55116800 remain unchanged. Installed engine metadata, project association, code and asset bytes remain unchanged. No networkversionoverride, checksum delegate, runtime bypass or warning suppression.
+
+Metadata rebuild PASS46.73s wall (43.14s UBT), exit0, three actions (BuildSettings/link/receipt), no compiler warnings/errors: `PrimalFrontierServer_LocalVersion.{log,result.json}` under C:\UnrealSource\BuildLogs. New staging/archive PASS55.57s wall, exit0: `PFStage_WindowsServer_LocalVersion.{log,result.json}`, package `C:\UnrealSource\Packages\M15LocalVersion\WindowsServer`. Existing577-package cook reused without asset edits. One-client replay running with Scripts/RunPersistenceAutomation.ps1 -PackagedServerRoot targeting this archive; both roles get isolated UserDir, owned handles/waits and server loopback binding. Only actual successful connection plus existing native authority/save/restart assertions can accept interoperability. If this fails, use matching source-built clients rather than weakening network validation. Remaining sections retain chronological earlier evidence, not current running claims.
+
 Updated October 19, 2026. **Source Server compile PASS; cooked package and hosting remain unverified.** The user requested preparation of the missing PlayFab build. No paid capacity, new service agreement, account secret or personal save is involved in this preparation.
 
 ## Verified prerequisites
@@ -61,6 +118,26 @@ Zero test warnings/errors and raw-log warning/error/fatal/ensure matches. Sample
 - Completed 05:13:27.962 UTC. C: free space 688.56 GiB after source/build/worktree activity.
 - Build-time free physical RAM samples approximately 10–15 GiB; these are not peak server-runtime measurements. Native test process peaks are listed separately above.
 - No Server launch/cook/package/GSDK result is implied by successful linking. Main project's engine association/assets/private saves remain unchanged. Main Editor binary was rebuilt for the two helper renames.
+
+## Package gate in progress
+
+Source fix/evidence published as `133d865b551ade327ed3f7be9e587467095a32a4`, local/remote master equal and primary tree clean before starting this gate, Milestone 15 title / Codex GPT-6.1 Sol coauthor. Matching installed-engine Editor build in the isolated workspace passed in **74.45 seconds**, exit 0, no compiler warnings/errors; `PrimalFrontierEditor_CookWorkspace.{log,result.json}` under the external BuildLogs directory. Each Editor process uses its own matched project DLLs; source Server executable remains a separate artifact.
+
+Initial supported commandlet cook is running:
+
+```powershell
+& 'C:/Program Files/Epic Games/UE_5.8/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' 'C:/Users/jackh/.codex/worktrees/m15-source-server/PrimalFrontier/PrimalFrontier.uproject' -run=Cook '-targetplatform=WindowsServer' '-map=/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld' -SkipCookingEditorContent -unattended -nop4 -nosplash -nullrhi -nosound -NoLiveCoding -NoSaveConfig -stdout -FullStdOutLogOutput '-abslog=C:/UnrealSource/BuildLogs/PFCook_WindowsServer_Initial.log'
+```
+
+External log, stdout and completion receipt share prefix `C:\UnrealSource\BuildLogs\PFCook_WindowsServer_Initial`. Cook success, staging and actual package execution are not yet verified. No main map/assets/settings/private saves are changed by this isolated cook request. This gate does not enable GSDK or create paid capacity.
+
+Initial cook completed **PASS**, exit 0, 68.37 seconds wall. Cook summary: 573 packages cooked / 9 skipped by platform / 582 total; `Success - 0 error(s), 0 warning(s)`. Cook uses the normal local Zen store (`ue.projectstore`), so loose-asset copying is not sufficient. UAT BuildCookRun staging is now running with `-target=PrimalFrontierServer -server -noclient -serverplatform=Win64 -serverconfig=Development -skipbuild -skipcook -stage -pak -iostore -archive -nocompile -nocompileeditor`. Separate stage root `C:\UnrealSource\Staged\M15Baseline`, archive root `C:\UnrealSource\Packages\M15Baseline`. Exact stdout/receipt prefix `C:\UnrealSource\BuildLogs\PFStage_WindowsServer_Initial`. No package launch or GSDK test passed yet.
+
+Initial stage/archive **PASS**, 44.79 seconds wall / exit 0, 47 files / 2.897 GiB, including 2558840832-byte PDB. Packaged inner executable SHA256 matches the verified source binary. UAT successfully reused the installed matching cooker/UnrealPak tools with the source Server receipt; no source Editor rebuild was needed for this staging attempt.
+
+Actual packaged smoke **FAIL**, `M15PackSmoke_13c750718abe`, logs/reports under `C:\UnrealSource\TestRuns\M15PackSmoke_13c750718abe`. Map loaded as BP_SurvivalGameMode_C and listened on loopback17994; PF.Help ran. PF.SaveWorld / PF.CheckSave refused `Missing persistence catalogs`: DA_ItemCatalog, DA_CraftingCatalog, DA_BuildingCatalog and DA_CreatureCatalog were not cooked because their fallback paths are code strings, not hard map references. Result export correctly says Failed. Initial shell invocation returned asynchronously for the GUI-subsystem executable, so `.result.json` exit is null, not a process-exit pass. Log shows normal requested quit, plus an early-teardown Recast warning that must be investigated in a sustained replay.
+
+Bounded cook fix: add four existing gameplay catalog directories to `DirectoriesToAlwaysCook` in Config/DefaultGame.ini (Items, Crafting, Building, Creatures), alongside existing UI/Audio. No asset edits, blanket CookAll or validation bypass. Exact PFAssetPaths were checked first. Config copied only into the isolated workspace; catalog recook is running at `PFCook_WindowsServer_Catalogs.{log,stdio.log,result.json}` under BuildLogs. Replay process management must use an explicit owned process handle/WaitForExit and isolated `-UserDir`, not assume a synchronous PowerShell GUI invocation.
 
 ## Remaining acceptance gates
 

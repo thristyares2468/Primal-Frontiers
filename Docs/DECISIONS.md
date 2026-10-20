@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## October20 — explicit cooked catalog discovery and source build provenance
+
+PFAssetPaths loads four gameplay catalogs by runtime string; cook discovery cannot infer them from a hard map reference. Add only the Items/Crafting/Building/Creatures folders to AlwaysCook, not CookAll or raw asset changes. Non-Shipping PrimalAgentToolsRuntime Server receipts also stage the existing engine HTML report shell as NonUFS. The optional packaged-server test mode isolates both roles and requires actual authority/privacy/restart assertions, clean Server raw logs and exported HTML/JSON before pass.
+
+Official source5.8.3 declares compatibleCL55116800, but UBT ignores it while Changelist0. Stamp only the isolated source Build.version with our clearly labelled local licensee build2026102001, retaining the tag's compatible baseline and source396c9f0. This is not Epic CL58210709 provenance and does not alter runtime network-version checking. Actual Launcher-client connectivity/checksum3283589285 and10 final native role reports prove this bounded interoperability; no general cross-version/cooked-client claim. [Evidence and exact metadata](PLAYFAB_SERVER_BUILD_M15.md). No installed-engine/global association change or paid allocation.
+
 ## October19 — isolate source-engine server preparation
 
 Storage/access now permit the previously blocked source-server work. Match the installed actual5.8.3 patch with Epic's pinned5.8.3-release source in C:\UnrealSource; keep Launcher installation and main project engine association unchanged. Build against a managed isolated project worktree so generated source-engine binaries cannot replace ordinary Launcher-editor DLLs or touch personal saves. First gate Windows source Server compilation, then Editor/cook/local package and reviewed GSDK lifecycle. Limit compile concurrency for the32GB host; no paid hosted capacity before local verification. GSDK is downloaded outside the repo for review, not yet a game dependency. [Build gate](PLAYFAB_SERVER_BUILD_M15.md).

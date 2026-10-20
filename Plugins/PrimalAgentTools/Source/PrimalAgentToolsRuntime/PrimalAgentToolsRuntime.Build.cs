@@ -14,5 +14,9 @@ public class PrimalAgentToolsRuntime : ModuleRules
         PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine" });
         // InputCore is required by development-only live tests of registered keys.
         PrivateDependencyModuleNames.AddRange(new[] { "Json", "PrimalFrontier", "NavigationSystem", "InputCore" });
+        // Cooked development servers run native automation too. The controller
+        // reads this engine-supplied HTML shell as a loose file when exporting.
+        if (Target.Type == TargetType.Server)
+            RuntimeDependencies.Add("$(EngineDir)/Content/Automation/Report-Template.html", StagedFileType.NonUFS);
     }
 }
