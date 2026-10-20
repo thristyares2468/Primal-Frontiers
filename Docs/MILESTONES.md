@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October21 — M15 strict native lease reply protocol PASS
+
+Unwired acquire/renew/commit decoder and frozen actual local SQL reply bridge; exact int64 fence/null-head/safe numeric lexemes, bounded4096-byte flat JSON, strict case-sensitive proofs and refusals. Initial native9/10 case-comparison failure retained and narrowly fixed/replayed1/1; final10/10 clean in18.65s,2.994working/2.862privateGiB. Offline50/50 pass2.569s; legacy fixture unchanged. Final Editor6.389/Game17.255/sourceServer explicit-unity59.955s build PASS/exit0/no compiler severity. Exact selectors/logs/reproduction and auth/request-binding/restore/live limits LEASE_REPLY_PROTOCOL_M15.md. jfiav3jF completes bounded parser only; fullM15 and live access audit incomplete, hosted login closed, no cloud/asset/private-save change or new manual gate acceptance.
+
 ## October21 — M15 native authority-state foundation PASS5/5
 
 Focused unwired FPFHostedAuthorityState and five PF.Hosting.Authority selectors pass: Durability, ExpiryAndRenewal, Initialization, Recovery, Refusals. Editor34.75/Game38.43/sourceServer explicit-unity60.59seconds compile PASS/exit0/no compiler severity. Actual NullRHI5/5 report Automation_M15AuthorityFirst_20261020_220950732_bf83124d,47.2seconds/exit0/raw+test warnings/errors/fatal/ensure0,2.983working/2.966privateGiB. No world/RPC/auth/HTTP/actual hosted-entry change: two GameMode refusal paths remain closed. Backend-only value tests require no map fixture/manual playtest. Server binary not restaged/deployed; no multiplayer/FPS/clock-drift/private-restore acceptance. Exact commands/limits HOSTED_AUTHORITY_STATE_M15.md. sfSC5E2o closes bounded foundation only; fullM15/live audit incomplete.

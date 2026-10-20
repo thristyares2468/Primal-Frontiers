@@ -26,13 +26,20 @@ On this host, pnpm is available at
 Node is on PATH; use the full pnpm path if required. First installation needs
 the public package registry. Test execution itself needs no network.
 
-Expect **49 tests PASS** (29SQL/composed +20ingress), process exit0, `LEGACY_PUBLIC_FIXTURE_UNCHANGED true` and
+Expect **50 tests PASS** (30SQL/composed +20ingress), process exit0, `LEGACY_PUBLIC_FIXTURE_UNCHANGED true` and
 the actual database version/RSS printed. On any assertion/SQL failure, stop;
 preserve output, fix this bounded prototype and replay the failed selector.
 Use `--test-name-pattern="exact test title"` before the filename for a narrow
 replay. `--test-concurrency=1` intentionally bounds memory.
 
 ## Contract
+
+The additional SQL test compares six frozen replies used by native lease decoding
+against current actual SQL keys/types/values. `capture-lease-replies.mjs` is an
+explicit one-time generator; normal tests never overwrite the synthetic fixture
+at Tests/Fixtures/M15LeaseReplies. It is a reply-shape test, not an authenticated
+service or valid native save payload. Contract bytes use LF for a stable recorded
+SHA256. See Docs/LEASE_REPLY_PROTOCOL_M15.md for native results and limits.
 
 - One retained `worlds` row per world serializes acquire, renew, release and
   checkpoint commit using `SELECT ... FOR UPDATE`. Never delete that row to

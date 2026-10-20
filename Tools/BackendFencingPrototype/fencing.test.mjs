@@ -81,6 +81,36 @@ test('acquisition returns a database-owned epoch, bounded deadline and empty hea
   assert.ok(Number(row.remaining) > 25 && Number(row.remaining) <= 30);
 });
 
+test('frozen native lease-reply fixture matches actual SQL result types and bounds', async () => {
+  const fixture = JSON.parse(await readFile(new URL('../../Tests/Fixtures/M15LeaseReplies/fixture.json', import.meta.url), 'utf8'));
+  assert.equal(fixture.contractSha256, createHash('sha256').update(await readFile(new URL('./contract.sql', import.meta.url))).digest('hex'));
+  await db.query('INSERT INTO pf_fencing_draft.worlds(world_id,fence) VALUES($1,$2::bigint)',
+    [fixture.world, '9223372036854775806']);
+  const request = randomUUID();
+  const lease = await acquire(fixture.world, 'server-a', request);
+  const retry = await acquire(fixture.world, 'server-a', request);
+  const renewalRequest = randomUUID();
+  const renewal = await renew(lease, renewalRequest);
+  const renewalRetry = await renew(lease, renewalRequest);
+  const options = { generation: '9007199254740991', request: randomUUID() };
+  const committed = await commit(lease, options);
+  const committedRetry = await commit(lease, options);
+  for (const [name, actual] of Object.entries({ acquire: lease, acquireReplay: retry,
+    renew: renewal, renewReplay: renewalRetry, commit: committed, commitReplay: committedRetry })) {
+    const frozen = fixture[name];
+    assert.deepEqual(Object.keys(actual).sort(), Object.keys(frozen).sort(), name);
+    for (const key of Object.keys(actual)) {
+      assert.equal(typeof actual[key], typeof frozen[key], `${name}.${key}`);
+      if (!['lease_id', 'expires_at'].includes(key)) assert.deepEqual(actual[key], frozen[key], `${name}.${key}`);
+    }
+    if (actual.lease_id) assert.match(frozen.lease_id, /^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/);
+    if (actual.expires_at) assert.ok(Number.isFinite(Date.parse(frozen.expires_at)));
+  }
+  assert.equal(lease.fence, '9223372036854775807');
+  assert.equal(lease.head_generation, null);
+  assert.equal(committed.generation, 9007199254740991);
+});
+
 test('queued competing acquisitions yield exactly one owner', async () => {
   const results = await Promise.all([acquire('world-a', 'server-a'), acquire('world-a', 'server-b')]);
   assert.equal(results.filter(r => r.ok).length, 1);

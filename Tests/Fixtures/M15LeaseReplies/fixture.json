@@ -1,0 +1,54 @@
+{
+  "provenance": "Synthetic in-memory PostgreSQL results, not a deployed service or native save payload",
+  "postgres": "PostgreSQL 18.6 (PGlite 0.5.10) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit",
+  "contractSha256": "37b282bd1620e2fffdf9c880b9fb2b3e55ce531ed05f0f100b0a1d6e9696617a",
+  "world": "native-lease-fixture",
+  "checksum": "sha256:abababababababababababababababababababababababababababababababab",
+  "acquire": {
+    "ok": true,
+    "fence": "9223372036854775807",
+    "lease_id": "988314f8-0705-452a-88c3-3ea6c51f7193",
+    "world_id": "native-lease-fixture",
+    "expires_at": "2026-10-20T22:48:31.052+00:00",
+    "head_generation": null
+  },
+  "acquireReplay": {
+    "ok": true,
+    "fence": "9223372036854775807",
+    "lease_id": "988314f8-0705-452a-88c3-3ea6c51f7193",
+    "replayed": true,
+    "world_id": "native-lease-fixture",
+    "expires_at": "2026-10-20T22:48:31.052+00:00",
+    "head_generation": null
+  },
+  "renew": {
+    "ok": true,
+    "fence": "9223372036854775807",
+    "lease_id": "988314f8-0705-452a-88c3-3ea6c51f7193",
+    "expires_at": "2026-10-20T22:49:01.058+00:00"
+  },
+  "renewReplay": {
+    "ok": true,
+    "fence": "9223372036854775807",
+    "lease_id": "988314f8-0705-452a-88c3-3ea6c51f7193",
+    "replayed": true,
+    "expires_at": "2026-10-20T22:49:01.058+00:00"
+  },
+  "commit": {
+    "ok": true,
+    "fence": "9223372036854775807",
+    "checksum": "sha256:abababababababababababababababababababababababababababababababab",
+    "world_id": "native-lease-fixture",
+    "committed": true,
+    "generation": 9007199254740991
+  },
+  "commitReplay": {
+    "ok": true,
+    "fence": "9223372036854775807",
+    "checksum": "sha256:abababababababababababababababababababababababababababababababab",
+    "replayed": true,
+    "world_id": "native-lease-fixture",
+    "committed": true,
+    "generation": 9007199254740991
+  }
+}

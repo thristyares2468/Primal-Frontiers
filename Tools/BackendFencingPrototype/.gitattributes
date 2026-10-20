@@ -1,2 +1,4 @@
 # Preserve the copied baseline byte-for-byte for its provenance checksum.
 baseline.sql -text
+# Stable contract bytes for cross-language reply fixture provenance.
+contract.sql text eol=lf

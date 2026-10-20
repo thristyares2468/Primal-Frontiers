@@ -1,6 +1,7 @@
 # M15 offline checkpoint writer fencing
 
-**Current checkout expected count:49/49 via pnpm test (29SQL/composed +20ingress).**
+**Current checkout expected count:50/50 via pnpm test (30SQL/composed +20ingress).**
+The extra SQL/native reply-shape bridge is documented in [lease replies](LEASE_REPLY_PROTOCOL_M15.md); historical49 results below remain unchanged.
 [Ingress follow-up](CHECKPOINT_INGRESS_PROTOTYPE_M15.md) adds actual SHA/CRC/header
 validation and max-envelope SQL integration; draft JSON cap is now aligned6MiB.
 Earlier25/27counts and1MiB mismatch discussion below are historical run evidence.

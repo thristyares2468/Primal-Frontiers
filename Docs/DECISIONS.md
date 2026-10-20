@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October21 — strict lease reply parsing before authenticated transport
+
+Keep draft lease reply decoding separate from authority state and actual HTTP/auth/world restoration. Bound UTF8 bytes/flat fields; require canonical case-sensitive proofs and exact numeric lexemes, preserve null head distinct from saved zero and make outputs atomic. Capture six actual in-memory SQL replies with synthetic identities and compare them in both Node/native tests; never regenerate fixtures during normal tests. Initial UUID refusal exposed FString case-insensitive equality, fixed explicitly with case regressions and narrow replay before the full group. Server UTC remains metadata, not a readiness extension. Future retry binding must retain original wire nonce/send-time; hosted admission stays closed. Evidence LEASE_REPLY_PROTOCOL_M15.md.
+
 ## October21 — native authority guard before hosted admission integration
 
 Add focused FPFHostedAuthorityState rather than combine transport/auth/world restore into the existing SDK lifecycle subsystem. Use nonreused local callback serials, canonical fence strings, durable-head floors and conservative monotonic send-time TTL budget; require exact restored head/trusted identity and matching durable acknowledgment, freeze on expiry/unknown outcomes. Keep it unwired until actual authenticated adapters/restore/clock bounds are verified; GameMode remains closed. Editor/Game/sourceServer builds and five value-state tests pass, not a live authority or multiplayer proof. Evidence HOSTED_AUTHORITY_STATE_M15.md.
