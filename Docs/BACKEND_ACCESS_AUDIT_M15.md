@@ -1,5 +1,17 @@
 # M15 live backend access audit
 
+## October20 connection refresh — current status
+
+Owner replied **Neon connected**. Fresh plugin discovery confirms installed:true, status:ENABLED. The installed:false/installation prerequisite below is historical and superseded; do not reinstall.
+
+Read-only describe_project without an ID returned `InvalidArgumentError: project_id is required because this connection is not scoped to a project. Pass the target project ID, for example one returned by list_projects.` This is a targeting failure before project inspection, not evidence of broken pf_app permissions or a missing database.
+
+Current tool inventory includes describe_project, describe_branch and describe_table_schema, but no list_projects/list_branches/inspect_database/run_sql. Existing project-doc/backend searches found no verified project/branch ID. Computer Use inventory has only an empty in-app browser and MCP Apps, no Neon tab. No credential access, migration/destructive tool, cloud write or account navigation occurred.
+
+Start here (owner): open your existing Primal Frontier project in the Neon console and paste its **browser URL** into chat. This supplies the non-secret project ID. No connection string/password/API key, new project/branch, role change or Unreal level/playtest is needed.
+
+AI next: use the explicit ID for project metadata, identify the existing development branch, inspect the checkpoint table using supported read-only tools, and verify SQL capability before attempting the prepared metadata query. Worker branch identity and actual grants remain UNVERIFIED. Do not use migration tools to bypass unavailable read access or claim the unexecuted SQL passed. No runtime/C++ change or new build/test is needed for this access/documentation refresh; prior package/GSDK results remain separate.
+
 October20,2026. **Cloudflare read-only checks PASS; direct Neon schema/role audit UNVERIFIED pending owner connection.** Local server/GSDK implementation is published3cdac3a; this audit changes no runtime, Worker, database, account settings or assets.
 
 ## Verified live evidence

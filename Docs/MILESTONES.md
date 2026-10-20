@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October20 — M15 Neon connection refresh, targeting pending
+
+Owner confirmed Neon connected; fresh discovery installed:true/ENABLED supersedes the installation blocker below. Account-wide project read requires explicit project_id; current tools omit project listing/SQL, docs lack verified IDs, and available browser inventory has no Neon tab. Next action is only the existing project browser URL, no credentials or reinstall. Actual schema/grants/branch audit remains unverified and metadata SQL unexecuted. Trello hKddPkEg updated to precise Personal1 targeting prerequisite; M15 parent stays incomplete. No database/Worker/runtime change, Unreal launch or new build/test claim. See BACKEND_ACCESS_AUDIT_M15.md.
+
 ## October20 — M15 live access audit, owner connection prerequisite
 
 Read-only Cloudflare Worker settings/secrets/deployment responses200/success; expected runtime secret names present (no values read). Public health200 and checkpoint status200 READY/neondb prove connectivity/table presence only. Local backend3bc1ed2 contract read, existing untracked nested checkout preserved. Direct Neon plugin is available but installed:false; actual live schema/grants/branch identity still unverified, no SQL/migration executed. Prepared metadata-only bounded READ ONLY query and exact owner install/connect step in BACKEND_ACCESS_AUDIT_M15.md. No C++ change/rebuild/Unreal launch/service mutation for this audit. Owner connection is next required action before dependent backend work; current local gates remain published/valid.
