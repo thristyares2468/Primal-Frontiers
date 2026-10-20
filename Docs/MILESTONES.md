@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October21 — M15 candidate connection probe implemented and serving
+
+Owner CHECKPOINT_LOGIN_READY accepted; no repeat activation/host/account request. Separate backend c8a3575 publishes optional read-only Development candidate probe without changing active NEON_DATABASE_URL. Exact metadata SQL, route/refusal/error/deadline tests11/11 PASS, typecheck PASS after retained DOM/timer failures, workerd5routes PASS,209.67KiB bundle excludes test-only PGlite. Fresh public route now503/CANDIDATE_NOT_CONFIGURED, health200/development, existing status200/READY/neondb, POST405 and protected GET401. [Full evidence/owner action](CHECKPOINT_CANDIDATE_PROBE_M15.md). No private candidate set/query, cutover, new Unreal build or fullM15/hosted acceptance. Next Personal1: add only PF_CHECKPOINT_DATABASE_URL_CANDIDATE runtime Secret using privately retained URL and reply CANDIDATE_SECRET_READY; AI verifies public status next.
+
 ## October21 — M15 one-time restricted login preparation PASS locally
 
 Owner supplies Development pooled hostname, completing target-input prerequisite. Exact activation script validates inactive restricted role/context/effective rights, generates private exact-host URL/password in PostgreSQL, enables LOGIN once with SCRAM and clears transaction-local output; rejects accidental rerun/unsafe contexts. Five focused/67combined local tests PASS, final5.219s/exit0/no skipped/cancel/todo, legacy fixture and old app/data unchanged; generated secrets absent from output. No C++/Unreal build needed, no real Neon activation/network authentication/Worker change or fullM15 pass. Evidence and one-script owner guide CHECKPOINT_LOGIN_SETUP_M15.md. Current next Personal1 action is activation/private result with CHECKPOINT_LOGIN_READY; candidate connection verification/cutover remains future.

@@ -42,6 +42,11 @@
     "source": "Owner supplied hostname from requested Development/neondb Connect dialog on October21 2026; no password or full connection URL",
     "limit": "Reported branch/endpoint target, not independent provider lookup or proof of existing encrypted Worker binding"
   },
-  "assessment": "Owner confirms restricted staging role prepared and provides Development pooled host. One-time private login setup prepared/tested locally; actual activation and fresh provider connection/Worker cutover/old credential retirement remain pending. Old managed pf_app stays unchanged; full runtime audit incomplete.",
+  "loginActivationReport": {
+    "source": "Owner message CHECKPOINT_LOGIN_READY on October21 2026 after the one-time activation guide",
+    "status": "CHECKPOINT_LOGIN_READY",
+    "limit": "Owner-reported activation/private URL availability; not fresh network authentication, current Worker binding verification or cutover. No private URL or password collected."
+  },
+  "assessment": "Owner reports restricted staging preparation, Development pooled host and one-time login activation complete. Do not repeat these prerequisites. Fresh candidate provider authentication/least-privilege proof, Worker cutover and old credential retirement remain pending. Old managed pf_app stays unchanged; full runtime audit incomplete.",
   "limits": "SQL result does not authenticate the reported Neon branch, reveal current Worker binding, inspect all role ownership or certify later hosted-fencing authorization. Production untouched."
 }

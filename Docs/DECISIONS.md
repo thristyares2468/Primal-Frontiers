@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October21 — verify a restricted candidate before database cutover
+
+Keep the current checkpoint connection active while a separate optional encrypted candidate binding is checked. Use existing Neon HTTPS driver with a static metadata-only SELECT, exact recorded Development target, strict role/effective-right proofs, bounded timeout and sanitized status-only replies. Do not read payloads, mutate grants or silently fall back to active DB. Development diagnostics alone never enable hosted admission or constitute all-schema/identity/fencing assurance. PGlite remains a test-only dependency, excluded from Worker bundle. Current11local/workerd/deployed-route evidence and next private owner entry are in CHECKPOINT_CANDIDATE_PROBE_M15.md; credential cutover/retirement is a separate reviewed step.
+
 ## October21 — strict lease reply parsing before authenticated transport
 
 Keep draft lease reply decoding separate from authority state and actual HTTP/auth/world restoration. Bound UTF8 bytes/flat fields; require canonical case-sensitive proofs and exact numeric lexemes, preserve null head distinct from saved zero and make outputs atomic. Capture six actual in-memory SQL replies with synthetic identities and compare them in both Node/native tests; never regenerate fixtures during normal tests. Initial UUID refusal exposed FString case-insensitive equality, fixed explicitly with case regressions and narrow replay before the full group. Server UTC remains metadata, not a readiness extension. Future retry binding must retain original wire nonce/send-time; hosted admission stays closed. Evidence LEASE_REPLY_PROTOCOL_M15.md.

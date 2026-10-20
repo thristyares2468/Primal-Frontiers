@@ -1,5 +1,12 @@
 # M15 one-time restricted checkpoint login preparation
 
+**Latest October21:** owner has replied CHECKPOINT_LOGIN_READY; the activation
+action below is complete as an owner report. Do not rerun it. Next private
+candidate-secret step and deployed probe evidence are in
+[CHECKPOINT_CANDIDATE_PROBE_M15.md](CHECKPOINT_CANDIDATE_PROBE_M15.md).
+Preparation results below are retained historical evidence, not a current
+request to activate again. Fresh candidate authentication/cutover is pending.
+
 October21,2026. Trello vPA1nOPg. **Focused5/5 and combined67/67 local PASS.**
 No live login activation, credential, Worker change or new provider/gameplay pass.
 
