@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October21 — native authority guard before hosted admission integration
+
+Add focused FPFHostedAuthorityState rather than combine transport/auth/world restore into the existing SDK lifecycle subsystem. Use nonreused local callback serials, canonical fence strings, durable-head floors and conservative monotonic send-time TTL budget; require exact restored head/trusted identity and matching durable acknowledgment, freeze on expiry/unknown outcomes. Keep it unwired until actual authenticated adapters/restore/clock bounds are verified; GameMode remains closed. Editor/Game/sourceServer builds and five value-state tests pass, not a live authority or multiplayer proof. Evidence HOSTED_AUTHORITY_STATE_M15.md.
+
 ## October21 — quarantine writer-fencing SQL until live audit and adapter gates
 
 Develop the M15 lease/epoch/CAS/idempotency contract in an in-memory PostgreSQL18.6 test fixture under Tools/BackendFencingPrototype, outside the Worker's Git deployment workflow. Pinned Apache2 PGlite0.5.10 is a test-only dependency, not Unreal/Worker runtime. Retain per-world row/fence across release, use database actual clock after lock, preserve original envelope generations/metadata, and require atomic head/checkpoint/receipt. PUBLIC access revoked; SECURITY INVOKER remains a draft, not eventual runtime authorization. Local25tests pass; no approved live migration, grant design, true multi-session contention, authenticated identity or cloud restore/admission claim. Finish live privilege/binding audit and isolated migration/legacy-write cutover before adoption. Evidence CHECKPOINT_FENCING_PROTOTYPE_M15.md.

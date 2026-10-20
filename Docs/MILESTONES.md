@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October21 — M15 native authority-state foundation PASS5/5
+
+Focused unwired FPFHostedAuthorityState and five PF.Hosting.Authority selectors pass: Durability, ExpiryAndRenewal, Initialization, Recovery, Refusals. Editor34.75/Game38.43/sourceServer explicit-unity60.59seconds compile PASS/exit0/no compiler severity. Actual NullRHI5/5 report Automation_M15AuthorityFirst_20261020_220950732_bf83124d,47.2seconds/exit0/raw+test warnings/errors/fatal/ensure0,2.983working/2.966privateGiB. No world/RPC/auth/HTTP/actual hosted-entry change: two GameMode refusal paths remain closed. Backend-only value tests require no map fixture/manual playtest. Server binary not restaged/deployed; no multiplayer/FPS/clock-drift/private-restore acceptance. Exact commands/limits HOSTED_AUTHORITY_STATE_M15.md. sfSC5E2o closes bounded foundation only; fullM15/live audit incomplete.
+
 ## October21 — M15 bounded envelope ingress/composed SQL PASS49/49
 
 29SQL/composed +20WebAPI definitions pass/exit0 in2.296s native, legacy public fixture unchanged. Original-envelope SHA/CRC/header/base64/4MiB file bounds/generation/UTC/expiry,6MiB streaming bytes/deadline/cancellation and mutation snapshotting verified; genuine historical fixture unchanged, full-size synthetic file validates/commits. Retained max-envelope budget0/1 failure, narrow draft cap1→6MiB fix/replay1/1 before combined49. SQLRSS627392512bytes, ingress124260352bytes separate processes; no Worker isolate/Unreal/gameplay/performance claim. No C++/Worker/runtime/Neon/migration/deploy/paid changes; fullM15/audit incomplete, hosted entry closed. Exact49titles/logs/guide CHECKPOINT_INGRESS_PROTOTYPE_M15.md. RgXzqdou completes only local contract; native admission-state guard is next independent step.
