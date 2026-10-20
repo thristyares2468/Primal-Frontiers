@@ -1,0 +1,12 @@
+{
+  "name": "pf-writer-fencing-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 fencing.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.10"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October21 — quarantine writer-fencing SQL until live audit and adapter gates
+
+Develop the M15 lease/epoch/CAS/idempotency contract in an in-memory PostgreSQL18.6 test fixture under Tools/BackendFencingPrototype, outside the Worker's Git deployment workflow. Pinned Apache2 PGlite0.5.10 is a test-only dependency, not Unreal/Worker runtime. Retain per-world row/fence across release, use database actual clock after lock, preserve original envelope generations/metadata, and require atomic head/checkpoint/receipt. PUBLIC access revoked; SECURITY INVOKER remains a draft, not eventual runtime authorization. Local25tests pass; no approved live migration, grant design, true multi-session contention, authenticated identity or cloud restore/admission claim. Finish live privilege/binding audit and isolated migration/legacy-write cutover before adoption. Evidence CHECKPOINT_FENCING_PROTOTYPE_M15.md.
+
 ## October20 — explicit server-only GSDK lifecycle, closed hosted admission
 
 Vendor Microsoft Apache-2.0 Unreal GSDK2.0.1 at673f068f0 with license/patch provenance; allow only Server target and load only after explicit PFPlayFabHosted plus bounded agent JSON validation. Remove machine-specific legacy DLL staging, preserve upstream style and make nine explicit JSON key copies for source5.8.3. Default offline servers and Editor/Game clients do not start agent traffic. Real allocated port/readiness, stateless health callback and weak GameThread shutdown tested with official local mock. Both PreLogin/InitNewPlayer keep hosted gameplay closed until authenticated identity, durable remote restore and writer fencing are implemented. Standby/Active is not durability acceptance.

@@ -1,0 +1,2 @@
+# Preserve the copied baseline byte-for-byte for its provenance checksum.
+baseline.sql -text
