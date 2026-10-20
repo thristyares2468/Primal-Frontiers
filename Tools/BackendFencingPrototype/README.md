@@ -18,7 +18,7 @@ No Unreal level, server, client, editor or account setup is required.
 ```powershell
 cd C:\UnrealProjects\PrimalFrontier\Tools\BackendFencingPrototype
 pnpm install --frozen-lockfile --ignore-scripts
-node --test --test-concurrency=1 --test-reporter=tap fencing.test.mjs
+pnpm test
 ```
 
 On this host, pnpm is available at
@@ -26,7 +26,7 @@ On this host, pnpm is available at
 Node is on PATH; use the full pnpm path if required. First installation needs
 the public package registry. Test execution itself needs no network.
 
-Expect all tests PASS, process exit0, `LEGACY_PUBLIC_FIXTURE_UNCHANGED true` and
+Expect **49 tests PASS** (29SQL/composed +20ingress), process exit0, `LEGACY_PUBLIC_FIXTURE_UNCHANGED true` and
 the actual database version/RSS printed. On any assertion/SQL failure, stop;
 preserve output, fix this bounded prototype and replay the failed selector.
 Use `--test-name-pattern="exact test title"` before the filename for a narrow
@@ -81,7 +81,14 @@ durability and isolated Neon migration still need separate verification.
 
 Caller identity here is a supplied fixture server ID, **not authenticated
 PlayFab/EOS identity**. No HTTP route or token verifier exists. SQL validates
-checksum shape/immutable metadata, not SHA256 or original file decoding.
+checksum shape/immutable metadata. The separate `ingress.mjs` offline validator
+now checks actual SHA256, CRC32, native fileV1 header/size/generation/original UTC,
+canonical base64, expiry and trusted-context world/floor. Its streaming reader
+enforces6MiB UTF8 bytes, max65536chunks and a default5second whole-body deadline,
+cancels refused bodies without awaiting a stalled cancellation, and snapshots
+data before async crypto. It rejects compressed bodies and requires JSON POST.
+These helpers are not imported by the deployed Worker and do not authenticate
+caller context or validate the inner game-world serialization schema.
 The SQL checksum spelling is the exact native `sha256:` plus lowercase64hex;
 bare/uppercase/incorrect-length forms refuse. A genuine frozen Unreal fixture
 is also committed/retried in memory with its independent known SHA256, original
@@ -89,7 +96,7 @@ base64 bytes, generation and saved UTC unchanged. This does not validate every
 incoming file: SQL still treats the payload as immutable JSON metadata.
 
 The trusted future adapter must verify capability/world/server identity and
-the original Unreal envelope/version/checksum before SQL. Never expose these
+invoke envelope validation before SQL. Never expose these
 functions as a public API or accept caller-selected server IDs as authority.
 
 The draft uses SECURITY INVOKER and explicitly revokes PUBLIC schema/table/
@@ -100,14 +107,15 @@ Production role separation/search_path/functions require a reviewed migration.
 
 Other unresolved rollout work: disable legacy unfenced writes atomically at
 cutover; validate/import historical generations; define receipt retention and
-quotas (no cleanup here); agree the request-size budget (draft1MiB JSON payload,
-Unreal response cap6MiB); bound HTTP body reading before parsing; rate-limit
+quotas (no cleanup here); verify the aligned6MiB request/SQL JSON budget and
+4MiB native payload limit in an actual Worker isolate; rate-limit
 request IDs; reconcile expired/deleted checkpoint receipts conservatively;
 restore original timestamps/ownership and reject corrupt/expired saves; freeze
 server gameplay on unknown/lost lease; require authenticated player admission.
 No automatic migration, cloud settings/deployment or paid capacity is included.
 
-Evidence/remaining live audit: [M15 prototype results](../../Docs/CHECKPOINT_FENCING_PROTOTYPE_M15.md),
+Evidence/remaining live audit: [ingress results/failures](../../Docs/CHECKPOINT_INGRESS_PROTOTYPE_M15.md),
+[M15 SQL prototype results](../../Docs/CHECKPOINT_FENCING_PROTOTYPE_M15.md),
 [live metadata audit](../../Docs/BACKEND_ACCESS_AUDIT_M15.md).
 
 ## Sources

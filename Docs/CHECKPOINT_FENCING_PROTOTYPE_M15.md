@@ -1,5 +1,11 @@
 # M15 offline checkpoint writer fencing
 
+**Current checkout expected count:49/49 via pnpm test (29SQL/composed +20ingress).**
+[Ingress follow-up](CHECKPOINT_INGRESS_PROTOTYPE_M15.md) adds actual SHA/CRC/header
+validation and max-envelope SQL integration; draft JSON cap is now aligned6MiB.
+Earlier25/27counts and1MiB mismatch discussion below are historical run evidence.
+Runtime/deployment/auth/live SQL limits remain; do not deploy the draft.
+
 ## October21 native wire-format correction — PASS27/27
 
 Follow-up task AusYLCpp found draft900cd16 checksum shape accepted bare64hex,

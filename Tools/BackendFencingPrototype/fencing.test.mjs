@@ -1,8 +1,10 @@
 import { after, before, beforeEach, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
+import { crc32 } from 'node:zlib';
 import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
+import { readCheckpointRequest, MAX_PAYLOAD_BYTES } from './ingress.mjs';
 
 // No DSN, network client, file-backed database or Worker import is used here.
 const db = new PGlite();
@@ -264,7 +266,7 @@ test('invalid checkpoint shapes, numbers and digest lengths leave all state unch
   const before = await counts();
   for (const changed of [{ generation: -1 }, { generation: '9007199254740992' }, { version: 0 },
     { checksum: 'not-sha256' }, { checksum: 'Z'.repeat(64) }, { payload: null },
-    { payload: [] }, { payload: 'text' }, { payload: { huge: 'x'.repeat(1048577) } }]) {
+    { payload: [] }, { payload: 'text' }, { payload: { huge: 'x'.repeat(6291457) } }]) {
     refused(await commit(lease, changed), 'invalid_checkpoint');
   }
   assert.deepEqual(await counts(), before);
@@ -377,4 +379,47 @@ test('genuine frozen Unreal upload preserves historical bytes, generation and sa
   assert.deepEqual(Buffer.from(row.payload.envelope, 'base64'), original);
   assert.equal(Buffer.from(row.payload.envelope, 'base64').readBigInt64LE(16), BigInt(fixture.savedUtc));
   assert.equal((await counts()).checkpoints, 1);
+});
+
+test('maximum native envelope survives bounded validation and SQL commit', async () => {
+  const lease = await acquire();
+  const raw = Buffer.alloc(32+MAX_PAYLOAD_BYTES,11);
+  raw.writeUInt32LE(0x46534650,0); raw.writeUInt32LE(1,4); raw.writeBigUInt64LE(1n,8);
+  raw.writeBigInt64LE(1700000000n,16); raw.writeUInt32LE(MAX_PAYLOAD_BYTES,24);
+  raw.writeUInt32LE(crc32(raw.subarray(32)),28);
+  const input = { world_id:'world-a',generation:1,envelope_version:1,
+    checksum:'sha256:'+createHash('sha256').update(raw).digest('hex'),expires_at:null,
+    payload:{format:'pf-pfs-base64-v1',envelope:raw.toString('base64')} };
+  const request = new Request('https://offline.invalid/checkpoint',{
+    method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(input)});
+  const checked = await readCheckpointRequest(request,'world-a');
+  assert.equal(checked.ok,true);
+  assert.equal((await commit(lease,{checksum:checked.checkpoint.checksum,payload:checked.checkpoint.payload})).ok,true);
+  const saved = (await db.query('SELECT payload FROM pf_fencing_draft.checkpoints')).rows[0].payload;
+  assert.equal(saved.envelope,input.payload.envelope);
+  assert.equal((await counts()).checkpoints,1);
+});
+
+test('validated historical ingress commits unchanged and corruption is refused before SQL', async () => {
+  const fixture = JSON.parse(await readFile(new URL('../../Tests/Fixtures/M8_c3d221f/fixture.json', import.meta.url), 'utf8'));
+  const raw = Buffer.from(fixture.envelopeBase64,'base64');
+  const input = {world_id:'world-a',generation:1,envelope_version:1,expires_at:null,
+    checksum:'sha256:'+createHash('sha256').update(raw).digest('hex'),
+    payload:{format:'pf-pfs-base64-v1',envelope:fixture.envelopeBase64}};
+  const lease = await acquire();
+  const process = async value => {
+    const checked = await readCheckpointRequest(new Request('https://offline.invalid/checkpoint',{
+      method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(value)}),'world-a');
+    if (!checked.ok) return checked;
+    return commit(lease,{generation:checked.checkpoint.generation,
+      checksum:checked.checkpoint.checksum,payload:checked.checkpoint.payload});
+  };
+  const before = await counts();
+  refused(await process({...input,checksum:'sha256:'+'0'.repeat(64)}),'sha256_mismatch');
+  assert.deepEqual(await counts(),before);
+  assert.equal((await process(input)).ok,true);
+  const saved = (await db.query('SELECT generation::text,checksum,payload FROM pf_fencing_draft.checkpoints')).rows[0];
+  assert.equal(saved.generation,'1'); assert.equal(saved.checksum,input.checksum);
+  assert.equal(saved.payload.envelope,fixture.envelopeBase64);
+  assert.equal(Buffer.from(saved.payload.envelope,'base64').readBigInt64LE(16),BigInt(fixture.savedUtc));
 });

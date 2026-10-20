@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October21 — M15 bounded envelope ingress/composed SQL PASS49/49
+
+29SQL/composed +20WebAPI definitions pass/exit0 in2.296s native, legacy public fixture unchanged. Original-envelope SHA/CRC/header/base64/4MiB file bounds/generation/UTC/expiry,6MiB streaming bytes/deadline/cancellation and mutation snapshotting verified; genuine historical fixture unchanged, full-size synthetic file validates/commits. Retained max-envelope budget0/1 failure, narrow draft cap1→6MiB fix/replay1/1 before combined49. SQLRSS627392512bytes, ingress124260352bytes separate processes; no Worker isolate/Unreal/gameplay/performance claim. No C++/Worker/runtime/Neon/migration/deploy/paid changes; fullM15/audit incomplete, hosted entry closed. Exact49titles/logs/guide CHECKPOINT_INGRESS_PROTOTYPE_M15.md. RgXzqdou completes only local contract; native admission-state guard is next independent step.
+
 ## October21 — M15 native checksum wire correction PASS27/27
 
 PFCheckpointProtocol source review found prototype barehex incompatibility. New selector reproduced0/1 FAIL/exit1, retained log and stopped expansion. Draft regex/fixture corrected to sha256:lowercase64hex; replay1/1, regression26/26 and final27/27 pass. Genuine immutable historical2054-byte envelope preserves known SHA/base64/generation1/SavedUtc1792032698 through commit/retry. Final1.808s native/exit0/RSS649109504bytes; no skipped/cancelled/todo, legacy public fixture unchanged. CHECKPOINT_FENCING_PROTOTYPE_M15.md records exact logs/test names. No Worker/C++/cloud changes or new Unreal build/test; known-fixture fidelity is not arbitrary ingress validation/auth/live concurrency. AusYLCpp bounded correction completes, fullM15/audit stay incomplete.
