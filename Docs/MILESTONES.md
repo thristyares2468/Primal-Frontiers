@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October21 — M15 owner role findings and tested restricted staging preparation
+
+Owner SQL on reported Development confirms pf_app elevated flags/membership/mutation rights; second query shows cloud_admin-granted memberships/no ADMIN option. Reject in-place demotion, preserve old app; prepare new SQL-owned NOLOGIN pf_checkpoint_app with SELECT/INSERT. Twelve role fixtures pass, final62combined5.522s/exit0; actual SET ROLE read/insert/duplicate and mutation/DDL refusal, unchanged old role/data, idempotency, active-role/PUBLIC broad-right rollback. Retained failed harness/postcondition attempts and explicit grantor safeguard in BACKEND_ROLE_RESTRICTION_M15.md; exact owner source snapshot retained. No new C++/Unreal build needed for SQL-only local fixtures; no live role, password, Worker or production change. Personal1 owner script execution pending; fullM15/audit/hosted integration incomplete.
+
 ## October21 — M15 strict native lease reply protocol PASS
 
 Unwired acquire/renew/commit decoder and frozen actual local SQL reply bridge; exact int64 fence/null-head/safe numeric lexemes, bounded4096-byte flat JSON, strict case-sensitive proofs and refusals. Initial native9/10 case-comparison failure retained and narrowly fixed/replayed1/1; final10/10 clean in18.65s,2.994working/2.862privateGiB. Offline50/50 pass2.569s; legacy fixture unchanged. Final Editor6.389/Game17.255/sourceServer explicit-unity59.955s build PASS/exit0/no compiler severity. Exact selectors/logs/reproduction and auth/request-binding/restore/live limits LEASE_REPLY_PROTOCOL_M15.md. jfiav3jF completes bounded parser only; fullM15 and live access audit incomplete, hosted login closed, no cloud/asset/private-save change or new manual gate acceptance.

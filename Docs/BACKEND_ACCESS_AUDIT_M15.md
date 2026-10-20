@@ -1,6 +1,14 @@
 # M15 live backend access audit
 
-October20,2026. **Neon connection and development schema metadata verified; role permissions and Worker branch binding remain UNVERIFIED.** Installation and URL prerequisites are resolved. No further owner connection/URL action is currently requested. Full M15 is incomplete; hosted gameplay stays closed.
+October21,2026. **Owner role result received: least privilege FAILS.** Existing connection/schema metadata verified; exact Worker branch binding remains UNVERIFIED. Installation/URL prerequisites stay resolved. Full M15 is incomplete; hosted gameplay stays closed.
+
+## October21 owner browser inspection
+
+Computer Use stopped because it could not confidently identify the Windows browser URL; no bypass attempted. Owner offered assistance, confirmed NEON SQL READY on Development/neondb and pasted the read-only SELECT result. [Exact sanitized result/provenance](BACKEND_ROLE_OWNER_RESULT_M15.json): pf_app exists, table owned by neondb_owner, schema USAGE true/CREATE false, SELECT/INSERT/UPDATE/DELETE true/TRUNCATE false, RLS/forcedRLS false, superuser false, CREATEDB/CREATEROLE true and direct membership neon_superuser. This is owner-provided SQL evidence, not a new direct-agent query or cryptographic branch proof.
+
+Current backend3bc1ed2 src/index.ts only reads status/latest and INSERT ON CONFLICT DO NOTHING RETURNING. Runtime needs SELECT+INSERT/schema USAGE/DB CONNECT; broad administrative membership and UPDATE/DELETE are unnecessary. Neon documents Console/API/CLI-created roles receive neon_superuser and recommends SQL-created restricted roles for application access: [roles](https://neon.com/docs/manage/roles), [database access](https://neon.com/docs/manage/database-access). Do not infer least privilege from role name or successful connection. Do not enable RLS blindly or revoke owner/PUBLIC privileges. Prepare a tested narrow transactional correction first; no live changes made and exact Worker branch/role binding still unverified. Legacy full AuditCheckpointSchema.sql remains unexecuted; only the supplied subset has actual owner output.
+
+Owner's second query now reports BOTH neon_superuser memberships (neondb_owner and pf_app) granted by cloud_admin, admin_option=false, inherit/set=true. Grantor-query prerequisite is resolved; no additional read-only grantor action needed. Do not try forcing an in-place managed-role demotion. Local8failure-safety tests proved that an unmanageable grantor refuses or rolls back rather than silently passing. Current [tested preparation](BACKEND_ROLE_RESTRICTION_M15.md) instead creates separate SQL-owned pf_checkpoint_app NOLOGIN with SELECT/INSERT only, retaining old managed app/connection/data. Operator execution and later login/Worker credential cutover are still pending; no password or Worker binding changed.
 
 ## Verified development target
 
@@ -28,7 +36,7 @@ The development object tree returns pf_checkpoints, both indexes and show_db_tre
 
 ## Remaining audit limits and next AI work
 
-Current exposed Neon tools have no run_sql/inspect_database; local Get-Command found neither neon nor neonctl. [AuditCheckpointSchema.sql](../Scripts/AuditCheckpointSchema.sql) remains UNEXECUTED. Table/schema owner, RLS/policies, pf_app existence/membership/effective SELECT/INSERT/UPDATE/DELETE/TRUNCATE and schema CREATE/USAGE permissions remain UNVERIFIED. Project ADMIN capability is not runtime pf_app authority. Do not infer least privilege from connection success or schema descriptions.
+Current exposed Neon tools have no run_sql/inspect_database; local Get-Command found neither neon nor neonctl. Full [AuditCheckpointSchema.sql](../Scripts/AuditCheckpointSchema.sql) remains UNEXECUTED. The owner subset above now reports table owner, role flags/direct membership, RLS flags and effective schema/table privileges; these are no longer wholly unknown, but their least-privilege assessment FAILS. Other ownership, recursive/SET memberships, policy metadata, direct replication/bypass flags and exact Worker binding remain to verify. Project ADMIN capability is not runtime pf_app authority. Do not infer least privilege from connection success or schema descriptions.
 
 The Cloudflare encrypted runtime binding cannot establish branch/role identity from its name alone. The exact Worker endpoint/branch/role binding remains UNVERIFIED; public READY/neondb is insufficient because both branches can have neondb and pf_checkpoints. Do not change credentials, grant permissions or apply a migration on that assumption. No production query, migration/grant/deployment/security change was requested. Supported description tools may have their own internal implementation; this audit certifies only the returned metadata, not their internal transaction mode.
 

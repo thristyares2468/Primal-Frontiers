@@ -1,0 +1,30 @@
+{
+  "source": "Owner-pasted Neon SQL Editor result on October21 2026 after confirming Development/neondb; not a direct agent database query",
+  "projectId": "aged-resonance-28932410",
+  "reportedBranchId": "br-red-fog-a7mp3ux7",
+  "result": {
+    "database_name": "neondb",
+    "inspection_role": "neondb_owner",
+    "app_role": "pf_app",
+    "table_owner": "neondb_owner",
+    "is_superuser": false,
+    "can_create_database": true,
+    "can_create_roles": true,
+    "schema_usage": true,
+    "schema_create": false,
+    "can_read": true,
+    "can_insert": true,
+    "can_update": true,
+    "can_delete": true,
+    "can_truncate": false,
+    "row_security": false,
+    "forced_row_security": false,
+    "member_of": "{neon_superuser}"
+  },
+  "grantorResult": [
+    { "granted_role": "neon_superuser", "member": "neondb_owner", "granted_by": "cloud_admin", "admin_option": false, "inherit_option": true, "set_option": true },
+    { "granted_role": "neon_superuser", "member": "pf_app", "granted_by": "cloud_admin", "admin_option": false, "inherit_option": true, "set_option": true }
+  ],
+  "assessment": "Current Worker source needs SELECT and INSERT only; least privilege fails due elevated role attributes/membership and UPDATE/DELETE. Both managed grants are by cloud_admin without owner ADMIN option shown. Reject in-place demotion; prepare a separate SQL-created restricted staging role. No correction executed.",
+  "limits": "SQL result does not authenticate the reported Neon branch, reveal current Worker binding, inspect all role ownership or certify later hosted-fencing authorization. Production untouched."
+}

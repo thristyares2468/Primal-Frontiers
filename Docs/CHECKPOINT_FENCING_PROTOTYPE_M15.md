@@ -1,6 +1,7 @@
 # M15 offline checkpoint writer fencing
 
-**Current checkout expected count:50/50 via pnpm test (30SQL/composed +20ingress).**
+**Current checkout expected count:62/62 via pnpm test (30SQL/composed +20ingress +12role-preparation/safety).**
+The twelve role fixtures are a separate synthetic database, not live migration/permission acceptance; see [role preparation](BACKEND_ROLE_RESTRICTION_M15.md).
 The extra SQL/native reply-shape bridge is documented in [lease replies](LEASE_REPLY_PROTOCOL_M15.md); historical49 results below remain unchanged.
 [Ingress follow-up](CHECKPOINT_INGRESS_PROTOTYPE_M15.md) adds actual SHA/CRC/header
 validation and max-envelope SQL integration; draft JSON cap is now aligned6MiB.
