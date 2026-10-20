@@ -28,6 +28,7 @@
 // 0c2d935 (+ResetCreatures), time of day M7 b5a3165.
 
 #include "PFCommands.h"
+#include "PFReadyAutomation.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
@@ -614,6 +615,7 @@ class FPrimalAgentToolsRuntimeModule final : public IModuleInterface
 public:
     void StartupModule() override
     {
+        PFStartReadyPersistenceAutomation();
 #if !UE_BUILD_SHIPPING
         for (const PF::AgentTools::FCommandSpec& S : PF::AgentTools::CommandSpecs())
         {
@@ -627,6 +629,7 @@ public:
     }
     void ShutdownModule() override
     {
+        PFStopReadyPersistenceAutomation();
         for (IConsoleObject* Command : Commands) { IConsoleManager::Get().UnregisterConsoleObject(Command, false); }
         Commands.Empty();
         PF::AgentTools::SetEditorCommand({});

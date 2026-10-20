@@ -17,6 +17,11 @@
 	],
 	"Plugins": [
 		{
+			"Name": "PlayFabGSDK",
+			"Enabled": true,
+			"TargetAllowList": ["Server"]
+		},
+		{
 			"Name": "PrimalAgentTools",
 			"Enabled": true,
 			"TargetAllowList": ["Editor", "Game", "Client", "Server"],

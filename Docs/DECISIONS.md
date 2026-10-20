@@ -1,5 +1,11 @@
 # Architecture and Design Decisions
 
+## October20 — explicit server-only GSDK lifecycle, closed hosted admission
+
+Vendor Microsoft Apache-2.0 Unreal GSDK2.0.1 at673f068f0 with license/patch provenance; allow only Server target and load only after explicit PFPlayFabHosted plus bounded agent JSON validation. Remove machine-specific legacy DLL staging, preserve upstream style and make nine explicit JSON key copies for source5.8.3. Default offline servers and Editor/Game clients do not start agent traffic. Real allocated port/readiness, stateless health callback and weak GameThread shutdown tested with official local mock. Both PreLogin/InitNewPlayer keep hosted gameplay closed until authenticated identity, durable remote restore and writer fencing are implemented. Standby/Active is not durability acceptance.
+
+Do not hide raw messages or patch engine navigation to certify this local mock. Exact optional metrics404, normal SDK termination Warning and post-BeginTearingDown Crowd warning are recorded, source-investigated and narrowly classified in an opt-in local fixture; unexpected severity still fails. The SDK stops heartbeats upon Terminate, so test command receipt/callback/natural exit rather than invent a final heartbeat. Developer-only client readiness starts the existing persistence test after actual connected pawn readiness, retaining startup logs and strict assertions. [Evidence, failed attempts and reproduction](PLAYFAB_GSDK_M15.md). No cloud allocation/service credentials/asset changes.
+
 ## October20 — explicit cooked catalog discovery and source build provenance
 
 PFAssetPaths loads four gameplay catalogs by runtime string; cook discovery cannot infer them from a hard map reference. Add only the Items/Crafting/Building/Creatures folders to AlwaysCook, not CookAll or raw asset changes. Non-Shipping PrimalAgentToolsRuntime Server receipts also stage the existing engine HTML report shell as NonUFS. The optional packaged-server test mode isolates both roles and requires actual authority/privacy/restart assertions, clean Server raw logs and exported HTML/JSON before pass.

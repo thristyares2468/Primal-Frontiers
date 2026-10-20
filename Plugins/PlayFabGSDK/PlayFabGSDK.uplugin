@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 2,
+	"VersionName": "2.0.1",
+	"FriendlyName": "PlayFabGSDK",
+	"Description": "Unreal Integration of the PlayFab GSDK; modified by Rift Bound Games for opt-in Server loading (PF_VENDOR_NOTES.md)",
+	"Category": "PlayFab",
+	"CreatedBy": "PlayFab",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "PlayFabGSDK",
+			"Type": "ServerOnly",
+			"LoadingPhase": "None"
+		}
+	]
+}

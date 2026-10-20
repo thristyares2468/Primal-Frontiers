@@ -35,6 +35,9 @@ public class PrimalFrontier : ModuleRules
 		AddEngineThirdPartyPrivateStaticDependencies(Target, "OpenSSL");
 		// Real keyboard automation uses the engine's platform input-device mapper.
 		PrivateDependencyModuleNames.Add("ApplicationCore");
+		// Explicit hosted-server lifecycle only; no GSDK in Game/Editor clients.
+		if (Target.Type == TargetType.Server)
+			PrivateDependencyModuleNames.AddRange(new[] { "PlayFabGSDK", "Sockets" });
 
 		// Variant_Horror / Variant_Shooter are Epic template samples, not part of the
 		// survival game. They still compile into this module; removing them (code,

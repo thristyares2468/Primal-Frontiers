@@ -146,6 +146,12 @@ try {
                     $userRole=if($i -eq 0){'Server'}else{'Client'+$i}
                     $userDir=(Join-Path $summaryDirectory ('UserData\'+$userRole)).Replace('\','/')+'/'
                     $arguments+=' -UserDir="'+$userDir+'"'
+                    if($i -ne 0){
+                        # Start after actual map/possession readiness, retaining all startup
+                        # warnings in the raw log instead of racing them into a test report.
+                        $arguments=$arguments.Replace(' -ExecCmds="Automation RunTests '+$testFilter+'"','')
+                        $arguments+=' -PFRunPersistenceWhenReady'
+                    }
                     if($i -eq 0){
                         $projectPrefix='"'+$projectFile+'" '
                         if(!$arguments.StartsWith($projectPrefix)){throw 'Unexpected server argument prefix'}

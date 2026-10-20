@@ -10,6 +10,7 @@
 #include "Inventory/PFInventoryPlayerState.h"
 #include "Progression/PFProgressionComponent.h"
 #include "Persistence/PFWorldPersistence.h"
+#include "Hosting/PFHostingSubsystem.h"
 #include "GameFramework/PlayerStart.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
@@ -37,12 +38,16 @@ void APFSurvivalGameMode::StartPlay()
 void APFSurvivalGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
     Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+    if(UPFHostingSubsystem::IsHostedRequested())
+    {ErrorMessage=TEXT("Hosted gameplay admission NOT IMPLEMENTED: durable restore and authenticated identity required");return;}
     if (ErrorMessage.IsEmpty()) { GetWorld()->GetSubsystem<UPFWorldPersistence>()->CheckLogin(Options, ErrorMessage); }
 }
 
 FString APFSurvivalGameMode::InitNewPlayer(APlayerController* PC, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal)
 {
     FString Error = Super::InitNewPlayer(PC, UniqueId, Options, Portal);
+    if(UPFHostingSubsystem::IsHostedRequested())
+    {return TEXT("Hosted gameplay admission NOT IMPLEMENTED: durable restore and authenticated identity required");}
     auto* SurvivorPC = Cast<APFSurvivalPlayerController>(PC);
     auto* Persistence = GetWorld()->GetSubsystem<UPFWorldPersistence>();
     if (Error.IsEmpty() && !Persistence->CheckLogin(Options, Error)) { return Error; }
