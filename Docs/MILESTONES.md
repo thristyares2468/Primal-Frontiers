@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October20 — M15 branch targeting resolved, connection unavailable
+
+Owner supplied project aged-resonance-28932410, development br-red-fog-a7mp3ux7, production br-twilight-bread-a7rjhss5 and neondb. Development is the explicit read-only audit target; production remains untouched. Fresh capability inventory contains no Neon tools and discovery reports installed:false, superseding earlier connection snapshots. No live query/schema verification or migration executed; owner only re-enables/connects Neon for this chat, no repeated URLs/credentials/database setup. hKddPkEg and parent status reconciled; M15 remains incomplete. Exact targets and limits: BACKEND_ACCESS_AUDIT_M15.md.
+
 ## October20 — M15 Neon connection refresh, targeting pending
 
 Owner confirmed Neon connected; fresh discovery installed:true/ENABLED supersedes the installation blocker below. Account-wide project read requires explicit project_id; current tools omit project listing/SQL, docs lack verified IDs, and available browser inventory has no Neon tab. Next action is only the existing project browser URL, no credentials or reinstall. Actual schema/grants/branch audit remains unverified and metadata SQL unexecuted. Trello hKddPkEg updated to precise Personal1 targeting prerequisite; M15 parent stays incomplete. No database/Worker/runtime change, Unreal launch or new build/test claim. See BACKEND_ACCESS_AUDIT_M15.md.

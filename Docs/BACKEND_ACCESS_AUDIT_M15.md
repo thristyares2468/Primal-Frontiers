@@ -1,5 +1,20 @@
 # M15 live backend access audit
 
+## October20 — owner supplied explicit branch targets
+
+The project-targeting prerequisite is resolved by the owner's browser URLs:
+
+| Target | Owner-supplied identifier |
+| --- | --- |
+| Project | `aged-resonance-28932410` |
+| Development branch — audit target | `br-red-fog-a7mp3ux7` |
+| Production branch — leave untouched | `br-twilight-bread-a7rjhss5` |
+| Database | `neondb` |
+
+These are owner-supplied targets, not live-verified metadata or proof of the Worker's branch binding. Do not default to production when the development target is unavailable.
+
+Current capability refresh: no Neon tools are exposed in this chat; fresh plugin discovery reports installed:false (status:ENABLED), superseding the earlier installed:true snapshot below. No project/schema/role query was attempted after this tool removal. Owner's only next action is enable/connect Neon for this chat and reply ready; do not resend IDs, recreate the database, change roles or paste credentials. Resume the read-only development audit with the explicit targets above when tools return. Prepared SQL remains unexecuted; no database/Worker/security change or new engine test.
+
 ## October20 connection refresh — current status
 
 Owner replied **Neon connected**. Fresh plugin discovery confirms installed:true, status:ENABLED. The installed:false/installation prerequisite below is historical and superseded; do not reinstall.
