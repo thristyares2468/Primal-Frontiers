@@ -1,6 +1,6 @@
 import { after, before, beforeEach, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 
@@ -9,7 +9,7 @@ const db = new PGlite();
 let peakRss = 0;
 const sampler = setInterval(() => { peakRss = Math.max(peakRss, process.memoryUsage().rss); }, 10);
 sampler.unref();
-const checksum = 'AB'.repeat(32);
+const checksum = 'sha256:' + 'ab'.repeat(32);
 const payload = { original_file_base64: 'fixture-only', source_utc: '2026-10-18T00:00:00Z' };
 const acquire = (world = 'world-a', server = 'server-a', request = randomUUID(), ttl = 30) =>
   invoke(db, 'acquire', [world, server, request, ttl]);
@@ -179,7 +179,7 @@ test('same commit request cannot substitute payload, checksum, expiry, version o
   const lease = await acquire();
   const request = randomUUID();
   await commit(lease, { request });
-  for (const changed of [{ payload: { forged: true } }, { checksum: 'CD'.repeat(32) },
+  for (const changed of [{ payload: { forged: true } }, { checksum: 'sha256:' + 'cd'.repeat(32) },
     { expires: '2099-01-01T00:00:00Z' }, { version: 2 }, { generation: 2 }, { head: 1 }]) {
     refused(await commit(lease, { request, ...changed }), 'request_conflict');
   }
@@ -347,4 +347,34 @@ test('long takeover chain preserves immutable history and never admits a retired
   assert.equal((await counts()).checkpoints, 24);
   assert.deepEqual((await db.query('SELECT generation::int FROM pf_fencing_draft.checkpoints ORDER BY generation')).rows,
     Array.from({ length: 24 }, (_, i) => ({ generation: (i+1)*3 })));
+});
+
+test('native Unreal sha256-prefixed checkpoint checksum is accepted and bare hex refused', async () => {
+  const lease = await acquire();
+  const native = 'sha256:47d0a2035da74393511ea2f39463de0a4eea822fc0d822584e3799ab899a17ed';
+  assert.equal((await commit(lease, { checksum: native })).ok, true);
+  for (const bad of [native.slice(7), native.toUpperCase(), native+'0', 'sha256:'+native.slice(7).toUpperCase()]) {
+    refused(await commit(lease, { head: 1, generation: 2, checksum: bad }), 'invalid_checkpoint');
+  }
+});
+
+test('genuine frozen Unreal upload preserves historical bytes, generation and saved UTC across commit retry', async () => {
+  const fixture = JSON.parse(await readFile(new URL('../../Tests/Fixtures/M8_c3d221f/fixture.json', import.meta.url), 'utf8'));
+  const original = Buffer.from(fixture.envelopeBase64, 'base64');
+  const nativeChecksum = 'sha256:' + createHash('sha256').update(original).digest('hex');
+  assert.equal(nativeChecksum, 'sha256:47d0a2035da74393511ea2f39463de0a4eea822fc0d822584e3799ab899a17ed');
+  assert.equal(original.readBigUInt64LE(8), BigInt(fixture.generation));
+  assert.equal(original.readBigInt64LE(16), BigInt(fixture.savedUtc));
+  const lease = await acquire();
+  const options = { request: randomUUID(), generation: fixture.generation, checksum: nativeChecksum,
+    payload: { format: 'pf-pfs-base64-v1', envelope: fixture.envelopeBase64 } };
+  assert.equal((await commit(lease, options)).ok, true);
+  assert.equal((await commit(lease, options)).replayed, true);
+  const row = (await db.query('SELECT generation::text,checksum,payload FROM pf_fencing_draft.checkpoints')).rows[0];
+  assert.equal(row.generation, String(fixture.generation));
+  assert.equal(row.checksum, nativeChecksum);
+  assert.deepEqual(row.payload, options.payload);
+  assert.deepEqual(Buffer.from(row.payload.envelope, 'base64'), original);
+  assert.equal(Buffer.from(row.payload.envelope, 'base64').readBigInt64LE(16), BigInt(fixture.savedUtc));
+  assert.equal((await counts()).checkpoints, 1);
 });

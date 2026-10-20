@@ -1,5 +1,31 @@
 # M15 offline checkpoint writer fencing
 
+## October21 native wire-format correction — PASS27/27
+
+Follow-up task AusYLCpp found draft900cd16 checksum shape accepted bare64hex,
+whereas actual PFCheckpointProtocol emits `sha256:` plus lowercase64hex.
+Native-format selector reproduced0/1 FAIL/exit1 (false != true) in
+C:/UnrealSource/BuildLogs/M15FencingWire_20261021_Repro.log. Expansion stopped;
+only draft regex/fixture checksum corrected. Narrow replay1/1 PASS/exit0,
+M15FencingWire_20261021_Replay.log (1.447s), then26/26 regression PASS/exit0,
+M15FencingWire_20261021_SQLRegression.log (1.776s).
+
+Added genuine frozen Unreal fixture commit/retry proof using unmodified
+Tests/Fixtures/M8_c3d221f/fixture.json, SHA256
+47d0a2035da74393511ea2f39463de0a4eea822fc0d822584e3799ab899a17ed.
+Original2054bytes/base64, generation1 and SavedUtc1792032698 remain exact.
+Final27/27 PASS/exit0, no skipped/cancelled/todo,1.808s native/2.035wrapper,
+peak649109504bytes RSS, legacy public fixture unchanged. Exact final log:
+C:/UnrealSource/BuildLogs/M15FencingWire_20261021_Final.log.
+
+Additional passed titles: native Unreal sha256-prefixed checkpoint checksum is
+accepted and bare hex refused; genuine frozen Unreal upload preserves historical
+bytes, generation and saved UTC across commit retry. Bare/uppercase/wrong-length
+checksum forms refuse. Prior25tests below remain historical local SQL evidence;
+use current27 expected count for reproduction. These tests verify a known
+fixture's fidelity, not arbitrary input checksum/file validity or live cloud
+authority. All original single-session/security/deployment limits remain.
+
 October21,2026 — **local prototype PASS25/25; no deployed gameplay feature**.
 Trello [bounded task kGQxQHIS](https://trello.com/c/kGQxQHIS).
 

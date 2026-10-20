@@ -82,6 +82,12 @@ durability and isolated Neon migration still need separate verification.
 Caller identity here is a supplied fixture server ID, **not authenticated
 PlayFab/EOS identity**. No HTTP route or token verifier exists. SQL validates
 checksum shape/immutable metadata, not SHA256 or original file decoding.
+The SQL checksum spelling is the exact native `sha256:` plus lowercase64hex;
+bare/uppercase/incorrect-length forms refuse. A genuine frozen Unreal fixture
+is also committed/retried in memory with its independent known SHA256, original
+base64 bytes, generation and saved UTC unchanged. This does not validate every
+incoming file: SQL still treats the payload as immutable JSON metadata.
+
 The trusted future adapter must verify capability/world/server identity and
 the original Unreal envelope/version/checksum before SQL. Never expose these
 functions as a public API or accept caller-selected server IDs as authority.

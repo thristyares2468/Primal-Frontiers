@@ -173,7 +173,7 @@ DECLARE
   problem text;
 BEGIN
   IF p_request IS NULL OR p_generation IS NULL OR p_generation NOT BETWEEN 0 AND 9007199254740991
-     OR p_version IS NULL OR p_version < 1 OR p_checksum IS NULL OR p_checksum !~ '^[A-Fa-f0-9]{64}$'
+     OR p_version IS NULL OR p_version < 1 OR p_checksum IS NULL OR p_checksum !~ '^sha256:[a-f0-9]{64}$'
      OR p_payload IS NULL OR jsonb_typeof(p_payload) <> 'object'
      OR octet_length(p_payload::text) > 1048576 THEN
     RETURN jsonb_build_object('ok',false,'error','invalid_checkpoint');

@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October21 — M15 native checksum wire correction PASS27/27
+
+PFCheckpointProtocol source review found prototype barehex incompatibility. New selector reproduced0/1 FAIL/exit1, retained log and stopped expansion. Draft regex/fixture corrected to sha256:lowercase64hex; replay1/1, regression26/26 and final27/27 pass. Genuine immutable historical2054-byte envelope preserves known SHA/base64/generation1/SavedUtc1792032698 through commit/retry. Final1.808s native/exit0/RSS649109504bytes; no skipped/cancelled/todo, legacy public fixture unchanged. CHECKPOINT_FENCING_PROTOTYPE_M15.md records exact logs/test names. No Worker/C++/cloud changes or new Unreal build/test; known-fixture fidelity is not arbitrary ingress validation/auth/live concurrency. AusYLCpp bounded correction completes, fullM15/audit stay incomplete.
+
 ## October21 — M15 offline writer-fencing prototype PASS25/25
 
 Tools/BackendFencingPrototype uses pinned test-only PGlite0.5.10/PG18.6 and actual baseline001 SQL copied/hash-verified. Final25/25 native SQL tests pass/exit0 in1.941s (wrapper2.181s), peak652099584bytes RSS (~0.607GiB); initial22and expanded25 also pass. Lease epochs/expiry/renew/release, immutable retries/CAS, stale-writer refusal, rollback, public role refusal and24takeover sequence verified; legacy public fixture unchanged. Backend checkout/runtime/Worker/Unreal/assets/cloud untouched, no deployment or paid capacity. Single-session queue only; live permissions/binding, true contention, identity/envelope validation/restore remain unverified. Exact tests/logs/no-level guide/limits CHECKPOINT_FENCING_PROTOTYPE_M15.md. Bounded kGQxQHIS completes only this prototype; fullM15 and hKddPkEg audit remain incomplete.
