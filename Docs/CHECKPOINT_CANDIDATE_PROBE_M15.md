@@ -96,13 +96,26 @@ C:/UnrealProjects/PrimalFrontier-Backend.
 4. Exact workerd command/five expected routes and type-generation procedure are
    in backend README. No actual secrets should be supplied for those fixtures.
 
+## Recovery if the private activation result was lost (Personal1)
+
+The original password cannot be recovered from PostgreSQL. Do not rerun
+`ActivateDevelopmentCheckpointLogin.sql`; it correctly refuses once LOGIN is
+enabled. If the private URL was lost, open
+`C:/UnrealProjects/PrimalFrontier/Scripts/RotateDevelopmentCheckpointLogin.sql`
+in the Development `neondb` SQL editor as `neondb_owner` and run it once. It
+requires the existing restricted login and rechecks its permissions before
+rotating the password. On `PF_CHECKPOINT_LOGIN_ROTATED` plus successful COMMIT,
+copy the entire returned URL privately. If it refuses, stop and report only the
+redacted error. Do not paste the URL here.
+
 ## Start here — next owner action (Personal1)
 
 No Unreal level, launch, PowerShell, SQL rerun or bearer token needed. The new
 route is already deployed. Prerequisite: privately retained URL from the
 successful one-time activation, for Development br-red-fog-a7mp3ux7/neondb.
 
-1. Cloudflare > Workers & Pages > primalfrontier-backend > Settings >
+1. If you had to rotate, use the new URL; otherwise use the original privately
+   retained URL. Cloudflare > Workers & Pages > primalfrontier-backend > Settings >
    **Variables and Secrets**, outside the **Builds** section.
 2. Add type **Secret**, name **PF_CHECKPOINT_DATABASE_URL_CANDIDATE**. Value is
    the complete privately retained postgresql:// URL, without quotes or psql.
