@@ -196,3 +196,44 @@ bool FPFSaveFileStore::PreserveOriginal(const FString& Slot,const FString& Edge,
     {Error=TEXT("Original backup verification failed; source/destination preserved");return false;}
     return true;
 }
+
+bool FPFSaveFileStore::CopyOriginalToNewSlot(const FString& Slot,const FString& Edge,const FString& NewSlot,FString& Error)
+{
+    Error.Reset();
+    const FString Original=OriginalPath(Slot,Edge);
+    if(!IsInGameThread() || Original.IsEmpty() || !ValidSlot(NewSlot) || Slot.Equals(NewSlot,ESearchCase::IgnoreCase))
+    {Error=TEXT("Requires game thread, valid identifiers and a distinct unused recovery slot");return false;}
+    auto& Files=IFileManager::Get();
+    const auto Occupied=[&Files](const FString& Name){return Files.FileExists(*Name) || Files.DirectoryExists(*Name);};
+    for(bool Second:{false,true})
+    {
+        const FString Destination=Path(NewSlot,Second);
+        if(Occupied(Destination) || Occupied(Destination+TEXT(".pending")))
+        {Error=TEXT("Recovery destination has generation or pending evidence; choose an unused slot");return false;}
+    }
+    if(Occupied(FPaths::GetPath(OriginalPath(NewSlot,Edge))))
+    {Error=TEXT("Recovery destination has original evidence; choose an unused slot");return false;}
+
+    TUniquePtr<FArchive> Reader(Files.CreateFileReader(*Original,FILEREAD_Silent));
+    if(!Reader || Reader->TotalSize()<HeaderBytes || Reader->TotalSize()>HeaderBytes+MaxPayloadBytes)
+    {Error=TEXT("Original missing or outside bounded envelope size; files preserved");return false;}
+    TArray<uint8> Bytes;Bytes.SetNumUninitialized(static_cast<int32>(Reader->TotalSize()));
+    Reader->Serialize(Bytes.GetData(),Bytes.Num());
+    const bool Read=!Reader->IsError() && Reader->Close();Reader.Reset();
+    FPFSavedFile Source;
+    if(!Read || !DecodeEnvelope(Bytes,Source,Error))
+    {Error=TEXT("Original envelope invalid or corrupt; files preserved");return false;}
+
+    const FString Destination=Path(NewSlot,false);
+    if(!Files.MakeDirectory(*FPaths::GetPath(Destination),true))
+    {Error=TEXT("Cannot create recovery directory; files preserved");return false;}
+    TUniquePtr<FArchive> File(Files.CreateFileWriter(*Destination,FILEWRITE_NoReplaceExisting|FILEWRITE_Silent));
+    if(!File){Error=TEXT("Cannot create unused recovery destination; files preserved");return false;}
+    File->Serialize(Bytes.GetData(),Bytes.Num());
+    const bool Written=!File->IsError() && File->Close();File.Reset();
+    FPFSavedFile Verified;
+    if(!Written || !ReadGeneration(Destination,Verified) || Verified.Generation!=Source.Generation ||
+        Verified.SavedUtc!=Source.SavedUtc || Verified.Payload!=Source.Payload)
+    {Error=TEXT("Recovery copy verification failed; source and destination evidence preserved");return false;}
+    return true;
+}

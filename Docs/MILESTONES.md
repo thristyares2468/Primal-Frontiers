@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October22 — M18 exact original recovery copy technical PASS
+
+Trusted file-store API copies a verified original to a strictly unused slot while preserving raw bytes/generation/old time anchor. Source-corrupt A/B salvage, every occupied file/directory/pending/archive refusal, invalid/thread/path/case guards and genuine historical writer copy pass. Final Editor13.43s/Game24.81s builds and six native selectors43.26s/exit0 clean, peak2.961working/2.871privateGiB;636 existing persistence hashes unchanged. ORIGINAL_RECOVERY_COPY_M18.md contains exact tests/runner/evidence/limits. No new live-world rollback/RPC/UI/console/format/asset/map change, no fullM18 pass; explicit semantic/operator workflow remains future work.
+
 ## October22 — M15 live candidate and credential recovery verification PASS
 
 Fresh HTTP200/CANDIDATE_READY receipt proves current restricted candidate login/nine metadata checks, resolving owner prerequisite. Reviewed untested rotation script: add explicit ADMIN precondition, actual in-memory SQL/SCRAM/rollback/refusal tests pass5focused and72combined4.803s/exit0. RoleRSS494776320bytes, no generated credential output. Retain initial2/5 failures and exact narrow repairs in CHECKPOINT_RECOVERY_M15.md. No new Unreal build, real credential rotation/cutover, grant/schema/Worker/asset/private-save mutation or fullM15 acceptance. PlayFab upload remains deferred; supported local package evidence already exists. hKddPkEg reclassifiedAI/Doing, no repeated Personal setup action.

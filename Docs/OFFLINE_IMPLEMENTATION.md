@@ -1,5 +1,13 @@
 # Offline implementation scope — October16
 
+**October22 explicit resume:** owner authorizes continuing all milestones after
+the earlier stop/read-only period. Candidate backend login now verifies READY;
+PlayFab build upload/capacity remains deferred while local gameplay progresses.
+Next bounded M18 original-copy primitive uses file fixtures only. Existing
+offline objectives below remain eligible in tested slices; owner-led MCP level
+building, external-art provenance, manual/device gates and release boundaries
+still apply. Historical stop/unconfigured statements below are superseded.
+
 **Latest boundary:** user requests stop after the current station push and recording world-building workflow. Station source ff614aa is pushed; no further task is active. This queue is retained for a future explicit resume, not automatic continuation. Future world/level construction belongs to the owner's Unreal MCP workflow, not this chat (Trello gWRaMJHp /1tI62BmQ, Personal3). Any future C++ integration/authority/save testing must reconcile actual MCP-authored level identities first. Server/database/voice remain unconfigured and are being left for owner setup.
 
 Latest user direction authorizes planned resources, the technology tree and remaining offline features. It supersedes the former wait-for-COPPER_LOOP implementation stop, without asserting a human PASS. Existing server authority remains mandatory; no hosting, account/backend/database, voice transport, matchmaking or new online services are being implemented.

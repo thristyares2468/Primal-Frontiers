@@ -28,4 +28,9 @@ public:
     static bool PreserveOriginal(const FString& Slot,const FString& Edge,FString& Error);
     /** Checks the ordinary bounded envelope; failed reads preserve Out. */
     static bool ReadOriginal(const FString& Slot,const FString& Edge,FPFSavedFile& Out,FString& Error);
+    /** Trusted offline recovery primitive. Copies the exact validated original envelope
+     *  into an unused A/B slot without renewing timestamps or applying a live world.
+     *  Refusals retain source and destination evidence, including partial writes.
+     *  Caller must separately validate payload semantics and coordinate other processes. */
+    static bool CopyOriginalToNewSlot(const FString& Slot,const FString& Edge,const FString& NewSlot,FString& Error);
 };

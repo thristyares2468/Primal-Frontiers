@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October22 — recover original envelopes into unused slots only
+
+Keep byte-preserving original-copy recovery separate from semantic conversion and live-world apply. Require game thread and a distinct bounded slot, refuse any A/B/pending/archive occupant, and retain partial evidence on failure. Preserve generation/SavedUtc so recovery never renews food or fabricates a newer save. Callers must validate map/catalog/identity semantics and coordinate external writers before restoration. The trusted API adds no RPC/UI/console integration or automatic rollback. Six native/frozen-writer regressions and untouched636 private-file hashes are recorded in ORIGINAL_RECOVERY_COPY_M18.md; OS crash/disk-full/cross-process guarantees remain unverified.
+
 ## October21 — verify a restricted candidate before database cutover
 
 Keep the current checkpoint connection active while a separate optional encrypted candidate binding is checked. Use existing Neon HTTPS driver with a static metadata-only SELECT, exact recorded Development target, strict role/effective-right proofs, bounded timeout and sanitized status-only replies. Do not read payloads, mutate grants or silently fall back to active DB. Development diagnostics alone never enable hosted admission or constitute all-schema/identity/fencing assurance. PGlite remains a test-only dependency, excluded from Worker bundle. Current11local/workerd/deployed-route evidence and next private owner entry are in CHECKPOINT_CANDIDATE_PROBE_M15.md; credential cutover/retirement is a separate reviewed step.

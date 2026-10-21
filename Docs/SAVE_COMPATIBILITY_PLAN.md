@@ -1,5 +1,11 @@
 # Save compatibility and migration plan — M18
 
+October22 [ORIGINAL_RECOVERY_COPY_M18.md](ORIGINAL_RECOVERY_COPY_M18.md) supplies
+a tested trusted backend primitive to copy a verified original into an unused
+slot without resetting bytes/generation/time. It preserves source/destination
+evidence and is not an automatic live rollback, semantic migration or exposed
+operator command. Six native regressions/builds pass; fullM18 remains open.
+
 October15 [FROZEN_WRITER_M18.md](FROZEN_WRITER_M18.md) adds one genuine historical-source writer fixture: c3d221f rebuilt independently on installed5.8.3, production source hashes unchanged, synthetic data only. Current tests consume immutable V1 payload/envelope directly and pass startup/login/repeatedLoad/currentV2save, neutral progression/chest defaults, expired-food and refusal checks. This supersedes the blanket "only current-generated synthetic legacy records" gap for this ONE fixture. No archived historical executable, multi-engine/version/catalog matrix, generic content migration/rollback or fullM18 claim. No personal save processed.
 
 October15 [MIGRATION_REFUSAL_M18.md](MIGRATION_REFUSAL_M18.md): six actual manual/startup backup-refusal scenarios preserve source/evidence/live state/active craft, block default-world saves after startup failure. New native test and three related regressions PASS, both builds clean; no production code repair or OS-crash/disk-full/general migration claim. Genuine older-writer fixtures remain open.
