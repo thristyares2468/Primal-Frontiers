@@ -18,6 +18,10 @@ BEGIN
   IF NOT FOUND OR NOT app.rolcanlogin THEN
     RAISE EXCEPTION 'PF_ROTATE_REFUSED: restricted login is not currently enabled';
   END IF;
+  IF NOT EXISTS(SELECT 1 FROM pg_catalog.pg_auth_members
+      WHERE roleid=app.oid AND member=(SELECT oid FROM pg_catalog.pg_roles WHERE rolname=current_user) AND admin_option) THEN
+    RAISE EXCEPTION 'PF_ROTATE_REFUSED: role administration differs';
+  END IF;
   IF app.rolsuper OR app.rolcreatedb OR app.rolcreaterole OR app.rolreplication OR app.rolbypassrls
     OR EXISTS(SELECT 1 FROM pg_catalog.pg_auth_members WHERE member=app.oid)
     OR EXISTS(SELECT 1 FROM pg_catalog.pg_shdepend

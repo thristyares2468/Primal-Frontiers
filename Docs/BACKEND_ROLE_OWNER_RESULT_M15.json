@@ -47,6 +47,13 @@
     "status": "CHECKPOINT_LOGIN_READY",
     "limit": "Owner-reported activation/private URL availability; not fresh network authentication, current Worker binding verification or cutover. No private URL or password collected."
   },
-  "assessment": "Owner reports restricted staging preparation, Development pooled host and one-time login activation complete. Do not repeat these prerequisites. Fresh candidate provider authentication/least-privilege proof, Worker cutover and old credential retirement remain pending. Old managed pf_app stays unchanged; full runtime audit incomplete.",
+  "candidateVerification": {
+    "receipt": "CHECKPOINT_CANDIDATE_RESULT_M15.json",
+    "source": "AI fresh deployed candidate GET October22 Brisbane",
+    "httpStatus": 200,
+    "status": "CANDIDATE_READY",
+    "limit": "Network login and nine implemented metadata checks at query time; not active connection cutover, all permissions, independent provider branch mapping or hosted acceptance."
+  },
+  "assessment": "Owner restricted staging preparation, endpoint, login recovery and candidate-secret entry resolved. Fresh deployed candidate authentication/implemented metadata proof now passes. Do not repeat owner setup. Active Worker cutover, old credential retirement and comprehensive runtime audit remain separate and incomplete.",
   "limits": "SQL result does not authenticate the reported Neon branch, reveal current Worker binding, inspect all role ownership or certify later hosted-fencing authorization. Production untouched."
 }

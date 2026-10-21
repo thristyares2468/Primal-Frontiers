@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October22 — M15 live candidate and credential recovery verification PASS
+
+Fresh HTTP200/CANDIDATE_READY receipt proves current restricted candidate login/nine metadata checks, resolving owner prerequisite. Reviewed untested rotation script: add explicit ADMIN precondition, actual in-memory SQL/SCRAM/rollback/refusal tests pass5focused and72combined4.803s/exit0. RoleRSS494776320bytes, no generated credential output. Retain initial2/5 failures and exact narrow repairs in CHECKPOINT_RECOVERY_M15.md. No new Unreal build, real credential rotation/cutover, grant/schema/Worker/asset/private-save mutation or fullM15 acceptance. PlayFab upload remains deferred; supported local package evidence already exists. hKddPkEg reclassifiedAI/Doing, no repeated Personal setup action.
+
 ## October21 — M15 candidate connection probe implemented and serving
 
 Owner CHECKPOINT_LOGIN_READY accepted; no repeat activation/host/account request. Separate backend c8a3575 publishes optional read-only Development candidate probe without changing active NEON_DATABASE_URL. Exact metadata SQL, route/refusal/error/deadline tests11/11 PASS, typecheck PASS after retained DOM/timer failures, workerd5routes PASS,209.67KiB bundle excludes test-only PGlite. Fresh public route now503/CANDIDATE_NOT_CONFIGURED, health200/development, existing status200/READY/neondb, POST405 and protected GET401. [Full evidence/owner action](CHECKPOINT_CANDIDATE_PROBE_M15.md). No private candidate set/query, cutover, new Unreal build or fullM15/hosted acceptance. Next Personal1: add only PF_CHECKPOINT_DATABASE_URL_CANDIDATE runtime Secret using privately retained URL and reply CANDIDATE_SECRET_READY; AI verifies public status next.

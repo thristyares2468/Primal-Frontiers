@@ -1,0 +1,10 @@
+{
+  "observedUtc": "2026-10-21T23:09:44.0122658Z",
+  "localDate": "2026-10-22 Australia/Brisbane",
+  "source": "Fresh AI unauthenticated GET of deployed development status endpoint; no credential value read",
+  "url": "https://primalfrontier-backend.jackherbig09.workers.dev/v1/checkpoints/candidate/status",
+  "httpStatus": 200,
+  "body": {"ok": true, "status": "CANDIDATE_READY"},
+  "scope": "Candidate network login and nine implemented catalog metadata checks at query time. Owner private secret-entry action complete; no repeat requested.",
+  "limits": "Not active connection cutover, independent provider branch identity, writes, comprehensive privilege audit, migration, hosted restoration, lease fencing or voice acceptance. Live role/secret values were not modified."
+}

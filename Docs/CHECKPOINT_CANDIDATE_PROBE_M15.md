@@ -1,5 +1,11 @@
 # M15 restricted database candidate probe
 
+**October22 current result:** HTTP200/CANDIDATE_READY verified by AI. Owner
+activation/recovery/secret-entry action below is complete; do not repeat it.
+Safe receipt CHECKPOINT_CANDIDATE_RESULT_M15.json, recovery source/tests and
+remaining limits CHECKPOINT_RECOVERY_M15.md. Active connection cutover is a
+separate unfinished step. Old owner instructions remain reproduction/history.
+
 October21 2026. Bounded implementation/publishing task QvxVFMZZ PASS. Full M15
 and runtime permission audit hKddPkEg remain incomplete. Owner reported
 CHECKPOINT_LOGIN_READY: activation/private URL availability is complete as an

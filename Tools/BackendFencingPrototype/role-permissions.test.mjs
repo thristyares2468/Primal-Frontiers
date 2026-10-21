@@ -1,6 +1,7 @@
 import { after, before, beforeEach, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { createHash, createHmac, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
 
 // No DSN/network/cloud API. The rejected in-place reference and exact current
@@ -8,6 +9,7 @@ import { PGlite } from '@electric-sql/pglite';
 const patch = await readFile(new URL('./rejected-inplace-role.sql', import.meta.url), 'utf8');
 const prepare = await readFile(new URL('../../Scripts/PrepareDevelopmentCheckpointRole.sql', import.meta.url), 'utf8');
 const activate = await readFile(new URL('../../Scripts/ActivateDevelopmentCheckpointLogin.sql', import.meta.url), 'utf8');
+const rotate = await readFile(new URL('../../Scripts/RotateDevelopmentCheckpointLogin.sql', import.meta.url), 'utf8');
 const baseline = await readFile(new URL('./baseline.sql', import.meta.url), 'utf8');
 let db;
 let peakRss = 0;
@@ -51,7 +53,7 @@ before(async () => {
     VALUES('untouched-checkpoint',1,1,'synthetic-sum','{"fixture":true}')`);
 });
 beforeEach(async () => {
-  await db.exec(`RESET ROLE;
+  await db.exec(`ROLLBACK; RESET ROLE;
     DROP TABLE IF EXISTS public.owned_by_app;
     REVOKE unexpected_group FROM pf_app;
     GRANT pf_app TO neondb_owner WITH ADMIN TRUE, INHERIT FALSE, SET TRUE;
@@ -228,4 +230,85 @@ test('activation refuses wrong inspection identity and clears private URL on rol
   await db.exec('ROLLBACK');
   assert.ok(!(await db.query("SELECT current_setting('pf.private_checkpoint_url',true) AS value")).rows[0].value);
   assert.equal((await db.query("SELECT rolcanlogin FROM pg_roles WHERE rolname='pf_checkpoint_app'")).rows[0].rolcanlogin, false);
+});
+
+// Read only in the synthetic cluster as its bootstrap superuser. Return a boolean
+// in assertions, never print a generated password, URL or SCRAM verifier.
+async function credential() {
+  await db.exec('RESET ROLE');
+  const value = (await db.query("SELECT rolpassword FROM pg_authid WHERE rolname='pf_checkpoint_app'")).rows[0]?.rolpassword;
+  await db.exec('SET ROLE neondb_owner');
+  return value;
+}
+
+async function rotationRefused(pattern) {
+  const oldPassword = await credential(), oldApp = await appMetadata(), rows = await data();
+  try { await assert.rejects(db.exec(rotate), pattern); }
+  finally { await db.exec('ROLLBACK'); }
+  assert.ok((await credential()) === oldPassword, 'refused rotation preserved credential');
+  assert.deepEqual(await appMetadata(), oldApp);
+  assert.deepEqual(await data(), rows);
+  assert.ok(!(await db.query("SELECT current_setting('pf.private_checkpoint_url',true) AS value")).rows[0].value);
+}
+
+test('recovery rotates only the restricted credential and clears private output after commit', async () => {
+  await db.exec(prepare); await db.exec(activate);
+  const original = await credential(), oldApp = await appMetadata(), rows = await data();
+  const result = (await db.exec(rotate)).find(r => r.rows[0]?.neon_database_url)?.rows[0];
+  assert.ok(result?.status === 'PF_CHECKPOINT_LOGIN_ROTATED');
+  const url = new URL(result.neon_database_url);
+  assert.ok(url.protocol === 'postgresql:' && url.username === 'pf_checkpoint_app');
+  assert.ok(url.hostname === 'ep-autumn-cell-a7d9uojb-pooler.ap-southeast-2.aws.neon.tech');
+  assert.ok(url.pathname === '/neondb' && url.search === '?sslmode=require');
+  assert.ok(/^[a-f0-9]{64}$/.test(url.password));
+  const current = await credential();
+  assert.ok(current !== original && current.startsWith('SCRAM-SHA-256$'));
+  const proof = /^SCRAM-SHA-256\$(\d+):([^$]+)\$([^:]+):(.+)$/.exec(current);
+  assert.ok(proof && Number(proof[1]) > 0 && Number(proof[1]) <= 100_000);
+  const salted = pbkdf2Sync(url.password, Buffer.from(proof[2], 'base64'), Number(proof[1]), 32, 'sha256');
+  const client = createHmac('sha256', salted).update('Client Key').digest();
+  const stored = createHash('sha256').update(client).digest();
+  const server = createHmac('sha256', salted).update('Server Key').digest();
+  assert.ok(timingSafeEqual(stored, Buffer.from(proof[3], 'base64')) &&
+    timingSafeEqual(server, Buffer.from(proof[4], 'base64')), 'returned private password matches stored SCRAM proof');
+  assert.deepEqual(await appMetadata(), oldApp); assert.deepEqual(await data(), rows);
+  assert.ok(!(await db.query("SELECT current_setting('pf.private_checkpoint_url',true) AS value")).rows[0].value);
+  assert.equal((await db.query("SELECT rolcanlogin FROM pg_roles WHERE rolname='pf_checkpoint_app'")).rows[0].rolcanlogin, true);
+  await assert.rejects(db.exec(activate), /PF_LOGIN_REFUSED: login already enabled/);
+  await db.exec('ROLLBACK');
+  assert.ok((await credential()) === current, 'activation remains one-time after recovery');
+});
+
+test('recovery refuses missing or disabled login and preserves old app/data', async () => {
+  await rotationRefused(/PF_ROTATE_REFUSED: restricted login is not currently enabled/);
+  await db.exec(prepare);
+  await rotationRefused(/PF_ROTATE_REFUSED: restricted login is not currently enabled/);
+});
+
+test('recovery refuses broad flags, inherited membership and effective mutation grants atomically', async () => {
+  await db.exec(prepare); await db.exec(activate);
+  await db.exec('ALTER ROLE pf_checkpoint_app CREATEDB');
+  await rotationRefused(/PF_ROTATE_REFUSED: role privilege\/ownership differs/);
+  await db.exec('ALTER ROLE pf_checkpoint_app NOCREATEDB; GRANT UPDATE ON public.pf_checkpoints TO PUBLIC');
+  await rotationRefused(/PF_ROTATE_REFUSED: effective checkpoint privileges differ/);
+  await db.exec('REVOKE UPDATE ON public.pf_checkpoints FROM PUBLIC; RESET ROLE; GRANT unexpected_group TO pf_checkpoint_app; SET ROLE neondb_owner');
+  await rotationRefused(/PF_ROTATE_REFUSED: role privilege\/ownership differs/);
+  await db.exec('RESET ROLE; REVOKE unexpected_group FROM pf_checkpoint_app; CREATE TABLE public.owned_by_app(id integer); ALTER TABLE public.owned_by_app OWNER TO pf_checkpoint_app; SET ROLE neondb_owner');
+  await rotationRefused(/PF_ROTATE_REFUSED: role privilege\/ownership differs/);
+  await db.exec('RESET ROLE; DROP TABLE public.owned_by_app; SET ROLE neondb_owner; ALTER TABLE public.pf_checkpoints ENABLE ROW LEVEL SECURITY');
+  await rotationRefused(/PF_ROTATE_REFUSED: effective checkpoint privileges differ/);
+});
+
+test('recovery refuses missing administration with an explicit precondition before rotation', async () => {
+  await db.exec(prepare); await db.exec(activate);
+  await db.exec('RESET ROLE; REVOKE ADMIN OPTION FOR pf_checkpoint_app FROM neondb_owner; SET ROLE neondb_owner');
+  await rotationRefused(/PF_ROTATE_REFUSED: role administration differs/);
+});
+
+test('recovery refuses wrong inspection identity before changing a credential', async () => {
+  await db.exec(prepare); await db.exec(activate);
+  const original = await credential(); await db.exec('RESET ROLE');
+  await assert.rejects(db.exec(rotate), /PF_ROTATE_REFUSED: select Development\/neondb and neondb_owner/);
+  await db.exec('ROLLBACK');
+  assert.ok((await credential()) === original);
 });
