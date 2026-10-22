@@ -68,6 +68,13 @@ bool FPFArgumentsTest::RunTest(const FString&)
     TestFalse(TEXT("Export traversal"), Valid(TEXT("PF.ExportTestReport"), {TEXT("../escape")}));
     TestTrue(TEXT("World slot identifier"), Valid(TEXT("PF.SaveWorld"), {TEXT("Automation_Example")}));
     TestTrue(TEXT("Read-only save slot identifier"),Valid(TEXT("PF.CheckSave"),{TEXT("Automation_Example")}));
+    TestTrue(TEXT("Original recovery grammar"),Valid(TEXT("PF.CopyOriginalSave"),{TEXT("Source"),TEXT("Edge_1"),TEXT("Recovery")}));
+    TestFalse(TEXT("Original recovery case-alias destination refused"),Valid(TEXT("PF.CopyOriginalSave"),{TEXT("Source"),TEXT("Edge_1"),TEXT("source")}));
+    for(int32 N=0;N<3;++N)
+    {
+        for(const FString& Bad:{FString(TEXT("../escape")),FString(TEXT("bad-name")),FString(TEXT("")),FString::ChrN(65,TEXT('x'))})
+        {TArray<FString> A={TEXT("Source"),TEXT("Edge"),TEXT("Target")};A[N]=Bad;TestFalse(TEXT("Each recovery identifier is bounded and path-free"),Valid(TEXT("PF.CopyOriginalSave"),A));}
+    }
     for (const TCHAR* Slot : {TEXT("../escape"), TEXT("C:/World"), TEXT("bad-name"), TEXT("")})
     { TestFalse(TEXT("Invalid save/load slot"), Valid(TEXT("PF.LoadWorld"), {Slot}));TestFalse(TEXT("Invalid inspection slot"),Valid(TEXT("PF.CheckSave"),{Slot})); }
     TestTrue(TEXT("Help through console"), IConsoleManager::Get().ProcessUserConsoleInput(TEXT("PF.Help"), *GLog, nullptr));

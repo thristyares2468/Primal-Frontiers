@@ -1,5 +1,7 @@
 # M18 verified original copy into an unused slot
 
+October22 follow-up: [ORIGINAL_COPY_COMMAND_M18.md](ORIGINAL_COPY_COMMAND_M18.md) records a separate non-Shipping operator-console wrapper. "No command yet" below describes this earlier API-only slice; current wrapper still never performs a live load, semantic migration or active-slot change.
+
 October22 2026, bounded task https://trello.com/c/2425XbNK. Technical PASS for a
 trusted backend primitive; fullM18, generic migration and manual recovery remain
 incomplete. It is not a new UI/console command or automatic live-world rollback.

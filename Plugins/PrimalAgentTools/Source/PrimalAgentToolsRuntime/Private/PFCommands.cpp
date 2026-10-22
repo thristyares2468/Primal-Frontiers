@@ -110,6 +110,7 @@ const TArray<FCommandSpec>& CommandSpecs()
         {TEXT("PF.VerifyCheckpoint"), TEXT("WorldId Dedicated server: asynchronously fetch/verify the remote envelope in memory; does not load a world or publish a file."), TEXT(""), 1, 1},
         {TEXT("PF.LoadWorld"), TEXT("[slot] Server: restore validated gameplay state on the same map (default Survival)."), TEXT(""), 0, 1, false, true},
         {TEXT("PF.CheckSave"), TEXT("[slot] Server: inspect saved file/catalog/map/layout and connected membership without loading or writing (default Survival); not a restore guarantee."), TEXT(""), 0, 1},
+        {TEXT("PF.CopyOriginalSave"), TEXT("SourceSlot Edge NewSlot Server console: copy preserved original bytes into a distinct unused slot; no live load or active-slot change. Inspect copied semantics separately."), TEXT(""), 3, 3, false, true},
         // Gathering/crafting (M4) and building (M5).
         {TEXT("PF.TestGathering"), TEXT("Server: validate loaded resource definitions and node state; no harvesting."), TEXT(""), 0, 0},
         {TEXT("PF.TestCrafting"), TEXT("Server: validate player recipe catalogs and queue state; no item grants."), TEXT(""), 0, 0},
@@ -148,6 +149,11 @@ FString ValidateArguments(const FCommandSpec& S, const TArray<FString>& A)
     if (A.Num() < S.MinArgs || A.Num() > S.MaxArgs) { return TEXT("Wrong argument count. Usage: ") + S.Name + TEXT(" ") + S.Help; }
     if ((S.Name == TEXT("PF.SaveWorld") || S.Name == TEXT("PF.LoadWorld") || S.Name==TEXT("PF.CheckSave")) && !A.IsEmpty() && !FPFSaveFileStore::ValidSlot(A[0]))
     { return TEXT("Save slot requires 1-64 ASCII letters, digits or underscores; paths are refused."); }
+    if(S.Name==TEXT("PF.CopyOriginalSave"))
+    {
+        for(const FString& Id:A){if(!FPFSaveFileStore::ValidSlot(Id)){return TEXT("Source slot, edge and new slot each require 1-64 ASCII letters, digits or underscores; paths are refused.");}}
+        if(A[0].Equals(A[2],ESearchCase::IgnoreCase)){return TEXT("Recovery requires a distinct unused destination slot.");}
+    }
     if (S.Name==TEXT("PF.UploadCheckpoint") && !FPFSaveFileStore::ValidSlot(A[0])) { return TEXT("Invalid local save slot"); }
     if ((S.Name==TEXT("PF.UploadCheckpoint") || S.Name==TEXT("PF.VerifyCheckpoint")) && !FPFCheckpointProtocol::ValidWorldId(A.Last()))
     { return TEXT("World ID requires 1-128 ASCII letters, digits, dot, underscore, colon or hyphen"); }
@@ -526,6 +532,17 @@ FResult ExecuteCommand(const FString& Name, const TArray<FString>& Args, UWorld*
             FPFCheckpointClient::Fetch(World,Args[0],1,MoveTemp(Complete),Why);
         if (!Started) { Fail(R,TEXT("CheckpointRejected"),Why); }
         else { R.Scope=RequestId; R.Add(TEXT("Warning"),TEXT("CheckpointPending"),RequestId,TEXT("Request queued; NOT a completed remote save/load. Wait for matching CheckpointComplete or CheckpointRejected, then export history.")); }
+    }
+    else if(Name==TEXT("PF.CopyOriginalSave"))
+    {
+        if(!World || !World->IsGameWorld() || World->GetNetMode()==NM_Client || !World->GetAuthGameMode())
+        {Fail(R,TEXT("NotAuthority"),TEXT("Requires authoritative game-world server console; no client forwarding or recovery RPC exists."));}
+        else
+        {
+            FString Why;
+            if(!FPFSaveFileStore::CopyOriginalToNewSlot(Args[0],Args[1],Args[2],Why)){Fail(R,TEXT("RecoveryCopyRejected"),Why);}
+            else{R.Add(TEXT("Info"),TEXT("OriginalCopied"),Args[2],TEXT("Exact preserved original copied to unused slot. Source bytes/generation/UTC unchanged; live world and active slot unchanged. Run PF.CheckSave on the copy before considering a separate load; semantic validity is not certified."));}
+        }
     }
     else if (Name == TEXT("PF.SaveWorld") || Name == TEXT("PF.LoadWorld") || Name == TEXT("PF.CheckSave") || Name == TEXT("PF.TestPersistence"))
     {

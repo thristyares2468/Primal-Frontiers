@@ -1,5 +1,10 @@
 # Offline implementation scope — October16
 
+**Latest owner direction October22: STOP after the current M18 recovery-command
+work is published.** LMVAG5Xz technical gates pass; finish its scoped commit/push
+and stop. Do not automatically start any queued objective below. Full M18 and
+unfinished milestones remain incomplete; a new explicit resume is required.
+
 **October22 explicit resume:** owner authorizes continuing all milestones after
 the earlier stop/read-only period. Candidate backend login now verifies READY;
 PlayFab build upload/capacity remains deferred while local gameplay progresses.

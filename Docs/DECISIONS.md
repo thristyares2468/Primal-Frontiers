@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October22 — original-copy console command never loads or switches worlds
+
+Expose the already verified exact-copy primitive only through non-Shipping PrimalAgentTools, three bounded identifiers and existing server-console mutation refusal. Require authoritative game-world GameMode; no command RPC/client forwarding. Preserve exact bytes/generation/UTC into a distinct unused slot, report envelope-only success and unchanged active world/slot, then require separate read-only PF.CheckSave semantics before any proposed load. Do not silently combine recovery with a live apply or renew food time. Synthetic actual-console/native tests and real one-/two-client create/restart refusal pass; ORIGINAL_COPY_COMMAND_M18.md records operator steps and limits. Generic semantic recovery, cross-process transaction/OS crash durability and ordinary player UI remain separate.
+
 ## October22 — stateless owned stations derive from saved build pieces
 
 Append Workbench/Refinery kinds after the eight stable building values. Reuse authoritative construction/support/cost validation and persistent structure identity/owner; derive a single hidden replicated crafting provider from each live built piece. Destroy helpers with their parent and reconstruct them on restore, rather than serializing a second owner-bearing actor record. Owner/range/LOS/provider-health/type/authority remain checked by server crafting selection and completion; no client multiplier input. Public camp stations stay public. This deliberately adds no fuel/power/station inventory or cross-owner access policy. Existing near-start camp and disposable construction fixture avoid any map/layout/asset migration; code-native station pictures need no external art. Tests and limits: OWNED_CRAFTING_STATIONS_M12.md.

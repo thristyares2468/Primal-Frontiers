@@ -1,5 +1,9 @@
 # Trello test guides
 
+## G19 — Original-save copy command (optional operator reproduction)
+
+Full exact guide/evidence copied into completed AI task LMVAG5Xz: [ORIGINAL_COPY_COMMAND_M18.md](ORIGINAL_COPY_COMMAND_M18.md). Automated tests require no level or personal original. Optional operator use requires an actual preserved file under Saved/Persistence/Originals, an unused destination and an authoritative Development game/server on that save's correct map; existing normal map `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Start in Explorer to identify source folder/edge filename; do not invent them. Command copies only; explicit OriginalCopied PASS must leave world/active slot unchanged, repeat must refuse. Separate PF.CheckSave semantics before any proposed load. No new mandatory Personal recovery test or instruction to edit private saves. Owner requests stop after publication; no next task starts automatically.
+
 ## G18 — Owned workbench and refinery (optional reproduction)
 
 Canonical complete guide: [OWNED_CRAFTING_STATIONS_M12.md](OWNED_CRAFTING_STATIONS_M12.md), sections Reachable test and controls / Technical reproduction / Evidence. Same exact guide is copied into AI completed task fKB7Zgqs. Level `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`, one rendered Standalone Game, disposable new world. Start at CAMP CRAFTING STATIONS sign `(350,-650,160)`; construction patch `(-800,-1200,0)`. B/1 Foundation, B/9 Workbench, B/0 Refinery, R rotate, left-click place, C craft, H demolish only in building mode; exact ingredients/ownership/save steps and OWNED_STATIONS pass conditions are in that guide. Native/network/rendered assisted tests passed; normal earned pacing/physical-controller observation remains unverified. This is not a mandatory repeat of prior accepted building/chest/save/menu tests.

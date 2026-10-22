@@ -1,5 +1,7 @@
 # PrimalAgentTools
 
+M18 adds non-Shipping server-console `PF.CopyOriginalSave SourceSlot Edge NewSlot`: exact preserved-envelope copy to an unused slot only, no live load/active-slot change or client forwarding. Read-only semantic inspection remains separate; [operator guide/evidence](../../Docs/ORIGINAL_COPY_COMMAND_M18.md). No personal recovery is needed for its synthetic automated tests.
+
 M15 local hosting fixtures: `PF.Hosting.ClosedAdmissionLive` is an explicitly opted-in ClientContext wire probe, not a normal console command. `Scripts/RunPlayFabLifecycle.ps1` drives the official offline mock and requires real refused gameplay admission/health/natural exits; see `Docs/PLAYFAB_GSDK_M15.md` for exact package/levels/known messages. The optional packaged persistence runner uses `PFRunPersistenceWhenReady` only with the existing live fixture: connected open-world pawn stable2s,90s deadline, original test/assertions, raw startup warnings preserved. This command plugin/its fixtures remain excluded from Shipping. GSDK is a separate Server-only dependency.
 
 M15 adds dedicated-server-only asynchronous `PF.UploadCheckpoint Slot WorldId` and `PF.VerifyCheckpoint WorldId`. Pending requests never claim save success; terminal outcomes enter normal report history. Development API transport only; no automatic restore or production identity. [Checkpoint guide](../../Docs/CHECKPOINT_TRANSPORT_M15.md).

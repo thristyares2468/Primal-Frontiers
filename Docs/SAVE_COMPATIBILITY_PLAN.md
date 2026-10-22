@@ -1,5 +1,10 @@
 # Save compatibility and migration plan — M18
 
+October22 follow-up [ORIGINAL_COPY_COMMAND_M18.md](ORIGINAL_COPY_COMMAND_M18.md)
+exposes a separately tested non-Shipping server-console wrapper for exact copy
+into an unused slot. Older API-only "not exposed" statements below are historical;
+live loading, semantic migration, active-slot changes and full M18 remain separate.
+
 October22 [ORIGINAL_RECOVERY_COPY_M18.md](ORIGINAL_RECOVERY_COPY_M18.md) supplies
 a tested trusted backend primitive to copy a verified original into an unused
 slot without resetting bytes/generation/time. It preserves source/destination

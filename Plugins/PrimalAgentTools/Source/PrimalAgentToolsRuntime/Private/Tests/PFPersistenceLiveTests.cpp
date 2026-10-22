@@ -183,6 +183,8 @@ public:
             Test->TestEqual(TEXT("Client inspection refusal preserves output"),ClientInspection.Map,FString(TEXT("Unchanged")));
             for (const TCHAR* Name : {TEXT("PF.SaveWorld"), TEXT("PF.LoadWorld"), TEXT("PF.CheckSave"), TEXT("PF.TestPersistence")})
             { Test->TestTrue(TEXT("Client PF persistence command rejected"), PF::AgentTools::ExecuteCommand(Name, {}, W, false).HasErrors()); }
+            const auto CopyDenied=PF::AgentTools::ExecuteCommand(TEXT("PF.CopyOriginalSave"),{Slot,TEXT("ClientProbe"),TEXT("AutomationCopyDenied")+FGuid::NewGuid().ToString(EGuidFormats::Digits)},W,false);
+            Test->TestTrue(TEXT("Network client original copy refused before disk access"),CopyDenied.Issues.ContainsByPredicate([](const auto& E){return E.Code==TEXT("NotAuthority");}));
             Test->TestFalse(TEXT("Client cannot create items"), PC->GetInventory()->Grant(TEXT("Item_Wood"), 1));
             Test->TestFalse(TEXT("Client cannot replace progression"),Progression->Restore({},Error));
             ClientProgressionBefore=Progression->GetRecord();
