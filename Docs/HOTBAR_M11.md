@@ -1,5 +1,7 @@
 # Illustrated hotbar — M11/M12
 
+October23 additive M12 optical consumer: a crafted Field survey scope can be pinned to an exact hotbar batch and toggled with Q / D-pad down after closing inventory. Local2x camera view clears on menu/switch/loss/death/pawn replacement; no settings write, interaction reach or item consumption. Earlier consumable-only statements below describe the prior hotbar. Full recipe/fixture/tests and optional guide: [SURVEY_SCOPE_M12.md](SURVEY_SCOPE_M12.md). Existing UI_HOTBAR owner acceptance is retained, not extrapolated to new physical-controller scope feel.
+
 October15 user report UI_HOTBAR PASS accepted for the named G17 visual/usability review. Trello5p0GUDCt Testing/Done and complete readback; guide retained for reproduction, no repeat requested. Exact evidence/limits PLAYTEST_RESULTS_2026_10_15.md. Resolution/HUD scale/FPS/build/device/optional substeps not separately reported; controller/audio/1440p/Copper/stat-earned/broader milestones remain separate. Documentation/Trello reconciliation only; no source/asset/settings/save change or new Unreal launch.
 
 October15,2026. User requested this after original UI art/design creation. Technically complete with Unreal evidence; user UI_HOTBAR PASS now accepted for G17. Trello https://trello.com/c/lMFUU8VE.

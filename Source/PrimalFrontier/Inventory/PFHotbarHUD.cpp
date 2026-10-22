@@ -42,6 +42,7 @@ void UPFHotbarHUD::NativeTick(const FGeometry& Geometry,float Delta)
     if(!Show){return;}
     const auto* Settings=UPFGameUserSettings::Get();const float Scale=Settings?Settings->Preferences.HUDScale:1.f;
     Hint->SetText(FText::FromString((!Settings || Settings->Preferences.bControlHints)?TEXT("1–8 select  ·  Q / D-down use  ·  Tab + 1–8 assign"):TEXT("")));auto HintFont=Hint->GetFont();HintFont.Size=FMath::RoundToInt(11*Scale);Hint->SetFont(HintFont);
+    if(PC->GetSurveyMagnification()>0){Hint->SetText(FText::FromString(FString::Printf(TEXT("SURVEY %.1fx  ·  Q / D-down lower scope"),PC->GetSurveyMagnification())));}
     for(int32 N=0;N<FPFHotbar::SlotCount;++N)
     {
         const auto* Stack=PC->GetHotbar().Resolve(N,I,UPFInventoryComponent::ServerTime(GetWorld()));const bool Selected=N==PC->GetHotbar().Selected();

@@ -153,7 +153,7 @@ void APFSurvivalPlayerController::SetupInputComponent()
     BindControl(EKeys::Up,&APFSurvivalPlayerController::InventoryPrevious,TEXT("Inventory"),TEXT("Select previous stack"));
     BindControl(EKeys::X,&APFSurvivalPlayerController::InventorySplit,TEXT("Inventory"),TEXT("Split selected stack"));
     BindControl(EKeys::G,&APFSurvivalPlayerController::InventoryDrop,TEXT("Inventory"),TEXT("Drop one selected item"));
-    BindControl(EKeys::Q,&APFSurvivalPlayerController::InventoryConsume,TEXT("Inventory / Hotbar"),TEXT("Consume one selected edible inventory or hotbar batch"));
+    BindControl(EKeys::Q,&APFSurvivalPlayerController::InventoryConsume,TEXT("Inventory / Hotbar"),TEXT("Consume selected edible batch; toggle assigned survey scope"));
     // Crafting (M4)
     BindControl(EKeys::C,&APFSurvivalPlayerController::ToggleCrafting,TEXT("General"),TEXT("Open / close crafting"));
     BindControl(EKeys::U,&APFSurvivalPlayerController::ToggleStatMenu,TEXT("General"),TEXT("Inventory Player upgrades tab: spend earned stat points; separate from technology"));

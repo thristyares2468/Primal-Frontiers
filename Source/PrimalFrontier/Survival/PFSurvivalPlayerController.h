@@ -129,6 +129,10 @@ public:
     void ClearSelectedHotbar();
     bool SelectHotbar(int32 Slot);
     void UseHotbar();
+    /** Local optical view of the exact selected owned batch; never grants gameplay reach or stats. */
+    float GetSurveyMagnification() const;
+    float ResolveSurveyFieldOfView(float BaseFieldOfView);
+    void CancelSurveyView();
     const FString& GetInventoryMessage() const {return InventoryMessage;}
     // Only operations on the owning player's existing stack IDs. No item-grant RPC.
     /** Action codes (PFInventoryAction in PFRequestCodes.h): 0 = split Quantity off, 1 = drop Quantity, 2 = eat one (Quantity must be 1). */
@@ -144,6 +148,9 @@ protected:
 
 private:
     FPFHotbar Hotbar;
+    FGuid SurveyBatch;
+    TWeakObjectPtr<APawn> SurveyPawn;
+    void ToggleSurveyView();
     bool CanUseHotbar() const;
     void RouteHotbar(int32 Slot);
     void CycleHotbar(int32 Direction);

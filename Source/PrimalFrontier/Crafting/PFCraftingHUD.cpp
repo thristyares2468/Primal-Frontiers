@@ -249,6 +249,7 @@ void UPFCraftingHUD::RefreshMenu()
         }
         else if(Output->MeleeDamage>0){Stats+=FString::Printf(TEXT("Weapon: %.0f melee damage | no gathering benefit\n"),Output->MeleeDamage);}
         if(Output->CreatureHitReduction>0){Stats+=FString::Printf(TEXT("Carried: %.0f%% creature hit reduction\nNeeds and environmental damage unaffected\n"),Output->CreatureHitReduction*100);}
+        if(Output->OpticalMagnification>0){Stats+=FString::Printf(TEXT("%.1fx optical scope | pin to hotbar, close menu, Q / D-down toggles. No reach bonus.\n"),Output->OpticalMagnification);}
         Stats+=TEXT("Greybox item preview");
     }
     ItemStats->SetText(FText::FromString(Stats));

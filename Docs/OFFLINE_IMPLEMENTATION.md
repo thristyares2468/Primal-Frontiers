@@ -1,5 +1,13 @@
 # Offline implementation scope — October16
 
+**October23 explicit resume supersedes previous stops.** Continue independently
+in verified bounded tasks until mandatory owner input or the real asset-integration
+stage. Current next M12 slice is an optical intermediate consumer: a craftable
+first-person survey scope using existing materials and code-native placeholders.
+No external art acquisition/import or authored-world expansion is authorized by
+this slice; owner-led MCP level work remains separate. Earlier incomplete/manual
+gates stay unverified rather than assumed passed.
+
 **October22 final boundary: STOP after batch-refining publication.** Owner's four
 steps pass (native regressions, two-client, rendered menu, Game/docs/Trello), with
 exact evidence in BATCH_REFINING_M12.md / jvU88JFY. Finish scoped commit/push and

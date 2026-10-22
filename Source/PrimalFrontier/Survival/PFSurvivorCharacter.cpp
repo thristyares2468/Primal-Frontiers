@@ -74,7 +74,8 @@ void APFSurvivorCharacter::Tick(float DeltaSeconds)
         if(const auto* Settings=UPFGameUserSettings::Get())
         {
             auto* Camera=GetFirstPersonCameraComponent();
-            Camera->SetFieldOfView(Settings->Preferences.FieldOfView);
+            auto* PC=Cast<APFSurvivalPlayerController>(GetController());
+            Camera->SetFieldOfView(PC?PC->ResolveSurveyFieldOfView(Settings->Preferences.FieldOfView):Settings->Preferences.FieldOfView);
             Camera->PostProcessSettings.bOverride_MotionBlurAmount=true;
             Camera->PostProcessSettings.MotionBlurAmount=Settings->Preferences.bMotionBlur?0.5f:0;
         }

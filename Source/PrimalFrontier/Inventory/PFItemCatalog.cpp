@@ -90,6 +90,9 @@ const FPFItemDefinition* UPFItemCatalog::Find(FName Id) const
             !FMath::IsFinite(D.CreatureHitReduction) || D.CreatureHitReduction<0 || D.CreatureHitReduction>0.5f ||
             (!D.Category.MatchesTag(TAG_PF_Protection) && D.CreatureHitReduction!=0) ||
             (D.Category.MatchesTag(TAG_PF_Protection) && (D.CreatureHitReduction<=0 || D.StackLimit!=1))) { return nullptr; }
+        if(!FMath::IsFinite(D.OpticalMagnification) || D.OpticalMagnification<0 || D.OpticalMagnification>4 ||
+            (D.OpticalMagnification>0 && (D.OpticalMagnification<1.25f || !D.Category.MatchesTag(TAG_PF_Tool) || D.StackLimit!=1 ||
+                D.FoodRecovery!=0 || D.WaterRecovery!=0 || D.GatheringHits!=0 || D.MeleeDamage!=0 || D.CreatureHitReduction!=0))) {return nullptr;}
         Result=&D;
     }
     return Result;

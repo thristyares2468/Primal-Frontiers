@@ -14,6 +14,7 @@ param(
     [switch]$Stations,
     [switch]$OwnedStations,
     [switch]$BatchRefining,
+    [switch]$SurveyScope,
     [ValidateRange(1024, 65535)][int]$Port = 17989,
     [ValidateRange(30, 600)][int]$TimeoutSeconds = 210,
     [string]$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8',
@@ -59,7 +60,7 @@ try {
     }
     $packageRoot = $null; $serverExecutable = $null
     if (-not [string]::IsNullOrWhiteSpace($PackagedServerRoot)) {
-        if (@(@($ToolProgression,$WeaponProgression,$Protection,$Knowledge,$WeaponKnowledge,$AuthoredEcology,$PlayerStats,$Copper,$Stations) | Where-Object { $_ }).Count) {
+        if (@(@($ToolProgression,$WeaponProgression,$Protection,$Knowledge,$WeaponKnowledge,$AuthoredEcology,$PlayerStats,$Copper,$Stations,$SurveyScope) | Where-Object { $_ }).Count) {
             throw 'Packaged baseline supports only PF.Persistence.Live; choose no additional fixture'
         }
         $packageRoot = Get-SafeFullPath $PackagedServerRoot
@@ -81,7 +82,7 @@ try {
     }
 
     $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmssfff') + '_' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
-    if(@(@($ToolProgression,$WeaponProgression,$Protection,$Knowledge,$AuthoredEcology,$PlayerStats,$Copper,$Stations) | Where-Object {$_}).Count -gt 1){throw 'Choose one fixture per run'}
+    if(@(@($ToolProgression,$WeaponProgression,$Protection,$Knowledge,$AuthoredEcology,$PlayerStats,$Copper,$Stations,$SurveyScope) | Where-Object {$_}).Count -gt 1){throw 'Choose one fixture per run'}
     if($WeaponKnowledge -and !$Knowledge){throw 'WeaponKnowledge requires the Knowledge fixture'}
     $prefix = $(if($WeaponKnowledge){'M12KnowledgeWeaponLive'}elseif($Knowledge){'M12KnowledgeLive'}elseif($Protection){'M12ProtectionLive'}elseif($WeaponProgression){'M12WeaponLive'}elseif($ToolProgression){'M12ToolLive'}else{'M8Live'}) + $Players + '_' + $stamp
     $testFilter = if($Knowledge){'PF.Progression.KnowledgeLive'}elseif($Protection){'PF.Crafting.ProtectionLive'}elseif($WeaponProgression){'PF.Crafting.WeaponProgressionLive'}elseif($ToolProgression){'PF.Crafting.ToolProgressionLive'}else{'PF.Persistence.Live'}
@@ -93,6 +94,7 @@ try {
     if($Stations){$prefix='M12StationLive'+$Players+'_'+$stamp;$testFilter='PF.Crafting.StationsNetwork';$testFlag='-PFRunCraftingLiveTests -PFRunStationNetworkTests'}
     if($OwnedStations){$prefix='M12OwnedStationLive'+$Players+'_'+$stamp;$testFlag+=' -PFRunOwnedStationNetworkTests'}
     if($BatchRefining){$prefix='M12BatchLive'+$Players+'_'+$stamp;$testFilter='PF.Crafting.BatchLive';$testFlag='-PFRunBatchRefiningTests'}
+    if($SurveyScope){$prefix='M12ScopeLive'+$Players+'_'+$stamp;$testFilter='PF.Optics.Network';$testFlag='-PFRunSurveyScopeTests'}
     if($packageRoot){$prefix='M8PackagedLive'+$Players+'_'+$stamp}
     $slot = 'Automation' + $prefix
     # Profiles are private local test state. Same aliases and endpoint survive both phases.
@@ -147,7 +149,7 @@ try {
                 # NullRHI can exceed 1,000 FPS and fill CharacterMovement's 96-move
                 # queue before the next server acknowledgement. Bound only these
                 # headless fixtures; rendered performance runs remain uncapped.
-                if($AuthoredEcology -or $Copper -or $OwnedStations -or $BatchRefining){$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120';$arguments=$arguments.Replace('Automation RunTests '+$testFilter,'t.MaxFPS 120,Automation RunTests '+$testFilter)}
+                if($AuthoredEcology -or $Copper -or $OwnedStations -or $BatchRefining -or $SurveyScope){$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120';$arguments=$arguments.Replace('Automation RunTests '+$testFilter,'t.MaxFPS 120,Automation RunTests '+$testFilter)}
                 $executable=$editor; $workingDirectory=$root
                 if($packageRoot){
                     # Explicitly isolate BOTH roles from AppData/default private profiles.
@@ -245,6 +247,7 @@ try {
                     if($Stations){$contract=$text -match $(if($run.Role -eq 'Server'){'Station network server bonus, owned RPC conservation and portable cooking verified'}else{'Station network client replicated bonus, owned RPC conservation and refusal verified'})}
                     if($OwnedStations){$contract=$text -match $(if($run.Role -eq 'Server'){'Owned station network server bonus, owned RPC conservation and portable cooking verified'}else{'Owned station network client replicated bonus, owned RPC conservation and refusal verified'})}
                     if($BatchRefining){$contract=$text -match $(if($run.Role -eq 'Server'){'Batch server required refinery, exact fuel, cancel and owned RPC conservation verified'}else{'Batch client required station, fuel, private inventory and owned RPC refusal verified'})}
+                    if($SurveyScope){$contract=$text -match $(if($run.Role -eq 'Server'){if($phase -eq 'Restart'){'Scope restart server restored owners, costs and once-only records'}else{'Scope server real crafting, exact costs and private save verified'}}else{if($phase -eq 'Restart'){'Scope restart client original identity, inventory, ledger and optical reset verified'}else{'Scope client owned craft/cancel, actual local camera, privacy and authority refusal verified'}})}
                     $exactTest = $verdict.TestCount -eq 1 -and @($verdict.Tests | Where-Object { $_.Name -eq $testFilter }).Count -eq 1
                     $packagedReportClean = !$packageRoot -or $run.Role -ne 'Server' -or (
                         $text -notmatch '(?im)\bWarning:|\bError:' -and
@@ -272,7 +275,8 @@ try {
             $summary | ConvertTo-Json -Depth 9 | Set-Content -LiteralPath (Join-Path $summaryDirectory 'run-summary.json') -Encoding UTF8
         }
         $allPassed = $phaseRecord.Processes.Count -eq ($Players + 1) -and @($phaseRecord.Processes | Where-Object { -not $_.Passed }).Count -eq 0
-        $rolesCovered = $Stations -or $Copper -or $PlayerStats -or $AuthoredEcology -or $Knowledge -or $Protection -or $WeaponProgression -or $ToolProgression -or (@($phaseRecord.Processes | Where-Object { $_.StorageOwnerRole }).Count -eq 1 -and
+        # Scope has an exact per-role optics/privacy contract above, not the baseline chest scenario.
+        $rolesCovered = $SurveyScope -or $Stations -or $Copper -or $PlayerStats -or $AuthoredEcology -or $Knowledge -or $Protection -or $WeaponProgression -or $ToolProgression -or (@($phaseRecord.Processes | Where-Object { $_.StorageOwnerRole }).Count -eq 1 -and
             @($phaseRecord.Processes | Where-Object { $_.StorageForeignRole }).Count -eq ($Players - 1))
         if ($phaseRecord.CleanupFailures.Count -or -not $allPassed -or -not $rolesCovered) { throw 'Live report, cleanup or RPC/privacy/profile evidence failed' }
         $phaseRecord.Passed = $true

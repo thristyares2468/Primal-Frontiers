@@ -1,5 +1,7 @@
 # Eryndor minerals and technology — M12
 
+October23 additive optical consumer: [SURVEY_SCOPE_M12.md](SURVEY_SCOPE_M12.md) uses one Quartz lens/twoCopper ingots/oneCord/twoWood at Workbench under existing Gem cutting, with exact hotbar/local2x camera state. Current append-only totals37items/24recipes/15resources/sixknowledge nodes include the previously added two refinery batches. Earlier counts below describe their historical gates. Through-Titanium world layout/IDs and ordinary material recipes are preserved; Frontier/Deepforge/Riftglass/power/ancient points remain incomplete. No real assets or map changes.
+
 October15 offline expansion. Bounded task: https://trello.com/c/zg9mp2Tl. This implements home-world progression through Titanium, not the entire offline roadmap, dimensional travel, powered Tech or a release-ready technology tree.
 
 Publication restored October15: scoped source `a6a8b0d`,40files, M12 title/Sol coauthor, plus initial blocker receipt `3b04006` pushed to origin/master after user set LFS budgetUSD10. Ordinary retry uploaded11/11LFSobjects56KB; local/remote SHA equality and clean tree confirmed. Initial quota rejection remains historical evidence, now resolved. No other GitHub budget change, force push/history rewrite or missing-asset bypass. Broader offline work remains incomplete.

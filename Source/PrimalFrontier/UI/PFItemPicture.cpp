@@ -128,6 +128,14 @@ int32 UPFItemPicture::NativePaint(const FPaintArgs& Args,const FGeometry& G,cons
         Line({{0.52,0.19},{0.69,0.31}},PFUITheme::Text,0.04f);
         if(ItemId==TEXT("Item_BoundTool")){Line({{0.52,0.27},{0.69,0.36},{0.49,0.32},{0.65,0.41}},PFUITheme::Accent,0.04f);}
     }
+    else if(ItemId==TEXT("Item_SurveyScope"))
+    {
+        Line({{.24,.74},{.72,.26}},PFUITheme::Accent,.22f);
+        Line({{.27,.71},{.69,.29}},PFUITheme::Muted,.12f);
+        Box({.58,.13},{.27,.27},FLinearColor(.35f,.8f,.9f),.13f);
+        Line({{.67,.18},{.77,.30}},PFUITheme::Text,.035f);
+        Box({.14,.65},{.25,.20},PFUITheme::Text,.04f);
+    }
     else if(ItemId==TEXT("Item_CopperOre"))
     {
         Box({0.19,0.23},{0.62,0.56},PFUITheme::Muted,0.16f);

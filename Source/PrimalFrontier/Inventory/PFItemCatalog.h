@@ -58,6 +58,8 @@ struct FPFItemDefinition
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="100")) float MeleeDamage = 0;
     /** Best carried Protection item mitigates creature-caused hits only, never needs/hazards. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="0.5")) float CreatureHitReduction = 0;
+    /** Local optical presentation only; zero preserves legacy tools. No trace/range/stat bonus. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ClampMin="0",ClampMax="4")) float OpticalMagnification = 0;
 };
 
 UCLASS(BlueprintType)

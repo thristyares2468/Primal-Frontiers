@@ -1,5 +1,9 @@
 # Trello test guides
 
+## G21 — Craftable field survey scope
+
+Use complete [SURVEY_SCOPE_M12.md](SURVEY_SCOPE_M12.md) guide, copied into YlK19xC8 before Done. Exact existing OpenWorld package, camp workbench coordinates, standalone mode, Gem cutting/material prerequisites, one Start here action, C/Enter/R craft/cancel, Tab/1 exact-batch pin, Q/D-pad toggle, P/modal/pawn resets, deltas and evidence. Native temporary worlds need no manually opened level; network tests use one then two isolated NullRHI clients and a new server. Optional owner reproduction is not a new mandatory repeat of accepted earlier tests. Real asset integration and physical-controller/FPS acceptance remain separate.
+
 ## G20 — Required-refinery fuel-efficient batches
 
 Use the complete guide [BATCH_REFINING_M12.md](BATCH_REFINING_M12.md): exact existing OpenWorld level, camp refinery/copper/mining-row coordinates, standalone mode, prerequisites, one Start here action, numbered C/Enter/R interactions, copper/iron expected deltas, automated selectors/runners/evidence and limits. Copy that guide into the task card; do not assign an invented new fixture or mark ordinary pacing tested. Current owner requests STOP after this bounded task's four verification/publication steps.

@@ -32,6 +32,8 @@ void AddItems(UPFItemCatalog& C)
     Pick(TEXT("Item_DiamondPick"),TEXT("Diamond pick"),EPFHarvestGrade::Diamond,6,2.8f);
     Pick(TEXT("Item_TitaniumPick"),TEXT("Titanium pick"),EPFHarvestGrade::Titanium,7,2);
     FPFItemDefinition Blade=*C.Find(TEXT("Item_BoundClub"));Blade.Id=TEXT("Item_ObsidianBlade");Blade.DisplayName=FText::FromString(TEXT("Obsidian blade"));Blade.Weight=1.5f;Blade.MeleeDamage=70;C.Items.Add(Blade);
+    FPFItemDefinition Scope=*C.Find(TEXT("Item_Cord"));Scope.Id=TEXT("Item_SurveyScope");Scope.DisplayName=FText::FromString(TEXT("Field survey scope"));
+    Scope.Category=FGameplayTag::RequestGameplayTag(TEXT("Item.Category.Tool"));Scope.Weight=1.25f;Scope.StackLimit=1;Scope.OpticalMagnification=2;C.Items.Add(Scope);
 }
 void AddCrafting(UPFCraftingCatalog& C)
 {
@@ -57,6 +59,8 @@ void AddCrafting(UPFCraftingCatalog& C)
     C.Recipes.Last().OutputQuantity=2;C.Recipes.Last().RequiredStation=APFCraftingStation::RefineryType();
     Recipe(TEXT("Recipe_IronBatch"),TEXT("Batch refine iron (coal fuel)"),TEXT("Item_IronIngot"),15,Material,{{TEXT("Item_IronOre"),4},{TEXT("Item_Coal"),1},{TEXT("Item_Flint"),2}});
     C.Recipes.Last().OutputQuantity=2;C.Recipes.Last().RequiredStation=APFCraftingStation::RefineryType();
+    Recipe(TEXT("Recipe_SurveyScope"),TEXT("Assemble field survey scope"),TEXT("Item_SurveyScope"),12,Tool,{{TEXT("Item_QuartzLens"),1},{TEXT("Item_CopperIngot"),2},{TEXT("Item_Cord"),1},{TEXT("Item_Wood"),2}});
+    C.Recipes.Last().RequiredStation=APFCraftingStation::WorkbenchType();
     auto Node=[&](const TCHAR* Id,const TCHAR* Name,const TCHAR* Item,EPFHarvestGrade Grade)
     {FPFResourceDefinition D;D.Id=Id;D.DisplayName=FText::FromString(Name);D.YieldItem=Item;D.Hits=8;D.RespawnSeconds=45;D.HarvestRequirement.Family=PFHarvest::Pick();D.HarvestRequirement.MinimumGrade=Grade;C.Resources.Add(D);};
     Node(TEXT("Node_Coal"),TEXT("Coal seam"),TEXT("Item_Coal"),EPFHarvestGrade::Stone);
@@ -76,7 +80,7 @@ void AddKnowledge(UPFProgressionCatalog& C)
     Add(TEXT("Tech_Metalwork"),TEXT("Iron metalworking"),3,2,TEXT("Tech_FieldTools"),{TEXT("Recipe_IronRefine"),TEXT("Recipe_IronPick"),TEXT("Recipe_SilverRefine"),TEXT("Recipe_GoldRefine"),TEXT("Recipe_IronBatch")});
     // Unique baseline + metalwork + gem crafts can reach level4 without waiting
     // for another 30-minute gather window. Optional branches still compete for points.
-    Add(TEXT("Tech_Gemwork"),TEXT("Gem cutting"),3,2,TEXT("Tech_Metalwork"),{TEXT("Recipe_DiamondPick"),TEXT("Recipe_QuartzLens"),TEXT("Recipe_ObsidianBlade")});
+    Add(TEXT("Tech_Gemwork"),TEXT("Gem cutting"),3,2,TEXT("Tech_Metalwork"),{TEXT("Recipe_DiamondPick"),TEXT("Recipe_QuartzLens"),TEXT("Recipe_ObsidianBlade"),TEXT("Recipe_SurveyScope")});
     Add(TEXT("Tech_Titanium"),TEXT("Titanium metallurgy"),4,3,TEXT("Tech_Gemwork"),{TEXT("Recipe_TitaniumRefine"),TEXT("Recipe_TitaniumPick")});
     Add(TEXT("Tech_Conductors"),TEXT("Conductive fabrication"),5,2,TEXT("Tech_Metalwork"),{TEXT("Recipe_ConductiveParts")});
 }

@@ -25,12 +25,13 @@ void APFSurvivalPlayerController::ClearSelectedHotbar()
 bool APFSurvivalPlayerController::SelectHotbar(int32 Slot)
 {
     if(!CanUseHotbar() || !Hotbar.Select(Slot)){return false;}
+    CancelSurveyView();
     const auto* I=GetInventory();const auto* Stack=Hotbar.Resolve(Slot,I,UPFInventoryComponent::ServerTime(GetWorld()));
     if(Stack)
     {
         const auto* D=I->Definition(Stack->ItemId);const bool Edible=D->FoodRecovery>0 || D->WaterRecovery>0;
         ClientInventoryFeedback_Implementation(FString::Printf(TEXT("Hotbar %d: %s x%d. %s"),Slot+1,*D->DisplayName.ToString(),Stack->Quantity,
-            Edible?TEXT("Q / D-down: use one."):TEXT("Carried tool/protection benefits remain automatic; E gathers, mouse attacks.")));
+            D->OpticalMagnification>0?TEXT("Q / D-down: toggle survey scope."):Edible?TEXT("Q / D-down: use one."):TEXT("Carried tool/protection benefits remain automatic; E gathers, mouse attacks.")));
     }
     else{ClientInventoryFeedback_Implementation(TEXT("Empty or missing hotbar batch. Tab, select a stack, then 1–8 to assign."));}
     return true;
@@ -41,6 +42,7 @@ void APFSurvivalPlayerController::UseHotbar()
     const auto* I=GetInventory();const auto* Stack=Hotbar.Resolve(Hotbar.Selected(),I,UPFInventoryComponent::ServerTime(GetWorld()));
     if(!Stack){ClientInventoryFeedback_Implementation(TEXT("Hotbar batch expired, removed or empty; no replacement used."));return;}
     const auto* D=I->Definition(Stack->ItemId);
+    if(D->OpticalMagnification>0){ToggleSurveyView();return;}
     if(D->FoodRecovery<=0 && D->WaterRecovery<=0){ClientInventoryFeedback_Implementation(TEXT("Not consumable. Carried tool/protection benefits are automatic."));return;}
     ServerInventoryAction(Stack->StackId,PFInventoryAction::Consume,1);
 }
