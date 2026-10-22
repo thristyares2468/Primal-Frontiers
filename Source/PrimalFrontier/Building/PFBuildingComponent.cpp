@@ -122,11 +122,11 @@ bool UPFBuildingComponent::Candidate(FName Id,int32 Q,FTransform& Out,APFBuildPi
             RotationValue.Yaw=((Facing+Q)%4+4)%4*90.0;
             Location=Parent->GetActorLocation()+RotationValue.RotateVector(FVector(200,0,160));
         }
-        else if(D->Kind==EPFBuildKind::Storage)
+        else if(D->Kind==EPFBuildKind::Storage || D->Kind==EPFBuildKind::Workbench || D->Kind==EPFBuildKind::Refinery)
         {
             // On a platform, snapped to a 100 cm sub-grid, kept within +/-100 cm of its centre.
             if(!Parent->IsPlatform()){return false;}
-            Location=Parent->GetActorLocation()+FVector(FMath::Clamp(FMath::GridSnap(Hit.ImpactPoint.X-Parent->GetActorLocation().X,100.0),-100.0,100.0),FMath::Clamp(FMath::GridSnap(Hit.ImpactPoint.Y-Parent->GetActorLocation().Y,100.0),-100.0,100.0),50);
+            Location=Parent->GetActorLocation()+FVector(FMath::Clamp(FMath::GridSnap(Hit.ImpactPoint.X-Parent->GetActorLocation().X,100.0),-100.0,100.0),FMath::Clamp(FMath::GridSnap(Hit.ImpactPoint.Y-Parent->GetActorLocation().Y,100.0),-100.0,100.0),10+UPFBuildingCatalog::Size(D->Kind).Z/2);
         }
         else if(D->Kind==EPFBuildKind::Stairs)
         {

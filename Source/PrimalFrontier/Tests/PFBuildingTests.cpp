@@ -54,7 +54,7 @@ bool FPFBuildingTest::RunTest(const FString&)
     P->GetCharacterMovement()->DisableMovement();
     // Fresh in-memory catalogs so the test doesn't depend on saved asset edits.
     B->Catalog=NewObject<UPFBuildingCatalog>(B);
-    TestEqual(TEXT("Eight selectable greybox definitions"),B->Catalog->Pieces.Num(),8);
+    TestEqual(TEXT("Ten selectable greybox definitions including owned stations"),B->Catalog->Pieces.Num(),10);
     TestNotNull(TEXT("Window wall definition"),B->Catalog->Find(TEXT("Build_Window")));
     TestNotNull(TEXT("Stair definition"),B->Catalog->Find(TEXT("Build_Stairs")));
     I->Catalog=NewObject<UPFItemCatalog>(I);

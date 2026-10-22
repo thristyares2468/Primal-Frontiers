@@ -6,8 +6,9 @@ class APawn;
 class UStaticMeshComponent;
 class UTextRenderComponent;
 struct FPFRecipeDefinition;
+class APFBuildPiece;
 
-/** Public, stateless greybox camp station. Player-built/owned stations are separate future work. */
+/** Stateless greybox station. Authored camp stations are public; owned helpers derive from built pieces. */
 UCLASS()
 class PRIMALFRONTIER_API APFCraftingStation : public AActor
 {
@@ -17,6 +18,9 @@ public:
     UPROPERTY(EditAnywhere,Replicated,BlueprintReadOnly) FGameplayTag StationType;
     UPROPERTY(EditAnywhere,Replicated,BlueprintReadOnly) float Radius=250;
     UPROPERTY(EditAnywhere,Replicated,BlueprintReadOnly) float SpeedMultiplier=1.25f;
+    /** Runtime derived provider, never a separate persistent structure or client-selected bonus. */
+    UPROPERTY(ReplicatedUsing=OnRepProvider,BlueprintReadOnly) bool bOwnedProvider=false;
+    UPROPERTY(ReplicatedUsing=OnRepProvider,BlueprintReadOnly) TObjectPtr<APFBuildPiece> ProviderPiece;
     UFUNCTION(BlueprintPure) static FGameplayTag WorkbenchType();
     UFUNCTION(BlueprintPure) static FGameplayTag RefineryType();
     FString DisplayName() const;
@@ -29,4 +33,5 @@ protected:
 private:
     UPROPERTY() TObjectPtr<UStaticMeshComponent> Mesh;
     UPROPERTY() TObjectPtr<UTextRenderComponent> Label;
+    UFUNCTION() void OnRepProvider();
 };

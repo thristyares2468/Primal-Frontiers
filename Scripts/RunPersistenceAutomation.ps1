@@ -12,6 +12,7 @@ param(
     [switch]$PlayerStats,
     [switch]$Copper,
     [switch]$Stations,
+    [switch]$OwnedStations,
     [ValidateRange(1024, 65535)][int]$Port = 17989,
     [ValidateRange(30, 600)][int]$TimeoutSeconds = 210,
     [string]$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8',
@@ -22,6 +23,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if($OwnedStations){$Stations=$true}
 
 function Get-SafeFullPath([string]$Path) {
     if ($Path -match '["\x00-\x1f]') { throw 'Unsupported path quote/control characters' }
@@ -87,6 +89,7 @@ try {
     if($PlayerStats){$prefix='M12StatsLive'+$Players+'_'+$stamp;$testFilter='PF.Progression.StatsLive';$testFlag='-PFRunStatsTests'}
     if($Copper){$prefix='M12CopperLive'+$Players+'_'+$stamp;$testFilter='PF.Persistence.CopperLive';$testFlag='-PFRunCopperMigrationTests'}
     if($Stations){$prefix='M12StationLive'+$Players+'_'+$stamp;$testFilter='PF.Crafting.StationsNetwork';$testFlag='-PFRunCraftingLiveTests -PFRunStationNetworkTests'}
+    if($OwnedStations){$prefix='M12OwnedStationLive'+$Players+'_'+$stamp;$testFlag+=' -PFRunOwnedStationNetworkTests'}
     if($packageRoot){$prefix='M8PackagedLive'+$Players+'_'+$stamp}
     $slot = 'Automation' + $prefix
     # Profiles are private local test state. Same aliases and endpoint survive both phases.
@@ -138,7 +141,10 @@ try {
                 $network = if ($SimulateLagLoss) { '-PktLag=75 -PktLoss=1' } else { '-PktLag=0 -PktLoss=0' }
                 $arguments = '"{0}" {1} {2} -nullrhi -unattended -nosplash -nosound -NoLiveCoding -NoSaveConfig {3} {9} -PFExpectedPlayers={4} -PFSaveSlot={5} {6} -ExecCmds="Automation RunTests {10}" -TestExit="Automation Test Queue Empty" -ReportExportPath="{7}" -abslog="{8}"' -f $projectFile, $url, $mode, $network, $Players, $slot, $load, $report, $log, $testFlag, $testFilter
                 if($Stations){$arguments=$arguments.Replace(' -PFSaveSlot='+$slot,'')}
-                if($AuthoredEcology -or $Copper){$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120';$arguments=$arguments.Replace('Automation RunTests '+$testFilter,'t.MaxFPS 120,Automation RunTests '+$testFilter)}
+                # NullRHI can exceed 1,000 FPS and fill CharacterMovement's 96-move
+                # queue before the next server acknowledgement. Bound only these
+                # headless fixtures; rendered performance runs remain uncapped.
+                if($AuthoredEcology -or $Copper -or $OwnedStations){$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120';$arguments=$arguments.Replace('Automation RunTests '+$testFilter,'t.MaxFPS 120,Automation RunTests '+$testFilter)}
                 $executable=$editor; $workingDirectory=$root
                 if($packageRoot){
                     # Explicitly isolate BOTH roles from AppData/default private profiles.
@@ -234,6 +240,7 @@ try {
                     if($PlayerStats){$contract=$text -match $(if($run.Role -eq 'Server'){if($phase -eq 'Restart'){'Stats restart server restored independent allocations and capacities'}else{'Stats server independent allocations, exact budgets and upgraded save verified'}}else{if($phase -eq 'Restart'){'Stats restart client identity, private ranks, capacities and refusal verified'}else{'Stats owned RPC, duplicate cooldown, separate tech budget, privacy and client refusal verified'}})}
                     if($Copper){$contract=$text -match $(if($run.Role -eq 'Server'){if($phase -eq 'Restart'){'Copper restart server actual migration, preserved original, independent owners, finite shared gather and current(16|25) save verified'}else{'Copper create server actual old15 layout and independent owners saved'}}else{if($phase -eq 'Restart'){'Copper restart client actual saved owner, private state and owned authored gather verified'}else{'Copper create client old-layout seed and private acknowledgement verified'}})}
                     if($Stations){$contract=$text -match $(if($run.Role -eq 'Server'){'Station network server bonus, owned RPC conservation and portable cooking verified'}else{'Station network client replicated bonus, owned RPC conservation and refusal verified'})}
+                    if($OwnedStations){$contract=$text -match $(if($run.Role -eq 'Server'){'Owned station network server bonus, owned RPC conservation and portable cooking verified'}else{'Owned station network client replicated bonus, owned RPC conservation and refusal verified'})}
                     $exactTest = $verdict.TestCount -eq 1 -and @($verdict.Tests | Where-Object { $_.Name -eq $testFilter }).Count -eq 1
                     $packagedReportClean = !$packageRoot -or $run.Role -ne 'Server' -or (
                         $text -notmatch '(?im)\bWarning:|\bError:' -and

@@ -1,5 +1,9 @@
 # Architecture and Design Decisions
 
+## October22 — stateless owned stations derive from saved build pieces
+
+Append Workbench/Refinery kinds after the eight stable building values. Reuse authoritative construction/support/cost validation and persistent structure identity/owner; derive a single hidden replicated crafting provider from each live built piece. Destroy helpers with their parent and reconstruct them on restore, rather than serializing a second owner-bearing actor record. Owner/range/LOS/provider-health/type/authority remain checked by server crafting selection and completion; no client multiplier input. Public camp stations stay public. This deliberately adds no fuel/power/station inventory or cross-owner access policy. Existing near-start camp and disposable construction fixture avoid any map/layout/asset migration; code-native station pictures need no external art. Tests and limits: OWNED_CRAFTING_STATIONS_M12.md.
+
 ## October22 — recover original envelopes into unused slots only
 
 Keep byte-preserving original-copy recovery separate from semantic conversion and live-world apply. Require game thread and a distinct bounded slot, refuse any A/B/pending/archive occupant, and retain partial evidence on failure. Preserve generation/SavedUtc so recovery never renews food or fabricates a newer save. Callers must validate map/catalog/identity semantics and coordinate external writers before restoration. The trusted API adds no RPC/UI/console integration or automatic rollback. Six native/frozen-writer regressions and untouched636 private-file hashes are recorded in ORIGINAL_RECOVERY_COPY_M18.md; OS crash/disk-full/cross-process guarantees remain unverified.

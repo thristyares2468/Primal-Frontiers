@@ -1,5 +1,7 @@
 # M12 — Public camp crafting stations
 
+October22 follow-up: [player-built owned stations](OWNED_CRAFTING_STATIONS_M12.md) add separate private Workbench/Refinery construction. Historical "future work" below describes this original public-only slice; fueled/powered processing remains future work. Existing public stations retain their access/bonus and now point to B in their runtime labels. No authored map/layout changes in this follow-up.
+
 October16, bounded task https://trello.com/c/FdCrP124. This offline camp-workstation slice passes its scoped build/native/rendered/network gates. It is not completion of M12, dimensional technology, ordinary-input pacing or online services. Source publication is recorded in CURRENT_STATE.md/Trello.
 
 Source `ff614aa` published to origin/master with local/remote equality and4LFSobjects27KB uploaded. User requests stop after this checkpoint and the recorded owner-led Unreal MCP world-building handoff; no next offline feature is being started. Future world authoring is outside this chat.

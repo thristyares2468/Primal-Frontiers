@@ -3,7 +3,9 @@
 **October22 explicit resume:** owner authorizes continuing all milestones after
 the earlier stop/read-only period. Candidate backend login now verifies READY;
 PlayFab build upload/capacity remains deferred while local gameplay progresses.
-Next bounded M18 original-copy primitive uses file fixtures only. Existing
+M18 original-copy primitive and M12 owned build stations now pass their bounded
+technical gates (ORIGINAL_RECOVERY_COPY_M18.md / OWNED_CRAFTING_STATIONS_M12.md).
+Fueled processing and useful intermediate consumers remain eligible next. Existing
 offline objectives below remain eligible in tested slices; owner-led MCP level
 building, external-art provenance, manual/device gates and release boundaries
 still apply. Historical stop/unconfigured statements below are superseded.

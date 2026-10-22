@@ -1,5 +1,9 @@
 # Trello test guides
 
+## G18 — Owned workbench and refinery (optional reproduction)
+
+Canonical complete guide: [OWNED_CRAFTING_STATIONS_M12.md](OWNED_CRAFTING_STATIONS_M12.md), sections Reachable test and controls / Technical reproduction / Evidence. Same exact guide is copied into AI completed task fKB7Zgqs. Level `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`, one rendered Standalone Game, disposable new world. Start at CAMP CRAFTING STATIONS sign `(350,-650,160)`; construction patch `(-800,-1200,0)`. B/1 Foundation, B/9 Workbench, B/0 Refinery, R rotate, left-click place, C craft, H demolish only in building mode; exact ingredients/ownership/save steps and OWNED_STATIONS pass conditions are in that guide. Native/network/rendered assisted tests passed; normal earned pacing/physical-controller observation remains unverified. This is not a mandatory repeat of prior accepted building/chest/save/menu tests.
+
 ## G17 — Expedition UI and hotbar visual review (Personal 2)
 
 Accepted October15: direct user UI_HOTBAR PASS. Guide below is reproduction only, not a repeat request. PLAYTEST_RESULTS_2026_10_15.md records exact scope/limits; physical controller/audio/performance and optional substeps are not individually inferred.

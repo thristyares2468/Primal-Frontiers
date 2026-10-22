@@ -2,6 +2,8 @@
 #include "Crafting/PFCraftingStation.h"
 #include "Crafting/PFCraftingComponent.h"
 #include "Crafting/PFCraftingHUD.h"
+#include "Building/PFBuildingComponent.h"
+#include "Building/PFBuildPiece.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFSurvivorCharacter.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -30,7 +32,8 @@ namespace
 class FStationUI final : public IAutomationLatentCommand
 {
 public:
-    FStationUI(FAutomationTestBase* T,FString D):Test(T),Directory(MoveTemp(D)){}
+    FStationUI(FAutomationTestBase* T,FString D):Test(T),Directory(MoveTemp(D))
+    {bOwned=FParse::Param(FCommandLine::Get(),TEXT("PFRunOwnedStationUITest"));}
     bool Update() override
     {
         const double Now=FPlatformTime::Seconds();
@@ -55,12 +58,31 @@ public:
             P->Survival->HungerDrainPerSecond=0;P->Survival->ThirstDrainPerSecond=0;P->GetCharacterMovement()->DisableMovement();
             auto* G=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();FPFProgressionRecord Seed;Seed.Experience=700;FString Error;
             if(!G->Restore(Seed,Error) || !G->RequestKnowledge(TEXT("Tech_FieldTools"),P,Error) || !I->Grant(TEXT("Item_Wood"),6) || !I->Grant(TEXT("Item_Stone"),2) || !I->Grant(TEXT("Item_CopperOre"),2)){Test->AddError(TEXT("Station boundary fixture setup failed"));return true;}
+            if(bOwned)
+            {
+                if(!I->Grant(TEXT("Item_Wood"),22)){Test->AddError(TEXT("Owned build material fixture refused"));return true;}
+                P->SetActorLocation(FVector(-1200,-1100,100));
+                auto Aim=[&](FVector At){FVector Eye;FRotator Look;P->GetActorEyesViewPoint(Eye,Look);PC->SetControlRotation((At-Eye).Rotation());};
+                Aim(FVector(-800,-1200,0));auto* Base=PC->Building->Place(TEXT("Build_Foundation"),0);
+                if(!Base){Test->AddError(TEXT("Owned fixture foundation placement failed"));return true;}
+                Aim(Base->GetActorLocation()+FVector(-100,-100,10));auto* Work=PC->Building->Place(TEXT("Build_Workbench"),0);
+                Aim(Base->GetActorLocation()+FVector(100,100,10));auto* Refine=PC->Building->Place(TEXT("Build_Refinery"),0);
+                if(!Work || !Refine){Test->AddError(TEXT("Owned fixture station placement failed"));return true;}
+                Bench=nullptr;Refinery=nullptr;
+                for(TActorIterator<APFCraftingStation> It(W);It;++It){if(It->ProviderPiece==Work){Bench=*It;}if(It->ProviderPiece==Refine){Refinery=*It;}}
+                if(!Bench || !Refinery){Test->AddError(TEXT("Owned fixture provider missing"));return true;}
+                Test->TestEqual(TEXT("Actual foundation/bench/refinery charge22wood"),I->Count(TEXT("Item_Wood")),6);
+                PC->SetControlRotation((Base->GetActorLocation()+FVector(0,0,50)-P->GetActorLocation()).Rotation());
+                Stage=70;Changed=Now;return false;
+            }
             Approach(PC,Bench);Select(PC,TEXT("Recipe_Tool"));Next(Now);return false;
         }
         if(Now-Changed<.75){return false;}
+        if(Stage==70){Shot(TEXT("owned_stations_placed"));Stage=71;Changed=Now;return false;}
+        if(Stage==71){Approach(PC,Bench);Select(PC,TEXT("Recipe_Tool"));Stage=1;Changed=Now;return false;}
         if(Stage==1)
         {
-            if(!BodyContains(TEXT("Camp workbench: 125%"))){return true;}
+            if(!BodyContains(bOwned?TEXT("Owned workbench: 125%"):TEXT("Camp workbench: 125%"))){return true;}
             // A screenshot is emitted at frame end: retain the panel until a later update.
             if(!WorkbenchCaptured){Shot(TEXT("workbench_menu"));WorkbenchCaptured=true;Changed=Now;return false;}
             Press(EKeys::Enter);
@@ -82,7 +104,7 @@ public:
         }
         if(Stage==5)
         {
-            if(!BodyContains(TEXT("Camp refinery: 150%"))){return true;}Shot(TEXT("refinery_menu"));Press(EKeys::Enter);
+            if(!BodyContains(bOwned?TEXT("Owned refinery: 150%"):TEXT("Camp refinery: 150%"))){return true;}Shot(TEXT("refinery_menu"));Press(EKeys::Enter);
             Test->TestEqual(TEXT("Slate refinery owns 150 percent speed"),C->ActiveStationMultiplier,1.5f);Next(Now);return false;
         }
         if(Stage==6)
@@ -90,7 +112,7 @@ public:
             if(!C->ActiveRecipe.IsNone()){return false;}
             Test->TestEqual(TEXT("One ingot"),I->Count(TEXT("Item_CopperIngot")),1);Test->TestEqual(TEXT("Metal input consumed once"),I->Count(TEXT("Item_CopperOre")),0);Test->TestEqual(TEXT("Tool and ingot fuel conserve wood"),I->Count(TEXT("Item_Wood")),2);
             PC->SetCraftingMenuOpen(false);P->SetActorLocation(FVector(450,-950,100));PC->SetControlRotation(FRotator(-8,45,0));Shot(TEXT("camp_first_person"));
-            Test->AddInfo(TEXT("[PrimalCrafting] Rendered camp stations: saved fixtures, actual Slate craft, leave cancellation, workbench tool and refinery ingot verified. Explicit700XP/material boundary seed and assisted travel; not earned pacing or FPS certification."));Stage=99;Changed=Now;return false;
+            Test->AddInfo(bOwned?TEXT("[PrimalCrafting] Rendered owned stations: actual server placement22wood, owner workbench/refinery Slate craft, leave cancellation and exact tool/ingot verified. Explicit700XP/material seed and assisted travel; no earned pacing/FPS claim."):TEXT("[PrimalCrafting] Rendered camp stations: saved fixtures, actual Slate craft, leave cancellation, workbench tool and refinery ingot verified. Explicit700XP/material boundary seed and assisted travel; not earned pacing or FPS certification."));Stage=99;Changed=Now;return false;
         }
         return false;
     }
@@ -102,7 +124,7 @@ private:
     bool BodyContains(const TCHAR* Text){auto* Body=Menu.IsValid()?Cast<UTextBlock>(Menu->WidgetTree->FindWidget(TEXT("PF_CraftingPanel_Body"))):nullptr;return Test->TestTrue(TEXT("Actual station UI description at requested font scale"),Body && Body->GetFont().Size==FMath::RoundToInt(16*RequestedScale) && Body->GetText().ToString().Contains(Text));}
     void Shot(const TCHAR* Name){const FString Path=Directory/(FString(Name)+TEXT(".png"));Shots.Add(Path);FScreenshotRequest::RequestScreenshot(Path,true,false);}
     FAutomationTestBase* Test;FString Directory;TArray<FString> Shots;TWeakObjectPtr<UPFCraftingHUD> Menu;APFCraftingStation* Bench=nullptr;APFCraftingStation* Refinery=nullptr;
-    float RequestedScale=1;bool WorkbenchCaptured=false;int32 Stage=0;double Started=FPlatformTime::Seconds(),Changed=0;
+    float RequestedScale=1;bool WorkbenchCaptured=false,bOwned=false;int32 Stage=0;double Started=FPlatformTime::Seconds(),Changed=0;
 };
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFStationUILiveTest,"PF.Crafting.StationsUI",EAutomationTestFlags::ClientContext|EAutomationTestFlags::EngineFilter)

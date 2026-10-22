@@ -1,5 +1,9 @@
 # Primal Frontier milestone evidence
 
+## October22 — M12 owned build stations technical PASS
+
+Two additive player-built owner-only stations: Workbench8Wood/125%, Refinery12Wood/150%, existing authoritative support/collision/cost/rotation/demolition, actual repeated restore of structure identity/ownership with one derived helper each, distinct code-native pictures and ten-choice picker9/0. No map/binary asset/layout/private-save migration. Final Editor6.74s/Game29.60s clean, native4+3selectors cleanPASS17.03/16.75s, one-client2rolePASS61.03s before lag/loss two-client3rolePASS63.31s, rendered owned placement/craft1/1PASS43.11s and picker1/1PASS38.53s plus HUD1.5 replay38.58s; images inspected. All exact failed build/fixture/selector/headlessFPS gates and passing replays preserved in OWNED_CRAFTING_STATIONS_M12.md. Native peak3.101working/3.036privateGiB; renderer peak3.440/5.819. No new raw severity versus existing OpenWorld baseline; unrelated settings/private files hash unchanged per runner. Stateless bonuses only: fueled/powered consumers, advanced tiers/dimensions/ancient points, ordinary pacing/manual/devices/fullM12/hosted remain unfinished.
+
 ## October22 — M18 exact original recovery copy technical PASS
 
 Trusted file-store API copies a verified original to a strictly unused slot while preserving raw bytes/generation/old time anchor. Source-corrupt A/B salvage, every occupied file/directory/pending/archive refusal, invalid/thread/path/case guards and genuine historical writer copy pass. Final Editor13.43s/Game24.81s builds and six native selectors43.26s/exit0 clean, peak2.961working/2.871privateGiB;636 existing persistence hashes unchanged. ORIGINAL_RECOVERY_COPY_M18.md contains exact tests/runner/evidence/limits. No new live-world rollback/RPC/UI/console/format/asset/map change, no fullM18 pass; explicit semantic/operator workflow remains future work.

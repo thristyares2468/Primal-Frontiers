@@ -23,6 +23,7 @@
 class UStaticMeshComponent;
 class UPFInventoryComponent;
 class APlayerState;
+class APFCraftingStation;
 UCLASS()
 class PRIMALFRONTIER_API APFBuildPiece : public AActor
 {
@@ -71,10 +72,14 @@ public:
 protected:
     /** Build the shape; non-storage pieces disable their unused inventory tick. */
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 
 private:
     /** Eight reusable cube parts; OnRepShape decides which are visible/solid. */
     UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> Shapes;
     /** Rebuild the visible/collidable shape from Kind and bDoorOpen. */
     UFUNCTION() void OnRepShape();
+    /** Derived helper, never saved separately; reconstructed from this owned piece. */
+    UPROPERTY(Transient) TObjectPtr<APFCraftingStation> CraftingStation;
+    void RefreshCraftingStation();
 };

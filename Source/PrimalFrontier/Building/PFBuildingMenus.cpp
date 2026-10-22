@@ -53,6 +53,8 @@ FString BuildHint(EPFBuildKind K)
     if(K==EPFBuildKind::Window){return TEXT("Window opening on a platform edge");}
     if(K==EPFBuildKind::Stairs){return TEXT("Climb to the next storey");}
     if(K==EPFBuildKind::Storage){return TEXT("Owned chest: E to open");}
+    if(K==EPFBuildKind::Workbench){return TEXT("Owner crafting: 125% nearby | place on your platform");}
+    if(K==EPFBuildKind::Refinery){return TEXT("Owner metal refining: 150% nearby | place on your platform");}
     return TEXT("Aim at your foundation/floor");
 }
 }
@@ -81,7 +83,7 @@ void UPFBuildingMenu::RefreshMenu()
             Choice->InitializeChoice(this,D.Id);
             auto* Card=WidgetTree->ConstructWidget<UVerticalBox>();Choice->SetContent(Card);
             auto* ArtBounds=WidgetTree->ConstructWidget<USizeBox>();ArtBounds->SetWidthOverride(100);ArtBounds->SetHeightOverride(100);auto* Picture=CreateWidget<UPFItemPicture>(GetOwningPlayer());Picture->SetStructure(D.Id);ArtBounds->SetContent(Picture);Card->AddChildToVerticalBox(ArtBounds)->SetHorizontalAlignment(HAlign_Center);
-            Card->AddChild(Label(WidgetTree,NAME_None,FString::Printf(TEXT("%d. %s\n%d Wood\n%s"),N+1,*D.Name.ToString(),D.WoodCost,*BuildHint(D.Kind))));
+            Card->AddChild(Label(WidgetTree,NAME_None,FString::Printf(TEXT("%d. %s\n%d Wood\n%s"),(N+1)%10,*D.Name.ToString(),D.WoodCost,*BuildHint(D.Kind))));
             CastChecked<UButtonSlot>(Choice->GetContent()->Slot)->SetHorizontalAlignment(HAlign_Fill);
             Grid->AddChildToUniformGrid(Choice,N/4,N%4);
         }
@@ -98,9 +100,9 @@ FReply UPFBuildingMenu::NativeOnKeyDown(const FGeometry& G,const FKeyEvent& E)
     const auto K=E.GetKey();
     if(K==EKeys::B || K==EKeys::Escape || K==EKeys::Gamepad_FaceButton_Right){if(!E.IsRepeat()){CloseMenu();}return FReply::Handled();}
     if(K==EKeys::P || K==EKeys::Gamepad_Special_Right){CloseMenu();CastChecked<APFSurvivalPlayerController>(GetOwningPlayer())->SetPauseMenuOpen(true);return FReply::Handled();}
-    const FKey Keys[]={EKeys::One,EKeys::Two,EKeys::Three,EKeys::Four,EKeys::Five,EKeys::Six,EKeys::Seven,EKeys::Eight};
+    const FKey Keys[]={EKeys::One,EKeys::Two,EKeys::Three,EKeys::Four,EKeys::Five,EKeys::Six,EKeys::Seven,EKeys::Eight,EKeys::Nine,EKeys::Zero};
     auto* PC=Cast<APFSurvivalPlayerController>(GetOwningPlayer());
-    for(int32 N=0;N<8;++N){if(K==Keys[N] && PC && PC->Building->Catalog && PC->Building->Catalog->Pieces.IsValidIndex(N)){Choose(PC->Building->Catalog->Pieces[N].Id);return FReply::Handled();}}
+    for(int32 N=0;N<UE_ARRAY_COUNT(Keys);++N){if(K==Keys[N] && PC && PC->Building->Catalog && PC->Building->Catalog->Pieces.IsValidIndex(N)){Choose(PC->Building->Catalog->Pieces[N].Id);return FReply::Handled();}}
     return Super::NativeOnKeyDown(G,E);
 }
 

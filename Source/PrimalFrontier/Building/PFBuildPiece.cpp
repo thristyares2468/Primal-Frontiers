@@ -1,6 +1,7 @@
 // PFBuildPiece.cpp — see PFBuildPiece.h.
 
 #include "Building/PFBuildPiece.h"
+#include "Crafting/PFCraftingStation.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFInventoryPlayerState.h"
 #include "Components/StaticMeshComponent.h"
@@ -36,6 +37,27 @@ void APFBuildPiece::BeginPlay()
     Super::BeginPlay();
     OnRepShape();
     if(Kind!=EPFBuildKind::Storage){Storage->SetComponentTickEnabled(false);}
+}
+
+void APFBuildPiece::EndPlay(const EEndPlayReason::Type Reason)
+{
+    if(HasAuthority() && IsValid(CraftingStation)){CraftingStation->Destroy();}
+    CraftingStation=nullptr;Super::EndPlay(Reason);
+}
+
+void APFBuildPiece::RefreshCraftingStation()
+{
+    if(!HasAuthority() || !HasActorBegunPlay() || !GetWorld()->IsGameWorld() || IsActorBeingDestroyed()){return;}
+    const bool IsStation=Kind==EPFBuildKind::Workbench || Kind==EPFBuildKind::Refinery;
+    if(!IsStation){if(IsValid(CraftingStation)){CraftingStation->Destroy();}CraftingStation=nullptr;return;}
+    if(IsValid(CraftingStation)){return;}
+    auto* Station=GetWorld()->SpawnActorDeferred<APFCraftingStation>(APFCraftingStation::StaticClass(),GetActorTransform(),this,nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+    if(!Station){return;}
+    Station->bOwnedProvider=true;Station->ProviderPiece=this;
+    Station->StationType=Kind==EPFBuildKind::Workbench?APFCraftingStation::WorkbenchType():APFCraftingStation::RefineryType();
+    Station->SpeedMultiplier=Kind==EPFBuildKind::Workbench?1.25f:1.5f;
+    Station->FinishSpawning(GetActorTransform());Station->AttachToActor(this,FAttachmentTransformRules::KeepWorldTransform);
+    CraftingStation=Station;
 }
 
 void APFBuildPiece::Initialize(const FPFBuildingDefinition& D,APlayerState* OwnerState,APFBuildPiece* Parent)
@@ -112,6 +134,7 @@ void APFBuildPiece::OnRepShape()
         }
     }
     else{Set(0,UPFBuildingCatalog::Size(Kind),FVector::ZeroVector);}
+    RefreshCraftingStation();
 }
 
 bool APFBuildPiece::IsPlatform() const{return Kind==EPFBuildKind::Foundation || Kind==EPFBuildKind::Floor || Kind==EPFBuildKind::Ceiling;}

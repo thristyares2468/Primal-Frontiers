@@ -113,6 +113,10 @@ int32 UPFItemPicture::NativePaint(const FPaintArgs& Args,const FGeometry& G,cons
         {Box({.12,.50},{.76,.20},Timber,.02f);for(float X:{.25f,.45f,.65f}){Line({{X,.51},{X,.69}},PFUITheme::Inset,.025f);}}
         else if(ItemId==TEXT("Build_Storage"))
         {Box({.14,.28},{.72,.48},Timber,.03f);Line({{.14,.46},{.86,.46}},PFUITheme::Inset,.025f);Box({.46,.40},{.08,.18},PFUITheme::Text,.01f);}
+        else if(ItemId==TEXT("Build_Workbench"))
+        {Box({.12,.35},{.76,.12},Timber,.02f);Box({.20,.47},{.09,.34},Timber,.01f);Box({.71,.47},{.09,.34},Timber,.01f);Line({{.38,.20},{.57,.34}},PFUITheme::Text,.055f);}
+        else if(ItemId==TEXT("Build_Refinery"))
+        {Box({.21,.22},{.58,.60},PFUITheme::Muted,.08f);Box({.38,.44},{.24,.28},PFUITheme::Inset,.05f);Line({{.47,.68},{.56,.57},{.52,.47}},Timber,.07f);Box({.28,.15},{.44,.10},Timber,.02f);}
         else
         {Box({.18,.15},{.64,.70},Timber,.02f);if(ItemId==TEXT("Build_Window")){Box({.32,.28},{.36,.28},PFUITheme::Inset,.02f);}else if(ItemId==TEXT("Build_Door")){Box({.37,.33},{.26,.52},PFUITheme::Inset,.02f);}else{for(float X:{.34f,.5f,.66f}){Line({{X,.2},{X,.8}},PFUITheme::Inset,.025f);}}}
     }

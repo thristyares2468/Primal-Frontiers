@@ -1,5 +1,6 @@
 #include "Crafting/PFCraftingStation.h"
 #include "Crafting/PFCraftingCatalog.h"
+#include "Building/PFBuildPiece.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
@@ -27,16 +28,24 @@ APFCraftingStation::APFCraftingStation()
 void APFCraftingStation::BeginPlay()
 {
     Super::BeginPlay();
+    OnRepProvider();
     // TextRender components are stripped when an authored map loads on a server.
-    if(GetNetMode()!=NM_DedicatedServer && IsValid(Label))
-    {Label->SetText(FText::FromString(DisplayName()+TEXT("\nC: craft nearby | stay within 2.5m\nPortable crafting still works away from camp")));}
+    if(!bOwnedProvider && GetNetMode()!=NM_DedicatedServer && IsValid(Label))
+    {Label->SetText(FText::FromString(DisplayName()+TEXT("\nC: craft nearby | stay within 2.5m\nB: build your own workbench / refinery on a foundation")));}
+}
+void APFCraftingStation::OnRepProvider()
+{
+    if(!bOwnedProvider){return;}
+    // The replicated build piece supplies all visible/collidable geometry.
+    SetActorHiddenInGame(true);SetActorEnableCollision(false);
+    bNetUseOwnerRelevancy=true;
 }
 void APFCraftingStation::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);DOREPLIFETIME(APFCraftingStation,StationType);DOREPLIFETIME(APFCraftingStation,Radius);DOREPLIFETIME(APFCraftingStation,SpeedMultiplier);
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);DOREPLIFETIME(APFCraftingStation,StationType);DOREPLIFETIME(APFCraftingStation,Radius);DOREPLIFETIME(APFCraftingStation,SpeedMultiplier);DOREPLIFETIME(APFCraftingStation,bOwnedProvider);DOREPLIFETIME(APFCraftingStation,ProviderPiece);
 }
 FString APFCraftingStation::DisplayName() const
-{return StationType==TAG_CampWorkbench?TEXT("Camp workbench"):StationType==TAG_CampRefinery?TEXT("Camp refinery"):TEXT("Unavailable station");}
+{return StationType==TAG_CampWorkbench?(bOwnedProvider?TEXT("Owned workbench"):TEXT("Camp workbench")):StationType==TAG_CampRefinery?(bOwnedProvider?TEXT("Owned refinery"):TEXT("Camp refinery")):TEXT("Unavailable station");}
 bool APFCraftingStation::Supports(const FPFRecipeDefinition& Recipe) const
 {
     if(!FMath::IsFinite(Radius) || Radius<100 || Radius>500 || !FMath::IsFinite(SpeedMultiplier) || SpeedMultiplier<=1 || SpeedMultiplier>2){return false;}
@@ -53,9 +62,13 @@ bool APFCraftingStation::CanUse(const FPFRecipeDefinition& Recipe,const APawn* P
 {
     if(!IsValid(Pawn) || IsActorBeingDestroyed() || GetWorld()!=Pawn->GetWorld() || !Supports(Recipe) ||
         (RequireAuthority && (!HasAuthority() || !Pawn->HasAuthority())) || FVector::DistSquared(GetActorLocation(),Pawn->GetActorLocation())>FMath::Square(Radius)){return false;}
+    if(bOwnedProvider && (!IsValid(ProviderPiece) || ProviderPiece->IsActorBeingDestroyed() || !FMath::IsFinite(ProviderPiece->Health) || ProviderPiece->Health<=0 ||
+        (RequireAuthority && !ProviderPiece->HasAuthority()) ||
+        ProviderPiece->GetWorld()!=GetWorld() || !ProviderPiece->IsOwnedBy(Pawn->GetPlayerState()) ||
+        (StationType==TAG_CampWorkbench?ProviderPiece->Kind!=EPFBuildKind::Workbench:ProviderPiece->Kind!=EPFBuildKind::Refinery))){return false;}
     FVector Eye;FRotator View;Pawn->GetActorEyesViewPoint(Eye,View);
     FCollisionQueryParams Params(SCENE_QUERY_STAT(PFCraftStation),false,Pawn);FHitResult Hit;
-    return !GetWorld()->LineTraceSingleByChannel(Hit,Eye,GetActorLocation()+FVector(0,0,35),ECC_Visibility,Params) || Hit.GetActor()==this;
+    return !GetWorld()->LineTraceSingleByChannel(Hit,Eye,GetActorLocation()+FVector(0,0,35),ECC_Visibility,Params) || Hit.GetActor()==this || (bOwnedProvider && Hit.GetActor()==ProviderPiece);
 }
 APFCraftingStation* APFCraftingStation::FindBest(const FPFRecipeDefinition& Recipe,const APawn* Pawn,bool RequireAuthority)
 {

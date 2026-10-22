@@ -24,6 +24,7 @@
 #if WITH_DEV_AUTOMATION_TESTS && !UE_BUILD_SHIPPING
 #include "Crafting/PFCraftingComponent.h"
 #include "Crafting/PFCraftingStation.h"
+#include "Building/PFBuildPiece.h"
 #include "Crafting/PFResourceNode.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFPlayerSurvivalComponent.h"
@@ -41,6 +42,7 @@ public:
     {
         FParse::Value(FCommandLine::Get(),TEXT("PFExpectedPlayers="),Expected);
         bStations=FParse::Param(FCommandLine::Get(),TEXT("PFRunStationNetworkTests"));
+        bOwnedStations=FParse::Param(FCommandLine::Get(),TEXT("PFRunOwnedStationNetworkTests"));
     }
 
     /** Called every frame by the automation framework; returning true ends the test. */
@@ -68,7 +70,7 @@ public:
         auto* C=PC->GetCrafting();
         if(bStations && !Client)
         {
-            for(auto* P:Players){if(P->GetCrafting()->ActiveRecipe==TEXT("Recipe_Tool") && P->GetCrafting()->ActiveStationMultiplier==1.25f && P->GetCrafting()->ActiveStation==TEXT("Camp workbench")){StationServerSeen.Add(P);}}
+            for(auto* P:Players){if(P->GetCrafting()->ActiveRecipe==TEXT("Recipe_Tool") && P->GetCrafting()->ActiveStationMultiplier==1.25f && P->GetCrafting()->ActiveStation==(bOwnedStations?TEXT("Owned workbench"):TEXT("Camp workbench"))){StationServerSeen.Add(P);}}
         }
 
         // This player's fixture node (spawned by the server with the pawn as owner).
@@ -103,8 +105,20 @@ public:
                     P->SetControlRotation(FRotator::ZeroRotator);
                     if(bStations)
                     {
-                        FActorSpawnParameters StationParams;StationParams.Owner=P->GetPawn();
-                        W->SpawnActor<APFCraftingStation>(FVector(-400,Y+140,0),FRotator::ZeroRotator,StationParams);
+                        if(bOwnedStations)
+                        {
+                            auto* Catalog=NewObject<UPFBuildingCatalog>();
+                            const FTransform BaseT(FVector(-400,Y+140,10)),BenchT(FVector(-400,Y+140,55));
+                            auto* Base=W->SpawnActorDeferred<APFBuildPiece>(APFBuildPiece::StaticClass(),BaseT);
+                            Base->Initialize(*Catalog->Find(TEXT("Build_Foundation")),P->PlayerState,nullptr);Base->FinishSpawning(BaseT);
+                            auto* Bench=W->SpawnActorDeferred<APFBuildPiece>(APFBuildPiece::StaticClass(),BenchT);
+                            Bench->Initialize(*Catalog->Find(TEXT("Build_Workbench")),P->PlayerState,Base);Bench->FinishSpawning(BenchT);
+                        }
+                        else
+                        {
+                            FActorSpawnParameters StationParams;StationParams.Owner=P->GetPawn();
+                            W->SpawnActor<APFCraftingStation>(FVector(-400,Y+140,0),FRotator::ZeroRotator,StationParams);
+                        }
                     }
                     FActorSpawnParameters Params;
                     Params.Owner=P->GetPawn();
@@ -136,7 +150,7 @@ public:
                 // Wait for every fixture node to respawn (full hits, no deadline).
                 for(TActorIterator<APFResourceNode> It(W);It;++It){if(It->GetOwner() && (It->HitsRemaining!=3 || It->RespawnAt!=0)){return false;}}
                 Test->TestFalse(TEXT("Server export"),PF::AgentTools::ExecuteCommand(TEXT("PF.ExportTestReport"),{TEXT("M4LiveServer")},W).HasErrors());
-                if(bStations){Test->TestEqual(TEXT("Every actual server-owned craft used station"),StationServerSeen.Num(),Expected);Test->AddInfo(TEXT("Station network server bonus, owned RPC conservation and portable cooking verified"));}
+                if(bStations){Test->TestEqual(TEXT("Every actual server-owned craft used station"),StationServerSeen.Num(),Expected);Test->AddInfo(bOwnedStations?TEXT("Owned station network server bonus, owned RPC conservation and portable cooking verified"):TEXT("Station network server bonus, owned RPC conservation and portable cooking verified"));}
                 Advance(99);
             }
         }
@@ -177,10 +191,12 @@ public:
             {
                 if(bStations)
                 {
-                    Test->TestEqual(TEXT("Owner received server station name"),C->ActiveStation,FString(TEXT("Camp workbench")));
+                    Test->TestEqual(TEXT("Owner received server station name"),C->ActiveStation,FString(bOwnedStations?TEXT("Owned workbench"):TEXT("Camp workbench")));
                     Test->TestEqual(TEXT("Owner received server-only bonus"),C->ActiveStationMultiplier,1.25f);
                     auto* Station=APFCraftingStation::FindBest(*C->Catalog->Recipe(TEXT("Recipe_Tool"),I->Catalog),PC->GetPawn(),false);
-                    Test->TestTrue(TEXT("Actual replicated station discovered"),Station && Station->GetOwner()==PC->GetPawn());
+                    Test->TestTrue(TEXT("Actual replicated station discovered"),Station && (bOwnedStations?
+                        Station->bOwnedProvider && IsValid(Station->ProviderPiece) && Station->ProviderPiece->IsOwnedBy(PC->PlayerState) && Station->GetOwner()==Station->ProviderPiece:
+                        Station->GetOwner()==PC->GetPawn()));
                     Test->TestTrue(TEXT("Client cannot authorize station use"),!Station || !Station->CanUse(*C->Catalog->Recipe(TEXT("Recipe_Tool"),I->Catalog),PC->GetPawn(),true));
                 }
                 // Duplicate start while already crafting: must not charge twice.
@@ -228,7 +244,7 @@ public:
                 for(TActorIterator<APFResourceNode> It(W);It;++It){if(It->GetOwner() && It->GetOwner()!=PC->GetPawn()){++OtherNodes;}}
                 Test->TestEqual(TEXT("Other player's resource actor replicated"),OtherNodes,Expected-1);
                 Test->TestFalse(TEXT("Client export"),PF::AgentTools::ExecuteCommand(TEXT("PF.ExportTestReport"),{TEXT("M4LiveClient")},W).HasErrors());
-                if(bStations){Test->AddInfo(TEXT("Station network client replicated bonus, owned RPC conservation and refusal verified"));}
+                if(bStations){Test->AddInfo(bOwnedStations?TEXT("Owned station network client replicated bonus, owned RPC conservation and refusal verified"):TEXT("Station network client replicated bonus, owned RPC conservation and refusal verified"));}
                 Advance(99);
             }
         }
@@ -241,6 +257,7 @@ private:
     int32 Stage=0,Expected=1;
     bool bClientSession=false;
     bool bStations=false;
+    bool bOwnedStations=false;
     TSet<APFSurvivalPlayerController*> StationServerSeen;
 };
 

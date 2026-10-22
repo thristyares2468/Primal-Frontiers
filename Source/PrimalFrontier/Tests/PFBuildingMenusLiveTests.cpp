@@ -63,10 +63,10 @@ public:
         if(Stage==1)
         {
             Test->TestTrue(TEXT("B opens a visible picker and cursor"),PC->IsBuildingMenuOpen() && Picker->IsVisible() && PC->bShowMouseCursor);
-            Test->TestEqual(TEXT("All eight actual saved catalog choices"),B->Catalog->Pieces.Num(),8);
+            Test->TestEqual(TEXT("All ten actual saved catalog choices"),B->Catalog->Pieces.Num(),10);
             CheckBounds(Picker.Get(),TEXT("PF_BuildPickerPanel"));
             for(const auto& D:B->Catalog->Pieces){Test->TestNotNull(TEXT("Actual selectable piece ")+D.Id.ToString(),Picker->WidgetTree->FindWidget(FName(*(TEXT("PF_BuildChoice_")+D.Id.ToString()))));}
-            Capture(TEXT("eight_piece_picker"));Wait(Now,0.5,2);return false;
+            Capture(TEXT("ten_piece_picker"));Wait(Now,0.5,2);return false;
         }
         if(Stage==2)
         {
@@ -74,7 +74,9 @@ public:
             const auto Id=B->Catalog->Pieces[Choice].Id;Activate(Picker.Get(),FName(*(TEXT("PF_BuildChoice_")+Id.ToString())));
             Test->TestEqual(TEXT("UI selects requested piece"),B->SelectedId(),Id);
             Test->TestFalse(TEXT("Choice releases modal input"),PC->IsBuildingMenuOpen() || PC->bShowMouseCursor || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
-            if(++Choice<8){Press(EKeys::B);Test->TestTrue(TEXT("B returns directly to picker while placing"),PC->IsBuildingMenuOpen());Wait(Now,0.2,2);return false;}
+            if(++Choice<B->Catalog->Pieces.Num()){Press(EKeys::B);Test->TestTrue(TEXT("B returns directly to picker while placing"),PC->IsBuildingMenuOpen());Wait(Now,0.2,2);return false;}
+            Press(EKeys::B);MenuKey(EKeys::Nine);Test->TestEqual(TEXT("Nine selects workbench"),B->SelectedId(),FName(TEXT("Build_Workbench")));
+            Press(EKeys::B);MenuKey(EKeys::Zero);Test->TestEqual(TEXT("Zero selects refinery"),B->SelectedId(),FName(TEXT("Build_Refinery")));
             Test->TestEqual(TEXT("Selection alone consumes no wood"),I->Count(TEXT("Item_Wood")),14);
             PC->SelectBuildingPiece(TEXT("Build_Foundation"));Aim(FVector(-800,-1200,0));Press(EKeys::LeftMouseButton);Wait(Now,0.4,3);return false;
         }
@@ -212,9 +214,10 @@ public:
             WalkStarted=Now;Stage=22;return false;
         }
         Test->TestTrue(TEXT("Physical stair traversal reaches supported floor"),PC->GetPawn()->GetActorLocation().Z>390);
-        Test->AddInfo(TEXT("[PrimalUI] Eight-piece picker, actual chest opening, transfers, Quick Store/filter Apply/Cancel, Sort/freshness/capacity, ownership and physical stair traversal verified"));return true;
+        Test->AddInfo(TEXT("[PrimalUI] Ten-piece picker including Slate9/0 station shortcuts, actual chest opening, transfers, Quick Store/filter Apply/Cancel, Sort/freshness/capacity, ownership and physical stair traversal verified"));return true;
     }
 private:
+    void MenuKey(FKey Key){Picker->SetKeyboardFocus();auto& App=FSlateApplication::Get();App.ProcessKeyDownEvent(FKeyEvent(Key,FModifierKeysState(),0,false,0,0));App.ProcessKeyUpEvent(FKeyEvent(Key,FModifierKeysState(),0,false,0,0));}
     void SlateBack(bool Repeat){auto& App=FSlateApplication::Get();App.ProcessKeyDownEvent(FKeyEvent(EKeys::Escape,FModifierKeysState(),0,Repeat,0,0));App.ProcessKeyUpEvent(FKeyEvent(EKeys::Escape,FModifierKeysState(),0,false,0,0));}
     int32 StoragePage(){TArray<UWidget*> Widgets;ChestUI->WidgetTree->GetAllWidgets(Widgets);for(auto* W:Widgets){if(auto* Pages=Cast<UWidgetSwitcher>(W)){return Pages->GetActiveWidgetIndex();}}Test->AddError(TEXT("Missing chest page switcher"));return INDEX_NONE;}
     UUserWidget* Find(UClass* Type){TArray<UUserWidget*> Widgets;UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PC.Get(),Widgets,Type,false);return Widgets.Num()==1?Widgets[0]:nullptr;}
