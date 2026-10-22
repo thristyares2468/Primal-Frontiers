@@ -99,10 +99,14 @@ bool FPFFrozenM8Restore::RunTest(const FString&)
     Point->Rename(TEXT("LegacySpawn"),nullptr,REN_DontCreateRedirectors|REN_NonTransactional);Point->bAutoSpawn=false;Point->FinishSpawning(FTransform(FVector(1400,0,100)));
     if(!Fixture.BeginPlayInTestWorld()){return false;}auto* P=W->GetSubsystem<UPFWorldPersistence>();
     const FString Slot=TEXT("AutomationFrozenRestore")+FGuid::NewGuid().ToString(EGuidFormats::Digits),Updated=Slot+TEXT("New");
-    ON_SCOPE_EXIT{P->ActiveSlot.Reset();for(const auto& Owned:{Slot,Updated}){for(bool B:{false,true}){IFileManager::Get().Delete(*FPFSaveFileStore::Path(Owned,B));}}};
+    ON_SCOPE_EXIT{P->ActiveSlot.Reset();for(const auto& Owned:{Slot,Updated}){for(bool B:{false,true}){IFileManager::Get().Delete(*FPFSaveFileStore::Path(Owned,B));}const FString Original=FPFSaveFileStore::OriginalPath(Owned,TEXT("WorldProgressionV1"));IFileManager::Get().Delete(*Original);IFileManager::Get().DeleteDirectory(*FPaths::GetPath(Original),false,false);}};
     IFileManager::Get().MakeDirectory(*FPaths::GetPath(FPFSaveFileStore::Path(Slot,false)),true);
     if(!TestTrue(TEXT("Install original historical envelope"),FFileHelper::SaveArrayToFile(Envelope,*FPFSaveFileStore::Path(Slot,false)))){return false;}
+    const FString Original=FPFSaveFileStore::OriginalPath(Slot,TEXT("WorldProgressionV1"));FString InspectionError;FPFSaveInspection Inspection;
+    TestTrue(TEXT("Read-only old save inspection"),P->InspectSave(Slot,Inspection,InspectionError) && Inspection.WorldVersion==1);
+    TestFalse(TEXT("Inspection never creates a V1 original"),IFileManager::Get().FileExists(*Original));
     {const FString Previous(FCommandLine::Get());ON_SCOPE_EXIT{FCommandLine::Set(*Previous);};FCommandLine::Set(*(Previous+TEXT(" -PFSaveSlot=")+Slot+TEXT(" -PFLoadSave")));P->ConfigureStartup();P->ApplyStartup();}
+    TArray<uint8> OriginalBytes;TestTrue(TEXT("Actual V1 startup archives exact historical envelope before apply"),FFileHelper::LoadFileToArray(OriginalBytes,*Original) && OriginalBytes==Envelope);
     FString Error;if(!TestTrue(TEXT("Old save startup permits valid login"),P->CheckLogin(TEXT(""),Error))){AddError(Error);return false;}
     auto* PC=W->SpawnActor<APFSurvivalPlayerController>();W->GetAuthGameMode<APFSurvivalGameMode>()->RestartPlayer(PC);P->Login(PC,TEXT(""));bool Restored=false;
     if(!TestTrue(TEXT("Old saved owner restores through actual player adapter"),P->RestorePlayer(PC,&Restored) && Restored)){return false;}
@@ -127,6 +131,11 @@ bool FPFFrozenM8Restore::RunTest(const FString&)
     TestTrue(TEXT("Normal current capture upgrades to explicit progression without duplicate owners"),Current.Version==2 && Current.Players.Num()==1 && !Current.Players[0].Progression.IsEmpty());
     if(!TestTrue(TEXT("Save upgraded state into separate disposable current slot"),P->Save(Updated,Error) && P->Load(Updated,Error))){AddError(Error);return false;}CheckRuntime();
     TArray<uint8> After;TestTrue(TEXT("Historical source envelope never rewritten"),FFileHelper::LoadFileToArray(After,*FPFSaveFileStore::Path(Slot,false)) && After==Envelope);TestFalse(TEXT("Historical source no new generation"),IFileManager::Get().FileExists(*FPFSaveFileStore::Path(Slot,true)));
+    TestTrue(TEXT("V2 restoration does not create a new V1 archive"),!IFileManager::Get().FileExists(*FPFSaveFileStore::OriginalPath(Updated,TEXT("WorldProgressionV1"))));
+    for(int32 Repeat=0;Repeat<3;++Repeat){if(!TestTrue(TEXT("Normal V2 save rotates both old active generations"),P->Save(Slot,Error))){AddError(Error);return false;}}
+    FPFSavedFile Archived;TestTrue(TEXT("First original survives V2 A/B rotation with exact historical generation UTC payload"),FPFSaveFileStore::ReadOriginal(Slot,TEXT("WorldProgressionV1"),Archived,Error) && Archived.Payload==Payload && Archived.Generation==1 && Archived.SavedUtc==static_cast<int64>(Manifest->GetNumberField(TEXT("SavedUtc"))));
+    TestTrue(TEXT("Archive stays byte exact after repeated restoration and rotation"),FFileHelper::LoadFileToArray(After,*Original) && After==Envelope);
+    TestTrue(TEXT("Rotated current slot still restores"),P->Load(Slot,Error));CheckRuntime();
     Fixture.ForwardErrorMessages(this);AddInfo(TEXT("[PrimalAgentTools] FrozenM8Restore: actual old writer envelope startup/login/repeated Load/current V2 save-load, ownership/storage/creature/pickup/neutral progression and source preservation verified. Native synthetic layout; no historical executable, network or personal-world acceptance."));return true;
 }
 #endif

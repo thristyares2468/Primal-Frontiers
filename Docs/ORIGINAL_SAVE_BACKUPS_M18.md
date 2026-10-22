@@ -1,5 +1,7 @@
 # M18 — original save preservation primitive
 
+October23 integration update: [V1_WORLD_ORIGINAL_M18.md](V1_WORLD_ORIGINAL_M18.md) verifies permanent WorldProgressionV1 originals before compatible manual/startup restoration, including unchanged layouts. Existing reviewed Copper/Eryndor originals remain; currentV2/normalSave/read-only InspectSave do not create V1 archives. Exact historical bytes/UTC survive V2 A/B rotation; backup failure refuses before live mutation. Earlier primitive-only/no-load-integration statements below are historical. General content mapping, operator recovery UI/live rollback and OS crash guarantees remain unimplemented/unverified.
+
 ## Native evidence
 
 Editor repair PFM18OriginalBackupRepairBuild.log PASS6.35s; Game PFM18OriginalBackupGameBuild.log PASS27.19s, no compiler warnings. Native Automation_M18OriginalBackup_20261013_212202078_4299412e PASS2/2: PF.Persistence.OriginalBackup and PF.Persistence.FileGenerations,18.13s, raw/test warnings/errors0, no timeout/fatal/ensure,3.108GiB working/3.048GiB private sampled peaks. Index/run-summary under Saved/AutomationReports/<run>, matching PFAutomation_<run>.log under Saved/Logs. Brisbane date October14, UTC IDs retained. First build PFM18OriginalBackupBuild.log failed C2664 enum flags; replacing platform CopyFile with bounded archive copy removed that API and avoids claiming platform cleanup behavior. Ordinary PrimalFrontier.log checked with unique logs, no new fatal/ensure. No human/render/network/migration acceptance inferred.

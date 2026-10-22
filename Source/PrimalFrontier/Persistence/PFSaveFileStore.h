@@ -22,7 +22,7 @@ public:
     /** Exact existing .pfs envelope for remote transport. No file/world mutation; failures preserve Out. */
     static bool EncodeEnvelope(const FPFSavedFile& File, TArray<uint8>& Out, FString& Error);
     static bool DecodeEnvelope(const TArray<uint8>& Bytes, FPFSavedFile& Out, FString& Error);
-    /** Trusted migration preparation only; not called by normal Save/Load yet.
+    /** Trusted migration preparation, used before reviewed layout/V1 world restoration.
      *  Existing originals are never overwritten, including corrupt originals. */
     static FString OriginalPath(const FString& Slot,const FString& Edge);
     static bool PreserveOriginal(const FString& Slot,const FString& Edge,FString& Error);

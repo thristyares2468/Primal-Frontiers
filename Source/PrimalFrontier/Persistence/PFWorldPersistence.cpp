@@ -260,10 +260,24 @@ bool UPFWorldPersistence::Load(const FString& Slot, FString& Error)
     FPFSavedFile File; FPFWorldSaveData Data;
     if (!Authority(Error) || !FPFSaveFileStore::Read(Slot, File, Error) || !Decode(File.Payload, Data, Error)) { return false; }
     bool AddedCopper=false;
-    if(!PrepareCopperLayout(Data,AddedCopper,Error) || (AddedCopper && !FPFSaveFileStore::PreserveOriginal(Slot,Data.Resources.Num()==25?TEXT("M12EryndorLayout1"):TEXT("M12CopperLayout1"),Error)) || !Apply(Data,File.SavedUtc,Error)){return false;}
+    if(!PrepareCopperLayout(Data,AddedCopper,Error) || !CheckLayout(Data,Error) || !PreserveRestoreOriginal(Slot,Data,AddedCopper,Error) || !Apply(Data,File.SavedUtc,Error)){return false;}
     if(AddedCopper){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalPersistence] Reviewed resource layout applied (%d nodes); verified original retained, source UTC preserved until ordinary save"),Data.Resources.Num());}
     ActiveSlot = Slot; bLoadedWorld = true;
     UE_LOG(LogPFSurvival, Display, TEXT("[PrimalPersistence] Loaded slot=%s generation=%llu backupRecovery=%d"), *Slot, File.Generation, File.bRecoveredBackup);
+    return true;
+}
+
+bool UPFWorldPersistence::PreserveRestoreOriginal(const FString& Slot,const FPFWorldSaveData& Data,bool ChangedLayout,FString& Error)
+{
+    if(ChangedLayout && !FPFSaveFileStore::PreserveOriginal(Slot,Data.Resources.Num()==25?TEXT("M12EryndorLayout1"):TEXT("M12CopperLayout1"),Error)){return false;}
+    // Even an unchanged V1 layout will become V2 on the next ordinary capture/save.
+    // Archive the first exact envelope before applying neutral progression defaults,
+    // so later A/B rotation cannot erase its bytes, generation or food time anchor.
+    if(Data.Version==1)
+    {
+        if(!FPFSaveFileStore::PreserveOriginal(Slot,TEXT("WorldProgressionV1"),Error)){return false;}
+        UE_LOG(LogPFSurvival,Display,TEXT("[PrimalPersistence] Verified V1 world original retained before restoration; source UTC unchanged"));
+    }
     return true;
 }
 
@@ -301,8 +315,8 @@ void UPFWorldPersistence::ApplyStartup()
     // InitGame has not run resource BeginPlay yet. Inspect the actual reviewed
     // actors/catalogs only after StartPlay, before applying or publishing state.
     bool AddedCopper=false;
-    if(!PrepareCopperLayout(Pending,AddedCopper,Error) || (AddedCopper && !FPFSaveFileStore::PreserveOriginal(ActiveSlot,Pending.Resources.Num()==25?TEXT("M12EryndorLayout1"):TEXT("M12CopperLayout1"),Error)))
-    {bStartupBlocked=true;bPending=false;UE_LOG(LogPFSurvival,Error,TEXT("[PrimalAgentTools] Startup Copper layout refused: %s"),*Error);return;}
+    if(!PrepareCopperLayout(Pending,AddedCopper,Error) || !CheckLayout(Pending,Error) || !PreserveRestoreOriginal(ActiveSlot,Pending,AddedCopper,Error))
+    {bStartupBlocked=true;bPending=false;UE_LOG(LogPFSurvival,Error,TEXT("[PrimalAgentTools] Startup restoration preparation refused: %s"),*Error);return;}
     if(AddedCopper){UE_LOG(LogPFSurvival,Display,TEXT("[PrimalAgentTools] [PrimalPersistence] Startup reviewed resource layout prepared (%d nodes); original/UTC preserved"),Pending.Resources.Num());}
     if (!Apply(Pending, PendingUtc, Error)) { bStartupBlocked = true; UE_LOG(LogPFSurvival, Error, TEXT("[PrimalPersistence] Startup world restore refused: %s"), *Error); }
     bPending = false;

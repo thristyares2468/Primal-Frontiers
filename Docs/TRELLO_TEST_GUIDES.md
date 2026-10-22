@@ -1,5 +1,9 @@
 # Trello test guides
 
+## G22 — Compatible V1 original retention (backend; optional operator reproduction)
+
+Complete [V1_WORLD_ORIGINAL_M18.md](V1_WORLD_ORIGINAL_M18.md) guide copied to EcbkSSLf. No manually opened level for native/frozen fixtures; currentV2 network regression uses exact OpenWorld package with one then two NullRHI clients and isolated profiles. Start with the exact native command, expect immutable old envelope/archive/UTC and live refusal preservation; never corrupt a personal save. Optional operator inspection requires its actual matching map and backed-up disposable slot, names real WorldProgressionV1 edge and existing copy-only command without guessing IDs. No new mandatory owner engine test, OS-crash experiment or human acceptance inferred.
+
 ## G21 — Craftable field survey scope
 
 Use complete [SURVEY_SCOPE_M12.md](SURVEY_SCOPE_M12.md) guide, copied into YlK19xC8 before Done. Exact existing OpenWorld package, camp workbench coordinates, standalone mode, Gem cutting/material prerequisites, one Start here action, C/Enter/R craft/cancel, Tab/1 exact-batch pin, Q/D-pad toggle, P/modal/pawn resets, deltas and evidence. Native temporary worlds need no manually opened level; network tests use one then two isolated NullRHI clients and a new server. Optional owner reproduction is not a new mandatory repeat of accepted earlier tests. Real asset integration and physical-controller/FPS acceptance remain separate.

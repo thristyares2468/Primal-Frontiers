@@ -1,5 +1,7 @@
 # Offline implementation scope — October16
 
+**October23 delivery / asset boundary:** M12 scope d058be7 and M18 compatibleV1 original preservation now pass their bounded technical gates; see SURVEY_SCOPE_M12.md / V1_WORLD_ORIGINAL_M18.md. Stop after final scoped publication because the next selected art-intake step would begin using imported assets, the owner's explicit boundary. No asset processed/imported/renamed. Existing NGzmDxXl requires one intended pack's original source/Fab link plus matching local Content folder before that future step. Full M12/M18 and code objectives below remain incomplete; this does not claim all independent work is exhausted or authorize thirdperson/world authoring. A new instruction may resume a different verified offline slice without falsely completing art/manual/hosting gates.
+
 **October23 explicit resume supersedes previous stops.** Continue independently
 in verified bounded tasks until mandatory owner input or the real asset-integration
 stage. Current next M12 slice is an optical intermediate consumer: a craftable

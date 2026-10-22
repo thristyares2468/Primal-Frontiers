@@ -1,5 +1,7 @@
 # M18 — frozen historical M8 writer compatibility
 
+October23 extension: actual current FrozenM8Restore now checks read-only inspection creates no original, startup retains exact immutable V1 envelope, repeated Load and three later currentV2 A/B saves never replace it, and rotated current state still restores. CurrentV2-only restoration creates no V1 original. All previous owner/storage/identity/neutral progression/expired-food assertions remain. No frozen writer bytes/manifests were changed or regenerated. Exact current results and separate six refusal scenarios: [V1_WORLD_ORIGINAL_M18.md](V1_WORLD_ORIGINAL_M18.md).
+
 The project now has a small immutable fake-data save produced by historical production writer sources at `c3d221fdd3a68daacb58b72d0e8a021fff19d9c3`, the first whole-world persistence commit. This closes the limitation of testing legacy fields only by re-encoding today's structs. Current production/gameplay codecs and assets did not change.
 
 `Tests/Fixtures/M8_c3d221f/fixture.json` holds the exact original worldV1 payload2022bytes and fileV1 envelope2054bytes as Base64. `manifest.json` records full commit, source/archive/harness SHA256s, payload/envelope SHA256/MD5, original UTC/generation and installed engine. Fake repeating GUIDs are fixtures, never actual private saves or hosted credentials. Original captured/file UTC both1792032698; generation1. Payload SHA256 `2122aaee5ef21be959edd3dd80f2d030b0990d3c19e605ac24428380a7154fd9`; envelope SHA256 `47d0a2035da74393511ea2f39463de0a4eea822fc0d822584e3799ab899a17ed`.

@@ -1,5 +1,7 @@
 # M9 — controlled asset pipeline planning
 
+October23 stopping point: owner requested continuation only until mandatory input or asset integration. Two further code-only deliveries (SURVEY_SCOPE_M12.md / V1_WORLD_ORIGINAL_M18.md) pass; stop before using imported real models/textures. Existing intake card NGzmDxXl next action is simply identify ONE intended pack by original source/Fab link and corresponding local Content folder, plus known license/version/first desired asset. No new download/import/rename, engine test or private receipt is required now. Future first-art candidate approval/integration is not complete, and broader M12/M18 technical scope remains open.
+
 This is a documentation/read-only audit increment authorized while M7/M8 manual acceptance waits. It does not approve imported packs, start a final art pass or certify a new playable milestone. Existing greybox mechanics remain the baseline. No new asset is needed to finish the current manual survival/save tests.
 
 ## Intake and provenance

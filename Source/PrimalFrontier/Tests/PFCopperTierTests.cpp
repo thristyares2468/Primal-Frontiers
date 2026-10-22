@@ -146,7 +146,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFCopperBackupFailureTest,"PF.Persistence.Copp
 bool FPFCopperBackupFailureTest::RunTest(const FString&)
 {
     AddExpectedMessage(TEXT("GetSocketInfoByName.*No SkeletalMesh for Component"),EAutomationExpectedMessageFlags::Contains,0);
-    AddExpectedError(TEXT("Startup Copper layout refused:"),EAutomationExpectedErrorFlags::Contains,3);
+    AddExpectedError(TEXT("Startup restoration preparation refused:"),EAutomationExpectedErrorFlags::Contains,3);
     for(bool Startup:{false,true})
     {
         for(int32 Fault=0;Fault<3;++Fault)

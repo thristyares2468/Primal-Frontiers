@@ -260,7 +260,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFWorldStartupFailureTest, "PF.Persistence.Sta
 bool FPFWorldStartupFailureTest::RunTest(const FString&)
 {
     AddExpectedError(TEXT("Startup load refused:"), EAutomationExpectedErrorFlags::Contains, 1);
-    AddExpectedError(TEXT("Startup world restore refused:"), EAutomationExpectedErrorFlags::Contains, 1);
+    AddExpectedError(TEXT("Startup restoration preparation refused:"), EAutomationExpectedErrorFlags::Contains, 1);
     for (bool bLayoutMismatch : {false, true})
     {
         FTestWorldWrapper Fixture;

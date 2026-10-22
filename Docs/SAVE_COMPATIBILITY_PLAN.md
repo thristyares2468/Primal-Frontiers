@@ -1,5 +1,7 @@
 # Save compatibility and migration plan — M18
 
+October23 [V1_WORLD_ORIGINAL_M18.md](V1_WORLD_ORIGINAL_M18.md) closes the compatible unchanged-layout V1 original-retention gap: manual Load/startup validate layout and preserve exact WorldProgressionV1 envelope before applying neutral progression; later V2 A/B rotation cannot replace that first original. CurrentV2/normalSave/read-only inspection do not create it. Existing layout archives coexist. Actual frozen historical startup/repeated Load/rotation and six refusal scenarios pass, plus currentV2 live regressions. Older blanket claims below that only Copper restoration preserves originals are historical. Generic item/structure mappings, UI/live rollback, multi-engine/OS crash and fullM18 remain incomplete.
+
 October22 follow-up [ORIGINAL_COPY_COMMAND_M18.md](ORIGINAL_COPY_COMMAND_M18.md)
 exposes a separately tested non-Shipping server-console wrapper for exact copy
 into an unused slot. Older API-only "not exposed" statements below are historical;
