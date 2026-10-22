@@ -6,6 +6,7 @@
 
 #include "Crafting/PFCraftingCatalog.h"
 #include "Crafting/PFEryndorProgression.h"
+#include "Crafting/PFCraftingStation.h"
 #include "Inventory/PFItemCatalog.h"
 #include "NativeGameplayTags.h"
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_PF_CraftTool,"Recipe.Category.Tool");
@@ -66,7 +67,8 @@ const FPFRecipeDefinition* UPFCraftingCatalog::Recipe(FName Id,const UPFItemCata
     {
         if(D.Id!=Id){continue;}
         if(Found || Id.IsNone() || !Items || !D.Category.IsValid() || !Items->Find(D.Output) || D.OutputQuantity<1 || D.OutputQuantity>100 ||
-            !FMath::IsFinite(D.Duration) || D.Duration<0.1f || D.Duration>600 || D.Ingredients.IsEmpty() || D.Ingredients.Num()>8){return nullptr;}
+            !FMath::IsFinite(D.Duration) || D.Duration<0.1f || D.Duration>600 || D.Ingredients.IsEmpty() || D.Ingredients.Num()>8 ||
+            (D.RequiredStation.IsValid() && D.RequiredStation!=APFCraftingStation::WorkbenchType() && D.RequiredStation!=APFCraftingStation::RefineryType())){return nullptr;}
         // Ingredients: known items, sane quantities, no duplicates, never the output itself.
         TSet<FName> Seen;
         for(const auto& I:D.Ingredients)

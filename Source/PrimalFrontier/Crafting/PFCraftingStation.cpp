@@ -49,6 +49,7 @@ FString APFCraftingStation::DisplayName() const
 bool APFCraftingStation::Supports(const FPFRecipeDefinition& Recipe) const
 {
     if(!FMath::IsFinite(Radius) || Radius<100 || Radius>500 || !FMath::IsFinite(SpeedMultiplier) || SpeedMultiplier<=1 || SpeedMultiplier>2){return false;}
+    if(Recipe.RequiredStation.IsValid()){return Recipe.RequiredStation==StationType && (StationType==TAG_CampRefinery || StationType==TAG_CampWorkbench);}
     if(StationType==TAG_CampRefinery)
     {
         static const TArray<FName> Ids={TEXT("Recipe_CopperRefine"),TEXT("Recipe_IronRefine"),TEXT("Recipe_GoldRefine"),TEXT("Recipe_SilverRefine"),TEXT("Recipe_TitaniumRefine")};

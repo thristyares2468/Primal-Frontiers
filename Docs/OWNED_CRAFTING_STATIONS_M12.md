@@ -1,5 +1,7 @@
 # M12 — Player-built owned workbench and refinery
 
+October22 follow-up: [BATCH_REFINING_M12.md](BATCH_REFINING_M12.md) adds required-refinery copper/iron recipes with exact per-job fuel consumption. Older stateless/no-fuel statements below describe the initial station-bonus slice; providers still have no separate fuel tank/persistent burn timer. Existing portable recipes/bonuses remain.
+
 Bounded task: https://trello.com/c/fKB7Zgqs. October22 scoped implementation/build/native/rendered/network gates PASS. Full M12, ordinary-input pacing, powered/fueled processing and hosted multiplayer remain incomplete.
 
 ## Behavior

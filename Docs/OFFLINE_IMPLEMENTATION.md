@@ -1,5 +1,16 @@
 # Offline implementation scope — October16
 
+**October22 final boundary: STOP after batch-refining publication.** Owner's four
+steps pass (native regressions, two-client, rendered menu, Game/docs/Trello), with
+exact evidence in BATCH_REFINING_M12.md / jvU88JFY. Finish scoped commit/push and
+stop; do not select/start another objective. Full M12 and unfinished milestones
+remain incomplete. Resume requires a new explicit owner instruction.
+
+**October22 new explicit resume supersedes the stop below.** Current bounded task
+jvU88JFY implements refinery-required fuel-efficient copper/iron batches before
+Frontier/Deepforge expansion. Technical gates remain pending; full M12 remains
+incomplete. Earlier completed work is not repeated or treated as a new prerequisite.
+
 **Latest owner direction October22: STOP after the current M18 recovery-command
 work is published.** LMVAG5Xz technical gates pass; finish its scoped commit/push
 and stop. Do not automatically start any queued objective below. Full M18 and

@@ -33,7 +33,7 @@ class FStationUI final : public IAutomationLatentCommand
 {
 public:
     FStationUI(FAutomationTestBase* T,FString D):Test(T),Directory(MoveTemp(D))
-    {bOwned=FParse::Param(FCommandLine::Get(),TEXT("PFRunOwnedStationUITest"));}
+    {bOwned=FParse::Param(FCommandLine::Get(),TEXT("PFRunOwnedStationUITest"));bBatch=FParse::Param(FCommandLine::Get(),TEXT("PFRunBatchRefiningUITest"));}
     bool Update() override
     {
         const double Now=FPlatformTime::Seconds();
@@ -58,6 +58,11 @@ public:
             P->Survival->HungerDrainPerSecond=0;P->Survival->ThirstDrainPerSecond=0;P->GetCharacterMovement()->DisableMovement();
             auto* G=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();FPFProgressionRecord Seed;Seed.Experience=700;FString Error;
             if(!G->Restore(Seed,Error) || !G->RequestKnowledge(TEXT("Tech_FieldTools"),P,Error) || !I->Grant(TEXT("Item_Wood"),6) || !I->Grant(TEXT("Item_Stone"),2) || !I->Grant(TEXT("Item_CopperOre"),2)){Test->AddError(TEXT("Station boundary fixture setup failed"));return true;}
+            if(bBatch)
+            {
+                if(!I->Grant(TEXT("Item_CopperOre"),6)){Test->AddError(TEXT("Batch ore fixture refused"));return true;}
+                P->SetActorLocation(FVector(-1400,-1100,100));Select(PC,TEXT("Recipe_CopperBatch"));Stage=80;Changed=Now;return false;
+            }
             if(bOwned)
             {
                 if(!I->Grant(TEXT("Item_Wood"),22)){Test->AddError(TEXT("Owned build material fixture refused"));return true;}
@@ -78,6 +83,43 @@ public:
             Approach(PC,Bench);Select(PC,TEXT("Recipe_Tool"));Next(Now);return false;
         }
         if(Now-Changed<.75){return false;}
+        if(Stage==80)
+        {
+            if(!BodyContains(TEXT("Requires refinery"))){return true;}
+            auto* Button=Cast<UButton>(Menu->WidgetTree->FindWidget(TEXT("PF_CraftSelected")));
+            Test->TestTrue(TEXT("Missing refinery disables craft button"),Button && !Button->GetIsEnabled());
+            if(!WorkbenchCaptured){Shot(TEXT("batch_required_refinery"));WorkbenchCaptured=true;Changed=Now;return false;}
+            Press(EKeys::Enter);Test->TestTrue(TEXT("Enter cannot start absent refinery job"),C->ActiveRecipe.IsNone());Stage=81;Changed=Now;return false;
+        }
+        if(Stage==81){Approach(PC,Refinery);Select(PC,TEXT("Recipe_CopperBatch"));Stage=82;Changed=Now;return false;}
+        if(Stage==82)
+        {
+            if(!BodyContains(TEXT("Camp refinery: 150%")) || !BodyContains(TEXT("Makes 2")) || !BodyContains(TEXT("Wood 6/1"))){return true;}
+            if(!BatchCaptured){Shot(TEXT("batch_refinery_ready"));BatchCaptured=true;Changed=Now;return false;}
+            Press(EKeys::Enter);Test->TestEqual(TEXT("Slate starts actual refinery batch"),C->ActiveRecipe,FName(TEXT("Recipe_CopperBatch")));Stage=83;Changed=Now;return false;
+        }
+        if(Stage==83)
+        {
+            Test->TestEqual(TEXT("Fuel not charged before completion"),I->Count(TEXT("Item_Wood")),6);Press(EKeys::R);Stage=84;Changed=Now;return false;
+        }
+        if(Stage==84)
+        {
+            Test->TestTrue(TEXT("Slate cancel keeps exact batch inputs"),C->ActiveRecipe.IsNone() && I->Count(TEXT("Item_Wood"))==6 && I->Count(TEXT("Item_CopperOre"))==8 && I->Count(TEXT("Item_CopperIngot"))==0);
+            Press(EKeys::Enter);Stage=85;Changed=Now;return false;
+        }
+        if(Stage==85)
+        {
+            if(!C->ActiveRecipe.IsNone()){return false;}
+            Test->TestTrue(TEXT("Rendered batch two outputs and one fuel"),I->Count(TEXT("Item_CopperIngot"))==2 && I->Count(TEXT("Item_CopperOre"))==4 && I->Count(TEXT("Item_Wood"))==5);
+            Stage=86;Changed=Now;return false;
+        }
+        if(Stage==86)
+        {
+            if(!BodyContains(TEXT("Wood 5/1"))){return true;}
+            auto* Result=Cast<UTextBlock>(Menu->WidgetTree->FindWidget(TEXT("PF_CraftingPanel_Result")));
+            Test->TestTrue(TEXT("Completion result refreshed before screenshot"),Result && Result->GetText().ToString().Contains(TEXT("Completed")));
+            Shot(TEXT("batch_refinery_completed"));Test->AddInfo(TEXT("[PrimalCrafting] Rendered batch refinery: missing-station button, real Slate start/cancel/complete, two ingots and exact one fuel verified. Assisted positioning/seed, not earned pacing/FPS."));Stage=99;Changed=Now;return false;
+        }
         if(Stage==70){Shot(TEXT("owned_stations_placed"));Stage=71;Changed=Now;return false;}
         if(Stage==71){Approach(PC,Bench);Select(PC,TEXT("Recipe_Tool"));Stage=1;Changed=Now;return false;}
         if(Stage==1)
@@ -124,7 +166,7 @@ private:
     bool BodyContains(const TCHAR* Text){auto* Body=Menu.IsValid()?Cast<UTextBlock>(Menu->WidgetTree->FindWidget(TEXT("PF_CraftingPanel_Body"))):nullptr;return Test->TestTrue(TEXT("Actual station UI description at requested font scale"),Body && Body->GetFont().Size==FMath::RoundToInt(16*RequestedScale) && Body->GetText().ToString().Contains(Text));}
     void Shot(const TCHAR* Name){const FString Path=Directory/(FString(Name)+TEXT(".png"));Shots.Add(Path);FScreenshotRequest::RequestScreenshot(Path,true,false);}
     FAutomationTestBase* Test;FString Directory;TArray<FString> Shots;TWeakObjectPtr<UPFCraftingHUD> Menu;APFCraftingStation* Bench=nullptr;APFCraftingStation* Refinery=nullptr;
-    float RequestedScale=1;bool WorkbenchCaptured=false,bOwned=false;int32 Stage=0;double Started=FPlatformTime::Seconds(),Changed=0;
+    float RequestedScale=1;bool WorkbenchCaptured=false,BatchCaptured=false,bOwned=false,bBatch=false;int32 Stage=0;double Started=FPlatformTime::Seconds(),Changed=0;
 };
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFStationUILiveTest,"PF.Crafting.StationsUI",EAutomationTestFlags::ClientContext|EAutomationTestFlags::EngineFilter)

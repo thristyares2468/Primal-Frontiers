@@ -5,6 +5,8 @@
 #include "Crafting/PFCraftingComponent.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Inventory/PFInventoryComponent.h"
+#include "Inventory/PFInventoryPlayerState.h"
+#include "Progression/PFProgressionComponent.h"
 #include "Survival/PFSurvivalGameMode.h"
 #include "Survival/PFSurvivalPlayerController.h"
 #include "Survival/PFSurvivorCharacter.h"
@@ -106,6 +108,13 @@ bool FPFOwnedStationRestoreTest::RunTest(const FString&)
     const FGuid BenchId=Bench->PersistentId,RefineryId=Refinery->PersistentId,Owner=Bench->PersistentOwnerId;
     const FString Slot=TEXT("AutomationOwnedRestore")+FGuid::NewGuid().ToString(EGuidFormats::Digits);
     ON_SCOPE_EXIT{for(bool Second:{false,true}){IFileManager::Get().Delete(*FPFSaveFileStore::Path(Slot,Second));IFileManager::Get().Delete(*(FPFSaveFileStore::Path(Slot,Second)+TEXT(".pending")));}};
+    auto* Pawn=CastChecked<APFSurvivorCharacter>(PC->GetPawn());Pawn->GetCharacterMovement()->DisableMovement();
+    Pawn->Survival->HungerDrainPerSecond=0;Pawn->Survival->ThirstDrainPerSecond=0;
+    Pawn->SetActorLocation(Refinery->GetActorLocation()+FVector(-150,0,90));
+    TestTrue(TEXT("Batch persistence inputs"),PC->GetInventory()->Grant(TEXT("Item_CopperOre"),8) && PC->GetInventory()->Grant(TEXT("Item_Wood"),2));
+    if(!TestTrue(TEXT("Batch at owned refinery before real disk save"),PC->GetCrafting()->Start(TEXT("Recipe_CopperBatch"),Pawn))){return false;}
+    for(int32 N=0;N<90;++N){Fixture.TickTestWorld(.1f);}
+    TestTrue(TEXT("Owned batch completed before save"),PC->GetCrafting()->ActiveRecipe.IsNone() && PC->GetInventory()->Count(TEXT("Item_CopperIngot"))==2);
     FPFWorldSaveData Snapshot;
     if(!TestTrue(TEXT("Capture owned stations"),Persistence->Capture(Snapshot,Error)) ||
         !TestTrue(TEXT("Actual disk save accepts added definitions"),Persistence->Save(Slot,Error))){AddError(Error);return false;}
@@ -113,12 +122,12 @@ bool FPFOwnedStationRestoreTest::RunTest(const FString&)
     for(int32 Attempt=0;Attempt<2;++Attempt)
     {
         if(!TestTrue(TEXT("Load owned station structures"),Persistence->Load(Slot,Error))){AddError(Error);return false;}
-        int32 Structures=0,Helpers=0;APFBuildPiece* LoadedBench=nullptr;
+        int32 Structures=0,Helpers=0;APFBuildPiece* LoadedBench=nullptr;APFBuildPiece* LoadedRefinery=nullptr;
         for(TActorIterator<APFBuildPiece> It(W);It;++It)
         {
             ++Structures;
             if(It->PersistentId==BenchId){LoadedBench=*It;TestTrue(TEXT("Workbench ID/support/owner restored"),It->Kind==EPFBuildKind::Workbench && IsValid(It->Support) && It->PersistentOwnerId==Owner && It->IsOwnedBy(PC->PlayerState));}
-            if(It->PersistentId==RefineryId){TestTrue(TEXT("Refinery ID/support/owner restored"),It->Kind==EPFBuildKind::Refinery && IsValid(It->Support) && It->PersistentOwnerId==Owner && It->IsOwnedBy(PC->PlayerState));}
+            if(It->PersistentId==RefineryId){LoadedRefinery=*It;TestTrue(TEXT("Refinery ID/support/owner restored"),It->Kind==EPFBuildKind::Refinery && IsValid(It->Support) && It->PersistentOwnerId==Owner && It->IsOwnedBy(PC->PlayerState));}
         }
         for(TActorIterator<APFCraftingStation> It(W);It;++It)
         {
@@ -132,6 +141,13 @@ bool FPFOwnedStationRestoreTest::RunTest(const FString&)
         if(!TestNotNull(TEXT("Restored tool definition"),Tool)){return false;}
         auto* Best=APFCraftingStation::FindBest(*Tool,PC->GetPawn(),true);
         TestTrue(TEXT("Saved owner can use restored bench"),Best && Best->ProviderPiece==LoadedBench);
+        if(!TestNotNull(TEXT("Restored refinery for required batch"),LoadedRefinery)){return false;}
+        auto* Bag=PC->GetInventory();
+        TestTrue(TEXT("Repeated restore conserves batch ore/fuel/output"),Bag->Count(TEXT("Item_CopperIngot"))==2 && Bag->Count(TEXT("Item_CopperOre"))==4 && Bag->Count(TEXT("Item_Wood"))==1);
+        auto* Progression=PC->GetPlayerState<APFInventoryPlayerState>()->Progression.Get();
+        TestTrue(TEXT("New batch reward ledger survives actual disk restore"),Progression->GetRecord().CreditedCrafts.Contains(TEXT("Recipe_CopperBatch")));
+        PC->GetPawn()->SetActorLocation(LoadedRefinery->GetActorLocation()+FVector(-150,0,90));
+        TestTrue(TEXT("Restored required refinery can start remaining batch"),Craft->Start(TEXT("Recipe_CopperBatch"),PC->GetPawn()));TestTrue(TEXT("Cancel restored batch keeps fuel"),Craft->Cancel() && Bag->Count(TEXT("Item_Wood"))==1);
     }
     AddInfo(TEXT("[PrimalCrafting] OwnedStationsRestore: actual save/repeated load retains structure IDs/owners/support and rebuilds exactly two stateless providers without duplication."));
     Fixture.ForwardErrorMessages(this);return true;

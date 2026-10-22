@@ -1,5 +1,6 @@
 #include "UI/PFRecipeDetails.h"
 #include "Crafting/PFCraftingCatalog.h"
+#include "Crafting/PFCraftingStation.h"
 #include "Inventory/PFInventoryComponent.h"
 #include "Inventory/PFItemCatalog.h"
 
@@ -23,6 +24,8 @@ PFRecipeDetails::FView PFRecipeDetails::Describe(const FPFRecipeDefinition* Reci
     }
     const FString State=bBusy?TEXT("Job running - wait or cancel"):
         bMissing?TEXT("Missing fresh ingredients"):TEXT("Ingredients present; server validates");
+    const FString Station=Recipe->RequiredStation.IsValid()?
+        (Recipe->RequiredStation==APFCraftingStation::RefineryType()?TEXT("\nRequires refinery (within reach and clear sight)"):TEXT("\nRequires workbench (within reach and clear sight)")):TEXT("");
     return {FText::FromString(FString::Printf(TEXT("%s | %.1fs"),*Recipe->DisplayName.ToString(),Recipe->Duration)),
-        FText::FromString(FString::Printf(TEXT("Makes %d %s\n%s\n%s"),Recipe->OutputQuantity,*Output->DisplayName.ToString(),*FString::Join(Ingredients,TEXT(" | ")),*State))};
+        FText::FromString(FString::Printf(TEXT("Makes %d %s\n%s\n%s%s"),Recipe->OutputQuantity,*Output->DisplayName.ToString(),*FString::Join(Ingredients,TEXT(" | ")),*State,*Station))};
 }

@@ -53,6 +53,9 @@ bool UPFCraftingComponent::Start(FName Id,APawn* Pawn)
     const bool Optional=GetDefault<UPFProgressionCatalog>()->Knowledge.ContainsByPredicate([Id](const auto& D){return D.Recipes.Contains(Id);});
     if((Progression && !Progression->CanCraftRecipe(Id,AccessError)) || (!Progression && Optional))
     {Finish(AccessError.IsEmpty()?TEXT("Locked: progression unavailable"):AccessError);return false;}
+    auto* Station=APFCraftingStation::FindBest(*Recipe,Pawn,true);
+    if(Recipe->RequiredStation.IsValid() && !Station)
+    {Finish(Recipe->RequiredStation==APFCraftingStation::RefineryType()?TEXT("Requires refinery within 2.5m and clear sight; owned stations require ownership"):TEXT("Requires workbench within 2.5m and clear sight; owned stations require ownership"));return false;}
     I->PruneExpired();
     TArray<FPFItemStack> Selected;
 
@@ -78,7 +81,7 @@ bool UPFCraftingComponent::Start(FName Id,APawn* Pawn)
     PendingRecipe=*Recipe;
     Inputs=MoveTemp(Selected);
     CraftPawn=Pawn;
-    CraftStation=APFCraftingStation::FindBest(*Recipe,Pawn,true);
+    CraftStation=Station;
     ActiveStation=CraftStation.IsValid()?CraftStation->DisplayName():FString();
     ActiveStationMultiplier=CraftStation.IsValid()?CraftStation->SpeedMultiplier:1.f;
     ActiveRecipe=Id;

@@ -209,15 +209,18 @@ void UPFCraftingHUD::RefreshMenu()
     DetailTitle->SetText(View.Title);DetailBody->SetText(View.Body);
     if(D && Progression)
     {DetailTitle->SetText(FText::FromString(FString::Printf(TEXT("%s | %.1fs at %.0f%% crafting speed"),*D->DisplayName.ToString(),D->Duration/FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()),100*FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()))));}
+    bool bStationAccess=true;
     if(D && !Technology)
     {
         auto* Station=APFCraftingStation::FindBest(*D,PC?PC->GetPawn():nullptr,false);
         const float Bonus=Station?Station->SpeedMultiplier:1;
         const float StatsSpeed=Progression?FPFProgressionTransactions::CraftingMultiplier(Progression->GetRecord()):1;
+        bStationAccess=!D->RequiredStation.IsValid() || Station!=nullptr;
         DetailTitle->SetText(FText::FromString(FString::Printf(TEXT("%s | %.1fs"),*D->DisplayName.ToString(),D->Duration/(StatsSpeed*Bonus))));
-        DetailBody->SetText(FText::FromString(DetailBody->GetText().ToString()+TEXT("\n\n")+(Station?FString::Printf(TEXT("%s: %.0f%% station speed. Stay within reach until complete."),*Station->DisplayName(),Bonus*100):TEXT("Portable crafting: no station bonus."))));
+        const FString Unavailable=D->RequiredStation==APFCraftingStation::RefineryType()?TEXT("Required refinery unavailable. Move within clear sight; another player's owned station cannot be used."):TEXT("Required workbench unavailable. Move within clear sight; another player's owned station cannot be used.");
+        DetailBody->SetText(FText::FromString(DetailBody->GetText().ToString()+TEXT("\n\n")+(Station?FString::Printf(TEXT("%s: %.0f%% station speed. Stay within reach until complete."),*Station->DisplayName(),Bonus*100):bStationAccess?TEXT("Portable crafting: no station bonus."):Unavailable)));
     }
-    if(D && !bAccess){DetailBody->SetText(FText::FromString(AccessError+TEXT("\n")+View.Body.ToString()));}
+    if(D && !bAccess){DetailBody->SetText(FText::FromString(AccessError+TEXT("\n")+DetailBody->GetText().ToString()));}
     if(Technology && Knowledge)
     {
         FString Unlocks=TEXT("Unlocks recipes (items still require materials):\n");
@@ -254,7 +257,7 @@ void UPFCraftingHUD::RefreshMenu()
     if(C && !C->ActiveStation.IsEmpty()){Status+=TEXT("\nStation: ")+C->ActiveStation+FString::Printf(TEXT(" | %.0f%% station speed"),100*C->ActiveStationMultiplier);}
     if(Progression && !Progression->GetKnowledgeFeedback().IsEmpty()){Status+=TEXT("\nKnowledge: ")+Progression->GetKnowledgeFeedback();}
     if(PC && PC->GetInventoryMessage().StartsWith(TEXT("Craft "))){Status+=TEXT("\nLast request: ")+PC->GetInventoryMessage();}
-    Result->SetText(FText::FromString(Status));CraftButton->SetIsEnabled(!Technology && bAccess && bAlive);CancelButton->SetIsEnabled(C && !C->ActiveRecipe.IsNone());
+    Result->SetText(FText::FromString(Status));CraftButton->SetIsEnabled(!Technology && bAccess && bAlive && bStationAccess);CancelButton->SetIsEnabled(C && !C->ActiveRecipe.IsNone());
     Hints->SetText(FText::FromString(!Settings || Settings->Preferences.bControlHints?NavigationHelp():TEXT("The world keeps running.")));
 }
 void UPFCraftingHUD::SelectRecipe(FName Id)

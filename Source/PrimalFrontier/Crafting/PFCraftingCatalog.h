@@ -41,6 +41,8 @@ struct FPFRecipeDefinition
     UPROPERTY(EditAnywhere, BlueprintReadOnly) int32 OutputQuantity=1;
     /** Seconds, 0.1..600. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) float Duration=5;
+    /** Empty preserves portable recipes; only registered workbench/refinery types are accepted. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly) FGameplayTag RequiredStation;
 };
 
 /** A gatherable world node type (wood pile, stone outcrop, forage patch). */

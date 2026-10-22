@@ -10,7 +10,13 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPFEryndorCatalogTest,"PF.Eryndor.Catalog",EAut
 bool FPFEryndorCatalogTest::RunTest(const FString&)
 {
     auto* Items=NewObject<UPFItemCatalog>();auto* Craft=NewObject<UPFCraftingCatalog>();auto* Knowledge=NewObject<UPFProgressionCatalog>();FString Error;
-    TestEqual(TEXT("Append-only items"),Items->Items.Num(),36);TestEqual(TEXT("Append-only recipes"),Craft->Recipes.Num(),21);TestEqual(TEXT("Append-only resource definitions"),Craft->Resources.Num(),15);
+    TestEqual(TEXT("Append-only items"),Items->Items.Num(),36);TestEqual(TEXT("Append-only recipes with refinery batches"),Craft->Recipes.Num(),23);TestEqual(TEXT("Append-only resource definitions"),Craft->Resources.Num(),15);
+    if(Craft->Recipes.Num()==23)
+    {
+        for(int32 N=0;N<21;++N){TestFalse(TEXT("All original twenty-one recipes remain portable"),Craft->Recipes[N].RequiredStation.IsValid());}
+        TestEqual(TEXT("Copper batch appended after original recipes"),Craft->Recipes[21].Id,FName(TEXT("Recipe_CopperBatch")));
+        TestEqual(TEXT("Iron batch appended last"),Craft->Recipes[22].Id,FName(TEXT("Recipe_IronBatch")));
+    }
     for(const auto& D:Items->Items){TestNotNull(*D.Id.ToString(),Items->Find(D.Id));}
     for(const auto& D:Craft->Recipes){TestNotNull(*D.Id.ToString(),Craft->Recipe(D.Id,Items));}
     for(const auto& D:Craft->Resources){TestNotNull(*D.Id.ToString(),Craft->Resource(D.Id,Items));}

@@ -1,5 +1,6 @@
 #include "Crafting/PFEryndorProgression.h"
 #include "Crafting/PFCraftingCatalog.h"
+#include "Crafting/PFCraftingStation.h"
 #include "Inventory/PFItemCatalog.h"
 #include "Progression/PFProgressionCatalog.h"
 #include "NativeGameplayTags.h"
@@ -50,6 +51,12 @@ void AddCrafting(UPFCraftingCatalog& C)
     Recipe(TEXT("Recipe_ConductiveParts"),TEXT("Make conductive parts"),TEXT("Item_ConductiveParts"),8,Material,{{TEXT("Item_GoldIngot"),1},{TEXT("Item_SilverIngot"),1},{TEXT("Item_CopperIngot"),1}});
     Recipe(TEXT("Recipe_QuartzLens"),TEXT("Polish quartz lens"),TEXT("Item_QuartzLens"),8,Material,{{TEXT("Item_Quartz"),3},{TEXT("Item_Flint"),1}});
     Recipe(TEXT("Recipe_ObsidianBlade"),TEXT("Bind obsidian blade"),TEXT("Item_ObsidianBlade"),10,Weapon,{{TEXT("Item_Obsidian"),3},{TEXT("Item_Wood"),2},{TEXT("Item_Cord"),1}});
+    // Physical batch processing halves fuel per ingot. Fuel is an exact ordinary input,
+    // consumed only with the successful output; no separate station fuel timer/state.
+    Recipe(TEXT("Recipe_CopperBatch"),TEXT("Batch refine copper (wood fuel)"),TEXT("Item_CopperIngot"),12,Material,{{TEXT("Item_CopperOre"),4},{TEXT("Item_Wood"),1}});
+    C.Recipes.Last().OutputQuantity=2;C.Recipes.Last().RequiredStation=APFCraftingStation::RefineryType();
+    Recipe(TEXT("Recipe_IronBatch"),TEXT("Batch refine iron (coal fuel)"),TEXT("Item_IronIngot"),15,Material,{{TEXT("Item_IronOre"),4},{TEXT("Item_Coal"),1},{TEXT("Item_Flint"),2}});
+    C.Recipes.Last().OutputQuantity=2;C.Recipes.Last().RequiredStation=APFCraftingStation::RefineryType();
     auto Node=[&](const TCHAR* Id,const TCHAR* Name,const TCHAR* Item,EPFHarvestGrade Grade)
     {FPFResourceDefinition D;D.Id=Id;D.DisplayName=FText::FromString(Name);D.YieldItem=Item;D.Hits=8;D.RespawnSeconds=45;D.HarvestRequirement.Family=PFHarvest::Pick();D.HarvestRequirement.MinimumGrade=Grade;C.Resources.Add(D);};
     Node(TEXT("Node_Coal"),TEXT("Coal seam"),TEXT("Item_Coal"),EPFHarvestGrade::Stone);
@@ -66,7 +73,7 @@ void AddKnowledge(UPFProgressionCatalog& C)
 {
     auto Add=[&](const TCHAR* Id,const TCHAR* Name,int32 Level,int32 Cost,const TCHAR* Parent,TArray<FName> Recipes)
     {FPFKnowledgeDefinition D;D.Id=Id;D.DisplayName=FText::FromString(Name);D.Category=TAG_EryndorMaterial;D.MinimumLevel=Level;D.PointCost=Cost;D.Prerequisites.Add(Parent);D.Recipes=MoveTemp(Recipes);C.Knowledge.Add(D);};
-    Add(TEXT("Tech_Metalwork"),TEXT("Iron metalworking"),3,2,TEXT("Tech_FieldTools"),{TEXT("Recipe_IronRefine"),TEXT("Recipe_IronPick"),TEXT("Recipe_SilverRefine"),TEXT("Recipe_GoldRefine")});
+    Add(TEXT("Tech_Metalwork"),TEXT("Iron metalworking"),3,2,TEXT("Tech_FieldTools"),{TEXT("Recipe_IronRefine"),TEXT("Recipe_IronPick"),TEXT("Recipe_SilverRefine"),TEXT("Recipe_GoldRefine"),TEXT("Recipe_IronBatch")});
     // Unique baseline + metalwork + gem crafts can reach level4 without waiting
     // for another 30-minute gather window. Optional branches still compete for points.
     Add(TEXT("Tech_Gemwork"),TEXT("Gem cutting"),3,2,TEXT("Tech_Metalwork"),{TEXT("Recipe_DiamondPick"),TEXT("Recipe_QuartzLens"),TEXT("Recipe_ObsidianBlade")});

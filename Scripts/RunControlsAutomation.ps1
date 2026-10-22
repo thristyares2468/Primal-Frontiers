@@ -1,7 +1,7 @@
 # Isolated rendered controls smoke; human playtests and physical hardware remain separate.
 [CmdletBinding()]
 param([ValidateSet('720','1440')][string]$Resolution='720',
-      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation','Traversal','AuthoredEcology','CreatureVariety','AutoClimb','AuthoredClimb','PlayerStats','Copper','Eryndor','Stations','OwnedStations','Sprites','Hotbar')][string]$TestCase='Controls',
+      [ValidateSet('Controls','Inventory','Survival','Overlays','Reconnect','Settings','SettingsApply','SettingsRestartPrepare','SettingsRestartVerify','Display','WorldMenu','ToolProgression','WeaponProgression','Protection','Progression','EarnedProgression','EarnedCombat','EarnedWeapon','CraftingScroll','EcologyPreview','BuildingMenus','MenuNavigation','Traversal','AuthoredEcology','CreatureVariety','AutoClimb','AuthoredClimb','PlayerStats','Copper','Eryndor','Stations','OwnedStations','BatchRefining','Sprites','Hotbar')][string]$TestCase='Controls',
       [ValidateRange(0.75,1.5)][float]$HUDScale=1,
       [string]$SettingsSourceRun='',
       [switch]$LowShadowDiagnostic,
@@ -54,6 +54,7 @@ if($TestCase -eq 'Copper'){$filter='PF.UI.CopperLive'}
 if($TestCase -eq 'Eryndor'){$filter='PF.Eryndor.Live'}
 if($TestCase -eq 'Stations'){$filter='PF.Crafting.StationsUI'}
 if($TestCase -eq 'OwnedStations'){$filter='PF.Crafting.StationsUI'}
+if($TestCase -eq 'BatchRefining'){$filter='PF.Crafting.StationsUI'}
 if($TestCase -eq 'Sprites'){$filter='PF.UI.TargetSpritesLive'}
 if($TestCase -eq 'Hotbar'){$filter='PF.UI.HotbarLive'}
 if($TestCase -eq 'Traversal'){$filter='PF.Traversal.Live'}
@@ -95,6 +96,7 @@ if($TestCase -eq 'Copper'){$arguments+=' -PFRunCopperUITest'}
 if($TestCase -eq 'Eryndor'){$arguments+=' -PFRunEryndorUITest'}
 if($TestCase -eq 'Stations'){$arguments+=' -PFRunStationUITest'}
 if($TestCase -eq 'OwnedStations'){$arguments+=' -PFRunStationUITest -PFRunOwnedStationUITest'}
+if($TestCase -eq 'BatchRefining'){$arguments+=' -PFRunStationUITest -PFRunBatchRefiningUITest'}
 if($TestCase -eq 'AuthoredEcology'){$arguments+=' -PFRunAuthoredPreviewTest'}
 if($TestCase -eq 'CreatureVariety'){$arguments+=' -PFRunVarietyPreviewTest'}
 if($TestCase -eq 'Traversal'){$arguments+=' -PFRunTraversalLiveTests -PFExpectedPlayers=1'}

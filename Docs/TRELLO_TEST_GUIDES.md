@@ -1,5 +1,9 @@
 # Trello test guides
 
+## G20 — Required-refinery fuel-efficient batches
+
+Use the complete guide [BATCH_REFINING_M12.md](BATCH_REFINING_M12.md): exact existing OpenWorld level, camp refinery/copper/mining-row coordinates, standalone mode, prerequisites, one Start here action, numbered C/Enter/R interactions, copper/iron expected deltas, automated selectors/runners/evidence and limits. Copy that guide into the task card; do not assign an invented new fixture or mark ordinary pacing tested. Current owner requests STOP after this bounded task's four verification/publication steps.
+
 ## G19 — Original-save copy command (optional operator reproduction)
 
 Full exact guide/evidence copied into completed AI task LMVAG5Xz: [ORIGINAL_COPY_COMMAND_M18.md](ORIGINAL_COPY_COMMAND_M18.md). Automated tests require no level or personal original. Optional operator use requires an actual preserved file under Saved/Persistence/Originals, an unused destination and an authoritative Development game/server on that save's correct map; existing normal map `/Game/PrimalFrontier/Maps/L_PrimalFrontier_OpenWorld`. Start in Explorer to identify source folder/edge filename; do not invent them. Command copies only; explicit OriginalCopied PASS must leave world/active slot unchanged, repeat must refuse. Separate PF.CheckSave semantics before any proposed load. No new mandatory Personal recovery test or instruction to edit private saves. Owner requests stop after publication; no next task starts automatically.

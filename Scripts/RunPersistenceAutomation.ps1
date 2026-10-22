@@ -13,6 +13,7 @@ param(
     [switch]$Copper,
     [switch]$Stations,
     [switch]$OwnedStations,
+    [switch]$BatchRefining,
     [ValidateRange(1024, 65535)][int]$Port = 17989,
     [ValidateRange(30, 600)][int]$TimeoutSeconds = 210,
     [string]$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8',
@@ -23,7 +24,8 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-if($OwnedStations){$Stations=$true}
+if($OwnedStations -and $BatchRefining){throw 'Choose owned-station or batch fixture, not both'}
+if($OwnedStations -or $BatchRefining){$Stations=$true}
 
 function Get-SafeFullPath([string]$Path) {
     if ($Path -match '["\x00-\x1f]') { throw 'Unsupported path quote/control characters' }
@@ -90,6 +92,7 @@ try {
     if($Copper){$prefix='M12CopperLive'+$Players+'_'+$stamp;$testFilter='PF.Persistence.CopperLive';$testFlag='-PFRunCopperMigrationTests'}
     if($Stations){$prefix='M12StationLive'+$Players+'_'+$stamp;$testFilter='PF.Crafting.StationsNetwork';$testFlag='-PFRunCraftingLiveTests -PFRunStationNetworkTests'}
     if($OwnedStations){$prefix='M12OwnedStationLive'+$Players+'_'+$stamp;$testFlag+=' -PFRunOwnedStationNetworkTests'}
+    if($BatchRefining){$prefix='M12BatchLive'+$Players+'_'+$stamp;$testFilter='PF.Crafting.BatchLive';$testFlag='-PFRunBatchRefiningTests'}
     if($packageRoot){$prefix='M8PackagedLive'+$Players+'_'+$stamp}
     $slot = 'Automation' + $prefix
     # Profiles are private local test state. Same aliases and endpoint survive both phases.
@@ -144,7 +147,7 @@ try {
                 # NullRHI can exceed 1,000 FPS and fill CharacterMovement's 96-move
                 # queue before the next server acknowledgement. Bound only these
                 # headless fixtures; rendered performance runs remain uncapped.
-                if($AuthoredEcology -or $Copper -or $OwnedStations){$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120';$arguments=$arguments.Replace('Automation RunTests '+$testFilter,'t.MaxFPS 120,Automation RunTests '+$testFilter)}
+                if($AuthoredEcology -or $Copper -or $OwnedStations -or $BatchRefining){$arguments+=' -ini:GameUserSettings:[/Script/PrimalFrontier.PFGameUserSettings]:FrameRateLimit=120';$arguments=$arguments.Replace('Automation RunTests '+$testFilter,'t.MaxFPS 120,Automation RunTests '+$testFilter)}
                 $executable=$editor; $workingDirectory=$root
                 if($packageRoot){
                     # Explicitly isolate BOTH roles from AppData/default private profiles.
@@ -241,6 +244,7 @@ try {
                     if($Copper){$contract=$text -match $(if($run.Role -eq 'Server'){if($phase -eq 'Restart'){'Copper restart server actual migration, preserved original, independent owners, finite shared gather and current(16|25) save verified'}else{'Copper create server actual old15 layout and independent owners saved'}}else{if($phase -eq 'Restart'){'Copper restart client actual saved owner, private state and owned authored gather verified'}else{'Copper create client old-layout seed and private acknowledgement verified'}})}
                     if($Stations){$contract=$text -match $(if($run.Role -eq 'Server'){'Station network server bonus, owned RPC conservation and portable cooking verified'}else{'Station network client replicated bonus, owned RPC conservation and refusal verified'})}
                     if($OwnedStations){$contract=$text -match $(if($run.Role -eq 'Server'){'Owned station network server bonus, owned RPC conservation and portable cooking verified'}else{'Owned station network client replicated bonus, owned RPC conservation and refusal verified'})}
+                    if($BatchRefining){$contract=$text -match $(if($run.Role -eq 'Server'){'Batch server required refinery, exact fuel, cancel and owned RPC conservation verified'}else{'Batch client required station, fuel, private inventory and owned RPC refusal verified'})}
                     $exactTest = $verdict.TestCount -eq 1 -and @($verdict.Tests | Where-Object { $_.Name -eq $testFilter }).Count -eq 1
                     $packagedReportClean = !$packageRoot -or $run.Role -ne 'Server' -or (
                         $text -notmatch '(?im)\bWarning:|\bError:' -and
